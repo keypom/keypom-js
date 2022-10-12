@@ -1,0 +1,19 @@
+{
+  "name": "keypom-ws-plugin",
+  "version": "0.0.1",
+  "description": "Keypom Wallet via wallet-selector + Keypom Link",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "yarn ava",
+    "ava": "ava test/ws.test.js -vs --timeout=5m",
+    "build": "npx tsc",
+    "publish": "npx tsc && npm publish"
+  },
+  "author": "mattlockyer",
+  "license": "MIT",
+  "dependencies": {
+    "@near-wallet-selector/core": "^7.1.0",
+    "ava": "^4.3.3",
+    "near-api-js": "^0.44.2"
+  }
+}
