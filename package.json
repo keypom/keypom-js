@@ -4,7 +4,7 @@
   "description": "Keypom Wallet via wallet-selector + Keypom Link",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "yarn ava",
+    "test": "yarn build && yarn ava",
     "ava": "ava test/ws.test.js -vs --timeout=5m",
     "build": "npx tsc",
     "publish": "npx tsc && npm publish"
