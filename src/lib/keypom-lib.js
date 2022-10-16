@@ -78,8 +78,6 @@ export const signAndSendTransactions = async ({ transactions }) => {
 
 	const transformedTransactions = await transformTransactions(transactions)
 
-	return [await account.sendMoney(accountId, parseNearAmount('0.42'))]
-
 	return Promise.all(transformedTransactions.map((tx) => account.signAndSendTransaction(tx)))
 };
 
