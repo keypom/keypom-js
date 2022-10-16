@@ -14,6 +14,12 @@
   "dependencies": {
     "@near-wallet-selector/core": "^7.1.0",
     "ava": "^4.3.3",
+    "dotenv": "^16.0.3",
     "near-api-js": "^0.44.2"
+  },
+  "ava": {
+    "require": [
+      "dotenv/config"
+    ]
   }
 }

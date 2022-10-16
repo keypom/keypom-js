@@ -1,6 +1,7 @@
+export function autoSignIn(): Promise<void>;
 export function initConnection(network: any, logFn: any): void;
 export function getAccount(): Promise<{
-    accountId: string;
+    accountId: any;
 }>;
 export function signIn(): Promise<nearAPI.Account>;
 export function signOut(): void;

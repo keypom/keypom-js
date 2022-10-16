@@ -7,23 +7,8 @@ import {
 	waitFor,
 } from "@near-wallet-selector/core";
 
-import { initConnection, getAccount, signIn, signOut, signAndSendTransactions } from './keypom-lib' 
+import { autoSignIn, initConnection, getAccount, signIn, signOut, signAndSendTransactions } from './keypom-lib' 
 import { nearWalletIcon } from "../assets/icons";
-
-export const networks = {
-	mainnet: {
-		networkId: 'mainnet',
-		nodeUrl: 'https://rpc.mainnet.near.org',
-		walletUrl: 'https://wallet.near.org',
-		helperUrl: 'https://helper.mainnet.near.org'
-	},
-	testnet: {
-		networkId: 'testnet',
-		nodeUrl: 'https://rpc.testnet.near.org',
-		walletUrl: 'https://wallet.testnet.near.org',
-		helperUrl: 'https://helper.testnet.near.org'
-	}
-}
 
 declare global {
 	interface Window {
@@ -42,7 +27,7 @@ const Keypom: WalletBehaviourFactory<InjectedWallet> = async ({
 	provider,
 }) => {
 
-	initConnection(networks['testnet'])
+	initConnection(options.network)
 
 	const isValidActions = (actions: Array<Action>): actions is Array<FunctionCallAction> => {
 		return actions.every((x) => x.type === "FunctionCall");
@@ -126,6 +111,10 @@ export function setupKeypom({
 	iconUrl = nearWalletIcon,
 }: KeypomParams = {}): WalletModuleFactory<InjectedWallet> {
 	return async () => {
+
+		await autoSignIn()
+
+		await waitFor(() => !!window.near?.isSignedIn(), { timeout: 300 }).catch(() => false);
 
 		return {
 			id: "keypom",
