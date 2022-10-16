@@ -114,7 +114,7 @@ export function setupKeypom({
 
 		await autoSignIn()
 
-		await waitFor(() => !!window.near?.isSignedIn(), { timeout: 300 }).catch(() => false);
+		// await waitFor(() => !!window.near?.isSignedIn(), { timeout: 300 }).catch(() => false);
 
 		return {
 			id: "keypom",

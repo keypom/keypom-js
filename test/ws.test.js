@@ -25,7 +25,7 @@ window = {
 		href: 'https://example.com/#/keypom/' + process.env.TEST_ACCOUNT_PRVKEY
 	},
 	localStorage: {
-		getItem: async (k) => _ls[k],
+		getItem: (k) => _ls[k],
 		setItem: (k, v) => _ls[k] = v,
 		removeItem: (k) => delete _ls[k],
 	},
@@ -57,7 +57,26 @@ test('init', async (t) => {
 
 	wallet = await selector.wallet('keypom')
 
-	console.log(await wallet.getAccounts())
+	const accounts = await wallet.getAccounts()
+
+	t.is(accounts[0].accountId, accountId)
+});
+
+test('transaction', async (t) => {
+
+	const res = await wallet.signAndSendTransactions({
+		transactions: [{
+			receiverId: accountId,
+			actions: [{
+				type: 'Transfer',
+				params: {
+					deposit: parseNearAmount('0.42'),
+				}
+			}]
+		}]
+	})
+
+	console.log(res)
 
 	t.true(true)
 });
