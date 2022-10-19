@@ -11,7 +11,7 @@ const {
 const keypom = require("../lib/lib/keypom");
 const { initKeypom, createDrop, getDrops, deleteDrops } = keypom
 
-const accountId = PublicKey.fromString(process.env.TEST_ACCOUNT_PUBKEY).data.toString('hex')
+const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
 
 console.log('accountId', accountId)
