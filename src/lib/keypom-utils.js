@@ -1,7 +1,9 @@
 const { BN } = require("bn.js");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { connect, KeyPair, keyStores, utils } = require("near-api-js");
+const { generateSeedPhrase } = require("near-seed-phrase");
 const path = require("path");
+const crypto = require("crypto");
 const homedir = require("os").homedir();
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
@@ -13,6 +15,7 @@ export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE = new BN("1000000000000000000000");
 
+const hashBuf = (str) => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
 export const genKey = async (rootKey, meta, nonce) => {
 	const hash = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)

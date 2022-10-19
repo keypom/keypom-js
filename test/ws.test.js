@@ -8,8 +8,8 @@ const {
 	},
 } = nearAPI;
 
-const keypom = require("../lib/lib/keypom");
-const { initKeypom, createDrop, getDrops, deleteDrops } = keypom
+const keypom = require("../lib");
+const { initKeypom, createDrop, getDrops, deleteDrops, addKeys, genKey } = keypom
 
 const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
@@ -30,7 +30,7 @@ localStorage = window.localStorage
 
 test('init', async (t) => {
 
-	const kp = initKeypom({
+	initKeypom({
 		network: 'testnet',
 		funder: {
 			accountId,
@@ -64,7 +64,32 @@ test('get drops', async (t) => {
 		accountId
 	})
 
-	t.is(drops.length, 1)
+	// console.log(drops)
+
+	t.true(drops.length > 0)
+});
+
+test('add keys', async (t) => {
+
+	const numKeys = 10
+	const { drop_id: dropId } = drops[0]
+
+	/// create throw away keys
+	const publicKeys = []
+	if (numKeys) {
+		pubKeys = []
+		for (var i = 0; i < numKeys; i++) {
+			const keyPair = await genKey('some secret entropy', dropId, i)
+			pubKeys.push(keyPair.getPublicKey().toString());
+		}
+	}
+
+	await addKeys({
+		dropId,
+		publicKeys,
+	})
+
+	t.true(drops.length > 0)
 });
 
 test('delete drops', async (t) => {
@@ -73,7 +98,10 @@ test('delete drops', async (t) => {
 
 	const responses = await deleteDrops({ drops })
 
-	// console.log(responses)
-
-	t.is(responses[0][0]?.status?.SuccessValue, '')
+	console.log(responses)
+	const res = responses[0][0]?.status?.SuccessValue
+	if (res.length > 0) {
+		return t.true(parseInt(res) > -1)
+	}
+	t.is(res, '')
 });

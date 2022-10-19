@@ -14,7 +14,7 @@ const {
 import { parseSeedPhrase } from 'near-seed-phrase'
 import { BN } from "bn.js";
 import { AddKeyPermission, Action } from "@near-wallet-selector/core";
-const gas = '200000000000000'
+const gas = '300000000000000'
 
 import { genKey, estimateRequiredDeposit } from "./keypom-utils";
 
@@ -37,6 +37,8 @@ let contractId = 'v1.keypom.testnet'
 let receiverId = 'v1.keypom.testnet'
 
 import { InitKeypomParams, CreateDropParams } from "./types";
+
+const signAndSendTransactions = async (account, transactions) => await Promise.all(transactions.map((tx) => account.signAndSendTransaction(tx)))
 
 let near, connection, logger, fundingAccount, fundingKey;
 
@@ -68,7 +70,6 @@ export const initKeypom = async ({
 		keyStore.setKey(networkConfig.networkId, accountId, fundingKey)
 		fundingAccount = new Account(connection, accountId)
 		fundingAccount.viewFunction2 = ({ contractId, methodName, args }) => fundingAccount.viewFunction(contractId, methodName, args)
-		fundingAccount.signAndSendTransactions = async (transactions) => await Promise.all(transactions.map((tx) => fundingAccount.signAndSendTransaction(tx)))
 
 		return fundingAccount
 	}
@@ -128,7 +129,7 @@ export const createDrop = async ({
 		storage: parseNearAmount('0.00866'),
 	})
 
-	const transactions = [{
+	const transactions: any[] = [{
 		receiverId: 'v1.keypom.testnet',
 		actions: [{
 			type: 'FunctionCall',
@@ -144,46 +145,63 @@ export const createDrop = async ({
 					nftData,
 					fcData,
 				},
-				gas: '300000000000000',
+				gas,
 				deposit: requiredDeposit,
 			}
 		}]
 	}]
 
-	/// self funding
-	if (fundingAccount) {
-		const responses = await fundingAccount.signAndSendTransactions(await transformTransactions(transactions))
-		return { responses, keyPairs }
-	}
-
+	/// instance of walletSelector.wallet()
 	if (wallet) {
-
-		const responses = await wallet.signAndSendTransactions({
-			transactions: [{
-				receiverId: 'v1.keypom.testnet',
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'create_drop',
-						args: {
-							drop_id: dropId,
-							public_keys: pubKeys,
-							deposit_per_use: depositPerUseYocto,
-							config: finalConfig,
-							metadata,
-							ftData,
-							nftData,
-							fcData,
-						},
-						gas: '300000000000000',
-						deposit: requiredDeposit,
-					}
-				}]
-			}]
-		})
-
+		const responses = await wallet.signAndSendTransactions({ transactions })
 		return { responses, keyPairs }
 	}
+
+	/// instance of NEAR Account
+	const nearAccount = account || fundingAccount
+	if (!nearAccount) {
+		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
+	}
+	const responses = await signAndSendTransactions(nearAccount, await transformTransactions(transactions))
+	return { responses, keyPairs }
+}
+
+export const addKeys = async ({
+	account,
+	wallet,
+	dropId,
+	publicKeys
+}) => {
+
+	const requiredDeposit = parseNearAmount((0.01 * publicKeys.length).toString())
+
+	const transactions: any[] = [{
+		receiverId: 'v1.keypom.testnet',
+		actions: [{
+			type: 'FunctionCall',
+			params: {
+				methodName: 'add_keys',
+				args: {
+					drop_id: dropId,
+					public_keys: publicKeys,
+				},
+				gas,
+				deposit: requiredDeposit,
+			}
+		}]
+	}]
+
+	/// instance of walletSelector.wallet()
+	if (wallet) {
+		return await wallet.signAndSendTransactions({ transactions })
+	}
+
+	/// instance of NEAR Account
+	const nearAccount = account || fundingAccount
+	if (!nearAccount) {
+		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
+	}
+	return await signAndSendTransactions(nearAccount, await transformTransactions(transactions))
 }
 
 export const getDrops = async ({ accountId }) => {
@@ -248,7 +266,7 @@ export const deleteDrops = async ({ drops }) => {
 			}
 		})
 
-		return fundingAccount.signAndSendTransactions(await transformTransactions([{
+		return signAndSendTransactions(fundingAccount, await transformTransactions([{
 			receiverId,
 			actions
 		}]))
@@ -257,7 +275,6 @@ export const deleteDrops = async ({ drops }) => {
 
 	return responses
 }
-
 
 const transformTransactions = async (transactions) => {
 	const { provider } = fundingAccount.connection;
