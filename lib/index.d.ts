@@ -1,2 +1,1 @@
-export type { KeypomParams } from "./lib/keypom";
-export { setupKeypom } from "./lib/keypom";
+export { initKeypom, createDrop, getDrops, deleteDrops } from "./lib/keypom";

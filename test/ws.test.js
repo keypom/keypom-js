@@ -8,75 +8,72 @@ const {
 	},
 } = nearAPI;
 
-const wsCore = require("@near-wallet-selector/core");
-const { setupWalletSelector } = wsCore
-
-const kpLib = require("../lib/lib/keypom");
-const { setupKeypom } = kpLib
+const keypom = require("../lib/lib/keypom");
+const { initKeypom, createDrop, getDrops, deleteDrops } = keypom
 
 const accountId = PublicKey.fromString(process.env.TEST_ACCOUNT_PUBKEY).data.toString('hex')
-/// mocking for tests
-const lsAccount = `near-api-js:keystore:${accountId}:testnet`
+const secretKey = process.env.TEST_ACCOUNT_PRVKEY
 
-/// mocking for tests
+console.log('accountId', accountId)
+
+/// mocking browser for tests
+
 const _ls = {}
 window = {
-	location: {
-		href: 'https://example.com/#/keypom/' + process.env.TEST_ACCOUNT_PRVKEY
-	},
 	localStorage: {
 		getItem: (k) => _ls[k],
 		setItem: (k, v) => _ls[k] = v,
 		removeItem: (k) => delete _ls[k],
 	},
-	near: {
-		isSignedIn: () => true,
-	}
 }
 localStorage = window.localStorage
 
-// test.beforeEach((t) => {
-// });
-
-let
-	networkId = 'testnet',
-	contractId = 'testnet',
-	selector, wallet;
-
 test('init', async (t) => {
 
-	selector = await setupWalletSelector({
-		network: networkId,
-		contractId,
-		debug: 'true',
-		modules: [
-			setupKeypom()
-		],
-		// storage: window.localStorage,
-	});
-
-	wallet = await selector.wallet('keypom')
-
-	const accounts = await wallet.getAccounts()
-
-	t.is(accounts[0].accountId, accountId)
-});
-
-test('transaction', async (t) => {
-
-	const res = await wallet.signAndSendTransactions({
-		transactions: [{
-			receiverId: accountId,
-			actions: [{
-				type: 'Transfer',
-				params: {
-					deposit: parseNearAmount('0.42'),
-				}
-			}]
-		}]
+	const kp = initKeypom({
+		network: 'testnet',
+		funder: {
+			accountId,
+			secretKey,
+		}
 	})
 
-	console.log(res)
-
 	t.true(true)
+});
+
+test('createDrop', async (t) => {
+
+	const dropId = Date.now().toString()
+
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.0042
+	})
+
+	const { responses } = res
+	// console.log(responses)
+	const resDropId = Buffer.from(responses[0].status.SuccessValue, 'base64').toString()
+
+	t.is(resDropId, dropId)
+});
+
+let drops
+test('get drops', async (t) => {
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops.length, 1)
+});
+
+test('delete drops', async (t) => {
+
+	if (!drops.length) return t.true(true)
+
+	const responses = await deleteDrops({ drops })
+
+	// console.log(responses)
+
+	t.is(responses[0][0]?.status?.SuccessValue, '')
 });
