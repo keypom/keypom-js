@@ -14,7 +14,7 @@ import { parseSeedPhrase } from 'near-seed-phrase'
 import { key2str, genKey, estimateRequiredDeposit, execute as _execute } from "./keypom-utils";
 
 const gas = '300000000000000'
-const claimGas = '100000000000000'
+const attachedGas = '100000000000000'
 const networks = {
 	mainnet: {
 		networkId: 'mainnet',
@@ -126,7 +126,7 @@ export const createDrop = async ({
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
-		attachedGas: '1',
+		attachedGas,
 		storage: parseNearAmount('0.00866'),
 	})
 
@@ -160,11 +160,22 @@ export const createDrop = async ({
 export const addKeys = async ({
 	account,
 	wallet,
-	dropId,
+	drop,
 	publicKeys
 }) => {
 
-	const requiredDeposit = parseNearAmount((0.03 * publicKeys.length).toString())
+	const { required_gas, deposit_per_use, config: { uses_per_key } } = drop
+
+	let requiredDeposit = await estimateRequiredDeposit({
+		near,
+		depositPerUse: deposit_per_use,
+		numKeys: publicKeys.length,
+		usesPerKey: uses_per_key,
+		attachedGas: required_gas,
+		storage: '0',
+	})
+
+	console.log('requiredDeposit', formatNearAmount(requiredDeposit, 4))
 
 	const transactions: any[] = [{
 		receiverId,
@@ -173,7 +184,7 @@ export const addKeys = async ({
 			params: {
 				methodName: 'add_keys',
 				args: {
-					drop_id: dropId,
+					drop_id: drop.drop_id,
 					public_keys: publicKeys,
 				},
 				gas,
@@ -228,7 +239,35 @@ export const claim = ({
 				args: {
 					account_id: accountId
 				},
-				gas: claimGas,
+				gas: attachedGas,
+			}
+		}]
+	}]
+
+	return execute({ transactions, account: contractAccount })
+}
+
+
+export const createAccountAndClaim = ({
+	newAccountId,
+	newPublicKey, 
+	secretKey,
+}) => {
+
+	const keyPair = KeyPair.fromString(secretKey)
+	keyStore.setKey(networkId, contractId, keyPair)
+
+	const transactions: any[] = [{
+		receiverId,
+		actions: [{
+			type: 'FunctionCall',
+			params: {
+				methodName: 'create_account_and_claim',
+				args: {
+					new_account_id: newAccountId,
+					new_public_key: newPublicKey,
+				},
+				gas: attachedGas,
 			}
 		}]
 	}]

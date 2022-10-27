@@ -4,10 +4,10 @@ export declare const createDrop: ({ account, wallet, accountRootKey, dropId, pub
     responses: any;
     keyPairs: any[];
 }>;
-export declare const addKeys: ({ account, wallet, dropId, publicKeys }: {
+export declare const addKeys: ({ account, wallet, drop, publicKeys }: {
     account: any;
     wallet: any;
-    dropId: any;
+    drop: any;
     publicKeys: any;
 }) => Promise<any>;
 export declare const getDrops: ({ accountId }: {
@@ -16,6 +16,11 @@ export declare const getDrops: ({ accountId }: {
 export declare const claim: ({ secretKey, accountId, }: {
     secretKey: any;
     accountId: any;
+}) => Promise<any>;
+export declare const createAccountAndClaim: ({ newAccountId, newPublicKey, secretKey, }: {
+    newAccountId: any;
+    newPublicKey: any;
+    secretKey: any;
 }) => Promise<any>;
 export declare const deleteKeys: ({ account, wallet, drop, keys }: {
     account: any;

@@ -174,6 +174,7 @@ export const estimateRequiredDeposit = async ({
 
 // Estimate the amount of allowance required for a given attached gas.
 const estimatePessimisticAllowance = (attachedGas) => {
+    if (typeof attachedGas !== 'number') attachedGas = parseInt(attachedGas)
     // Get the number of CCCs you can make with the attached GAS
     let numCCCs = Math.floor(attachedGas / GAS_PER_CCC);
     // console.log('numCCCs: ', numCCCs)

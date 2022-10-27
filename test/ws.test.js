@@ -1,7 +1,7 @@
-const test = require('ava')
-
+const test = require('ava');
 const nearAPI = require("near-api-js");
 const {
+	KeyPair,
 	utils: {
 		PublicKey,
 		format: { parseNearAmount, formatNearAmount },
@@ -14,6 +14,7 @@ const {
 	createDrop,
 	getDrops,
 	claim,
+	createAccountAndClaim,
 	deleteKeys,
 	deleteDrops,
 	addKeys,
@@ -22,6 +23,7 @@ const {
 
 const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
+const testKeyPair = KeyPair.fromString(secretKey)
 
 const NUM_KEYS = 10
 const keyPairs = []
@@ -59,7 +61,7 @@ test('create drop', async (t) => {
 
 	const res = await createDrop({
 		dropId,
-		depositPerUseNEAR: 0.0042
+		depositPerUseNEAR: 0.02
 	})
 
 	const { responses } = res
@@ -81,7 +83,8 @@ test('get drops', async (t) => {
 
 test('add keys', async (t) => {
 
-	const { drop_id: dropId } = drops[0]
+	const drop = drops[0]
+	const { drop_id: dropId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
@@ -92,7 +95,7 @@ test('add keys', async (t) => {
 	}
 
 	await addKeys({
-		dropId,
+		drop,
 		publicKeys,
 	})
 
@@ -119,6 +122,23 @@ test('claim', async (t) => {
 	t.is(drops[0].keys.length, NUM_KEYS - 1)
 });
 
+test('create account and claim', async (t) => {
+
+	if (!drops.length) return t.true(false)
+
+	await createAccountAndClaim({
+		newAccountId: `someone-${Date.now()}.testnet`,
+		newPublicKey: testKeyPair.getPublicKey().toString(), 
+		secretKey: keyPairs.pop().secretKey
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[0].keys.length, NUM_KEYS - 2)
+});
+
 test('delete keys', async (t) => {
 
 	if (!drops.length) return t.true(false)
@@ -132,7 +152,7 @@ test('delete keys', async (t) => {
 		accountId
 	})
 
-	t.is(drops[0].keys.length, NUM_KEYS - 2)
+	t.is(drops[0].keys.length, NUM_KEYS - 3)
 });
 
 test('delete drops', async (t) => {

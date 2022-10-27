@@ -4,6 +4,7 @@ export {
 	createDrop,
 	getDrops,
 	claim,
+	createAccountAndClaim,
 	deleteKeys,
 	deleteDrops,
 	addKeys,
