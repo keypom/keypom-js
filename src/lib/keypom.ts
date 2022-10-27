@@ -18,12 +18,14 @@ const claimGas = '100000000000000'
 const networks = {
 	mainnet: {
 		networkId: 'mainnet',
+		viewAccountId: 'near',
 		nodeUrl: 'https://rpc.mainnet.near.org',
 		walletUrl: 'https://wallet.near.org',
 		helperUrl: 'https://helper.mainnet.near.org'
 	},
 	testnet: {
 		networkId: 'testnet',
+		viewAccountId: 'testnet',
 		nodeUrl: 'https://rpc.testnet.near.org',
 		walletUrl: 'https://wallet.testnet.near.org',
 		helperUrl: 'https://helper.testnet.near.org'
@@ -33,7 +35,7 @@ const networks = {
 let contractId = 'v1.keypom.testnet'
 let receiverId = 'v1.keypom.testnet'
 
-let near, connection, logger, fundingAccount, fundingKey;
+let near, connection, logger, fundingAccount, viewAccount, fundingKey;
 
 const execute = async (args) => _execute({ ...args, fundingAccount })
 
@@ -56,6 +58,9 @@ export const initKeypom = async ({
 		receiverId = 'v1.keypom.near'
 	}
 
+	viewAccount = new Account(connection, networks[networkId].viewAccountId)
+	viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args)
+
 	if (funder) {
 		let { accountId, secretKey, seedPhrase } = funder
 		if (seedPhrase) {
@@ -64,12 +69,9 @@ export const initKeypom = async ({
 		fundingKey = KeyPair.fromString(secretKey)
 		keyStore.setKey(networkConfig.networkId, accountId, fundingKey)
 		fundingAccount = new Account(connection, accountId)
-		fundingAccount.viewFunction2 = ({ contractId, methodName, args }) => fundingAccount.viewFunction(contractId, methodName, args)
 		fundingAccount.fundingKey = fundingKey
 		return fundingAccount
 	}
-
-	/// TODO default view account when no funder specified
 
 	return null
 }
@@ -186,7 +188,7 @@ export const getDrops = async ({ accountId }) => {
 
 	if (!fundingAccount) return null
 
-	const drops = await fundingAccount.viewFunction2({
+	const drops = await viewAccount.viewFunction2({
 		contractId,
 		methodName: 'get_drops_for_owner',
 		args: {
@@ -196,7 +198,7 @@ export const getDrops = async ({ accountId }) => {
 
 	await Promise.all(drops.map(async (drop, i) => {
 		const { drop_id } = drop
-		drop.keys = await fundingAccount.viewFunction2({
+		drop.keys = await viewAccount.viewFunction2({
 			contractId,
 			methodName: 'get_keys_for_drop',
 			args: {
