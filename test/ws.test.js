@@ -13,6 +13,7 @@ const {
 	initKeypom,
 	createDrop,
 	getDrops,
+	claim,
 	deleteKeys,
 	deleteDrops,
 	addKeys,
@@ -23,6 +24,7 @@ const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
 
 const NUM_KEYS = 10
+const keyPairs = []
 
 console.log('accountId', accountId)
 
@@ -84,7 +86,8 @@ test('add keys', async (t) => {
 	/// create throw away keys
 	const publicKeys = []
 	for (var i = 0; i < NUM_KEYS; i++) {
-		const keyPair = await genKey('some secret entropy', dropId, i)
+		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
+		keyPairs.push(keyPair)
 		publicKeys.push(keyPair.getPublicKey().toString());
 	}
 
@@ -100,6 +103,22 @@ test('add keys', async (t) => {
 	t.is(drops[0].keys.length, NUM_KEYS)
 });
 
+test('claim', async (t) => {
+
+	if (!drops.length) return t.true(false)
+
+	await claim({
+		accountId,
+		secretKey: keyPairs.pop().secretKey
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[0].keys.length, NUM_KEYS - 1)
+});
+
 test('delete keys', async (t) => {
 
 	if (!drops.length) return t.true(false)
@@ -113,7 +132,7 @@ test('delete keys', async (t) => {
 		accountId
 	})
 
-	t.is(drops[0].keys.length, NUM_KEYS - 1)
+	t.is(drops[0].keys.length, NUM_KEYS - 2)
 });
 
 test('delete drops', async (t) => {

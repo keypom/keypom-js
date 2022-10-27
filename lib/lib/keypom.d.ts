@@ -13,10 +13,9 @@ export declare const addKeys: ({ account, wallet, dropId, publicKeys }: {
 export declare const getDrops: ({ accountId }: {
     accountId: any;
 }) => Promise<any>;
-export declare const claim: ({ account, wallet, receiverId, }: {
-    account: any;
-    wallet: any;
-    receiverId: any;
+export declare const claim: ({ secretKey, accountId, }: {
+    secretKey: any;
+    accountId: any;
 }) => Promise<any>;
 export declare const deleteKeys: ({ account, wallet, drop, keys }: {
     account: any;

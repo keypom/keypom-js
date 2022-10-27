@@ -3,6 +3,7 @@ export {
 	initKeypom,
 	createDrop,
 	getDrops,
+	claim,
 	deleteKeys,
 	deleteDrops,
 	addKeys,

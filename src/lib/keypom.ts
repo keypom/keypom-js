@@ -33,9 +33,9 @@ const networks = {
 }
 
 let contractId = 'v1.keypom.testnet'
-let receiverId = 'v1.keypom.testnet'
+let receiverId = contractId
 
-let near, connection, logger, fundingAccount, viewAccount, fundingKey;
+let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey;
 
 const execute = async (args) => _execute({ ...args, fundingAccount })
 
@@ -44,7 +44,7 @@ export const initKeypom = async ({
 	funder,
 }: InitKeypomParams) => {
 	const networkConfig = typeof network === 'string' ? networks[network] : network
-	const keyStore = new BrowserLocalStorageKeyStore()
+	keyStore = new BrowserLocalStorageKeyStore()
 
 	near = new Near({
 		...networkConfig,
@@ -52,7 +52,7 @@ export const initKeypom = async ({
 	});
 	connection = near.connection;
 
-	const { networkId } = networkConfig
+	networkId = networkConfig.networkId
 	if (networkId === 'mainnet') {
 		contractId = 'v1.keypom.near'
 		receiverId = 'v1.keypom.near'
@@ -61,13 +61,14 @@ export const initKeypom = async ({
 	viewAccount = new Account(connection, networks[networkId].viewAccountId)
 	viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args)
 
+	contractAccount = new Account(connection, contractId)
 	if (funder) {
 		let { accountId, secretKey, seedPhrase } = funder
 		if (seedPhrase) {
 			secretKey = parseSeedPhrase(seedPhrase).secretKey
 		}
 		fundingKey = KeyPair.fromString(secretKey)
-		keyStore.setKey(networkConfig.networkId, accountId, fundingKey)
+		keyStore.setKey(networkId, accountId, fundingKey)
 		fundingAccount = new Account(connection, accountId)
 		fundingAccount.fundingKey = fundingKey
 		return fundingAccount
@@ -130,7 +131,7 @@ export const createDrop = async ({
 	})
 
 	const transactions: any[] = [{
-		receiverId: 'v1.keypom.testnet',
+		receiverId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
@@ -166,7 +167,7 @@ export const addKeys = async ({
 	const requiredDeposit = parseNearAmount((0.03 * publicKeys.length).toString())
 
 	const transactions: any[] = [{
-		receiverId: 'v1.keypom.testnet',
+		receiverId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
@@ -211,26 +212,28 @@ export const getDrops = async ({ accountId }) => {
 }
 
 export const claim = ({
-	account,
-	wallet,
-	receiverId,
+	secretKey,
+	accountId,
 }) => {
 
+	const keyPair = KeyPair.fromString(secretKey)
+	keyStore.setKey(networkId, contractId, keyPair)
+
 	const transactions: any[] = [{
-		receiverId: 'v1.keypom.testnet',
+		receiverId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
 				methodName: 'claim',
 				args: {
-					receiver_id: receiverId
+					account_id: accountId
 				},
 				gas: claimGas,
 			}
 		}]
 	}]
 
-	return execute({ transactions, account, wallet })
+	return execute({ transactions, account: contractAccount })
 }
 
 export const deleteKeys = async ({
