@@ -1,10 +1,16 @@
+const nearAPI =  require("near-api-js");
+const {
+	KeyPair,
+	utils,
+	transactions,
+	utils: {
+		format: { parseNearAmount },
+	},
+} = nearAPI;
+
 const { BN } = require("bn.js");
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { connect, KeyPair, keyStores, utils } = require("near-api-js");
 const { generateSeedPhrase } = require("near-seed-phrase");
-const path = require("path");
 const crypto = require("crypto");
-const homedir = require("os").homedir();
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
 const GAS_PER_CCC = 5000000000000; // 5 TGas
@@ -23,6 +29,97 @@ export const genKey = async (rootKey, meta, nonce) => {
 	const { secretKey } = generateSeedPhrase(hash)
 	return KeyPair.fromString(secretKey)
 }
+
+export const execute = async ({
+	transactions,
+	account,
+	wallet,
+    fundingAccount,
+}) => {
+	/// instance of walletSelector.wallet()
+	if (wallet) {
+		return await wallet.signAndSendTransactions({ transactions })
+	}
+
+	/// instance of NEAR Account (backend usage)
+	const nearAccount = account || fundingAccount
+	if (!nearAccount) {
+		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
+	}
+
+	return await signAndSendTransactions(nearAccount, transformTransactions(transactions))
+}
+/// sequentially execute all transactions
+const signAndSendTransactions = async (account, txs) => {
+	const responses = []
+    for (let i = 0; i < txs.length; i++) {
+		responses.push(await account.signAndSendTransaction(txs[i]))
+	}
+    return responses
+}
+
+export const transformTransactions = (transactions) => transactions.map(({ receiverId, actions: _actions }) => {
+    const actions = _actions.map((action) =>
+        createAction(action)
+    );
+    return ({
+        receiverId,
+        actions
+    });
+});
+
+const createAction = (action) => {
+	switch (action.type) {
+		case "CreateAccount":
+			return transactions.createAccount();
+		case "DeployContract": {
+			const { code } = action.params;
+
+			return transactions.deployContract(code);
+		}
+		case "FunctionCall": {
+			const { methodName, args, gas, deposit } = action.params;
+
+			return transactions.functionCall(
+				methodName,
+				args,
+				new BN(gas),
+				new BN(deposit)
+			);
+		}
+		case "Transfer": {
+			const { deposit } = action.params;
+
+			return transactions.transfer(new BN(deposit));
+		}
+		case "Stake": {
+			const { stake, publicKey } = action.params;
+
+			return transactions.stake(new BN(stake), utils.PublicKey.from(publicKey));
+		}
+		case "AddKey": {
+			const { publicKey, accessKey } = action.params;
+
+			// return transactions.addKey(
+			// 	utils.PublicKey.from(publicKey),
+			// 	// TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
+			// 	getAccessKey(accessKey.permission)
+			// );
+		}
+		case "DeleteKey": {
+			const { publicKey } = action.params;
+
+			return transactions.deleteKey(utils.PublicKey.from(publicKey));
+		}
+		case "DeleteAccount": {
+			const { beneficiaryId } = action.params;
+
+			return transactions.deleteAccount(beneficiaryId);
+		}
+		default:
+			throw new Error("Invalid action type");
+	}
+};
 
 // Initiate the connection to the NEAR blockchain.
 export const estimateRequiredDeposit = async ({

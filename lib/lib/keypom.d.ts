@@ -1,10 +1,7 @@
 import { InitKeypomParams, CreateDropParams } from "./types";
 export declare const initKeypom: ({ network, funder, }: InitKeypomParams) => Promise<any>;
 export declare const createDrop: ({ account, wallet, accountRootKey, dropId, publicKeys, numKeys, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, fcData, }: CreateDropParams) => Promise<{
-    responses: void;
-    keyPairs: any[];
-} | {
-    responses: any[];
+    responses: any;
     keyPairs: any[];
 }>;
 export declare const addKeys: ({ account, wallet, dropId, publicKeys }: {
@@ -16,10 +13,19 @@ export declare const addKeys: ({ account, wallet, dropId, publicKeys }: {
 export declare const getDrops: ({ accountId }: {
     accountId: any;
 }) => Promise<any>;
-export declare const deleteKeys: ({ drop, keys }: {
+export declare const claim: ({ account, wallet, receiverId, }: {
+    account: any;
+    wallet: any;
+    receiverId: any;
+}) => Promise<any>;
+export declare const deleteKeys: ({ account, wallet, drop, keys }: {
+    account: any;
+    wallet: any;
     drop: any;
     keys: any;
-}) => Promise<any[]>;
-export declare const deleteDrops: ({ drops }: {
+}) => Promise<any>;
+export declare const deleteDrops: ({ account, wallet, drops }: {
+    account: any;
+    wallet: any;
     drops: any;
 }) => Promise<any[]>;

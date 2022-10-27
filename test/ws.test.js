@@ -51,7 +51,7 @@ test('init', async (t) => {
 	t.true(true)
 });
 
-test('createDrop', async (t) => {
+test('create drop', async (t) => {
 
 	const dropId = Date.now().toString()
 

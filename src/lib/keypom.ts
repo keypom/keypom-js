@@ -4,20 +4,17 @@ const {
 	Account,
 	KeyPair,
 	keyStores: { BrowserLocalStorageKeyStore },
-	utils,
-	transactions: nearTransactions,
 	utils: {
-		PublicKey,
 		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
+
+import { InitKeypomParams, CreateDropParams } from "./types";
 import { parseSeedPhrase } from 'near-seed-phrase'
-import { BN } from "bn.js";
-import { AddKeyPermission, Action } from "@near-wallet-selector/core";
+import { key2str, genKey, estimateRequiredDeposit, execute as _execute } from "./keypom-utils";
+
 const gas = '300000000000000'
-
-import { key2str, genKey, estimateRequiredDeposit } from "./keypom-utils";
-
+const claimGas = '100000000000000'
 const networks = {
 	mainnet: {
 		networkId: 'mainnet',
@@ -36,11 +33,9 @@ const networks = {
 let contractId = 'v1.keypom.testnet'
 let receiverId = 'v1.keypom.testnet'
 
-import { InitKeypomParams, CreateDropParams } from "./types";
-
-const signAndSendTransactions = async (account, transactions) => await Promise.all(transactions.map((tx) => account.signAndSendTransaction(tx)))
-
 let near, connection, logger, fundingAccount, fundingKey;
+
+const execute = async (args) => _execute({ ...args, fundingAccount })
 
 export const initKeypom = async ({
 	network,
@@ -70,9 +65,12 @@ export const initKeypom = async ({
 		keyStore.setKey(networkConfig.networkId, accountId, fundingKey)
 		fundingAccount = new Account(connection, accountId)
 		fundingAccount.viewFunction2 = ({ contractId, methodName, args }) => fundingAccount.viewFunction(contractId, methodName, args)
-
+		fundingAccount.fundingKey = fundingKey
 		return fundingAccount
 	}
+
+	/// TODO default view account when no funder specified
+
 	return null
 }
 
@@ -151,18 +149,8 @@ export const createDrop = async ({
 		}]
 	}]
 
-	/// instance of walletSelector.wallet()
-	if (wallet) {
-		const responses = await wallet.signAndSendTransactions({ transactions })
-		return { responses, keyPairs }
-	}
+	const responses = await execute({ transactions, account, wallet })
 
-	/// instance of NEAR Account
-	const nearAccount = account || fundingAccount
-	if (!nearAccount) {
-		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
-	}
-	const responses = await signAndSendTransactions(nearAccount, await transformTransactions(transactions))
 	return { responses, keyPairs }
 }
 
@@ -191,17 +179,7 @@ export const addKeys = async ({
 		}]
 	}]
 
-	/// instance of walletSelector.wallet()
-	if (wallet) {
-		return await wallet.signAndSendTransactions({ transactions })
-	}
-
-	/// instance of NEAR Account
-	const nearAccount = account || fundingAccount
-	if (!nearAccount) {
-		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
-	}
-	return await signAndSendTransactions(nearAccount, await transformTransactions(transactions))
+	return execute({ transactions, account, wallet })
 }
 
 export const getDrops = async ({ accountId }) => {
@@ -230,7 +208,35 @@ export const getDrops = async ({ accountId }) => {
 	return drops
 }
 
-export const deleteKeys = async ({ drop, keys }) => {
+export const claim = ({
+	account,
+	wallet,
+	receiverId,
+}) => {
+
+	const transactions: any[] = [{
+		receiverId: 'v1.keypom.testnet',
+		actions: [{
+			type: 'FunctionCall',
+			params: {
+				methodName: 'claim',
+				args: {
+					receiver_id: receiverId
+				},
+				gas: claimGas,
+			}
+		}]
+	}]
+
+	return execute({ transactions, account, wallet })
+}
+
+export const deleteKeys = async ({
+	account,
+	wallet,
+	drop,
+	keys
+}) => {
 
 	const { drop_id, drop_type } = drop
 
@@ -266,13 +272,19 @@ export const deleteKeys = async ({ drop, keys }) => {
 		}
 	})
 
-	return signAndSendTransactions(fundingAccount, await transformTransactions([{
+	const transactions: any[] = [{
 		receiverId,
-		actions
-	}]))
+		actions,
+	}]
+
+	return execute({ transactions, account, wallet })
 }
 
-export const deleteDrops = async ({ drops }) => {
+export const deleteDrops = async ({
+	account,
+	wallet,
+	drops
+}) => {
 
 	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys }) => {
 
@@ -308,89 +320,13 @@ export const deleteDrops = async ({ drops }) => {
 			}
 		})
 
-		return signAndSendTransactions(fundingAccount, await transformTransactions([{
+		const transactions: any[] = [{
 			receiverId,
-			actions
-		}]))
+			actions,
+		}]
 
+		return execute({ transactions, account, wallet })
 	}))
 
 	return responses
 }
-
-const transformTransactions = async (transactions) => {
-	const { provider } = fundingAccount.connection;
-
-	return Promise.all(
-		transactions.map(async (transaction, index) => {
-			const actions = transaction.actions.map((action) =>
-				createAction(action)
-			);
-
-			const block = await provider.block({ finality: "final" });
-
-			return nearTransactions.createTransaction(
-				fundingAccount.accountId,
-				fundingKey.publicKey,
-				transaction.receiverId,
-				fundingKey.publicKey.nonce + index + 1,
-				actions,
-				utils.serialize.base_decode(block.header.hash)
-			);
-		})
-	);
-};
-
-
-const createAction = (action) => {
-	switch (action.type) {
-		case "CreateAccount":
-			return nearTransactions.createAccount();
-		case "DeployContract": {
-			const { code } = action.params;
-
-			return nearTransactions.deployContract(code);
-		}
-		case "FunctionCall": {
-			const { methodName, args, gas, deposit } = action.params;
-
-			return nearTransactions.functionCall(
-				methodName,
-				args,
-				new BN(gas),
-				new BN(deposit)
-			);
-		}
-		case "Transfer": {
-			const { deposit } = action.params;
-
-			return nearTransactions.transfer(new BN(deposit));
-		}
-		case "Stake": {
-			const { stake, publicKey } = action.params;
-
-			return nearTransactions.stake(new BN(stake), utils.PublicKey.from(publicKey));
-		}
-		case "AddKey": {
-			const { publicKey, accessKey } = action.params;
-
-			// return nearTransactions.addKey(
-			// 	utils.PublicKey.from(publicKey),
-			// 	// TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
-			// 	getAccessKey(accessKey.permission)
-			// );
-		}
-		case "DeleteKey": {
-			const { publicKey } = action.params;
-
-			return nearTransactions.deleteKey(utils.PublicKey.from(publicKey));
-		}
-		case "DeleteAccount": {
-			const { beneficiaryId } = action.params;
-
-			return nearTransactions.deleteAccount(beneficiaryId);
-		}
-		default:
-			throw new Error("Invalid action type");
-	}
-};
