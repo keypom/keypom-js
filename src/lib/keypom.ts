@@ -16,7 +16,7 @@ import { BN } from "bn.js";
 import { AddKeyPermission, Action } from "@near-wallet-selector/core";
 const gas = '300000000000000'
 
-import { genKey, estimateRequiredDeposit } from "./keypom-utils";
+import { key2str, genKey, estimateRequiredDeposit } from "./keypom-utils";
 
 const networks = {
 	mainnet: {
@@ -173,7 +173,7 @@ export const addKeys = async ({
 	publicKeys
 }) => {
 
-	const requiredDeposit = parseNearAmount((0.01 * publicKeys.length).toString())
+	const requiredDeposit = parseNearAmount((0.03 * publicKeys.length).toString())
 
 	const transactions: any[] = [{
 		receiverId: 'v1.keypom.testnet',
@@ -230,6 +230,48 @@ export const getDrops = async ({ accountId }) => {
 	return drops
 }
 
+export const deleteKeys = async ({ drop, keys }) => {
+
+	const { drop_id, drop_type } = drop
+
+	const actions: any[] = []
+	if (drop_type.FungibleToken || drop_type.NonFungibleToken) {
+		actions.push({
+			type: 'FunctionCall',
+			params: {
+				methodName: 'refund_assets',
+				args: {
+					drop_id,
+				},
+				gas: '100000000000000',
+			}
+		})
+	}
+	actions.push({
+		type: 'FunctionCall',
+		params: {
+			methodName: 'delete_keys',
+			args: {
+				drop_id,
+				public_keys: keys.map(key2str),
+			},
+			gas: '100000000000000',
+		}
+	}, {
+		type: 'FunctionCall',
+		params: {
+			methodName: 'withdraw_from_balance',
+			args: {},
+			gas: '100000000000000',
+		}
+	})
+
+	return signAndSendTransactions(fundingAccount, await transformTransactions([{
+		receiverId,
+		actions
+	}]))
+}
+
 export const deleteDrops = async ({ drops }) => {
 
 	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys }) => {
@@ -253,7 +295,7 @@ export const deleteDrops = async ({ drops }) => {
 				methodName: 'delete_keys',
 				args: {
 					drop_id,
-					public_keys: keys.map(({ pk }) => pk),
+					public_keys: keys.map(key2str),
 				},
 				gas: '100000000000000',
 			}

@@ -9,10 +9,20 @@ const {
 } = nearAPI;
 
 const keypom = require("../lib");
-const { initKeypom, createDrop, getDrops, deleteDrops, addKeys, genKey } = keypom
+const {
+	initKeypom,
+	createDrop,
+	getDrops,
+	deleteKeys,
+	deleteDrops,
+	addKeys,
+	genKey,
+} = keypom
 
 const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
+
+const NUM_KEYS = 10
 
 console.log('accountId', accountId)
 
@@ -64,24 +74,18 @@ test('get drops', async (t) => {
 		accountId
 	})
 
-	// console.log(drops)
-
 	t.true(drops.length > 0)
 });
 
 test('add keys', async (t) => {
 
-	const numKeys = 10
 	const { drop_id: dropId } = drops[0]
 
 	/// create throw away keys
 	const publicKeys = []
-	if (numKeys) {
-		pubKeys = []
-		for (var i = 0; i < numKeys; i++) {
-			const keyPair = await genKey('some secret entropy', dropId, i)
-			pubKeys.push(keyPair.getPublicKey().toString());
-		}
+	for (var i = 0; i < NUM_KEYS; i++) {
+		const keyPair = await genKey('some secret entropy', dropId, i)
+		publicKeys.push(keyPair.getPublicKey().toString());
 	}
 
 	await addKeys({
@@ -89,19 +93,38 @@ test('add keys', async (t) => {
 		publicKeys,
 	})
 
-	t.true(drops.length > 0)
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[0].keys.length, NUM_KEYS)
+});
+
+test('delete keys', async (t) => {
+
+	if (!drops.length) return t.true(false)
+
+	await deleteKeys({
+		drop: drops[0],
+		keys: [drops[0].keys[0]]
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[0].keys.length, NUM_KEYS - 1)
 });
 
 test('delete drops', async (t) => {
 
-	if (!drops.length) return t.true(true)
+	if (!drops.length) return t.true(false)
 
-	const responses = await deleteDrops({ drops })
+	await deleteDrops({ drops })
 
-	console.log(responses)
-	const res = responses[0][0]?.status?.SuccessValue
-	if (res.length > 0) {
-		return t.true(parseInt(res) > -1)
-	}
-	t.is(res, '')
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops.length, 0)
 });

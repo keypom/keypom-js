@@ -15,6 +15,8 @@ export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE = new BN("1000000000000000000000");
 
+export const key2str = (v) => typeof v === 'string' ? v : v.pk
+
 const hashBuf = (str) => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
 export const genKey = async (rootKey, meta, nonce) => {
 	const hash = await hashBuf(`${rootKey}_${meta}_${nonce}`)

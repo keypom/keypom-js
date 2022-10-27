@@ -16,6 +16,10 @@ export declare const addKeys: ({ account, wallet, dropId, publicKeys }: {
 export declare const getDrops: ({ accountId }: {
     accountId: any;
 }) => Promise<any>;
+export declare const deleteKeys: ({ drop, keys }: {
+    drop: any;
+    keys: any;
+}) => Promise<any[]>;
 export declare const deleteDrops: ({ drops }: {
     drops: any;
 }) => Promise<any[]>;
