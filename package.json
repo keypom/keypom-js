@@ -1,7 +1,7 @@
 {
-  "name": "keypom-ws-plugin",
-  "version": "0.0.1",
-  "description": "Keypom Wallet via wallet-selector + Keypom Link",
+  "name": "keypom-js",
+  "version": "0.0.2",
+  "description": "Keypom JS SDK",
   "main": "./lib/index.js",
   "scripts": {
     "test": "yarn build && yarn ava",
@@ -12,7 +12,6 @@
   "author": "mattlockyer",
   "license": "MIT",
   "dependencies": {
-    "@near-wallet-selector/core": "^7.1.0",
     "ava": "^4.3.3",
     "dotenv": "^16.0.3",
     "near-api-js": "^0.44.2",
