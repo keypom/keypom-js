@@ -130,8 +130,8 @@ export const estimateRequiredDeposit = async ({
     attachedGas,
     storage = parseNearAmount("0.034"),
     keyStorage = parseNearAmount("0.0065"),
-    fcData = null,
-    ftData = null,
+    fcData,
+    ftData,
 }) => {
     const numKeysBN = new BN(numKeys)
     
@@ -162,8 +162,8 @@ export const estimateRequiredDeposit = async ({
     
     // console.log('requiredDeposit B4 FT costs: ', requiredDeposit.toString())
     
-    if (ftData != null) {
-        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contract_id);
+    if (ftData.contract_id != null) {
+        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contract_id || ftData.contractId);
         requiredDeposit = requiredDeposit.add(new BN(extraFtCosts));
 
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
@@ -245,8 +245,8 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
 const getFtCosts = async (near, numKeys, usesPerKey, ftContract) => {
     const viewAccount = await near.account("foo");
     const storageBalanceBounds = await viewAccount.viewFunction(ftContract, "storage_balance_bounds", {}); 
-    console.log('storageBalanceBounds: ', storageBalanceBounds)
+    // console.log('storageBalanceBounds: ', storageBalanceBounds)
     let costs = new BN(storageBalanceBounds.min).mul(new BN(numKeys)).mul(new BN(usesPerKey)).add(new BN(storageBalanceBounds.min));
-    console.log('costs: ', costs.toString());
+    // console.log('costs: ', costs.toString());
     return costs.toString();
 };

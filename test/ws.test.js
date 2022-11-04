@@ -2,19 +2,19 @@ const test = require('ava');
 const nearAPI = require("near-api-js");
 const {
 	KeyPair,
-	utils: {
-		PublicKey,
-		format: { parseNearAmount, formatNearAmount },
-	},
+	Account,
+	utils: { format: {
+		parseNearAmount
+	} }
 } = nearAPI;
 
 const keypom = require("../lib");
 const {
 	initKeypom,
+	getEnv,
 	createDrop,
 	getDrops,
 	claim,
-	createAccountAndClaim,
 	deleteKeys,
 	deleteDrops,
 	addKeys,
@@ -24,6 +24,8 @@ const {
 const accountId = process.env.TEST_ACCOUNT_ID
 const secretKey = process.env.TEST_ACCOUNT_PRVKEY
 const testKeyPair = KeyPair.fromString(secretKey)
+
+const FT_CONTRACT_ID = 'ft.keypom.testnet'
 
 const NUM_KEYS = 10
 const keyPairs = []
@@ -42,6 +44,9 @@ window = {
 }
 localStorage = window.localStorage
 
+/// the test account
+let account, drops
+
 test('init', async (t) => {
 
 	initKeypom({
@@ -52,26 +57,69 @@ test('init', async (t) => {
 		}
 	})
 
+	const { connection, networkId, keyStore } = getEnv()
+	keyStore.setKey(networkId, accountId, testKeyPair)
+	account = new Account(connection, accountId)
+
 	t.true(true)
 });
 
-test('create drop', async (t) => {
+test('delete drops', async (t) => {
+
+	drops = await getDrops({
+		accountId
+	})
+
+	console.log(drops)
+
+	if (!drops.length) return t.true(true)
+
+	await deleteDrops({ drops })
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops.length, 0)
+});
+
+test('create simple drop', async (t) => {
 
 	const dropId = Date.now().toString()
 
 	const res = await createDrop({
 		dropId,
-		depositPerUseNEAR: 0.02
+		depositPerUseNEAR: 0.02,
 	})
 
 	const { responses } = res
 	// console.log(responses)
-	const resDropId = Buffer.from(responses[0].status.SuccessValue, 'base64').toString()
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-	t.is(resDropId, dropId)
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
 });
 
-let drops
+test('create ft drop', async (t) => {
+
+	const dropId = Date.now().toString()
+
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.02,
+		ftData: {
+			contractId: FT_CONTRACT_ID,
+			senderId: accountId,
+			balancePerUse: parseNearAmount('1')
+		}
+	})
+
+	const { responses } = res
+	// console.log(responses)
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+});
+
 test('get drops', async (t) => {
 
 	drops = await getDrops({
@@ -81,7 +129,7 @@ test('get drops', async (t) => {
 	t.true(drops.length > 0)
 });
 
-test('add keys', async (t) => {
+test('add keys to simple drop', async (t) => {
 
 	const drop = drops[0]
 	const { drop_id: dropId } = drop
@@ -106,13 +154,38 @@ test('add keys', async (t) => {
 	t.is(drops[0].keys.length, NUM_KEYS)
 });
 
-test('claim', async (t) => {
+test('add keys to ft drop', async (t) => {
+
+	const drop = drops[1]
+	const { drop_id: dropId } = drop
+
+	/// create throw away keys
+	const publicKeys = []
+	for (var i = 0; i < NUM_KEYS; i++) {
+		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
+		keyPairs.push(keyPair)
+		publicKeys.push(keyPair.getPublicKey().toString());
+	}
+
+	await addKeys({
+		drop,
+		publicKeys,
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[0].keys.length, NUM_KEYS)
+});
+
+test('claim simple drop', async (t) => {
 
 	if (!drops.length) return t.true(false)
 
 	await claim({
 		accountId,
-		secretKey: keyPairs.pop().secretKey
+		secretKey: keyPairs[0].secretKey
 	})
 
 	drops = await getDrops({
@@ -122,21 +195,21 @@ test('claim', async (t) => {
 	t.is(drops[0].keys.length, NUM_KEYS - 1)
 });
 
-test('create account and claim', async (t) => {
+test('create account and claim ft drop', async (t) => {
 
 	if (!drops.length) return t.true(false)
 
-	await createAccountAndClaim({
+	await claim({
 		newAccountId: `someone-${Date.now()}.testnet`,
 		newPublicKey: testKeyPair.getPublicKey().toString(), 
-		secretKey: keyPairs.pop().secretKey
+		secretKey: keyPairs[NUM_KEYS].secretKey
 	})
 
 	drops = await getDrops({
 		accountId
 	})
 
-	t.is(drops[0].keys.length, NUM_KEYS - 2)
+	t.is(drops[1].keys.length, NUM_KEYS - 1)
 });
 
 test('delete keys', async (t) => {
@@ -152,18 +225,5 @@ test('delete keys', async (t) => {
 		accountId
 	})
 
-	t.is(drops[0].keys.length, NUM_KEYS - 3)
-});
-
-test('delete drops', async (t) => {
-
-	if (!drops.length) return t.true(false)
-
-	await deleteDrops({ drops })
-
-	drops = await getDrops({
-		accountId
-	})
-
-	t.is(drops.length, 0)
+	t.is(drops[0].keys.length, NUM_KEYS - 2)
 });

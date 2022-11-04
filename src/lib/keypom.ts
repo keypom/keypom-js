@@ -1,4 +1,5 @@
 import * as nearAPI from "near-api-js";
+import BN from 'bn.js'
 const {
 	Near,
 	Account,
@@ -32,12 +33,20 @@ const networks = {
 	}
 }
 
+/// for testing
+const FT_CONTRACT_ID = 'ft.keypom.testnet'
+
 let contractId = 'v1.keypom.testnet'
 let receiverId = contractId
 
 let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey;
 
+export const getEnv = () => ({
+	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey
+})
+
 const execute = async (args) => _execute({ ...args, fundingAccount })
+const getAccount = ({ account, wallet }) => account || wallet || fundingAccount
 
 export const initKeypom = async ({
 	network,
@@ -77,6 +86,12 @@ export const initKeypom = async ({
 	return null
 }
 
+
+
+/// DROP CREATION
+
+
+
 export const createDrop = async ({
 	account,
 	wallet,
@@ -88,10 +103,11 @@ export const createDrop = async ({
 	depositPerUseYocto,
 	metadata,
 	config = {},
-	ftData,
+	ftData = {},
 	nftData,
 	fcData,
 }: CreateDropParams) => {
+
 	/// parse args
 	if (depositPerUseNEAR) {
 		depositPerUseYocto = parseNearAmount(depositPerUseNEAR.toString()) || '0'
@@ -128,9 +144,59 @@ export const createDrop = async ({
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas,
 		storage: parseNearAmount('0.00866'),
+		ftData,
+		fcData,
 	})
 
-	const transactions: any[] = [{
+	const activeAccount = getAccount({ account, wallet })
+
+	const transactions: any[] = []
+	if (ftData.contractId) {
+
+		const storageDeposit = await viewAccount.viewFunction2({
+			contractId: ftData.contractId,
+			methodName: 'storage_balance_of',
+			args: {
+				account_id: activeAccount.accountId,
+			}
+		})
+
+		if (!storageDeposit) {
+			transactions.push({
+				receiverId: ftData.contractId,
+				actions: [{
+					type: 'FunctionCall',
+					params: {
+						methodName: 'storage_deposit',
+						args: {
+							account_id: activeAccount.accountId,
+						},
+						gas: '100000000000000',
+						deposit: parseNearAmount('0.1')
+					}
+				}]
+			})
+		}
+
+		if (ftData.contractId === FT_CONTRACT_ID) {
+			transactions.push({
+				receiverId: ftData.contractId,
+				actions: [{
+					type: 'FunctionCall',
+					params: {
+						methodName: 'ft_mint',
+						args: {
+							account_id: activeAccount.accountId,
+							amount: parseNearAmount('10')
+						},
+						gas: '100000000000000',
+					}
+				}]
+			})
+		}
+	}
+
+	transactions.push({
 		receiverId,
 		actions: [{
 			type: 'FunctionCall',
@@ -142,20 +208,49 @@ export const createDrop = async ({
 					deposit_per_use: depositPerUseYocto,
 					config: finalConfig,
 					metadata,
-					ftData,
-					nftData,
-					fcData,
+					ft_data: ftData.contractId ? ({
+						contract_id: ftData.contractId,
+						sender_id: ftData.senderId,
+						balance_per_use: ftData.balancePerUse,
+					}) : undefined,
+					nft_data: null,
+					fc_data: null,
 				},
 				gas,
 				deposit: requiredDeposit,
 			}
 		}]
-	}]
+	})
+
+	if (ftData.contractId) {
+		transactions.push({
+			receiverId: ftData.contractId,
+			actions: [{
+				type: 'FunctionCall',
+				params: {
+					methodName: 'ft_transfer_call',
+					args: {
+						receiver_id: contractId,
+						amount: new BN(ftData.balancePerUse).mul(new BN(numKeys || '1')).toString(),
+						msg: dropId.toString(),
+					},
+					gas: '50000000000000',
+					deposit: '1',
+				}
+			}]
+		})
+	}
 
 	const responses = await execute({ transactions, account, wallet })
 
 	return { responses, keyPairs }
 }
+
+
+
+/// DROP ADMIN
+
+
 
 export const addKeys = async ({
 	account,
@@ -164,7 +259,12 @@ export const addKeys = async ({
 	publicKeys
 }) => {
 
-	const { required_gas, deposit_per_use, config: { uses_per_key } } = drop
+	const {
+		required_gas,
+		deposit_per_use,
+		config: { uses_per_key },
+		ft_data = {}
+	} = drop
 
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
@@ -172,7 +272,9 @@ export const addKeys = async ({
 		numKeys: publicKeys.length,
 		usesPerKey: uses_per_key,
 		attachedGas: required_gas,
-		storage: '0',
+		storage: parseNearAmount('0.01'),
+		ftData: ft_data,
+		fcData: null,
 	})
 
 	console.log('requiredDeposit', formatNearAmount(requiredDeposit, 4))
@@ -220,59 +322,6 @@ export const getDrops = async ({ accountId }) => {
 	}))
 
 	return drops
-}
-
-export const claim = ({
-	secretKey,
-	accountId,
-}) => {
-
-	const keyPair = KeyPair.fromString(secretKey)
-	keyStore.setKey(networkId, contractId, keyPair)
-
-	const transactions: any[] = [{
-		receiverId,
-		actions: [{
-			type: 'FunctionCall',
-			params: {
-				methodName: 'claim',
-				args: {
-					account_id: accountId
-				},
-				gas: attachedGas,
-			}
-		}]
-	}]
-
-	return execute({ transactions, account: contractAccount })
-}
-
-
-export const createAccountAndClaim = ({
-	newAccountId,
-	newPublicKey, 
-	secretKey,
-}) => {
-
-	const keyPair = KeyPair.fromString(secretKey)
-	keyStore.setKey(networkId, contractId, keyPair)
-
-	const transactions: any[] = [{
-		receiverId,
-		actions: [{
-			type: 'FunctionCall',
-			params: {
-				methodName: 'create_account_and_claim',
-				args: {
-					new_account_id: newAccountId,
-					new_public_key: newPublicKey,
-				},
-				gas: attachedGas,
-			}
-		}]
-	}]
-
-	return execute({ transactions, account: contractAccount })
 }
 
 export const deleteKeys = async ({
@@ -330,10 +379,10 @@ export const deleteDrops = async ({
 	drops
 }) => {
 
-	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys }) => {
+	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys, registered_uses }) => {
 
 		const actions: any[] = []
-		if (drop_type.FungibleToken || drop_type.NonFungibleToken) {
+		if (registered_uses !== 0 && (drop_type.FungibleToken || drop_type.NonFungibleToken)) {
 			actions.push({
 				type: 'FunctionCall',
 				params: {
@@ -341,7 +390,7 @@ export const deleteDrops = async ({
 					args: {
 						drop_id,
 					},
-					gas: '100000000000000',
+					gas: '50000000000000',
 				}
 			})
 		}
@@ -353,14 +402,14 @@ export const deleteDrops = async ({
 					drop_id,
 					public_keys: keys.map(key2str),
 				},
-				gas: '100000000000000',
+				gas: '200000000000000',
 			}
 		}, {
 			type: 'FunctionCall',
 			params: {
 				methodName: 'withdraw_from_balance',
 				args: {},
-				gas: '100000000000000',
+				gas: '50000000000000',
 			}
 		})
 
@@ -373,4 +422,47 @@ export const deleteDrops = async ({
 	}))
 
 	return responses
+}
+
+
+
+/// DROP CLAIMING
+
+
+
+export const claim = ({
+	secretKey,
+	accountId,
+	newAccountId,
+	newPublicKey, 
+}) => {
+
+	const keyPair = KeyPair.fromString(secretKey)
+	keyStore.setKey(networkId, contractId, keyPair)
+
+	const transactions: any[] = [{
+		receiverId,
+		actions: [{
+			type: 'FunctionCall',
+			params: newAccountId ? 
+			{
+				methodName: 'create_account_and_claim',
+				args: {
+					new_account_id: newAccountId,
+					new_public_key: newPublicKey,
+				},
+				gas: attachedGas,
+			}
+			:
+			{
+				methodName: 'claim',
+				args: {
+					account_id: accountId
+				},
+				gas: attachedGas,
+			}
+		}]
+	}]
+
+	return execute({ transactions, account: contractAccount })
 }

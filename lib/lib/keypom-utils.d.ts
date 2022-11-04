@@ -16,7 +16,7 @@ export function estimateRequiredDeposit({ near, depositPerUse, numKeys, usesPerK
     attachedGas: any;
     storage?: string | null | undefined;
     keyStorage?: string | null | undefined;
-    fcData?: null | undefined;
-    ftData?: null | undefined;
+    fcData: any;
+    ftData: any;
 }): Promise<any>;
 import nearAPI = require("near-api-js");

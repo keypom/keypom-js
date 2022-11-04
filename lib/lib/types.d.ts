@@ -28,6 +28,11 @@ export interface DropConfig {
     claimPermission?: boolean;
     dropRoot?: string;
 }
+export interface FTData {
+    contractId?: string;
+    senderId?: string;
+    balancePerUse?: string;
+}
 export interface CreateDropParams {
     account: Account;
     wallet?: BrowserWalletBehaviour;
@@ -39,7 +44,7 @@ export interface CreateDropParams {
     depositPerUseYocto?: string;
     metadata?: string;
     config?: DropConfig;
-    ftData: null;
+    ftData: FTData;
     nftData: null;
     fcData: null;
 }

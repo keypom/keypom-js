@@ -1,4 +1,15 @@
 import { InitKeypomParams, CreateDropParams } from "./types";
+export declare const getEnv: () => {
+    near: any;
+    connection: any;
+    keyStore: any;
+    logger: any;
+    networkId: any;
+    fundingAccount: any;
+    contractAccount: any;
+    viewAccount: any;
+    fundingKey: any;
+};
 export declare const initKeypom: ({ network, funder, }: InitKeypomParams) => Promise<any>;
 export declare const createDrop: ({ account, wallet, accountRootKey, dropId, publicKeys, numKeys, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, fcData, }: CreateDropParams) => Promise<{
     responses: any;
@@ -13,15 +24,6 @@ export declare const addKeys: ({ account, wallet, drop, publicKeys }: {
 export declare const getDrops: ({ accountId }: {
     accountId: any;
 }) => Promise<any>;
-export declare const claim: ({ secretKey, accountId, }: {
-    secretKey: any;
-    accountId: any;
-}) => Promise<any>;
-export declare const createAccountAndClaim: ({ newAccountId, newPublicKey, secretKey, }: {
-    newAccountId: any;
-    newPublicKey: any;
-    secretKey: any;
-}) => Promise<any>;
 export declare const deleteKeys: ({ account, wallet, drop, keys }: {
     account: any;
     wallet: any;
@@ -33,3 +35,9 @@ export declare const deleteDrops: ({ account, wallet, drops }: {
     wallet: any;
     drops: any;
 }) => Promise<any[]>;
+export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, }: {
+    secretKey: any;
+    accountId: any;
+    newAccountId: any;
+    newPublicKey: any;
+}) => Promise<any>;
