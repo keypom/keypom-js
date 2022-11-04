@@ -33,6 +33,11 @@ export interface FTData {
     senderId?: string;
     balancePerUse?: string;
 }
+export interface NFTData {
+    contractId?: string;
+    senderId?: string;
+    tokenIds?: string[];
+}
 export interface CreateDropParams {
     account: Account;
     wallet?: BrowserWalletBehaviour;
@@ -45,6 +50,6 @@ export interface CreateDropParams {
     metadata?: string;
     config?: DropConfig;
     ftData: FTData;
-    nftData: null;
+    nftData: NFTData;
     fcData: null;
 }

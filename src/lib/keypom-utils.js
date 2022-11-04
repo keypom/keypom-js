@@ -49,6 +49,64 @@ export const execute = async ({
 
 	return await signAndSendTransactions(nearAccount, transformTransactions(transactions))
 }
+
+export const ftTransferCall = ({
+    account,
+    contractId,
+    args,
+    returnTransaction = false,
+}) => {
+    const tx = {
+        receiverId: contractId,
+        actions: [{
+            type: 'FunctionCall',
+            params: {
+                methodName: 'ft_transfer_call',
+                args,
+                gas: '50000000000000',
+                deposit: '1',
+            }
+        }]
+    }
+    if (returnTransaction) return tx
+    return execute({ account, transactions})
+}
+
+export const nftTransferCall = async ({
+    account,
+    contractId,
+    receiverId,
+    tokenIds,
+    msg,
+}) => {
+    const responses = []
+
+    /// TODO batch calls
+
+    for (let i = 0; i < tokenIds.length; i++) {
+        responses.push(await execute({
+            account,
+            transactions: [{
+                receiverId: contractId,
+                actions: [{
+                    type: 'FunctionCall',
+                    params: {
+                        methodName: 'nft_transfer_call',
+                        args: {
+                            receiver_id: receiverId,
+                            token_id: tokenIds[i],
+                            msg
+                        },
+                        gas: '50000000000000',
+                        deposit: '1',
+                    }
+                }]
+            }]
+        }))
+    }
+    return responses
+}
+
 /// sequentially execute all transactions
 const signAndSendTransactions = async (account, txs) => {
 	const responses = []

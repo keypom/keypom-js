@@ -1,5 +1,11 @@
-export { genKey, estimateRequiredDeposit } from "./lib/keypom-utils";
 export {
+	genKey,
+	estimateRequiredDeposit,
+	ftTransferCall,
+	nftTransferCall,
+} from "./lib/keypom-utils";
+export {
+	execute,
 	initKeypom,
 	getEnv,
 	createDrop,
