@@ -5,13 +5,19 @@ export {
 	nftTransferCall,
 } from "./lib/keypom-utils";
 export {
+	createDrop,
+	getDrops,
+	deleteDrops,
+} from "./lib/drops";
+export {
+	deleteKeys,
+	addKeys,
+} from "./lib/keys";
+export {
+	claim,
+} from "./lib/claims";
+export {
 	execute,
 	initKeypom,
 	getEnv,
-	createDrop,
-	getDrops,
-	claim,
-	deleteKeys,
-	deleteDrops,
-	addKeys,
 } from "./lib/keypom";
