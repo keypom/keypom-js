@@ -10,8 +10,8 @@ export {
 	deleteDrops,
 } from "./lib/drops";
 export {
-	deleteKeys,
 	addKeys,
+	deleteKeys,
 } from "./lib/keys";
 export {
 	claim,

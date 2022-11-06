@@ -126,6 +126,7 @@ export const transformTransactions = (transactions) => transactions.map(({ recei
     });
 });
 
+// reference: https://github.com/near/wallet-selector/blob/d09f69e50df05c8e5f972beab4f336d7cfa08c65/packages/wallet-utils/src/lib/create-action.ts
 const createAction = (action) => {
 	switch (action.type) {
 		case "CreateAccount":

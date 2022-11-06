@@ -21,4 +21,4 @@ export declare const getEnv: () => {
     execute: (args: any) => Promise<any>;
 };
 export declare const execute: (args: any) => Promise<any>;
-export declare const initKeypom: ({ network, funder, }: InitKeypomParams) => Promise<any>;
+export declare const initKeypom: ({ near: _near, network, funder, }: InitKeypomParams) => Promise<any>;

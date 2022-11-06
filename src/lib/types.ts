@@ -21,6 +21,7 @@ export interface Funder {
 }
 
 export interface InitKeypomParams {
+	near: any;
 	network: string;
 	funder?: Funder;
 }

@@ -2,11 +2,13 @@ const test = require('ava');
 const BN = require('bn.js');
 const nearAPI = require("near-api-js");
 const {
+	Near,
 	KeyPair,
 	Account,
 	utils: { format: {
 		parseNearAmount
-	} }
+	} },
+	keyStores: { InMemoryKeyStore },
 } = nearAPI;
 
 const keypom = require("../lib");
@@ -57,12 +59,38 @@ window = {
 }
 localStorage = window.localStorage
 
+/// init NEAR connection here and pass in to initKeypom
+const networks = {
+	mainnet: {
+		networkId: 'mainnet',
+		viewAccountId: 'near',
+		nodeUrl: 'https://rpc.mainnet.near.org',
+		walletUrl: 'https://wallet.near.org',
+		helperUrl: 'https://helper.mainnet.near.org'
+	},
+	testnet: {
+		networkId: 'testnet',
+		viewAccountId: 'testnet',
+		nodeUrl: 'https://rpc.testnet.near.org',
+		walletUrl: 'https://wallet.testnet.near.org',
+		helperUrl: 'https://helper.testnet.near.org'
+	}
+}
+const network = 'testnet'
+const networkConfig = typeof network === 'string' ? networks[network] : network
+const keyStore = new InMemoryKeyStore()
+const near = new Near({
+	...networkConfig,
+	deps: { keyStore },
+});
+
 /// the test account
 let fundingAccount, drops
 
 test('init', async (t) => {
 
 	initKeypom({
+		// near,
 		network: 'testnet',
 		funder: {
 			accountId,
@@ -74,8 +102,12 @@ test('init', async (t) => {
 	keyStore.setKey(networkId, accountId, testKeyPair)
 	fundingAccount = new Account(connection, accountId)
 
+	console.log(keyStore)
+
 	t.true(true)
 });
+
+/*
 
 test('delete drops', async (t) => {
 
@@ -369,7 +401,24 @@ test('create account and claim ft drop', async (t) => {
 	t.is(drops[1].keys.length, NUM_KEYS - 1)
 });
 
-test('delete keys', async (t) => {
+test('create account and claim nft drop', async (t) => {
+
+	if (!drops.length) return t.true(false)
+
+	await claim({
+		newAccountId: `someone-${Date.now()}.testnet`,
+		newPublicKey: testKeyPair.getPublicKey().toString(), 
+		secretKey: keyPairs.nft[0].secretKey
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	t.is(drops[2].keys.length, 1)
+});
+
+test('delete 1 key from simple drop', async (t) => {
 
 	if (!drops.length) return t.true(false)
 
@@ -384,3 +433,5 @@ test('delete keys', async (t) => {
 
 	t.is(drops[0].keys.length, NUM_KEYS - 2)
 });
+
+*/

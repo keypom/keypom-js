@@ -3,7 +3,7 @@ const {
 	Near,
 	Account,
 	KeyPair,
-	keyStores: { BrowserLocalStorageKeyStore },
+	keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
 } = nearAPI;
 
 import { InitKeypomParams } from "./types";
@@ -47,19 +47,26 @@ export const execute = async (args) => _execute({ ...args, fundingAccount })
 const getAccount = ({ account, wallet }) => account || wallet || fundingAccount
 
 export const initKeypom = async ({
+	near: _near,
 	network,
 	funder,
 }: InitKeypomParams) => {
-	const networkConfig = typeof network === 'string' ? networks[network] : network
-	keyStore = new BrowserLocalStorageKeyStore()
 
-	near = new Near({
-		...networkConfig,
-		deps: { keyStore },
-	});
+	if (_near) {
+		near = _near
+		keyStore = near.config.deps.keyStore
+	} else {
+		const networkConfig = typeof network === 'string' ? networks[network] : network
+		keyStore = process?.versions?.node ? new InMemoryKeyStore() : new BrowserLocalStorageKeyStore()
+		near = new Near({
+			...networkConfig,
+			deps: { keyStore },
+		});
+	}
+	
 	connection = near.connection;
+	networkId = near.config.networkId
 
-	networkId = networkConfig.networkId
 	if (networkId === 'mainnet') {
 		contractId = 'v1.keypom.near'
 		receiverId = 'v1.keypom.near'

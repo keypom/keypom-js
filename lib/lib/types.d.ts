@@ -15,6 +15,7 @@ export interface Funder {
     seedPhrase: string;
 }
 export interface InitKeypomParams {
+    near: any;
     network: string;
     funder?: Funder;
 }

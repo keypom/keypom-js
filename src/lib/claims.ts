@@ -1,21 +1,9 @@
 import * as nearAPI from "near-api-js";
-import BN from 'bn.js'
 const {
 	KeyPair,
-	utils: {
-		format: { parseNearAmount },
-	},
 } = nearAPI;
 
-import { CreateDropParams } from "./types";
 import { getEnv } from "./keypom";
-import {
-	genKey,
-	estimateRequiredDeposit,
-	ftTransferCall,
-	nftTransferCall,
-} from "./keypom-utils";
-
 
 export const claim = ({
 	secretKey,
