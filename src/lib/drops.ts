@@ -2,7 +2,7 @@ import * as nearAPI from "near-api-js";
 import BN from 'bn.js'
 const {
 	utils: {
-		format: { parseNearAmount },
+		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
 
@@ -14,6 +14,7 @@ import {
 	estimateRequiredDeposit,
 	ftTransferCall,
 	nftTransferCall,
+	getStorageBase,
 } from "./keypom-utils";
 
 export const createDrop = async ({
@@ -45,6 +46,7 @@ export const createDrop = async ({
 	if (!dropId) dropId = Date.now().toString()
 	/// key generation
 	let keyPairs: any[] = [], pubKeys = publicKeys || [];
+	numKeys = numKeys || pubKeys.length
 	if (numKeys) {
 		pubKeys = []
 		for (var i = 0; i < numKeys; i++) {
@@ -72,10 +74,12 @@ export const createDrop = async ({
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas,
-		storage: nftData.contractId ? parseNearAmount('0.05') : parseNearAmount('0.01'),
+		storage: getStorageBase({ nftData, fcData }),
 		ftData,
 		fcData,
 	})
+
+	console.log('requiredDeposit', formatNearAmount(requiredDeposit.toString()))
 
 	const transactions: any[] = []
 
@@ -100,7 +104,18 @@ export const createDrop = async ({
 						contract_id: nftData.contractId,
 						sender_id: nftData.senderId,
 					}) : undefined,
-					fc_data: null,
+					fc_data: fcData?.methods ? ({
+						methods: fcData.methods.map((useMethods) => useMethods.map((method) => {
+							const ret: any = {}
+							ret.receiver_id = method.receiverId;
+							ret.method_name = method.methodName;
+							ret.args = method.args;
+							ret.attached_deposit = method.attachedDeposit;
+							ret.account_id_field = method.accountIdField;
+							ret.drop_id_field = method.dropIdField;
+							return ret
+						}))
+					}) : undefined,
 				},
 				gas,
 				deposit: requiredDeposit,
@@ -176,7 +191,7 @@ export const deleteDrops = async ({
 }) => {
 
 	const {
-		gas, gas200, receiverId, execute,
+		gas, gas300, receiverId, execute,
 	} = getEnv()
 
 	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys, registered_uses }) => {
@@ -195,7 +210,7 @@ export const deleteDrops = async ({
 							args: {
 								drop_id,
 							},
-							gas,
+							gas: gas300,
 						}
 					}],
 				}]
@@ -212,7 +227,7 @@ export const deleteDrops = async ({
 					drop_id,
 					public_keys: keys.map(key2str),
 				},
-				gas: gas200,
+				gas,
 			}
 		})
 

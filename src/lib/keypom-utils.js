@@ -4,7 +4,7 @@ const {
 	utils,
 	transactions,
 	utils: {
-		format: { parseNearAmount },
+		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
 
@@ -20,6 +20,10 @@ export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE = new BN("1000000000000000000000");
+
+export const snakeToCamel = (s) =>
+    s.toLowerCase().replace(/([-_][a-z])/g, (m) => m.toUpperCase().replace(/-_/g, '')
+);
 
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
@@ -180,6 +184,12 @@ const createAction = (action) => {
 	}
 };
 
+export const getStorageBase = ({ nftData, fcData }) => {
+    if (fcData?.methods) return parseNearAmount('0.015')
+    if (nftData.contractId) return parseNearAmount('0.05')
+    return parseNearAmount('0.01')
+}
+
 // Initiate the connection to the NEAR blockchain.
 export const estimateRequiredDeposit = async ({
     near,
@@ -207,10 +217,12 @@ export const estimateRequiredDeposit = async ({
     // console.log('totalAccessKeyStorage: ', totalAccessKeyStorage.toString())
 
     let {numNoneFcs, depositRequiredForFcDrops} = getNoneFcsAndDepositRequired(fcData, usesPerKey);
+
     let totalDeposits = new BN(depositPerUse).mul(new BN(usesPerKey - numNoneFcs)).mul(numKeysBN);
     // console.log('totalDeposits: ', totalDeposits.toString())
 
     let totalDepositsForFc = depositRequiredForFcDrops.mul(numKeysBN);
+
     // console.log('totalDepositsForFc: ', totalDepositsForFc.toString())
 
     let requiredDeposit = totalRequiredStorage
@@ -250,6 +262,7 @@ const estimatePessimisticAllowance = (attachedGas) => {
 
 // Estimate the amount of allowance required for a given attached gas.
 const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
+
     let depositRequiredForFcDrops = new BN(0);
     let numNoneFcs = 0;
     if (fcData == null) {

@@ -10,7 +10,7 @@ export declare const getEnv: () => {
     viewAccount: any;
     fundingKey: any;
     gas: string;
-    gas200: string;
+    gas300: string;
     attachedGas: string;
     contractId: string;
     receiverId: string;

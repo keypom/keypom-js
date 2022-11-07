@@ -13,7 +13,7 @@ export const claim = ({
 }) => {
 
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute,
+		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, connection,
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)

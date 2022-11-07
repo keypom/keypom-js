@@ -42,7 +42,8 @@ const NUM_KEYS = 10
 const keyPairs = {
 	simple: [],
 	ft: [],
-	nft: []
+	nft: [],
+	fc: [],
 }
 
 console.log('accountId', accountId)
@@ -59,7 +60,7 @@ window = {
 }
 localStorage = window.localStorage
 
-/// init NEAR connection here and pass in to initKeypom
+/// for testing of init NEAR here and pass in to initKeypom
 const networks = {
 	mainnet: {
 		networkId: 'mainnet',
@@ -84,7 +85,7 @@ const near = new Near({
 	deps: { keyStore },
 });
 
-/// the test account
+/// all tests
 let fundingAccount, drops
 
 test('init', async (t) => {
@@ -106,8 +107,6 @@ test('init', async (t) => {
 
 	t.true(true)
 });
-
-/*
 
 test('delete drops', async (t) => {
 
@@ -274,11 +273,55 @@ test('create nft drop and add 1 key', async (t) => {
 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
 });
 
+test('create an fc drop and 1 key', async (t) => {
+
+	let fcData = {
+		methods: [
+			[{
+				receiverId: "dev-1664052531433-97566156431683",
+				methodName: "nft_mint",
+				args: JSON.stringify({
+					"foo": "bar",
+					"keypom_args": {
+						"account_id_field": "receiver_id",
+						"drop_id_field" : "mint_id"
+					}
+				}),
+				attachedDeposit: parseNearAmount("1"),
+				accountIdField: "receiver_id",
+				dropIdField: "mint_id"
+			}]
+		]
+	}
+
+	const dropId = Date.now().toString()
+
+	const publicKeys = []
+	for (var i = 0; i < 1; i++) {
+		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
+		keyPairs.fc.push(keyPair)
+		publicKeys.push(keyPair.getPublicKey().toString());
+	}
+
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.02,
+		publicKeys,
+		fcData
+	})
+
+	const { responses } = res
+	// console.log(responses)
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+});
+
 test('get drops', async (t) => {
 	drops = await getDrops({
 		accountId
 	})
-	t.is(drops.length, 3)
+	t.is(drops.length, 4)
 });
 
 test('add keys to simple drop', async (t) => {
@@ -362,10 +405,11 @@ test('get drops after keys', async (t) => {
 		accountId
 	})
 	console.log(drops)
-	t.is(drops.length, 3)
+	t.is(drops.length, 4)
 	t.is(drops[0].registered_uses, 10)
 	t.is(drops[1].registered_uses, 10)
 	t.is(drops[2].registered_uses, 2)
+	t.is(drops[3].registered_uses, 1)
 });
 
 test('claim simple drop', async (t) => {
@@ -433,5 +477,3 @@ test('delete 1 key from simple drop', async (t) => {
 
 	t.is(drops[0].keys.length, NUM_KEYS - 2)
 });
-
-*/

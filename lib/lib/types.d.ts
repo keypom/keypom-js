@@ -39,6 +39,17 @@ export interface NFTData {
     senderId?: string;
     tokenIds?: string[];
 }
+export interface Method {
+    receiverId: string;
+    methodName: string;
+    args: string;
+    attachedDeposit: string;
+    accountIdField: string;
+    dropIdField: string;
+}
+export interface FCData {
+    methods: Method[][];
+}
 export interface CreateDropParams {
     account: Account;
     wallet?: BrowserWalletBehaviour;
@@ -52,5 +63,5 @@ export interface CreateDropParams {
     config?: DropConfig;
     ftData: FTData;
     nftData: NFTData;
-    fcData: null;
+    fcData?: FCData;
 }

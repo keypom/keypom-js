@@ -12,8 +12,8 @@ import {
 	execute as _execute,
 } from "./keypom-utils";
 
-const gas = '300000000000000'
-const gas200 = '200000000000000'
+const gas = '200000000000000'
+const gas300 = '300000000000000'
 const attachedGas = '100000000000000'
 const networks = {
 	mainnet: {
@@ -39,7 +39,7 @@ let near, connection, keyStore, logger, networkId, fundingAccount, contractAccou
 
 export const getEnv = () => ({
 	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey,
-	gas, gas200, attachedGas, contractId, receiverId, getAccount, execute,
+	gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
 })
 
 export const execute = async (args) => _execute({ ...args, fundingAccount })

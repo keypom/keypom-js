@@ -1,4 +1,5 @@
 export const ATTACHED_GAS_FROM_WALLET: 100000000000000;
+export function snakeToCamel(s: any): any;
 export function key2str(v: any): any;
 export function genKey(rootKey: any, meta: any, nonce: any): Promise<nearAPI.utils.key_pair.KeyPair>;
 export function execute({ transactions, account, wallet, fundingAccount, }: {
@@ -32,6 +33,10 @@ export function nftTransferCall({ account, contractId, receiverId, tokenIds, msg
     msg: any;
 }): Promise<any[]>;
 export function transformTransactions(transactions: any): any;
+export function getStorageBase({ nftData, fcData }: {
+    nftData: any;
+    fcData: any;
+}): string | null;
 export function estimateRequiredDeposit({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: {
     near: any;
     depositPerUse: any;
