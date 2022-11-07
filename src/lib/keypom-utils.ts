@@ -1,25 +1,32 @@
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { SignAndSendTransactionParams } from "@near-wallet-selector/core/lib/wallet";
+import type { Action } from "@near-wallet-selector/core";
+import { Account, Near, transactions } from "near-api-js";
+import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
+import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+
 const nearAPI =  require("near-api-js");
 const {
-	KeyPair,
+    KeyPair,
 	utils,
-	transactions,
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
 
-const { BN } = require("bn.js");
+import BN from 'bn.js';
+const { subtle } = require('crypto').webcrypto;
+
 const { generateSeedPhrase } = require("near-seed-phrase");
-const crypto = require("crypto");
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
-const GAS_PER_CCC = 5000000000000; // 5 TGas
-const RECEIPT_GAS_COST = 2500000000000; // 2.5 TGas
-const YOCTO_PER_GAS = 100000000; // 100 million
-export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
+const GAS_PER_CCC: number = 5000000000000; // 5 TGas
+const RECEIPT_GAS_COST: number = 2500000000000; // 2.5 TGas
+const YOCTO_PER_GAS: number = 100000000; // 100 million
+export const ATTACHED_GAS_FROM_WALLET: number = 100000000000000; // 100 TGas
 
 /// How much yoctoNEAR it costs to store 1 access key
-const ACCESS_KEY_STORAGE = new BN("1000000000000000000000");
+const ACCESS_KEY_STORAGE: BN = new BN("1000000000000000000000");
 
 export const snakeToCamel = (s) =>
     s.toLowerCase().replace(/([-_][a-z])/g, (m) => m.toUpperCase().replace(/-_/g, '')
@@ -27,9 +34,9 @@ export const snakeToCamel = (s) =>
 
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
-const hashBuf = (str) => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-export const genKey = async (rootKey, meta, nonce) => {
-	const hash = await hashBuf(`${rootKey}_${meta}_${nonce}`)
+const hashBuf = (str: string): Promise<ArrayBuffer> => subtle.digest('SHA-256', new TextEncoder().encode(str))
+export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<typeof KeyPair> => {
+	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)
 	return KeyPair.fromString(secretKey)
 }
@@ -39,10 +46,12 @@ export const execute = async ({
 	account,
 	wallet,
     fundingAccount,
-}) => {
+}: ExecuteParams): Promise<void | FinalExecutionOutcome[]> => {
 	/// instance of walletSelector.wallet()
 	if (wallet) {
-		return await wallet.signAndSendTransactions({ transactions })
+        // @ts-ignore
+        // SignAndSendTransactionOptions[] | BrowserWalletSignAndSendTransactionsParams can't be used
+		return await wallet.signAndSendTransactions(transactions)
 	}
 
 	/// instance of NEAR Account (backend usage)
@@ -51,7 +60,7 @@ export const execute = async ({
 		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
 	}
 
-	return await signAndSendTransactions(nearAccount, transformTransactions(transactions))
+	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
 }
 
 export const ftTransferCall = ({
@@ -59,8 +68,8 @@ export const ftTransferCall = ({
     contractId,
     args,
     returnTransaction = false,
-}) => {
-    const tx = {
+}: FTTransferCallParams): Promise<void | FinalExecutionOutcome[]> | SignAndSendTransactionParams => {
+    const tx: SignAndSendTransactionParams = {
         receiverId: contractId,
         actions: [{
             type: 'FunctionCall',
@@ -72,8 +81,9 @@ export const ftTransferCall = ({
             }
         }]
     }
+
     if (returnTransaction) return tx
-    return execute({ account, transactions})
+    return execute({ account, transactions: [tx]})
 }
 
 export const nftTransferCall = async ({
@@ -82,13 +92,13 @@ export const nftTransferCall = async ({
     receiverId,
     tokenIds,
     msg,
-}) => {
-    const responses = []
+}: NFTTransferCallParams): Promise<Array<FinalExecutionOutcome[]>> => {
+    const responses: Array<FinalExecutionOutcome[]> = []
 
     /// TODO batch calls
 
     for (let i = 0; i < tokenIds.length; i++) {
-        responses.push(await execute({
+        responses.push(<FinalExecutionOutcome[]> await execute({
             account,
             transactions: [{
                 receiverId: contractId,
@@ -112,26 +122,30 @@ export const nftTransferCall = async ({
 }
 
 /// sequentially execute all transactions
-const signAndSendTransactions = async (account, txs) => {
-	const responses = []
+const signAndSendTransactions = async (account: Account, txs: SignAndSendTransactionOptions[]): Promise<FinalExecutionOutcome[]> => {
+	const responses: FinalExecutionOutcome[] = []
     for (let i = 0; i < txs.length; i++) {
-		responses.push(await account.signAndSendTransaction(txs[i]))
+        // @ts-ignore
+        // near-api-js marks this method as protected.
+        // Reference: https://github.com/near/wallet-selector/blob/7f9f8598459cffb80583c2a83c387c3d5c2f4d5d/packages/my-near-wallet/src/lib/my-near-wallet.spec.ts#L31
+		responses.push(await account.signAndSendTransaction(txs[i]));
 	}
     return responses
 }
 
-export const transformTransactions = (transactions) => transactions.map(({ receiverId, actions: _actions }) => {
+export const transformTransactions = (transactions: SignAndSendTransactionParams[]): SignAndSendTransactionOptions[] => transactions.map(({ receiverId, actions: _actions }) => {
     const actions = _actions.map((action) =>
         createAction(action)
     );
-    return ({
-        receiverId,
+    let txnOption: SignAndSendTransactionOptions = {
+        receiverId: receiverId as string,
         actions
-    });
+    };
+    return (txnOption);
 });
 
 // reference: https://github.com/near/wallet-selector/blob/d09f69e50df05c8e5f972beab4f336d7cfa08c65/packages/wallet-utils/src/lib/create-action.ts
-const createAction = (action) => {
+const createAction = (action: Action): transactions.Action => {
 	switch (action.type) {
 		case "CreateAccount":
 			return transactions.createAccount();
@@ -201,8 +215,8 @@ export const estimateRequiredDeposit = async ({
     keyStorage = parseNearAmount("0.0065"),
     fcData,
     ftData,
-}) => {
-    const numKeysBN = new BN(numKeys)
+}: EstimatorParams): Promise<string>  => {
+    const numKeysBN: BN = new BN(numKeys)
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
     // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
@@ -210,10 +224,10 @@ export const estimateRequiredDeposit = async ({
     let actualAllowance = estimatePessimisticAllowance(attachedGas);
     // console.log('actualAllowance: ', actualAllowance.toString())
 
-    let totalAllowance = actualAllowance.mul(numKeysBN);
+    let totalAllowance: BN  = actualAllowance.mul(numKeysBN);
     // console.log('totalAllowance: ', totalAllowance.toString())
 
-    let totalAccessKeyStorage = ACCESS_KEY_STORAGE.mul(numKeysBN);
+    let totalAccessKeyStorage: BN  = ACCESS_KEY_STORAGE.mul(numKeysBN);
     // console.log('totalAccessKeyStorage: ', totalAccessKeyStorage.toString())
 
     let {numNoneFcs, depositRequiredForFcDrops} = getNoneFcsAndDepositRequired(fcData, usesPerKey);
@@ -225,7 +239,7 @@ export const estimateRequiredDeposit = async ({
 
     // console.log('totalDepositsForFc: ', totalDepositsForFc.toString())
 
-    let requiredDeposit = totalRequiredStorage
+    let requiredDeposit: BN  = totalRequiredStorage
         .add(totalAllowance)
         .add(totalAccessKeyStorage)
         .add(totalDeposits)
@@ -233,8 +247,8 @@ export const estimateRequiredDeposit = async ({
     
     // console.log('requiredDeposit B4 FT costs: ', requiredDeposit.toString())
     
-    if (ftData.contract_id != null) {
-        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contract_id || ftData.contractId);
+    if (ftData?.contractId != null) {
+        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contractId || ftData.contractId);
         requiredDeposit = requiredDeposit.add(new BN(extraFtCosts));
 
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
@@ -244,7 +258,7 @@ export const estimateRequiredDeposit = async ({
 };
 
 // Estimate the amount of allowance required for a given attached gas.
-const estimatePessimisticAllowance = (attachedGas) => {
+const estimatePessimisticAllowance = (attachedGas: number): BN => {
     if (typeof attachedGas !== 'number') attachedGas = parseInt(attachedGas)
     // Get the number of CCCs you can make with the attached GAS
     let numCCCs = Math.floor(attachedGas / GAS_PER_CCC);
@@ -255,7 +269,7 @@ const estimatePessimisticAllowance = (attachedGas) => {
 
     let requiredGas = (attachedGas + RECEIPT_GAS_COST) * powOutcome + RECEIPT_GAS_COST;
     // console.log('requiredGas: ', requiredGas)
-    let requiredAllowance = new BN(requiredGas).mul(new BN(YOCTO_PER_GAS));
+    let requiredAllowance: BN = new BN(requiredGas).mul(new BN(YOCTO_PER_GAS));
     // console.log('requiredAllowance: ', requiredAllowance.toString())
     return requiredAllowance;
 };
@@ -294,7 +308,7 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
     for (let i = 0; i < numMethodData; i++) {
         let methodData = fcData.methods[i];
         let isNoneFc = methodData == null;
-        numNoneFcs += isNoneFc;
+        numNoneFcs += isNoneFc ? 1 : 0;
 
         if (!isNoneFc) {
             // Keep track of the total attached deposit across all methods in the method data
@@ -314,11 +328,11 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
 };
 
 // Estimate the amount of allowance required for a given attached gas.
-const getFtCosts = async (near, numKeys, usesPerKey, ftContract) => {
+const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftContract: string): Promise<string> => {
     const viewAccount = await near.account("foo");
-    const storageBalanceBounds = await viewAccount.viewFunction(ftContract, "storage_balance_bounds", {}); 
+    const {min} = await viewAccount.viewFunction(ftContract, "storage_balance_bounds", {}); 
     // console.log('storageBalanceBounds: ', storageBalanceBounds)
-    let costs = new BN(storageBalanceBounds.min).mul(new BN(numKeys)).mul(new BN(usesPerKey)).add(new BN(storageBalanceBounds.min));
+    let costs: BN = new BN(min).mul(new BN(numKeys)).mul(new BN(usesPerKey)).add(new BN(min));
     // console.log('costs: ', costs.toString());
     return costs.toString();
 };

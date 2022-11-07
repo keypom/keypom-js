@@ -14,9 +14,11 @@
   "dependencies": {
     "@near-wallet-selector/core": "^7.1.0",
     "ava": "^4.3.3",
+    "bn.js": "^5.2.1",
     "dotenv": "^16.0.3",
     "near-api-js": "^0.44.2",
-    "near-seed-phrase": "^0.2.0"
+    "near-seed-phrase": "^0.2.0",
+    "typescript": "^4.8.4"
   },
   "ava": {
     "require": [
