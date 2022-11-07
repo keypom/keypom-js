@@ -1,8 +1,5 @@
-import { BrowserWalletBehaviour, BrowserWalletSignAndSendTransactionsParams, SignAndSendTransactionParams, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account, Connection, Near } from "near-api-js";
-import { KeyStore } from 'near-api-js/lib/key_stores';
-import { KeyPairEd25519 } from 'near-api-js/lib/utils';
-export interface NearAccount {
+import { BrowserWalletBehaviour } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+export interface Account {
     accountId: string;
     signAndSendTransaction: () => {};
 }
@@ -21,36 +18,6 @@ export interface InitKeypomParams {
     near: any;
     network: string;
     funder?: Funder;
-}
-export interface ExecuteParams {
-    transactions: SignAndSendTransactionParams[] | BrowserWalletSignAndSendTransactionsParams;
-    account: Account;
-    wallet?: Wallet;
-    fundingAccount?: Account;
-}
-export interface FTTransferCallParams {
-    account: Account;
-    contractId: string;
-    args: object;
-    returnTransaction: boolean;
-}
-export interface NFTTransferCallParams {
-    account: Account;
-    contractId: string;
-    receiverId: string;
-    tokenIds: string[];
-    msg: string | null;
-}
-export interface EstimatorParams {
-    near: Near;
-    depositPerUse: string;
-    numKeys: number;
-    usesPerKey: number;
-    attachedGas: number;
-    storage?: string;
-    keyStorage?: string;
-    fcData?: null;
-    ftData?: FTData;
 }
 export interface DropConfig {
     usesPerKey?: number;
@@ -72,6 +39,17 @@ export interface NFTData {
     senderId?: string;
     tokenIds?: string[];
 }
+export interface Method {
+    receiverId: string;
+    methodName: string;
+    args: string;
+    attachedDeposit: string;
+    accountIdField: string;
+    dropIdField: string;
+}
+export interface FCData {
+    methods: Method[][];
+}
 export interface CreateDropParams {
     account: Account;
     wallet?: BrowserWalletBehaviour;
@@ -85,23 +63,5 @@ export interface CreateDropParams {
     config?: DropConfig;
     ftData: FTData;
     nftData: NFTData;
-    fcData: null;
-}
-export interface EnvVars {
-    near: Near;
-    connection: Connection;
-    keyStore: KeyStore;
-    logger: any;
-    networkId: string;
-    fundingAccount: Account;
-    contractAccount: Account;
-    viewAccount: any;
-    fundingKey: KeyPairEd25519;
-    gas: string;
-    gas200: string;
-    attachedGas: string;
-    contractId: string;
-    receiverId: string;
-    getAccount: any;
-    execute: any;
+    fcData?: FCData;
 }
