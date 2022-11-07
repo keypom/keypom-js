@@ -15,9 +15,9 @@ const {
 } = nearAPI;
 
 import BN from 'bn.js';
-import { KeyPairEd25519 } from "near-api-js/lib/utils";
+const { subtle } = require('crypto').webcrypto;
+
 const { generateSeedPhrase } = require("near-seed-phrase");
-const crypto = require("crypto");
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
 const GAS_PER_CCC: number = 5000000000000; // 5 TGas
@@ -34,11 +34,11 @@ export const snakeToCamel = (s) =>
 
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
-const hashBuf = (str: string): string => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<KeyPairEd25519> => {
-	const hash: string = await hashBuf(`${rootKey}_${meta}_${nonce}`)
+const hashBuf = (str: string): Promise<ArrayBuffer> => subtle.digest('SHA-256', new TextEncoder().encode(str))
+export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<typeof KeyPair> => {
+	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)
-	return new KeyPairEd25519(secretKey)
+	return KeyPair.fromString(secretKey)
 }
 
 export const execute = async ({

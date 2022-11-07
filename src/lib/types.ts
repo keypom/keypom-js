@@ -1,7 +1,7 @@
 import { BrowserWalletBehaviour, BrowserWalletSignAndSendTransactionsParams, SignAndSendTransactionParams, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
-import { KeyPairEd25519 } from 'near-api-js/lib/utils';
+import { KeyPair, KeyPairEd25519 } from 'near-api-js/lib/utils';
 
 /// Initialization
 
@@ -59,7 +59,7 @@ export interface EstimatorParams {
     attachedGas: number,
     storage?: string,
     keyStorage?: string,
-    fcData?: null,
+    fcData?: FCData,
     ftData?: FTData,
 }
 
@@ -130,8 +130,8 @@ export interface CreateDropParams {
 	depositPerUseYocto?: string,
 	metadata?: string,
 	config?: DropConfig,
-	ftData: FTData,
-	nftData: NFTData,
+	ftData?: FTData,
+	nftData?: NFTData,
 	fcData?: FCData,
 }
 
@@ -144,9 +144,9 @@ export interface EnvVars {
 	fundingAccount: Account,
 	contractAccount: Account,
 	viewAccount: any,
-	fundingKey: KeyPairEd25519,
+	fundingKey: KeyPair,
 	gas: string,
-	gas200: string,
+	gas300: string,
 	attachedGas: string,
 	contractId: string,
 	receiverId: string,

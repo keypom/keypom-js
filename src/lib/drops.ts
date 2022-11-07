@@ -51,6 +51,8 @@ export const createDrop = async ({
 	if (numKeys) {
 		pubKeys = []
 		for (var i = 0; i < numKeys; i++) {
+			// @ts-ignore
+			// Not sure why KeyPair doesn't expose secret key param
 			const keyPair = await genKey((fundingAccount ? fundingKey.secretKey : accountRootKey) as string, dropId, i)
 			keyPairs.push(keyPair)
 			pubKeys.push(keyPair.getPublicKey().toString());
@@ -74,10 +76,10 @@ export const createDrop = async ({
 		depositPerUse: depositPerUseYocto,
 		numKeys: numKeys as number,
 		usesPerKey: finalConfig.uses_per_key,
-		attachedGas,
+		attachedGas: parseInt(attachedGas),
 		storage: getStorageBase({ nftData, fcData }),
 		ftData,
-		fcData: null,
+		fcData,
 	})
 
 	console.log('requiredDeposit', formatNearAmount(requiredDeposit.toString()))

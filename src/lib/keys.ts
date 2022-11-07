@@ -50,7 +50,6 @@ export const addKeys = async ({
 		attachedGas: required_gas,
 		storage: parseNearAmount('0.01') as string,
 		ftData,
-		fcData: null,
 	})
 
 	const transactions: any[] = []
