@@ -1,6 +1,6 @@
 {
   "name": "keypom-js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Keypom JS SDK",
   "main": "./lib/index.js",
   "scripts": {
