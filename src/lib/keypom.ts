@@ -6,7 +6,7 @@ const {
 	keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
 } = nearAPI;
 
-import { InitKeypomParams } from "./types";
+import { EnvVars, InitKeypomParams } from "./types";
 import { parseSeedPhrase } from 'near-seed-phrase'
 import {
 	execute as _execute,
@@ -37,7 +37,7 @@ let receiverId = contractId
 
 let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey;
 
-export const getEnv = () => ({
+export const getEnv = (): EnvVars  => ({
 	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey,
 	gas, gas200, attachedGas, contractId, receiverId, getAccount, execute,
 })

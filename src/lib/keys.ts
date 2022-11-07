@@ -48,7 +48,7 @@ export const addKeys = async ({
 		numKeys,
 		usesPerKey: uses_per_key,
 		attachedGas: required_gas,
-		storage: parseNearAmount('0.01'),
+		storage: parseNearAmount('0.01') as string,
 		ftData,
 		fcData: null,
 	})

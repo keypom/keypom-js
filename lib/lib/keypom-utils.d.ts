@@ -1,46 +1,13 @@
-export const ATTACHED_GAS_FROM_WALLET: 100000000000000;
-export function key2str(v: any): any;
-export function genKey(rootKey: any, meta: any, nonce: any): Promise<nearAPI.utils.key_pair.KeyPair>;
-export function execute({ transactions, account, wallet, fundingAccount, }: {
-    transactions: any;
-    account: any;
-    wallet: any;
-    fundingAccount: any;
-}): Promise<any>;
-export function ftTransferCall({ account, contractId, args, returnTransaction, }: {
-    account: any;
-    contractId: any;
-    args: any;
-    returnTransaction?: boolean | undefined;
-}): Promise<any> | {
-    receiverId: any;
-    actions: {
-        type: string;
-        params: {
-            methodName: string;
-            args: any;
-            gas: string;
-            deposit: string;
-        };
-    }[];
-};
-export function nftTransferCall({ account, contractId, receiverId, tokenIds, msg, }: {
-    account: any;
-    contractId: any;
-    receiverId: any;
-    tokenIds: any;
-    msg: any;
-}): Promise<any[]>;
-export function transformTransactions(transactions: any): any;
-export function estimateRequiredDeposit({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: {
-    near: any;
-    depositPerUse: any;
-    numKeys: any;
-    usesPerKey: any;
-    attachedGas: any;
-    storage?: string | null | undefined;
-    keyStorage?: string | null | undefined;
-    fcData: any;
-    ftData: any;
-}): Promise<any>;
-import nearAPI = require("near-api-js");
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { SignAndSendTransactionParams } from "@near-wallet-selector/core/lib/wallet";
+import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
+import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+import { KeyPairEd25519 } from "near-api-js/lib/utils";
+export declare const ATTACHED_GAS_FROM_WALLET: number;
+export declare const key2str: (v: any) => any;
+export declare const genKey: (rootKey: string, meta: string, nonce: number) => Promise<KeyPairEd25519>;
+export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[]>;
+export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | SignAndSendTransactionParams;
+export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, }: NFTTransferCallParams) => Promise<Array<FinalExecutionOutcome[]>>;
+export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
+export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;

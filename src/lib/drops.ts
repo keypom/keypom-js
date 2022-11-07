@@ -15,6 +15,7 @@ import {
 	ftTransferCall,
 	nftTransferCall,
 } from "./keypom-utils";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 
 export const createDrop = async ({
 	account,
@@ -48,7 +49,7 @@ export const createDrop = async ({
 	if (numKeys) {
 		pubKeys = []
 		for (var i = 0; i < numKeys; i++) {
-			const keyPair = await genKey(fundingAccount ? fundingKey.secretKey : accountRootKey, dropId, i)
+			const keyPair = await genKey((fundingAccount ? fundingKey.secretKey : accountRootKey) as string, dropId, i)
 			keyPairs.push(keyPair)
 			pubKeys.push(keyPair.getPublicKey().toString());
 		}
@@ -69,12 +70,12 @@ export const createDrop = async ({
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
 		depositPerUse: depositPerUseYocto,
-		numKeys,
+		numKeys: numKeys as number,
 		usesPerKey: finalConfig.uses_per_key,
-		attachedGas,
-		storage: nftData.contractId ? parseNearAmount('0.05') : parseNearAmount('0.01'),
+		attachedGas: parseInt(attachedGas),
+		storage: (nftData.contractId ? parseNearAmount('0.05') : parseNearAmount('0.01')) as string,
 		ftData,
-		fcData,
+		fcData: null,
 	})
 
 	const transactions: any[] = []
@@ -127,7 +128,7 @@ export const createDrop = async ({
 	if (tokenIds && tokenIds?.length > 0) {
 		const nftResponses = await nftTransferCall({
 			account: getAccount({ account, wallet }),
-			contractId: nftData.contractId,
+			contractId: nftData.contractId as string,
 			receiverId: contractId,
 			tokenIds,
 			msg: dropId.toString(),
@@ -181,7 +182,7 @@ export const deleteDrops = async ({
 
 	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys, registered_uses }) => {
 
-		const responses: any[] = []
+		const responses: Array<void | FinalExecutionOutcome[]> = []
 
 		if (registered_uses !== 0 && (drop_type.FungibleToken || drop_type.NonFungibleToken)) {
 			responses.push(...(await execute({
