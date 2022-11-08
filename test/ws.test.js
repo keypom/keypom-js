@@ -460,6 +460,23 @@ test('create account and claim nft drop', async (t) => {
 	t.is(drops[2].keys.length, 1)
 });
 
+test('claim fc drop', async (t) => {
+
+	if (!drops.length) return t.true(false)
+
+	await claim({
+		accountId,
+		secretKey: keyPairs.fc[0].secretKey
+	})
+
+	drops = await getDrops({
+		accountId
+	})
+
+	// the fc drop, having only 1 key, was removed automatically
+	t.is(drops.length, 3)
+});
+
 test('delete 1 key from simple drop', async (t) => {
 
 	if (!drops.length) return t.true(false)
