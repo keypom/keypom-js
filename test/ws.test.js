@@ -103,8 +103,6 @@ test('init', async (t) => {
 	keyStore.setKey(networkId, accountId, testKeyPair)
 	fundingAccount = new Account(connection, accountId)
 
-	console.log(keyStore)
-
 	t.true(true)
 });
 
@@ -114,7 +112,7 @@ test('delete drops', async (t) => {
 		accountId
 	})
 
-	console.log(drops)
+	console.log('drops', drops)
 
 	if (!drops.length) return t.true(true)
 

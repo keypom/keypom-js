@@ -76,6 +76,7 @@ export const initKeypom = async ({
 	viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args)
 
 	contractAccount = new Account(connection, contractId)
+
 	if (funder) {
 		let { accountId, secretKey, seedPhrase } = funder
 		if (seedPhrase) {

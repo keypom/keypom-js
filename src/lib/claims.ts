@@ -5,7 +5,7 @@ const {
 
 import { getEnv } from "./keypom";
 
-export const claim = ({
+export const claim = async ({
 	secretKey,
 	accountId,
 	newAccountId,
@@ -17,7 +17,7 @@ export const claim = ({
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)
-	keyStore.setKey(networkId, contractId, keyPair)
+	await keyStore.setKey(networkId, contractId, keyPair)
 
 	const transactions: any[] = [{
 		receiverId,

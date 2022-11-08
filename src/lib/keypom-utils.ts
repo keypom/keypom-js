@@ -216,7 +216,7 @@ export const estimateRequiredDeposit = async ({
     fcData,
     ftData,
 }: EstimatorParams): Promise<string>  => {
-    const numKeysBN: BN = new BN(numKeys)
+    const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
     // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
@@ -253,6 +253,7 @@ export const estimateRequiredDeposit = async ({
 
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
     }
+
 
     return requiredDeposit.toString();
 };

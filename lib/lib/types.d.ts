@@ -89,7 +89,7 @@ export interface CreateDropParams {
     accountRootKey?: string;
     dropId?: string;
     publicKeys?: string[];
-    numKeys?: number | string;
+    numKeys?: number;
     depositPerUseNEAR?: Number;
     depositPerUseYocto?: string;
     metadata?: string;

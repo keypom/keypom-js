@@ -45,19 +45,20 @@ export const createDrop = async ({
 	}
 	if (!depositPerUseYocto) depositPerUseYocto = '0'
 	if (!dropId) dropId = Date.now().toString()
+
 	/// key generation
-	let keyPairs: any[] = [], pubKeys = publicKeys || [];
-	numKeys = numKeys || pubKeys.length
-	if (numKeys) {
-		pubKeys = []
-		for (var i = 0; i < numKeys; i++) {
-			// @ts-ignore
-			// Not sure why KeyPair doesn't expose secret key param
-			const keyPair = await genKey((fundingAccount ? fundingKey.secretKey : accountRootKey) as string, dropId, i)
-			keyPairs.push(keyPair)
-			pubKeys.push(keyPair.getPublicKey().toString());
-		}
-	}
+	// let keyPairs: any[] = [], pubKeys = publicKeys || [];
+	// numKeys = numKeys || pubKeys.length
+	// if (numKeys) {
+	// 	pubKeys = []
+	// 	for (var i = 0; i < numKeys; i++) {
+	// 		// @ts-ignore
+	// 		// Not sure why KeyPair doesn't expose secret key param
+	// 		const keyPair = await genKey((fundingAccount ? fundingKey.secretKey : accountRootKey) as string, dropId, i)
+	// 		keyPairs.push(keyPair)
+	// 		pubKeys.push(keyPair.getPublicKey().toString());
+	// 	}
+	// }
 
 	const finalConfig = {
 		uses_per_key: config.usesPerKey || 1,
@@ -74,7 +75,7 @@ export const createDrop = async ({
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
 		depositPerUse: depositPerUseYocto,
-		numKeys: numKeys as number,
+		numKeys: publicKeys?.length || 1,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas: parseInt(attachedGas),
 		storage: getStorageBase({ nftData, fcData }),
@@ -94,7 +95,7 @@ export const createDrop = async ({
 				methodName: 'create_drop',
 				args: {
 					drop_id: dropId,
-					public_keys: pubKeys,
+					public_keys: publicKeys || [],
 					deposit_per_use: depositPerUseYocto,
 					config: finalConfig,
 					metadata,
@@ -153,7 +154,7 @@ export const createDrop = async ({
 		responses = responses.concat(nftResponses)
 	}
 
-	return { responses, keyPairs }
+	return { responses }
 }
 
 export const getDrops = async ({ accountId }) => {

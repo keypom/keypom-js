@@ -3,4 +3,4 @@ export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey,
     accountId: any;
     newAccountId: any;
     newPublicKey: any;
-}) => any;
+}) => Promise<any>;
