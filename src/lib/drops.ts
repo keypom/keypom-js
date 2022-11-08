@@ -62,13 +62,13 @@ export const createDrop = async ({
 
 	const finalConfig = {
 		uses_per_key: config.usesPerKey || 1,
-		delete_on_empty: config.usesPerKey || true,
-		auto_withdraw: config.usesPerKey || true,
-		start_timestamp: config.usesPerKey,
-		throttle_timestamp: config.usesPerKey,
-		on_claim_refund_deposit: config.usesPerKey,
-		claim_permission: config.usesPerKey,
-		drop_root: config.usesPerKey,
+		delete_on_empty: config.deleteOnEmpty || true,
+		auto_withdraw: config.autoWithdraw || true,
+		start_timestamp: config.startTimestamp,
+		throttle_timestamp: config.throttleTimestamp,
+		on_claim_refund_deposit: config.onClaimRefundDeposit,
+		claim_permission: config.claimPermission,
+		drop_root: config.dropRoot,
 	}
 
 	/// estimate required deposit
