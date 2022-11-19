@@ -42,6 +42,7 @@ export const genKey = async (rootKey: string, meta: string, nonce: number): Prom
 	return KeyPair.fromString(secretKey)
 }
 
+/// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys
 export const hasDeposit = ({
     accountId,
     transactions,
@@ -71,10 +72,6 @@ export const execute = async ({
 }: ExecuteParams): Promise<void | FinalExecutionOutcome[]> => {
 	/// instance of walletSelector.wallet()
 	if (wallet) {
-        hasDeposit({
-            accountId: wallet.accountId,
-            transactions,
-        })
         // @ts-ignore
         // SignAndSendTransactionOptions[] | BrowserWalletSignAndSendTransactionsParams can't be used
 		return await wallet.signAndSendTransactions(transactions)
@@ -85,11 +82,6 @@ export const execute = async ({
 	if (!nearAccount) {
 		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
 	}
-    
-    hasDeposit({
-        accountId: nearAccount.accountId,
-        transactions,
-    })
 
 	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
 }
