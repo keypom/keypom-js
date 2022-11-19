@@ -16,7 +16,6 @@ const {
 
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
-const { subtle } = require('crypto').webcrypto;
 
 const { generateSeedPhrase } = require("near-seed-phrase");
 
@@ -35,7 +34,7 @@ export const snakeToCamel = (s) =>
 
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
-const hashBuf = (str: string): Promise<ArrayBuffer> => subtle.digest('SHA-256', new TextEncoder().encode(str))
+const hashBuf = (str: string): Promise<ArrayBuffer> => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
 export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<typeof KeyPair> => {
 	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)
