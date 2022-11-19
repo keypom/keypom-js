@@ -1,6 +1,6 @@
 {
   "name": "keypom-js",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Keypom JS SDK",
   "main": "./lib/index.js",
   "scripts": {
@@ -23,6 +23,6 @@
   "ava": {
     "require": [
       "dotenv/config"
-    ]
+      ]
   }
 }

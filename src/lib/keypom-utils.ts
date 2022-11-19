@@ -73,7 +73,7 @@ export const execute = async ({
 	if (wallet) {
         // @ts-ignore
         // SignAndSendTransactionOptions[] | BrowserWalletSignAndSendTransactionsParams can't be used
-		return await wallet.signAndSendTransactions(transactions)
+		return await wallet.signAndSendTransactions({ transactions })
 	}
 
 	/// instance of NEAR Account (backend usage)
