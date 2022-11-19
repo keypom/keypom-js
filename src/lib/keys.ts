@@ -21,6 +21,7 @@ export const addKeys = async ({
 	drop,
 	publicKeys,
 	nftTokenIds,
+	hasBalance,
 }) => {
 
 	const {
@@ -65,7 +66,7 @@ export const addKeys = async ({
 					public_keys: publicKeys,
 				},
 				gas,
-				deposit: requiredDeposit,
+				deposit: !hasBalance ? requiredDeposit : undefined,
 			}
 		}]
 	})

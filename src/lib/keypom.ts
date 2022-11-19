@@ -50,6 +50,7 @@ export const initKeypom = async ({
 	near: _near,
 	network,
 	funder,
+	keypomContractId,
 }: InitKeypomParams) => {
 
 	if (_near) {
@@ -68,8 +69,11 @@ export const initKeypom = async ({
 	networkId = near.config.networkId
 
 	if (networkId === 'mainnet') {
-		contractId = 'v1.keypom.near'
-		receiverId = 'v1.keypom.near'
+		contractId = receiverId = 'v1.keypom.near'
+	}
+
+	if (keypomContractId) {
+		contractId = receiverId = keypomContractId
 	}
 
 	viewAccount = new Account(connection, networks[networkId].viewAccountId)

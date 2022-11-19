@@ -32,6 +32,7 @@ export const createDrop = async ({
 	ftData = {},
 	nftData = {},
 	fcData,
+	hasBalance = false,
 }: CreateDropParams) => {
 
 	const {
@@ -82,9 +83,7 @@ export const createDrop = async ({
 		ftData,
 		fcData,
 	})
-
-	console.log('requiredDeposit', formatNearAmount(requiredDeposit.toString()))
-
+	
 	const transactions: any[] = []
 
 	transactions.push({
@@ -122,7 +121,7 @@ export const createDrop = async ({
 					}) : undefined,
 				},
 				gas,
-				deposit: requiredDeposit,
+				deposit: !hasBalance ? requiredDeposit : undefined,
 			}
 		}]
 	})

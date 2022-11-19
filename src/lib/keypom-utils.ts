@@ -15,6 +15,7 @@ const {
 } = nearAPI;
 
 import BN from 'bn.js';
+import { getEnv } from "./keypom";
 const { subtle } = require('crypto').webcrypto;
 
 const { generateSeedPhrase } = require("near-seed-phrase");
@@ -41,6 +42,27 @@ export const genKey = async (rootKey: string, meta: string, nonce: number): Prom
 	return KeyPair.fromString(secretKey)
 }
 
+export const hasDeposit = ({
+    accountId,
+    transactions,
+}) => {
+    const { contractId, viewAccount } = getEnv()
+
+    const totalDeposit = transactions.reduce((a, c) =>
+        a.add(c.actions.reduce((a, c) => a.add(new BN(c.deposit || '0')), new BN('0')))
+    , new BN('0'))
+
+	const userBalance = viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
+
+    if (new BN(userBalance.gt(totalDeposit))) {
+        transactions
+            .filter(({ receiverId }) => contractId === receiverId)
+            .forEach((tx) => tx.actions.forEach((a) => {
+                if (/create_drop|add_keys/gi.test(a.methodName)) delete a.deposit
+            }))
+    }
+}
+
 export const execute = async ({
 	transactions,
 	account,
@@ -49,6 +71,10 @@ export const execute = async ({
 }: ExecuteParams): Promise<void | FinalExecutionOutcome[]> => {
 	/// instance of walletSelector.wallet()
 	if (wallet) {
+        hasDeposit({
+            accountId: wallet.accountId,
+            transactions,
+        })
         // @ts-ignore
         // SignAndSendTransactionOptions[] | BrowserWalletSignAndSendTransactionsParams can't be used
 		return await wallet.signAndSendTransactions(transactions)
@@ -59,6 +85,11 @@ export const execute = async ({
 	if (!nearAccount) {
 		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
 	}
+    
+    hasDeposit({
+        accountId: nearAccount.accountId,
+        transactions,
+    })
 
 	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
 }

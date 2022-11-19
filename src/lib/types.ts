@@ -26,6 +26,7 @@ export interface Funder {
 export interface InitKeypomParams {
 	near: any;
 	network: string;
+	keypomContractId: string;
 	funder?: Funder;
 }
 
@@ -133,6 +134,7 @@ export interface CreateDropParams {
 	ftData?: FTData,
 	nftData?: NFTData,
 	fcData?: FCData,
+	hasBalance?: boolean,
 }
 
 export interface EnvVars {
