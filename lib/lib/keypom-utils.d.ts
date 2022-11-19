@@ -7,6 +7,10 @@ export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
 export declare const genKey: (rootKey: string, meta: string, nonce: number) => Promise<typeof KeyPair>;
+export declare const hasDeposit: ({ accountId, transactions, }: {
+    accountId: any;
+    transactions: any;
+}) => void;
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[]>;
 export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | SignAndSendTransactionParams;
 export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, }: NFTTransferCallParams) => Promise<Array<FinalExecutionOutcome[]>>;
