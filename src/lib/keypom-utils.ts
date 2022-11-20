@@ -143,6 +143,27 @@ export const nftTransferCall = async ({
     return responses
 }
 
+/// https://github.com/near/near-api-js/blob/7f16b10ece3c900aebcedf6ebc660cc9e604a242/packages/near-api-js/src/utils/format.ts#L53
+export const parseFTAmount = (amt: string, decimals: number): string => {
+    amt = amt.replace(/,/g, '').trim();
+    const split = amt.split('.');
+    const wholePart = split[0];
+    const fracPart = split[1] || '';
+    if (split.length > 2 || fracPart.length > decimals) {
+        throw new Error(`Cannot parse '${amt}' as NEAR amount`);
+    }
+    return trimLeadingZeroes(wholePart + fracPart.padEnd(decimals, '0'));
+}
+
+const trimLeadingZeroes = (value: string): string => {
+    value = value.replace(/^0+/, '');
+    if (value === '') {
+        return '0';
+    }
+    return value;
+}
+
+
 /// sequentially execute all transactions
 const signAndSendTransactions = async (account: Account, txs: SignAndSendTransactionOptions[]): Promise<FinalExecutionOutcome[]> => {
 	const responses: FinalExecutionOutcome[] = []

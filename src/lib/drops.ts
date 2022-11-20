@@ -15,6 +15,7 @@ import {
 	ftTransferCall,
 	nftTransferCall,
 	getStorageBase,
+	parseFTAmount,
 } from "./keypom-utils";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 
@@ -36,7 +37,7 @@ export const createDrop = async ({
 }: CreateDropParams) => {
 
 	const {
-		near, fundingAccount, fundingKey,
+		near, viewAccount,
 		gas, attachedGas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
 
@@ -83,6 +84,14 @@ export const createDrop = async ({
 		ftData,
 		fcData,
 	})
+
+	if (ftData?.balancePerUse) {
+		const metadata = await viewAccount.viewFunction2({
+			contractId: ftData.contractId,
+			methodName: 'ft_metadata',
+		})
+		ftData.balancePerUse = parseFTAmount(ftData.balancePerUse, metadata.decimals);
+	}
 	
 	const transactions: any[] = []
 
