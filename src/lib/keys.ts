@@ -38,8 +38,8 @@ export const addKeys = async ({
 		deposit_per_use,
 		config: { uses_per_key },
 		drop_type: {
-			FungibleToken: ftData = {},
-			NonFungibleToken: nftData = {}
+			ft: ftData = {},
+			nft: nftData = {}
 		}
 	} = drop
 
@@ -104,7 +104,8 @@ export const deleteKeys = async ({
 	account,
 	wallet,
 	drop,
-	keys
+	keys,
+	withdrawBalance = false,
 }) => {
 
 	const {
@@ -112,10 +113,13 @@ export const deleteKeys = async ({
 		gas, attachedGas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
 
-	const { drop_id, drop_type } = drop
+	const { drop_id } = drop
+	if (!keys) keys = drop.keys
+
+	console.log('delete keys', drop)
 
 	const actions: any[] = []
-	if (drop_type.FungibleToken || drop_type.NonFungibleToken) {
+	if (drop.ft || drop.nft) {
 		actions.push({
 			type: 'FunctionCall',
 			params: {
@@ -137,14 +141,18 @@ export const deleteKeys = async ({
 			},
 			gas: '100000000000000',
 		}
-	}, {
-		type: 'FunctionCall',
-		params: {
-			methodName: 'withdraw_from_balance',
-			args: {},
-			gas: '100000000000000',
-		}
 	})
+	
+	if (withdrawBalance) {
+		actions.push({
+			type: 'FunctionCall',
+			params: {
+				methodName: 'withdraw_from_balance',
+				args: {},
+				gas: '100000000000000',
+			}
+		})
+	}
 
 	const transactions: any[] = [{
 		receiverId,
