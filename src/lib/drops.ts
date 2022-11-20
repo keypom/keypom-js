@@ -135,19 +135,19 @@ export const createDrop = async ({
 		}]
 	})
 
-	if (ftData.contractId && numKeys) {
+	if (ftData.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
 			account: getAccount({ account, wallet }),
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
-				amount: new BN(ftData.balancePerUse).mul(new BN(numKeys)).toString(),
+				amount: new BN(ftData.balancePerUse).mul(new BN(publicKeys.length)).toString(),
 				msg: dropId.toString(),
 			},
 			returnTransaction: true
 		}))
 	}
-
+	
 	let responses = await execute({ transactions, account, wallet })
 
 	const { tokenIds } = nftData
