@@ -98,16 +98,16 @@ export const createDrop = async ({
 					deposit_per_use: depositPerUseYocto,
 					config: finalConfig,
 					metadata,
-					ft_data: ftData.contractId ? ({
+					ft: ftData.contractId ? ({
 						contract_id: ftData.contractId,
 						sender_id: ftData.senderId,
 						balance_per_use: ftData.balancePerUse,
 					}) : undefined,
-					nft_data: nftData.contractId ? ({
+					nft: nftData.contractId ? ({
 						contract_id: nftData.contractId,
 						sender_id: nftData.senderId,
 					}) : undefined,
-					fc_data: fcData?.methods ? ({
+					fc: fcData?.methods ? ({
 						methods: fcData.methods.map((useMethods) => useMethods.map((method) => {
 							const ret: any = {}
 							ret.receiver_id = method.receiverId;
