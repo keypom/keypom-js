@@ -17,7 +17,7 @@ import {
 	getStorageBase,
 	parseFTAmount,
 } from "./keypom-utils";
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
 
 export const createDrop = async ({
 	account,
@@ -40,6 +40,8 @@ export const createDrop = async ({
 		near, viewAccount,
 		gas, attachedGas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
+
+	account = getAccount({ account, wallet })
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -92,11 +94,14 @@ export const createDrop = async ({
 		})
 		ftData.balancePerUse = parseFTAmount(ftData.balancePerUse, metadata.decimals);
 	}
+
+	const deposit = !hasBalance ? requiredDeposit : '0'
 	
-	const transactions: any[] = []
+	let transactions: Transaction[] = []
 
 	transactions.push({
 		receiverId,
+		signerId: account.accountId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
@@ -130,14 +135,14 @@ export const createDrop = async ({
 					}) : undefined,
 				},
 				gas,
-				deposit: !hasBalance ? requiredDeposit : undefined,
+				deposit,
 			}
 		}]
 	})
 
 	if (ftData.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
-			account: getAccount({ account, wallet }),
+			account,
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
@@ -145,22 +150,25 @@ export const createDrop = async ({
 				msg: dropId.toString(),
 			},
 			returnTransaction: true
-		}))
+		}) as Transaction)
 	}
 	
-	let responses = await execute({ transactions, account, wallet })
-
 	const { tokenIds } = nftData
 	if (tokenIds && tokenIds?.length > 0) {
-		const nftResponses = await nftTransferCall({
-			account: getAccount({ account, wallet }),
+		const nftTXs = await nftTransferCall({
+			account,
 			contractId: nftData.contractId as string,
 			receiverId: contractId,
 			tokenIds,
 			msg: dropId.toString(),
-		})
-		responses = responses.concat(nftResponses)
+			returnTransactions: true
+		}) as Transaction[]
+		transactions = transactions.concat(nftTXs)
 	}
+	
+	let responses = await execute({ transactions, account, wallet })
+
+	
 
 	return { responses }
 }

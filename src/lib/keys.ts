@@ -113,13 +113,11 @@ export const deleteKeys = async ({
 		gas, attachedGas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
 
-	const { drop_id } = drop
+	const { drop_id, registered_uses } = drop
 	if (!keys) keys = drop.keys
 
-	console.log('delete keys', drop)
-
 	const actions: any[] = []
-	if (drop.ft || drop.nft) {
+	if ((drop.ft || drop.nft) && registered_uses > 0) {
 		actions.push({
 			type: 'FunctionCall',
 			params: {

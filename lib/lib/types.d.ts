@@ -33,7 +33,7 @@ export interface FTTransferCallParams {
     account: Account;
     contractId: string;
     args: object;
-    returnTransaction: boolean;
+    returnTransaction?: boolean;
 }
 export interface NFTTransferCallParams {
     account: Account;
@@ -41,6 +41,7 @@ export interface NFTTransferCallParams {
     receiverId: string;
     tokenIds: string[];
     msg: string | null;
+    returnTransactions?: boolean;
 }
 export interface EstimatorParams {
     near: Near;

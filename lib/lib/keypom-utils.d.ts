@@ -1,5 +1,5 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { SignAndSendTransactionParams } from "@near-wallet-selector/core/lib/wallet";
+import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
 declare const KeyPair: any;
@@ -12,8 +12,8 @@ export declare const hasDeposit: ({ accountId, transactions, }: {
     transactions: any;
 }) => void;
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[]>;
-export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | SignAndSendTransactionParams;
-export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, }: NFTTransferCallParams) => Promise<Array<FinalExecutionOutcome[]>>;
+export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | Transaction;
+export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
 export declare const getStorageBase: ({ nftData, fcData }: {

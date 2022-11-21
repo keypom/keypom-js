@@ -1,5 +1,5 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { SignAndSendTransactionParams } from "@near-wallet-selector/core/lib/wallet";
+import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
@@ -90,9 +90,10 @@ export const ftTransferCall = ({
     contractId,
     args,
     returnTransaction = false,
-}: FTTransferCallParams): Promise<void | FinalExecutionOutcome[]> | SignAndSendTransactionParams => {
-    const tx: SignAndSendTransactionParams = {
+}: FTTransferCallParams): Promise<void | FinalExecutionOutcome[]> | Transaction => {
+    const tx: Transaction = {
         receiverId: contractId,
+        signerId: account.accountId,
         actions: [{
             type: 'FunctionCall',
             params: {
@@ -114,33 +115,40 @@ export const nftTransferCall = async ({
     receiverId,
     tokenIds,
     msg,
-}: NFTTransferCallParams): Promise<Array<FinalExecutionOutcome[]>> => {
+    returnTransactions = false,
+}: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
     const responses: Array<FinalExecutionOutcome[]> = []
 
     /// TODO batch calls
+    const transactions: Transaction[] = []
 
     for (let i = 0; i < tokenIds.length; i++) {
+        const tx: Transaction = {
+            receiverId: contractId,
+            signerId: account.accountId,
+            actions: [{
+                type: 'FunctionCall',
+                params: {
+                    methodName: 'nft_transfer_call',
+                    args: {
+                        receiver_id: receiverId,
+                        token_id: tokenIds[i],
+                        msg
+                    },
+                    gas: '50000000000000',
+                    deposit: '1',
+                }
+            }]
+        }
+        transactions.push(tx)
+        if (returnTransactions) continue
+
         responses.push(<FinalExecutionOutcome[]> await execute({
             account,
-            transactions: [{
-                receiverId: contractId,
-                actions: [{
-                    type: 'FunctionCall',
-                    params: {
-                        methodName: 'nft_transfer_call',
-                        args: {
-                            receiver_id: receiverId,
-                            token_id: tokenIds[i],
-                            msg
-                        },
-                        gas: '50000000000000',
-                        deposit: '1',
-                    }
-                }]
-            }]
+            transactions,
         }))
     }
-    return responses
+    return returnTransactions ? transactions : responses
 }
 
 /// https://github.com/near/near-api-js/blob/7f16b10ece3c900aebcedf6ebc660cc9e604a242/packages/near-api-js/src/utils/format.ts#L53
