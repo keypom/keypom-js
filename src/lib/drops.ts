@@ -168,8 +168,6 @@ export const createDrop = async ({
 	
 	let responses = await execute({ transactions, account, wallet })
 
-	
-
 	return { responses }
 }
 

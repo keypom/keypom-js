@@ -11,7 +11,7 @@ export declare const hasDeposit: ({ accountId, transactions, }: {
     accountId: any;
     transactions: any;
 }) => void;
-export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[]>;
+export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
 export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | Transaction;
 export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;

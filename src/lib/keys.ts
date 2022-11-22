@@ -25,8 +25,7 @@ export const addKeys = async ({
 }) => {
 
 	const {
-		near, fundingAccount, fundingKey,
-		gas, attachedGas, contractId, receiverId, getAccount, execute,
+		near, gas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
 
 	const numKeys = publicKeys.length
@@ -37,10 +36,8 @@ export const addKeys = async ({
 		required_gas,
 		deposit_per_use,
 		config: { uses_per_key },
-		drop_type: {
-			ft: ftData = {},
-			nft: nftData = {}
-		}
+		ft: ftData = {},
+		nft: nftData = {},
 	} = drop
 
 	let requiredDeposit = await estimateRequiredDeposit({
@@ -109,8 +106,7 @@ export const deleteKeys = async ({
 }) => {
 
 	const {
-		near, fundingAccount, fundingKey,
-		gas, attachedGas, contractId, receiverId, getAccount, execute,
+		receiverId, execute,
 	} = getEnv()
 
 	const { drop_id, registered_uses } = drop

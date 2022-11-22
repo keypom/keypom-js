@@ -1,4 +1,5 @@
-import { BrowserWalletBehaviour, BrowserWalletSignAndSendTransactionsParams, SignAndSendTransactionParams, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
+import { Transaction } from '@near-wallet-selector/core';
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair, KeyPairEd25519 } from 'near-api-js/lib/utils';
@@ -31,7 +32,7 @@ export interface InitKeypomParams {
 }
 
 export interface ExecuteParams {
-	transactions: SignAndSendTransactionParams[] | BrowserWalletSignAndSendTransactionsParams,
+	transactions: Transaction[],
 	account: Account,
 	wallet?: Wallet,
     fundingAccount?: Account,

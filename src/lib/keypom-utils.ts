@@ -68,13 +68,33 @@ export const execute = async ({
 	account,
 	wallet,
     fundingAccount,
-}: ExecuteParams): Promise<void | FinalExecutionOutcome[]> => {
+}: ExecuteParams): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
+
+	const {
+        contractId,
+	} = getEnv()
+
+    let needsRedirect = false;
+    transactions.forEach((tx) => {
+        if (tx.receiverId !== contractId) needsRedirect = true
+        tx.actions.forEach((a) => {
+            const { deposit } = (a as any)?.params
+            if (deposit && deposit !== '0') needsRedirect = true
+        })
+    })
+    
 	/// instance of walletSelector.wallet()
 	if (wallet) {
-        // @ts-ignore
-        // SignAndSendTransactionOptions[] | BrowserWalletSignAndSendTransactionsParams can't be used
-		return await wallet.signAndSendTransactions({ transactions })
-	}
+        if (needsRedirect) return await wallet.signAndSendTransactions({ transactions })
+        // sign txs in serial without redirect
+        const responses: Array<void | FinalExecutionOutcome> = []
+        for (const tx of transactions) {
+            responses.push(await wallet.signAndSendTransaction({
+                actions: tx.actions
+            }))
+        }
+        return responses
+    }
 
 	/// instance of NEAR Account (backend usage)
 	const nearAccount = account || fundingAccount
@@ -106,7 +126,7 @@ export const ftTransferCall = ({
     }
 
     if (returnTransaction) return tx
-    return execute({ account, transactions: [tx]})
+    return execute({ account, transactions: [tx]}) as Promise<void | FinalExecutionOutcome[]>
 }
 
 export const nftTransferCall = async ({
