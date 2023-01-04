@@ -212,11 +212,17 @@ export const deleteDrops = async ({
 		gas, gas300, receiverId, execute,
 	} = getEnv()
 
-	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys, registered_uses }) => {
+	const responses = await Promise.all(drops.map(async ({
+		drop_id,
+		keys,
+		registered_uses,
+		ft,
+		nft,
+	}) => {
 
 		const responses: Array<void | FinalExecutionOutcome[]> = []
 
-		if (registered_uses !== 0 && (drop_type.FungibleToken || drop_type.NonFungibleToken)) {
+		if (registered_uses !== 0 && (ft !== undefined || nft !== undefined)) {
 			responses.push(...(await execute({
 				account, wallet,
 				transactions: [{

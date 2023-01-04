@@ -3,21 +3,27 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+import BN from 'bn.js';
+import { getEnv } from "./keypom";
+import { generateSeedPhrase } from 'near-seed-phrase';
+import * as nearAPI from 'near-api-js';
 
-const nearAPI =  require("near-api-js");
 const {
     KeyPair,
 	utils,
 	utils: {
-		format: { parseNearAmount, formatNearAmount },
+		format: { parseNearAmount },
 	},
 } = nearAPI;
 
-import BN from 'bn.js';
-import { getEnv } from "./keypom";
-
-const { generateSeedPhrase } = require("near-seed-phrase");
+let sha256Hash
+if (typeof crypto === 'undefined') {
+    const nodeCrypto = require('crypto');
+    sha256Hash = (ab) => nodeCrypto.createHash('sha256').update(ab).digest();
+} else {
+    sha256Hash = (ab) => crypto.subtle.digest('SHA-256', ab)
+}
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
 const GAS_PER_CCC: number = 5000000000000; // 5 TGas
@@ -34,8 +40,8 @@ export const snakeToCamel = (s) =>
 
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
-const hashBuf = (str: string): Promise<ArrayBuffer> => crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<typeof KeyPair> => {
+const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
+export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<NearKeyPair> => {
 	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)
 	return KeyPair.fromString(secretKey)
@@ -139,9 +145,9 @@ export const nftTransferCall = async ({
 }: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
     const responses: Array<FinalExecutionOutcome[]> = []
 
-    /// TODO batch calls
     const transactions: Transaction[] = []
 
+    /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
         const tx: Transaction = {
             receiverId: contractId,
@@ -162,6 +168,8 @@ export const nftTransferCall = async ({
         }
         transactions.push(tx)
         if (returnTransactions) continue
+
+        console.log('NFT TRANSACTIONS ****', transactions)
 
         responses.push(<FinalExecutionOutcome[]> await execute({
             account,

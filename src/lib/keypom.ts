@@ -32,7 +32,7 @@ const networks = {
 	}
 }
 
-let contractId = 'v1.keypom.testnet'
+let contractId = 'v1-3.keypom.testnet'
 let receiverId = contractId
 
 let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey;

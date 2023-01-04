@@ -138,12 +138,12 @@ test('create simple drop', async (t) => {
 	// console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
 });
 
 test('create ft drop', async (t) => {
 	/// Auto minting for FT Testing (SDK only handles auto transferring to register keys)
-	const balancePerUse = parseNearAmount('1')
+	const balancePerUse = '1'
 	const { viewAccount } = getEnv()
 	
 	const storageDeposit = await viewAccount.viewFunction2({
@@ -208,7 +208,7 @@ test('create ft drop', async (t) => {
 	// console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
 });
 
 let nftTokenIds = []
@@ -268,7 +268,7 @@ test('create nft drop and add 1 key', async (t) => {
 	// console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
 });
 
 test('create an fc drop and 1 key', async (t) => {
@@ -312,7 +312,7 @@ test('create an fc drop and 1 key', async (t) => {
 	// console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString(), dropId)
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
 });
 
 test('get drops', async (t) => {
