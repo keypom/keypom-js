@@ -169,8 +169,6 @@ export const nftTransferCall = async ({
         transactions.push(tx)
         if (returnTransactions) continue
 
-        console.log('NFT TRANSACTIONS ****', transactions)
-
         responses.push(<FinalExecutionOutcome[]> await execute({
             account,
             transactions,

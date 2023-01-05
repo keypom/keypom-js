@@ -64,15 +64,18 @@ export const createDrop = async ({
 	// 	}
 	// }
 
+	// TODO Update
 	const finalConfig = {
 		uses_per_key: config.usesPerKey || 1,
-		delete_on_empty: config.deleteOnEmpty || true,
-		auto_withdraw: config.autoWithdraw || true,
-		start_timestamp: config.startTimestamp,
-		throttle_timestamp: config.throttleTimestamp,
-		on_claim_refund_deposit: config.onClaimRefundDeposit,
-		claim_permission: config.claimPermission,
-		drop_root: config.dropRoot,
+		usage: {
+			auto_delete_drop: config?.usage?.autoDeleteDrop || false,
+			auto_withdraw: config?.usage?.autoWithdraw || true,
+		}
+		// start_timestamp: config.startTimestamp,
+		// throttle_timestamp: config.throttleTimestamp,
+		// on_claim_refund_deposit: config.onClaimRefundDeposit,
+		// claim_permission: config.claimPermission,
+		// drop_root: config.dropRoot,
 	}
 
 	/// estimate required deposit

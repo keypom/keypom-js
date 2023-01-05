@@ -303,6 +303,12 @@ test('create an fc drop and 1 key', async (t) => {
 
 	const res = await createDrop({
 		dropId,
+		// see claim tests, expected this drop auto deletes when last key is used
+		config: {
+			usage: {
+				autoDeleteDrop: true,
+			}
+		},
 		depositPerUseNEAR: 0.02,
 		publicKeys,
 		fcData

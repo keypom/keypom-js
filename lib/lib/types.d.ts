@@ -56,15 +56,21 @@ export interface EstimatorParams {
     fcData?: FCData;
     ftData?: FTData;
 }
-export interface DropConfig {
-    usesPerKey?: number;
-    deleteOnEmpty?: true;
-    autoWithdraw?: true;
+export interface TimeConfig {
     startTimestamp?: string;
     throttleTimestamp?: string;
-    onClaimRefundDeposit?: boolean;
+}
+export interface UsageConfig {
+    autoDeleteDrop?: true;
+    autoWithdraw?: true;
     claimPermission?: boolean;
-    dropRoot?: string;
+    onClaimRefundDeposit?: boolean;
+}
+export interface DropConfig {
+    usesPerKey?: number;
+    rootAccountId?: string;
+    time?: TimeConfig;
+    usage?: UsageConfig;
 }
 export interface FTData {
     contractId?: string;
