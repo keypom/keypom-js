@@ -57,14 +57,16 @@ export interface EstimatorParams {
     ftData?: FTData;
 }
 export interface TimeConfig {
-    startTimestamp?: string;
-    throttleTimestamp?: string;
+    start: string;
+    end: string;
+    throttle: string;
+    interval: string;
 }
 export interface UsageConfig {
-    autoDeleteDrop?: true;
-    autoWithdraw?: true;
-    claimPermission?: boolean;
-    onClaimRefundDeposit?: boolean;
+    autoDeleteDrop?: boolean;
+    autoWithdraw?: boolean;
+    permissions: string;
+    refundDeposit: boolean;
 }
 export interface DropConfig {
     usesPerKey?: number;
