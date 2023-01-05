@@ -1,5 +1,5 @@
 import { CreateDropParams } from "./types";
-export declare const createDrop: ({ account, wallet, accountRootKey, dropId, publicKeys, numKeys, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, fcData, hasBalance, }: CreateDropParams) => Promise<{
+export declare const createDrop: ({ account, wallet, dropId, publicKeys, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, hasBalance, }: CreateDropParams) => Promise<{
     responses: any;
 }>;
 export declare const getDrops: ({ accountId }: {
