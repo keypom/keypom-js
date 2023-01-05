@@ -36,14 +36,14 @@ let contractBase = 'v1-3.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
 
-let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey;
+let near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKeyPair;
 
 /**
  * 
  * @returns {EnvVars} The environment variables used by the Keypom library.
  */
 export const getEnv = (): EnvVars  => ({
-	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKey,
+	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingKeyPair,
 	gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
 })
 
@@ -159,10 +159,10 @@ export const initKeypom = async ({
 		if (seedPhrase) {
 			secretKey = parseSeedPhrase(seedPhrase).secretKey
 		}
-		fundingKey = KeyPair.fromString(secretKey)
+    fundingKey = KeyPair.fromString(secretKey)
 		await keyStore.setKey(networkId, accountId, fundingKey)
 		fundingAccount = new Account(connection, accountId)
-		fundingAccount.fundingKey = fundingKey
+		fundingAccount.fundingKeyPair = fundingKeyPair
 		return fundingAccount
 	}
 
