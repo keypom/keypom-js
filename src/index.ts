@@ -21,3 +21,4 @@ export {
 	initKeypom,
 	getEnv,
 } from "./lib/keypom";
+export * from "./lib/types";
