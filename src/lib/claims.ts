@@ -13,12 +13,12 @@ export const claim = async ({
 }) => {
 
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, connection,
+		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingKeyPair,
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)
 	await keyStore.setKey(networkId, contractId, keyPair)
-
+	
 	const transactions: any[] = [{
 		receiverId,
 		actions: [{
@@ -42,6 +42,10 @@ export const claim = async ({
 			}
 		}]
 	}]
+	
+	const result = await execute({ transactions, account: contractAccount })
 
-	return execute({ transactions, account: contractAccount })
+	await keyStore.setKey(networkId, contractId, fundingKeyPair)
+
+	return result
 }
