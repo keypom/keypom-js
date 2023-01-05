@@ -174,10 +174,8 @@ export const createDrop = async ({
 export const getDrops = async ({ accountId }) => {
 
 	const {
-		fundingAccount, viewAccount, contractId,
+		viewAccount, contractId,
 	} = getEnv()
-
-	if (!fundingAccount) return null
 
 	const drops = await viewAccount.viewFunction2({
 		contractId,
