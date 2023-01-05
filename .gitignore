@@ -3,7 +3,6 @@
 # dependencies
 package-lock.json
 /node_modules
-/lib
 /.pnp
 .pnp.js
 /out
