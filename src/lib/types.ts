@@ -2,9 +2,11 @@ import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
-import { KeyPair, KeyPairEd25519 } from 'near-api-js/lib/utils';
+import { KeyPair } from 'near-api-js/lib/utils';
 
 /// Initialization
+
+export type NearKeyPair = KeyPair
 
 export interface NearAccount {
 	accountId: string;
@@ -60,8 +62,8 @@ export interface EstimatorParams {
     numKeys: number,
     usesPerKey: number,
     attachedGas: number,
-    storage?: string,
-    keyStorage?: string,
+    storage?: string | null,
+    keyStorage?: string | null,
     fcData?: FCData,
     ftData?: FTData,
 }

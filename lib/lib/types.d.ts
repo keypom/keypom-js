@@ -3,6 +3,7 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair } from 'near-api-js/lib/utils';
+export type NearKeyPair = KeyPair;
 export interface NearAccount {
     accountId: string;
     signAndSendTransaction: () => {};
@@ -50,20 +51,28 @@ export interface EstimatorParams {
     numKeys: number;
     usesPerKey: number;
     attachedGas: number;
-    storage?: string;
-    keyStorage?: string;
+    storage?: string | null;
+    keyStorage?: string | null;
     fcData?: FCData;
     ftData?: FTData;
 }
+export interface TimeConfig {
+    start: string;
+    end: string;
+    throttle: string;
+    interval: string;
+}
+export interface UsageConfig {
+    autoDeleteDrop?: boolean;
+    autoWithdraw?: boolean;
+    permissions: string;
+    refundDeposit: boolean;
+}
 export interface DropConfig {
     usesPerKey?: number;
-    deleteOnEmpty?: true;
-    autoWithdraw?: true;
-    startTimestamp?: string;
-    throttleTimestamp?: string;
-    onClaimRefundDeposit?: boolean;
-    claimPermission?: boolean;
-    dropRoot?: string;
+    rootAccountId?: string;
+    time?: TimeConfig;
+    usage?: UsageConfig;
 }
 export interface FTData {
     contractId?: string;
