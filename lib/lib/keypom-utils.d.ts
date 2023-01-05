@@ -1,12 +1,11 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
-declare const KeyPair: any;
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
-export declare const genKey: (rootKey: string, meta: string, nonce: number) => Promise<typeof KeyPair>;
+export declare const genKey: (rootKey: string, meta: string, nonce: number) => Promise<NearKeyPair>;
 export declare const hasDeposit: ({ accountId, transactions, }: {
     accountId: any;
     transactions: any;
@@ -19,6 +18,5 @@ export declare const transformTransactions: (transactions: SignAndSendTransactio
 export declare const getStorageBase: ({ nftData, fcData }: {
     nftData: any;
     fcData: any;
-}) => any;
+}) => string | null;
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;
-export {};

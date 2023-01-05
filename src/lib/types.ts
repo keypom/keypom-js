@@ -2,9 +2,11 @@ import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
-import { KeyPair, KeyPairEd25519 } from 'near-api-js/lib/utils';
+import { KeyPair } from 'near-api-js/lib/utils';
 
 /// Initialization
+
+export type NearKeyPair = KeyPair
 
 export interface NearAccount {
 	accountId: string;
@@ -60,41 +62,61 @@ export interface EstimatorParams {
     numKeys: number,
     usesPerKey: number,
     attachedGas: number,
-    storage?: string,
-    keyStorage?: string,
+    storage?: string | null,
+    keyStorage?: string | null,
     fcData?: FCData,
     ftData?: FTData,
 }
 
 /// Drops
 
+/// TODO Update
+export interface TimeConfig {
+	/// Minimum block timestamp before keys can be used. If None, keys can be used immediately
+    /// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    start: string,
+
+    /// Block timestamp that keys must be before. If None, keys can be used indefinitely
+    /// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    end: string,
+
+    /// Time interval between each key use. If None, there is no delay between key uses.
+    /// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    throttle: string,
+
+    /// Interval of time after the `start_timestamp` that must pass before a key can be used.
+    /// If multiple intervals pass, the key can be used multiple times. This has nothing to do
+    /// With the throttle timestamp. It only pertains to the start timestamp and the current
+    /// timestamp. The last_used timestamp is not taken into account.
+    /// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    interval: string,
+}
+
+export interface UsageConfig {
+	// Should the drop be automatically deleted when all the keys are used? This is defaulted to false and
+	// Must be overwritten
+	autoDeleteDrop?: boolean,
+
+	// When this drop is deleted and it is the owner's *last* drop, automatically withdraw their balance.
+	autoWithdraw?: boolean,
+
+	/// Can the access key only call the claim method_name? Default to both method_name callable
+	permissions: string,
+	
+    /// If claim is called, refund the deposit to the owner's balance. If None, default to false.
+    refundDeposit: boolean,
+}
+
 export interface DropConfig {
 	// How many claims can each key have.
 	usesPerKey?: number,
 
-	// Should the drop be automatically deleted when all the keys are used? This is defaulted to false and
-	// Must be overwritten
-	deleteOnEmpty?: true,
-
-	// When this drop is deleted and it is the owner's *last* drop, automatically withdraw their balance.
-	autoWithdraw?: true,
-
-	// Minimum block timestamp that keys can be used. If None, keys can be used immediately
-	// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
-	startTimestamp?: string,
-
-	// How often can a key be used
-	// Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
-	throttleTimestamp?: string,
-
-	// If claim is called, refund the deposit to the owner's balance. If None, default to false.
-	onClaimRefundDeposit?: boolean,
-
-	// Can the access key only call the claim method_name? Default to both method_name callable
-	claimPermission?: boolean,
-
 	// Root account that all sub-accounts will default to. If None, default to the global drop root.
-	dropRoot?: string,
+	rootAccountId?: string,
+
+	time?: TimeConfig,
+
+	usage?: UsageConfig,
 }
 
 export interface FTData {

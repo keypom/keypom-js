@@ -65,14 +65,15 @@ export const createDrop = async ({
 	// }
 
 	const finalConfig = {
-		uses_per_key: config.usesPerKey || 1,
-		delete_on_empty: config.deleteOnEmpty || true,
-		auto_withdraw: config.autoWithdraw || true,
-		start_timestamp: config.startTimestamp,
-		throttle_timestamp: config.throttleTimestamp,
-		on_claim_refund_deposit: config.onClaimRefundDeposit,
-		claim_permission: config.claimPermission,
-		drop_root: config.dropRoot,
+		uses_per_key: config?.usesPerKey || 1,
+		root_account_id: config?.rootAccountId,
+		usage: {
+			auto_delete_drop: config?.usage?.autoDeleteDrop || false,
+			auto_withdraw: config?.usage?.autoWithdraw || true,
+			permissions: config?.usage?.permissions,
+			refund_deposit: config?.usage?.refundDeposit,
+		},
+		time: config?.time,
 	}
 
 	/// estimate required deposit
@@ -210,11 +211,17 @@ export const deleteDrops = async ({
 		gas, gas300, receiverId, execute,
 	} = getEnv()
 
-	const responses = await Promise.all(drops.map(async ({ drop_id, drop_type, keys, registered_uses }) => {
+	const responses = await Promise.all(drops.map(async ({
+		drop_id,
+		keys,
+		registered_uses,
+		ft,
+		nft,
+	}) => {
 
 		const responses: Array<void | FinalExecutionOutcome[]> = []
 
-		if (registered_uses !== 0 && (drop_type.FungibleToken || drop_type.NonFungibleToken)) {
+		if (registered_uses !== 0 && (ft !== undefined || nft !== undefined)) {
 			responses.push(...(await execute({
 				account, wallet,
 				transactions: [{
