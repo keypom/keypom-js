@@ -228,27 +228,24 @@ export const updateFunder = async ({
  * 
  * @param {string} keypomContractId The account ID that should be used for the Keypom contract.
  * 
- * @example <caption>After initializing the SDK, the funder is updated.</caption>
+ * @example <caption>After initializing the SDK, the Keypom contract ID is updated.</caption>
  * ```js
  * const path = require("path");
  * const homedir = require("os").homedir();
  * const { KeyPair, keyStores, connect } = require("near-api-js");
- * const { initKeypom, updateFunder, getDrops } = require("keypom-js");
+ * const { initKeypom, updateKeypomContractId, getDrops } = require("keypom-js");
  * 
  *	// Initialize the SDK for the given network and NEAR connection
  *	await initKeypom({
  *		network: "testnet",
  *	});
  *
- *	// Update the current funder account
- *	await updateFunder({
- *		funder: {
- *			accountId: "benji_demo.testnet",
- *			secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
- *		}
+ *	// Update the current Keypom contract ID
+ *	await updateKeypomContractId({
+ *		keypomContractId: "v1.keypom.testnet"
  *	})
  *
- *	// Get the drops for the given owner
+ *	//Get the drops for the given owner
  *	const dropsForOwner = await getDrops({accountId: "benjiman.testnet"});
  *	console.log('dropsForOwner: ', dropsForOwner)
  *
@@ -260,18 +257,11 @@ export const updateKeypomContractId = async ({
 }:{keypomContractId: string}) => {
 
 	if (near == undefined) {
-		throw new Error("You must initialize the SDK via `initKeypom` before updating the funder account.");
+		throw new Error("You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.");
 	}
 
-	let { accountId, secretKey, seedPhrase } = funder
-	if (seedPhrase) {
-		secretKey = parseSeedPhrase(seedPhrase).secretKey
-	}
-	fundingKey = KeyPair.fromString(secretKey)
-	await keyStore.setKey(networkId, accountId, fundingKey)
-	fundingAccount = new Account(connection, accountId)
-	fundingAccount.fundingKey = fundingKey
-
+	contractId = receiverId = keypomContractId
+	contractAccount = new Account(connection, contractId)
 	return null
 }
 
