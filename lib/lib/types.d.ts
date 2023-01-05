@@ -120,7 +120,7 @@ export interface EnvVars {
     fundingAccount: Account;
     contractAccount: Account;
     viewAccount: any;
-    fundingKey: KeyPair;
+    fundingKeyPair: KeyPair;
     gas: string;
     gas300: string;
     attachedGas: string;
