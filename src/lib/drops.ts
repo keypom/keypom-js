@@ -6,7 +6,7 @@ const {
 	},
 } = nearAPI;
 
-import { CreateDropParams } from "./types";
+import { CreateDropParams, FTData, NFTData } from "./types";
 import { getEnv } from "./keypom";
 import {
 	genKey,
@@ -19,6 +19,51 @@ import {
 } from "./keypom-utils";
 import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
 
+/**
+ * Creates a new drop based on parameters passed in.
+ * 
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string=} dropId (OPTIONAL) Specify a custom drop ID rather than using the incrementing nonce on the contract.
+ * @param {string[]=} publicKeys (OPTIONAL) Add a set of publicKeys to the drop when it is created. If not specified, the drop will be empty.
+ * @param {Number=} depositPerUseNEAR (OPTIONAL) How much $NEAR should be contained in each link. Unit in $NEAR (i.e 1 = 1 $NEAR)
+ * @param {string=} depositPerUseYocto (OPTIONAL) How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR)
+ * @param {string=} metadata (OPTIONAL) String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON.
+ * @param {DropConfig=} config (OPTIONAL) Allows specific drop behaviors to be configured such as the number of uses each key / link will have.
+ * @param {FTData=} ftData (OPTIONAL) For creating a fungible token drop, this contains necessary configurable information about the drop.
+ * @param {NFTData=} nftData (OPTIONAL) For creating a non-fungible token drop, this contains necessary configurable information about the drop.
+ * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
+ * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
+ * @param {boolean=} hasBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit.
+ * 
+ * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR:</caption>
+ * ```
+ * const { KeyPair, keyStores, connect } = require("near-api-js");
+ * const { initKeypom, createDrop } = require("keypom-js");
+ * 
+ * // Initialize the SDK for the given network and NEAR connection
+ *	await initKeypom({
+ *		network: "testnet",
+ *		funder: {
+ *			accountId: "benji_demo.testnet",
+ *			secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ *		}
+ *	});
+ *	
+ *	// Keep track of the public keys to pass into the contract
+ *	let publicKeys = [];
+ *	console.log("Creating keypairs");
+ *	for(var i = 0; i < 10; i++) {
+ *		let keyPair = await KeyPair.fromRandom('ed25519');   
+ *		publicKeys.push(keyPair.publicKey.toString());   
+ *	}
+ *
+ *	await createDrop({
+ *		publicKeys,
+ *		depositPerUseNEAR: 1,
+ *	});
+ * ``` 
+*/
 export const createDrop = async ({
 	account,
 	wallet,
@@ -44,6 +89,11 @@ export const createDrop = async ({
 		depositPerUseYocto = parseNearAmount(depositPerUseNEAR.toString()) || '0'
 	}
 	if (!depositPerUseYocto) depositPerUseYocto = '0'
+
+	// Ensure that if the dropID is passed in, it's greater than 1 billion
+	if (dropId && parseInt(dropId) < 1000000000) {
+		throw new Error('All custom drop IDs must be greater than 1_000_000_000');
+	}
 	if (!dropId) dropId = Date.now().toString()
 
 	const finalConfig = {
@@ -128,7 +178,7 @@ export const createDrop = async ({
 
 	if (ftData.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
-			account,
+			account: account || fundingAccount,
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
@@ -142,7 +192,7 @@ export const createDrop = async ({
 	let tokenIds = nftData?.tokenIds
 	if (tokenIds && tokenIds?.length > 0) {
 		const nftTXs = await nftTransferCall({
-			account,
+			account: account || fundingAccount,
 			contractId: nftData.contractId as string,
 			receiverId: contractId,
 			tokenIds,

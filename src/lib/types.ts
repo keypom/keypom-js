@@ -151,7 +151,7 @@ export interface SimpleData {
 }
 
 export interface CreateDropParams {
-	account: Account,
+	account?: Account,
 	wallet?: BrowserWalletBehaviour,
 	dropId?: string,
 	publicKeys?: string[],
