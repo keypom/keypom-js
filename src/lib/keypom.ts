@@ -155,15 +155,7 @@ export const initKeypom = async ({
 	contractAccount = new Account(connection, contractId)
 
 	if (funder) {
-		let { accountId, secretKey, seedPhrase } = funder
-		if (seedPhrase) {
-			secretKey = parseSeedPhrase(seedPhrase).secretKey
-		}
-    fundingKey = KeyPair.fromString(secretKey)
-		await keyStore.setKey(networkId, accountId, fundingKey)
-		fundingAccount = new Account(connection, accountId)
-		fundingAccount.fundingKeyPair = fundingKeyPair
-		return fundingAccount
+		await updateFunder({ funder })
 	}
 
 	return null
@@ -215,10 +207,10 @@ export const updateFunder = async ({
 	if (seedPhrase) {
 		secretKey = parseSeedPhrase(seedPhrase).secretKey
 	}
-	fundingKey = KeyPair.fromString(secretKey)
-	await keyStore.setKey(networkId, accountId, fundingKey)
+	fundingKeyPair = KeyPair.fromString(secretKey)
+	await keyStore.setKey(networkId, accountId, fundingKeyPair)
 	fundingAccount = new Account(connection, accountId)
-	fundingAccount.fundingKey = fundingKey
+	fundingAccount.fundingKey = fundingKeyPair
 
 	return null
 }

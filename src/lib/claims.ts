@@ -57,9 +57,5 @@ export const claim = async ({
 	
 	const result = await execute({ transactions, account: contractAccount })
 
-	if (fundingKeyPair) {
-		await keyStore.setKey(networkId, contractId, fundingKeyPair)
-	}
-
 	return result
 }
