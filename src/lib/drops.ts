@@ -22,26 +22,22 @@ import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
 export const createDrop = async ({
 	account,
 	wallet,
-	accountRootKey,
 	dropId,
 	publicKeys,
-	numKeys,
 	depositPerUseNEAR,
 	depositPerUseYocto,
 	metadata,
 	config = {},
 	ftData = {},
 	nftData = {},
+	simpleData = {},
 	fcData,
 	hasBalance = false,
 }: CreateDropParams) => {
-
 	const {
 		near, viewAccount,
-		gas, attachedGas, contractId, receiverId, getAccount, execute,
+		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount
 	} = getEnv()
-
-	account = getAccount({ account, wallet })
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -50,28 +46,15 @@ export const createDrop = async ({
 	if (!depositPerUseYocto) depositPerUseYocto = '0'
 	if (!dropId) dropId = Date.now().toString()
 
-	/// key generation
-	// let keyPairs: any[] = [], pubKeys = publicKeys || [];
-	// numKeys = numKeys || pubKeys.length
-	// if (numKeys) {
-	// 	pubKeys = []
-	// 	for (var i = 0; i < numKeys; i++) {
-	// 		// @ts-ignore
-	// 		// Not sure why KeyPair doesn't expose secret key param
-	// 		const keyPair = await genKey((fundingAccount ? fundingKey.secretKey : accountRootKey) as string, dropId, i)
-	// 		keyPairs.push(keyPair)
-	// 		pubKeys.push(keyPair.getPublicKey().toString());
-	// 	}
-	// }
-
 	const finalConfig = {
 		uses_per_key: config.usesPerKey || 1,
-		delete_on_empty: config.deleteOnEmpty || true,
-		auto_withdraw: config.autoWithdraw || true,
-		start_timestamp: config.startTimestamp,
-		throttle_timestamp: config.throttleTimestamp,
-		on_claim_refund_deposit: config.onClaimRefundDeposit,
-		claim_permission: config.claimPermission,
+		time: config.time,
+		usage: {
+			permissions: config.usage?.permissions,
+			refund_deposit: config.usage?.refundDeposit,
+			auto_delete_drop: config.usage?.autoDeleteDrop,
+			auto_withdraw: config.usage?.autoWithdraw,
+		},
 		drop_root: config.dropRoot,
 	}
 
@@ -101,7 +84,7 @@ export const createDrop = async ({
 
 	transactions.push({
 		receiverId,
-		signerId: account.accountId,
+		signerId: account ? account?.accountId : fundingAccount.accountId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
@@ -133,6 +116,9 @@ export const createDrop = async ({
 							return ret
 						}))
 					}) : undefined,
+					simple: simpleData?.lazyRegister ? ({
+						lazy_register: simpleData.lazyRegister,
+					}) : undefined,
 				},
 				gas,
 				deposit,
@@ -153,7 +139,7 @@ export const createDrop = async ({
 		}) as Transaction)
 	}
 	
-	const { tokenIds } = nftData
+	let tokenIds = nftData?.tokenIds
 	if (tokenIds && tokenIds?.length > 0) {
 		const nftTXs = await nftTransferCall({
 			account,
