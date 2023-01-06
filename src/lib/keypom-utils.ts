@@ -37,7 +37,6 @@ const ACCESS_KEY_STORAGE: BN = new BN("1000000000000000000000");
 export const snakeToCamel = (s) =>
     s.toLowerCase().replace(/([-_][a-z])/g, (m) => m.toUpperCase().replace(/-_/g, '')
 );
-
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
@@ -45,6 +44,18 @@ export const genKey = async (rootKey: string, meta: string, nonce: number): Prom
 	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 	const { secretKey } = generateSeedPhrase(hash)
 	return KeyPair.fromString(secretKey)
+}
+
+export const keypomView = async ({ methodName, args }) => {
+    const {
+		viewAccount, contractId,
+	} = getEnv()
+
+    return viewAccount.viewFunction2({
+		contractId,
+		methodName,
+		args
+	})
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys

@@ -6,6 +6,10 @@ export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
 export declare const genKey: (rootKey: string, meta: string, nonce: number) => Promise<NearKeyPair>;
+export declare const keypomView: ({ methodName, args }: {
+    methodName: any;
+    args: any;
+}) => Promise<any>;
 export declare const hasDeposit: ({ accountId, transactions, }: {
     accountId: any;
     transactions: any;

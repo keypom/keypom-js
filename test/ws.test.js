@@ -4,7 +4,6 @@ const nearAPI = require("near-api-js");
 const {
 	Near,
 	KeyPair,
-	Account,
 	utils: { format: {
 		parseNearAmount
 	} },
@@ -110,7 +109,8 @@ test('init', async (t) => {
 test('delete drops', async (t) => {
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	console.log('drops', drops)
@@ -348,7 +348,8 @@ test('add keys to simple drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[0].keys.length, NUM_KEYS)
@@ -373,7 +374,8 @@ test('add keys to ft drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[1].keys.length, NUM_KEYS)
@@ -399,7 +401,8 @@ test('add 1 key to nft drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[2].keys.length, 2)
@@ -427,7 +430,8 @@ test('claim simple drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[0].keys.length, NUM_KEYS - 1)
@@ -444,7 +448,8 @@ test('create account and claim ft drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[1].keys.length, NUM_KEYS - 1)
@@ -461,7 +466,8 @@ test('create account and claim nft drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[2].keys.length, 1)
@@ -477,7 +483,8 @@ test('claim fc drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	// the fc drop, having only 1 key, was removed automatically
@@ -494,7 +501,8 @@ test('delete 1 key from simple drop', async (t) => {
 	})
 
 	drops = await getDrops({
-		accountId
+		accountId,
+		withKeys: true,
 	})
 
 	t.is(drops[0].keys.length, NUM_KEYS - 2)
