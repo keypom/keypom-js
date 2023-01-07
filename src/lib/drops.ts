@@ -37,7 +37,7 @@ import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
  * @param {boolean=} hasBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit.
  * 
  * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR:</caption>
- * ```
+ * ```js
  * const { KeyPair, keyStores, connect } = require("near-api-js");
  * const { initKeypom, createDrop, generateKeys } = require("keypom-js");
  * 
