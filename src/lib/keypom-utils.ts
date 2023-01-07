@@ -3,7 +3,7 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, KeyPairEntropy } from "./types";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
@@ -46,20 +46,83 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  * Generate a set of KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password, nonce, and some metadata.
  * 
  * @param {number} numKeys - The number of keys to generate
- * @param {object} entropy - Optional entropy to use to deterministically generate the keys. This is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the entropy (could be a user's password and a secret root key like a UUID).
+ * @param {KeyPairEntropy | KeyPairEntropy[]} entropy - Optional entropy to use to deterministically generate the keys. For generating multiple keys with different entropy, pass in an array of entropy with the same length as the number of keys.
+ For single key generation, you can either pass in an array of entropy with a single element, or simply pass in the entropy object directly (not within an array).
+ Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the entropy (could be a user's password and a secret root key like a UUID).
  *  
  * @returns {Promise<NearKeyPair[]>} - An array of KeyPair objects by which the secret key and public key can be accessed from.
  * 
- * @example
+ * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
+ * // Generate 10 keys with no entropy (all random)
+ * let keys = await generateKeys({
+ *     numKeys: 10,
+ * })
  * 
+ * let pubKey1 = keys[0].publicKey.toString();
+ * let secretKey1 = keys[0].secretKey.toString();
+ * 
+ * console.log('1st Public Key: ', pubKey1);
+ * console.log('1st Secret Key: ', secretKey1)
+ * 
+ * @example <caption>Generating 1 keypair based on entropy</caption>
+ * // Generate 1 key with the given entropy
+ * let keys = await generateKeys({
+ *     numKeys: 1,
+ *     entropy: {
+ *         rootKey: "my-global-password",
+ *         meta: "user-password-123",
+ *     } // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
+ * })
+ * 
+ * let pubKey = keys[0].publicKey.toString();
+ * let secretKey = keys[0].secretKey.toString();
+ * 
+ * console.log('Public Key: ', pubKey);
+ * console.log('Secret Key: ', secretKey)
+ * 
+ * @example <caption>Generating 2 keypairs each with their own entropy</caption>
+ * // Generate 2 keys each with their own unique entropy
+ * let keys = await generateKeys({
+ *     numKeys: 2,
+ *     entropy: [
+ *         {
+ *             rootKey: "my-global-password",
+ *             meta: "first-password",
+ *             nonce: 1
+ *         },
+ *         {
+ *             rootKey: "my-global-password",
+ *             meta: "second-password",
+ *             nonce: 2
+ *         }
+ *     ]
+ * })
+ * 
+ * console.log('Pub Key 1 ', keys[0].publicKey.toString());
+ * console.log('Priv Key 1 ', keys[0].secretKey.toString());
+ * 
+ * console.log('Pub Key 2 ', keys[1].publicKey.toString());
+ * console.log('Priv Key 2 ', keys[1].secretKey.toString());
  */
 export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Promise<NearKeyPair[]> => {
-    const { rootKey = "", meta = "", nonce = "" } = entropy || {}
+    // If the entropy provided is not an array (simply the object), we convert it to an array of size 1 so that we can use the same logic for both cases
+    if (entropy && !Array.isArray(entropy)) {
+        entropy = [entropy]
+    }
+
+    // Ensure that if entropy is provided, it should be the same length as the number of keys
+    const numEntropy = entropy?.length || numKeys;
+    if (numEntropy != numKeys) {
+        throw new Error(`You must provide the same number of entropy values as the number of keys`)
+    }
     
     var keyPairs: NearKeyPair[] = []
     for (let i = 0; i < numKeys; i++) {
         if (entropy) {
-            const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}_${i}`)
+            // Get current entropy values and generate the keypair from the hash
+            const { rootKey = "", meta = "", nonce = "" } = entropy[i]
+            const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
+
             const { secretKey } = generateSeedPhrase(hash)
             keyPairs.push(KeyPair.fromString(secretKey))
         } else {

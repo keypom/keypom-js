@@ -42,11 +42,13 @@ export interface ExecuteParams {
 
 export interface GenerateKeysParams {
 	numKeys: number;
-	entropy?: {
-		rootKey?: string;
-		meta?: string;
-		nonce?: number;
-	}
+	entropy?: KeyPairEntropy | KeyPairEntropy[];
+}
+
+export interface KeyPairEntropy {
+    rootKey?: string;
+	meta?: string;
+	nonce?: number;
 }
 
 export interface FTTransferCallParams {
