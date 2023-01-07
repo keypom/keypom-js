@@ -39,7 +39,7 @@ import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
  * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR:</caption>
  * ```
  * const { KeyPair, keyStores, connect } = require("near-api-js");
- * const { initKeypom, createDrop } = require("keypom-js");
+ * const { initKeypom, createDrop, generateKeys } = require("keypom-js");
  * 
  * // Initialize the SDK for the given network and NEAR connection
  *	await initKeypom({
@@ -50,13 +50,10 @@ import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
  *		}
  *	});
  *	
- *	// Keep track of the public keys to pass into the contract
- *	let publicKeys = [];
- *	console.log("Creating keypairs");
- *	for(var i = 0; i < 10; i++) {
- *		let keyPair = await KeyPair.fromRandom('ed25519');   
- *		publicKeys.push(keyPair.publicKey.toString());   
- *	}
+ * // create 10 keys with no entropy (all random)
+ * const {publicKeys} = await generateKeys({
+ * 	numKeys: 10
+ * });
  *
  *	await createDrop({
  *		publicKeys,
