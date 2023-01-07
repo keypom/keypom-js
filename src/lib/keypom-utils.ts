@@ -3,7 +3,7 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, KeyPairEntropy } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, KeyPairEntropy, GeneratedKeyPairs } from "./types";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
@@ -50,7 +50,7 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  For single key generation, you can either pass in an array of entropy with a single element, or simply pass in the entropy object directly (not within an array).
  Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the entropy (could be a user's password and a secret root key like a UUID).
  *  
- * @returns {Promise<NearKeyPair[]>} - An array of KeyPair objects by which the secret key and public key can be accessed from.
+ * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  * 
  * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
  * // Generate 10 keys with no entropy (all random)
@@ -58,8 +58,8 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  *     numKeys: 10,
  * })
  * 
- * let pubKey1 = keys[0].publicKey.toString();
- * let secretKey1 = keys[0].secretKey.toString();
+ * let pubKey1 = keys.publicKeys[0];
+ * let secretKey1 = keys.secretKeys[0];
  * 
  * console.log('1st Public Key: ', pubKey1);
  * console.log('1st Secret Key: ', secretKey1)
@@ -74,8 +74,8 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  *     } // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
  * })
  * 
- * let pubKey = keys[0].publicKey.toString();
- * let secretKey = keys[0].secretKey.toString();
+ * let pubKey = keys.publicKeys[0];
+ * let secretKey = keys.secretKeys[0];
  * 
  * console.log('Public Key: ', pubKey);
  * console.log('Secret Key: ', secretKey)
@@ -98,13 +98,10 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  *     ]
  * })
  * 
- * console.log('Pub Key 1 ', keys[0].publicKey.toString());
- * console.log('Priv Key 1 ', keys[0].secretKey.toString());
- * 
- * console.log('Pub Key 2 ', keys[1].publicKey.toString());
- * console.log('Priv Key 2 ', keys[1].secretKey.toString());
+ * console.log('Pub Keys ', keys.publicKeys);
+ * console.log('Secret Keys ', keys.secretKeys);
  */
-export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Promise<NearKeyPair[]> => {
+export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
     // If the entropy provided is not an array (simply the object), we convert it to an array of size 1 so that we can use the same logic for both cases
     if (entropy && !Array.isArray(entropy)) {
         entropy = [entropy]
@@ -117,20 +114,33 @@ export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Prom
     }
     
     var keyPairs: NearKeyPair[] = []
+    var publicKeys: string[] = []
+    var secretKeys: string[] = []
     for (let i = 0; i < numKeys; i++) {
         if (entropy) {
             // Get current entropy values and generate the keypair from the hash
             const { rootKey = "", meta = "", nonce = "" } = entropy[i]
             const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
 
-            const { secretKey } = generateSeedPhrase(hash)
-            keyPairs.push(KeyPair.fromString(secretKey))
+            const { secretKey, publicKey } = generateSeedPhrase(hash)
+            var keyPair = KeyPair.fromString(secretKey);
+            keyPairs.push(keyPair);
+            publicKeys.push(publicKey)
+            secretKeys.push(secretKey)
         } else {
-            keyPairs.push(KeyPair.fromRandom('ed25519'))
+            var keyPair = await KeyPair.fromRandom('ed25519');
+            keyPairs.push(keyPair);
+            publicKeys.push(keyPair.getPublicKey().toString())
+            // @ts-ignore - not sure why it's saying secret key isn't property of keypair
+            secretKeys.push(keyPair.secretKey)
         }
     }
 
-    return keyPairs
+    return {
+        keyPairs,
+        publicKeys,
+        secretKeys
+    }
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys

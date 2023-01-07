@@ -8,6 +8,12 @@ import { KeyPair } from 'near-api-js/lib/utils';
 
 export type NearKeyPair = KeyPair
 
+export interface GeneratedKeyPairs {
+	keyPairs: NearKeyPair[];
+	publicKeys: string[];
+	secretKeys: string[];
+}
+
 export interface NearAccount {
 	accountId: string;
 	signAndSendTransaction: () => {};
