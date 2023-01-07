@@ -1,5 +1,5 @@
 export {
-	genKey,
+	generateKeys,
 	estimateRequiredDeposit,
 	ftTransferCall,
 	nftTransferCall,

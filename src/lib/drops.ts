@@ -9,7 +9,7 @@ const {
 import { CreateDropParams, FTData, NFTData } from "./types";
 import { getEnv } from "./keypom";
 import {
-	genKey,
+	generateKeys,
 	key2str,
 	estimateRequiredDeposit,
 	ftTransferCall,

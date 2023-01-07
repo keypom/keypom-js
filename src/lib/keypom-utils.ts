@@ -3,7 +3,7 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams } from "./types";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
@@ -41,10 +41,33 @@ export const snakeToCamel = (s) =>
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
-export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<NearKeyPair> => {
-	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
-	const { secretKey } = generateSeedPhrase(hash)
-	return KeyPair.fromString(secretKey)
+
+/**
+ * Generate a set of KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password, nonce, and some metadata.
+ * 
+ * @param {number} numKeys - The number of keys to generate
+ * @param {object} entropy - Optional entropy to use to deterministically generate the keys. This is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the entropy (could be a user's password and a secret root key like a UUID).
+ *  
+ * @returns {Promise<NearKeyPair[]>} - An array of KeyPair objects by which the secret key and public key can be accessed from.
+ * 
+ * @example
+ * 
+ */
+export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Promise<NearKeyPair[]> => {
+    const { rootKey = "", meta = "", nonce = "" } = entropy || {}
+    
+    var keyPairs: NearKeyPair[] = []
+    for (let i = 0; i < numKeys; i++) {
+        if (entropy) {
+            const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}_${i}`)
+            const { secretKey } = generateSeedPhrase(hash)
+            keyPairs.push(KeyPair.fromString(secretKey))
+        } else {
+            keyPairs.push(KeyPair.fromRandom('ed25519'))
+        }
+    }
+
+    return keyPairs
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys

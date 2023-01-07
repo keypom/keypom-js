@@ -40,6 +40,15 @@ export interface ExecuteParams {
     fundingAccount?: Account,
 }
 
+export interface GenerateKeysParams {
+	numKeys: number;
+	entropy?: {
+		rootKey?: string;
+		meta?: string;
+		nonce?: number;
+	}
+}
+
 export interface FTTransferCallParams {
     account: Account,
     contractId: string,
