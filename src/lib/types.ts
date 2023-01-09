@@ -183,6 +183,13 @@ export interface CreateDropParams {
 	hasBalance?: boolean,
 }
 
+export interface GetDropParams {
+	accountId: string,
+	start: string | number,
+	limit: number,
+	withKeys: boolean,
+}
+
 export interface EnvVars {
 	near: Near,
 	connection: Connection,
