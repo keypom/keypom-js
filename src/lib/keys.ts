@@ -14,24 +14,28 @@ import {
 	ftTransferCall,
 	nftTransferCall,
 } from "./keypom-utils";
+import { AddKeyParams } from "./types";
 
 export const addKeys = async ({
 	account,
 	wallet,
+	dropId,
 	drop,
+	numKeys = 1,
 	publicKeys,
 	nftTokenIds,
-	hasBalance,
-}) => {
-
+	rootEntropy,
+	hasBalance = false,
+}: AddKeyParams) => {
 	const {
 		near, gas, contractId, receiverId, getAccount, execute,
 	} = getEnv()
 
-	const numKeys = publicKeys.length
+	if (!near) {
+		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
+	}
 
 	account = getAccount({ account, wallet });
-
 	const {
 		drop_id,
 		registered_uses,
@@ -40,7 +44,7 @@ export const addKeys = async ({
 		config: { uses_per_key },
 		ft: ftData = {},
 		nft: nftData = {},
-	} = drop
+	};
 
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,

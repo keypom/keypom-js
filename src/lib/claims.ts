@@ -80,11 +80,15 @@ export const claim = async ({
 }) => {
 
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingKeyPair,
+		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails,
 	} = getEnv()
 
+	if (!keyStore) {
+		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
+	}
+
 	const keyPair = KeyPair.fromString(secretKey)
-	await keyStore.setKey(networkId, contractId, keyPair)
+	await keyStore.setKey(networkId!, contractId, keyPair)
 
 	if (newAccountId && !newPublicKey) {
 		throw new Error('If creating a new account, a newPublicKey must be passed in.')

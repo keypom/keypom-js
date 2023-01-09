@@ -29,11 +29,13 @@ export interface Network {
 export interface Funder {
 	accountId: string;
 	secretKey: string;
-	seedPhrase: string;
+	seedPhrase?: string;
+	rootEntropy?: string;
+	fundingKeyPair?: NearKeyPair;
 }
 
 export interface InitKeypomParams {
-	near: any;
+	near: Near;
 	network: string;
 	keypomContractId: string;
 	funder?: Funder;
@@ -48,13 +50,8 @@ export interface ExecuteParams {
 
 export interface GenerateKeysParams {
 	numKeys: number;
-	entropy?: KeyPairEntropy | KeyPairEntropy[];
-}
-
-export interface KeyPairEntropy {
-    rootKey?: string;
-	meta?: string;
-	nonce?: number;
+	rootEntropy?: string;
+	metaEntropy?: string[] | string;
 }
 
 export interface FTTransferCallParams {
@@ -171,7 +168,9 @@ export interface CreateDropParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
 	dropId?: string,
+	numKeys: number,
 	publicKeys?: string[],
+	rootEntropy?: string,
 	depositPerUseNEAR?: Number,
 	depositPerUseYocto?: string,
 	metadata?: string,
@@ -183,6 +182,18 @@ export interface CreateDropParams {
 	hasBalance?: boolean,
 }
 
+export interface AddKeyParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	dropId?: string,
+	drop?: any,
+	numKeys: number,
+	publicKeys?: string[],
+	nftTokenIds?: string[],
+	rootEntropy?: string,
+	hasBalance?: boolean,
+}
+
 export interface GetDropParams {
 	accountId: string,
 	start: string | number,
@@ -191,15 +202,15 @@ export interface GetDropParams {
 }
 
 export interface EnvVars {
-	near: Near,
-	connection: Connection,
-	keyStore: KeyStore,
-	logger:  any,
-	networkId: string,
-	fundingAccount: Account,
-	contractAccount: Account,
-	viewAccount: any,
-	fundingKeyPair: KeyPair,
+	near?: Near,
+	connection?: Connection,
+	keyStore?: KeyStore,
+	logger?:  any,
+	networkId?: string,
+	fundingAccount?: Account,
+	fundingAccountDetails?: Funder,
+	contractAccount?: Account,
+	viewAccount?: any,
 	gas: string,
 	gas300: string,
 	attachedGas: string,

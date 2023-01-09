@@ -28,7 +28,10 @@ const KEY_LIMIT = 50;
  * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
  * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
  * @param {string=} dropId (OPTIONAL) Specify a custom drop ID rather than using the incrementing nonce on the contract.
- * @param {string[]=} publicKeys (OPTIONAL) Add a set of publicKeys to the drop when it is created. If not specified, the drop will be empty.
+ * @param {number} numKeys Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed into the function, the keys will be
+ * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly.
+ * @param {string[]=} publicKeys (OPTIONAL) Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter.
+ * @param {string=} rootEntropy (OPTIONAL) Specify an entropy to use for generating keys (will overload the funder's rootEntropy if applicable). This parameter only matters if the publicKeys variable is not passed in.
  * @param {Number=} depositPerUseNEAR (OPTIONAL) How much $NEAR should be contained in each link. Unit in $NEAR (i.e 1 = 1 $NEAR)
  * @param {string=} depositPerUseYocto (OPTIONAL) How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR)
  * @param {string=} metadata (OPTIONAL) String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON.
@@ -68,7 +71,9 @@ export const createDrop = async ({
 	account,
 	wallet,
 	dropId,
+	numKeys = 1,
 	publicKeys,
+	rootEntropy,
 	depositPerUseNEAR,
 	depositPerUseYocto,
 	metadata,
@@ -81,8 +86,12 @@ export const createDrop = async ({
 }: CreateDropParams) => {
 	const {
 		near, viewAccount,
-		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount
+		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
 	} = getEnv()
+
+	if (!near) {
+		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
+	}
 
 	account = getAccount({ account, wallet })
 
@@ -110,11 +119,38 @@ export const createDrop = async ({
 		time: config?.time,
 	}
 
+	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
+	if (!publicKeys) {
+		var keys;
+		
+		// Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
+		const rootEntropyUsed = rootEntropy || fundingAccountDetails?.rootEntropy;
+		console.log('rootEntropyUsed: ', rootEntropyUsed)
+		// If either root entropy was passed into the function or the funder has some set, we should use that.
+		if(rootEntropyUsed) {
+			// Create an array of size numKeys with increasing strings from 0 -> numKeys - 1. Each element should also contain the dropId infront of the string 
+			const nonceDropIdMeta = Array.from(Array(numKeys).keys()).map(String).map((nonce) => `${dropId}_${nonce}`);
+			keys = await generateKeys({
+				numKeys,
+				rootEntropy: rootEntropyUsed,
+				metaEntropy: nonceDropIdMeta
+			});
+		} else {
+			// No entropy is provided so all keys should be fully random
+			keys = await generateKeys({
+				numKeys,
+			});
+		}
+		
+		publicKeys = keys.publicKeys
+		console.log('publicKeys: ', publicKeys)
+	}
+
 	/// estimate required deposit
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
 		depositPerUse: depositPerUseYocto,
-		numKeys: publicKeys?.length || 1,
+		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas: parseInt(attachedGas),
 		storage: getStorageBase({ nftData, fcData }),
@@ -180,7 +216,7 @@ export const createDrop = async ({
 
 	if (ftData.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
-			account: account || fundingAccount,
+			account: account!,
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
@@ -194,7 +230,7 @@ export const createDrop = async ({
 	let tokenIds = nftData?.tokenIds
 	if (tokenIds && tokenIds?.length > 0) {
 		const nftTXs = await nftTransferCall({
-			account: account || fundingAccount,
+			account: account!,
 			contractId: nftData.contractId as string,
 			receiverId: contractId,
 			tokenIds,

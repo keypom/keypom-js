@@ -3,7 +3,7 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, KeyPairEntropy, GeneratedKeyPairs } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, GeneratedKeyPairs } from "./types";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
@@ -42,13 +42,14 @@ export const key2str = (v) => typeof v === 'string' ? v : v.pk
 const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
 
 /**
- * Generate a set of KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password, nonce, and some metadata.
+ * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.). 
+ * Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the meta entropy (could be a user's password) and the secret root key like a UUID).
  * 
  * @param {number} numKeys - The number of keys to generate
- * @param {KeyPairEntropy | KeyPairEntropy[]} entropy - Optional entropy to use to deterministically generate the keys. For generating multiple keys with different entropy, pass in an array of entropy with the same length as the number of keys.
- For single key generation, you can either pass in an array of entropy with a single element, or simply pass in the entropy object directly (not within an array).
- Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the entropy (could be a user's password and a secret root key like a UUID).
- *  
+ * @param {string=} rootEntropy (OPTIONAL) - A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random.
+ * @param {string=} metaEntropy (OPTIONAL) - An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply 
+ pass in the string itself directly (not within an array).
+ * 
  * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  * 
  * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
@@ -100,26 +101,25 @@ const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncode
  * console.log('Pub Keys ', keys.publicKeys);
  * console.log('Secret Keys ', keys.secretKeys);
  */
-export const generateKeys = async ({numKeys, entropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
-    // If the entropy provided is not an array (simply the object), we convert it to an array of size 1 so that we can use the same logic for both cases
-    if (entropy && !Array.isArray(entropy)) {
-        entropy = [entropy]
+export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
+    // If the metaEntropy provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
+    if (metaEntropy && !Array.isArray(metaEntropy)) {
+        metaEntropy = [metaEntropy]
     }
 
-    // Ensure that if entropy is provided, it should be the same length as the number of keys
-    const numEntropy = entropy?.length || numKeys;
+    // Ensure that if metaEntropy is provided, it should be the same length as the number of keys
+    const numEntropy = metaEntropy?.length || numKeys;
     if (numEntropy != numKeys) {
-        throw new Error(`You must provide the same number of entropy values as the number of keys`)
+        throw new Error(`You must provide the same number of meta entropy values as the number of keys`)
     }
     
     var keyPairs: NearKeyPair[] = []
     var publicKeys: string[] = []
     var secretKeys: string[] = []
     for (let i = 0; i < numKeys; i++) {
-        if (entropy) {
-            // Get current entropy values and generate the keypair from the hash
-            const { rootKey = "", meta = "", nonce = "" } = entropy[i]
-            const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
+        if (rootEntropy) {
+            const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy}` : rootEntropy;
+            const hash: ArrayBuffer = await hashBuf(stringToHash);
 
             const { secretKey, publicKey } = generateSeedPhrase(hash)
             var keyPair = KeyPair.fromString(secretKey);
@@ -147,7 +147,11 @@ export const keypomView = async ({ methodName, args }) => {
 		viewAccount, contractId,
 	} = getEnv()
 
-    return viewAccount.viewFunction2({
+    if (!viewAccount) {
+        throw new Error('initKeypom must be called before view functions can be called.')
+    }
+
+    return viewAccount!.viewFunction2({
 		contractId,
 		methodName,
 		args
