@@ -250,11 +250,8 @@ test('create nft drop and add 1 key', async (t) => {
 	for (var i = 0; i < 1; i++) {
 		const keys = await generateKeys({
 			numKeys: 1,
-			entropy: {
-				rootKey: 'some secret entropy' + Date.now(),
-				meta: dropId,
-				nonce: i
-			}
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
 		})
 		
 		keyPairs.nft.push(keys.keyPairs[0])
@@ -307,11 +304,8 @@ test('create an fc drop and 1 key', async (t) => {
 	for (var i = 0; i < 1; i++) {
 		const keys = await generateKeys({
 			numKeys: 1,
-			entropy: {
-				rootKey: 'some secret entropy' + Date.now(),
-				meta: dropId,
-				nonce: i
-			}
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
 		})
 		
 		keyPairs.fc.push(keys.keyPairs[0])
@@ -355,11 +349,8 @@ test('add keys to simple drop', async (t) => {
 	for (var i = 0; i < NUM_KEYS; i++) {
 		const keys = await generateKeys({
 			numKeys: 1,
-			entropy: {
-				rootKey: 'some secret entropy' + Date.now(),
-				meta: dropId,
-				nonce: i
-			}
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
 		})
 		
 		keyPairs.simple.push(keys.keyPairs[0])
@@ -389,11 +380,8 @@ test('add keys to ft drop', async (t) => {
 	for (var i = 0; i < NUM_KEYS; i++) {
 		const keys = await generateKeys({
 			numKeys: 1,
-			entropy: {
-				rootKey: 'some secret entropy' + Date.now(),
-				meta: dropId,
-				nonce: i
-			}
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
 		})
 		
 		keyPairs.ft.push(keys.keyPairs[0])
@@ -423,11 +411,8 @@ test('add 1 key to nft drop', async (t) => {
 	for (var i = 0; i < 1; i++) {
 		const keys = await generateKeys({
 			numKeys: 1,
-			entropy: {
-				rootKey: 'some secret entropy' + Date.now(),
-				meta: dropId,
-				nonce: i
-			}
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
 		})
 		
 		keyPairs.nft.push(keys.keyPairs[0])
