@@ -342,7 +342,7 @@ test('get drops', async (t) => {
 test('add keys to simple drop', async (t) => {
 
 	const drop = drops[0]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
@@ -350,7 +350,7 @@ test('add keys to simple drop', async (t) => {
 		const keys = await generateKeys({
 			numKeys: 1,
 			rootEntropy: 'some secret entropy' + Date.now(),
-			metaEntropy: `${dropId}_${i}`
+			metaEntropy: `${dropId}_${nextKeyId + i}`
 		})
 		
 		keyPairs.simple.push(keys.keyPairs[0])
@@ -373,7 +373,7 @@ test('add keys to simple drop', async (t) => {
 test('add keys to ft drop', async (t) => {
 
 	const drop = drops[1]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
@@ -381,7 +381,7 @@ test('add keys to ft drop', async (t) => {
 		const keys = await generateKeys({
 			numKeys: 1,
 			rootEntropy: 'some secret entropy' + Date.now(),
-			metaEntropy: `${dropId}_${i}`
+			metaEntropy: `${dropId}_${nextKeyId + i}`
 		})
 		
 		keyPairs.ft.push(keys.keyPairs[0])
@@ -404,7 +404,7 @@ test('add keys to ft drop', async (t) => {
 test('add 1 key to nft drop', async (t) => {
 
 	const drop = drops[2]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
@@ -412,7 +412,7 @@ test('add 1 key to nft drop', async (t) => {
 		const keys = await generateKeys({
 			numKeys: 1,
 			rootEntropy: 'some secret entropy' + Date.now(),
-			metaEntropy: `${dropId}_${i}`
+			metaEntropy: `${dropId}_${nextKeyId + i}`
 		})
 		
 		keyPairs.nft.push(keys.keyPairs[0])
