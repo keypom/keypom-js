@@ -6,10 +6,10 @@ const {
 	},
 } = nearAPI;
 
-import { CreateDropParams } from "./types";
+import { CreateDropParams, GetDropParams } from "./types";
 import { getEnv } from "./keypom";
 import {
-	genKey,
+	keypomView,
 	key2str,
 	estimateRequiredDeposit,
 	ftTransferCall,
@@ -18,6 +18,8 @@ import {
 	parseFTAmount,
 } from "./keypom-utils";
 import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
+
+const KEY_LIMIT = 50;
 
 export const createDrop = async ({
 	account,
@@ -159,30 +161,102 @@ export const createDrop = async ({
 	return { responses }
 }
 
-export const getDrops = async ({ accountId }) => {
-
-	const {
-		viewAccount, contractId,
-	} = getEnv()
-
-	const drops = await viewAccount.viewFunction2({
-		contractId,
-		methodName: 'get_drops_for_owner',
+/**
+ * Get the number of active drops for a given account ID. Active refers to ones exist on the contract and haven't been deleted.
+ * 
+ * @param {string} accountId The account to get the number of active drops for.
+ * 
+ * @returns {Promise<number>} The number of active drops for the given account ID.
+ * 
+ * @example <caption>Query for the number of drops owned by an account</caption>
+ * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * 	network: "testnet",
+ * });
+ * 
+ * // Query for the number of drops owned by the given account
+ * const numDrops = await getDropSupply({
+ * 	accountId: "benjiman.testnet"
+ * })
+ * 
+ * console.log('numDrops: ', numDrops)
+ * ```
+*/
+export const getDropSupply = async ({
+	accountId,
+}: { accountId: string }) => {
+	return keypomView({
+		methodName: 'get_drop_supply_for_owner',
 		args: {
 			account_id: accountId,
 		},
 	})
+}
 
-	await Promise.all(drops.map(async (drop, i) => {
-		const { drop_id } = drop
-		drop.keys = await viewAccount.viewFunction2({
-			contractId,
-			methodName: 'get_keys_for_drop',
-			args: {
-				drop_id: drop_id
-			}
-		})
-	}))
+/**
+ * Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.
+ * 
+ * @param {string} accountId The funding account that the drops belong to.
+ * @param {string= | number=} (OPTIONAL) Where to start paginating through drops.
+ * @param {number=} (OPTIONAL) How many drops to paginate through.
+ * @param {boolean=} (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
+ * 
+ * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
+ * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * 	network: "testnet",
+ * });
+ * 
+ * // Get the number of drops the account has.
+ * const numDrops = await getDropSupply({
+ * 	accountId: "benjiman.testnet"
+ * });
+ * 
+ * // Query for drop information for the last 5 drops and their respective keys
+ * const dropsAndKeys = await getDrops({
+ * 	accountId: "benjiman.testnet",
+ * 	start: numDrops - 5,
+ * 	withKeys: true
+ * })
+ * 
+ * console.log('dropsAndKeys: ', dropsAndKeys)
+ * ```
+*/
+export const getDrops = async ({
+	accountId,
+	start,
+	limit,
+	withKeys = false,
+}: GetDropParams) => {
+
+	const drops = await keypomView({
+		methodName: 'get_drops_for_owner',
+		args: {
+			account_id: accountId,
+			from_index: start ? start.toString() : undefined,
+			limit: limit ? limit : undefined,
+		},
+	})
+
+	if (withKeys) {
+		if (drops.length > 20) {
+			throw new Error(`Too many RPC requests in parallel. Use 'limit' arg 20 or less.`)
+		}
+
+		await Promise.all(drops.map(async (drop, i) => {
+			const { drop_id } = drop
+			drop.keys = await keypomView({
+				methodName: 'get_keys_for_drop',
+				args: {
+					drop_id,
+					from_index: '0',
+					limit: KEY_LIMIT
+				}
+			})
+		}))
+	}
 
 	return drops
 }
@@ -195,7 +269,7 @@ export const deleteDrops = async ({
 }) => {
 
 	const {
-		gas, gas300, receiverId, execute,
+		gas300, receiverId, execute,
 	} = getEnv()
 
 	const responses = await Promise.all(drops.map(async ({
@@ -206,11 +280,43 @@ export const deleteDrops = async ({
 		nft,
 	}) => {
 
+		let keySupply = keys?.length || 0
+
+		const updateKeys = async () => {
+			let keyPromises = [
+				(async() => {
+					keySupply = await keypomView({
+						methodName: 'get_key_supply_for_drop',
+						args: {
+							drop_id,
+						}
+					})
+				})
+			]
+	
+			if (!keys) {
+				keyPromises.push((async() => {
+					keys = await keypomView({
+						methodName: 'get_keys_for_drop',
+						args: {
+							drop_id,
+							from_index: '0',
+							limit: KEY_LIMIT,
+						}
+					})
+				}))
+			}
+	
+			await Promise.all(keyPromises)
+		}
+		await updateKeys()
+
 		const responses: Array<void | FinalExecutionOutcome[]> = []
 
 		if (registered_uses !== 0 && (ft !== undefined || nft !== undefined)) {
 			responses.push(...(await execute({
-				account, wallet,
+				account,
+				wallet,
 				transactions: [{
 					receiverId,
 					actions: [{
@@ -227,37 +333,50 @@ export const deleteDrops = async ({
 			})))
 		}
 
-		const actions: any[] = []
+		const deleteKeys = async () => {
+			responses.push(...(await execute({
+				account,
+				wallet,
+				transactions: [{
+					receiverId,
+					actions: [{
+						type: 'FunctionCall',
+						params: {
+							methodName: 'delete_keys',
+							args: {
+								drop_id,
+								public_keys: keys.map(key2str),
+							},
+							gas: gas300,
+						}
+					}],
+				}]
+			})))
 
-		actions.push({
-			type: 'FunctionCall',
-			params: {
-				methodName: 'delete_keys',
-				args: {
-					drop_id,
-					public_keys: keys.map(key2str),
-				},
-				gas,
+			if (keySupply > keys.length) {
+				await updateKeys()
+				await deleteKeys()
 			}
-		})
+		}
+		await deleteKeys()
 
 		if (withdrawBalance) {
-			actions.push({
-				type: 'FunctionCall',
-				params: {
-					methodName: 'withdraw_from_balance',
-					args: {},
-					gas: '50000000000000',
-				}
-			})
+			responses.push(...(await execute({
+				account,
+				wallet,
+				transactions: [{
+					receiverId,
+					actions: [{
+						type: 'FunctionCall',
+						params: {
+							methodName: 'withdraw_from_balance',
+							args: {},
+							gas: '50000000000000',
+						}
+					}],
+				}]
+			})))
 		}
-
-		const transactions: any[] = [{
-			receiverId,
-			actions,
-		}]
-
-		responses.push(...(await execute({ transactions, account, wallet })))
 
 		return responses
 	}))
