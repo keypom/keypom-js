@@ -80,7 +80,7 @@ export const claim = async ({
 }) => {
 
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, connection,
+		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingKeyPair,
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)
@@ -117,6 +117,8 @@ export const claim = async ({
 			}
 		}]
 	}]
+	
+	const result = await execute({ transactions, account: contractAccount })
 
-	return execute({ transactions, account: contractAccount })
+	return result
 }

@@ -90,7 +90,7 @@ let fundingAccount, drops
 
 test('init', async (t) => {
 
-	initKeypom({
+	await initKeypom({
 		// near,
 		network: 'testnet',
 		funder: {
@@ -99,9 +99,10 @@ test('init', async (t) => {
 		}
 	})
 
-	const { connection, networkId, keyStore } = getEnv()
-	keyStore.setKey(networkId, accountId, testKeyPair)
-	fundingAccount = new Account(connection, accountId)
+	const { fundingAccount: keypomFundingAccount } = getEnv()
+	fundingAccount = keypomFundingAccount
+
+	console.log('fundingAccount', keypomFundingAccount)
 
 	t.true(true)
 });

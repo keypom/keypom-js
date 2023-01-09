@@ -56,23 +56,23 @@ export interface EstimatorParams {
     fcData?: FCData;
     ftData?: FTData;
 }
-export interface TimeConfig {
-    start: string;
-    end: string;
-    throttle: string;
-    interval: string;
-}
-export interface UsageConfig {
-    autoDeleteDrop?: boolean;
-    autoWithdraw?: boolean;
-    permissions: string;
-    refundDeposit: boolean;
-}
 export interface DropConfig {
     usesPerKey?: number;
-    rootAccountId?: string;
     time?: TimeConfig;
     usage?: UsageConfig;
+    dropRoot?: string;
+}
+export interface TimeConfig {
+    start?: number;
+    end?: number;
+    throttle?: number;
+    interval?: number;
+}
+export interface UsageConfig {
+    permissions?: string;
+    refundDeposit?: boolean;
+    autoDeleteDrop?: boolean;
+    autoWithdraw?: boolean;
 }
 export interface FTData {
     contractId?: string;
@@ -95,13 +95,14 @@ export interface Method {
 export interface FCData {
     methods: Method[][];
 }
+export interface SimpleData {
+    lazyRegister?: boolean;
+}
 export interface CreateDropParams {
     account: Account;
     wallet?: BrowserWalletBehaviour;
-    accountRootKey?: string;
     dropId?: string;
     publicKeys?: string[];
-    numKeys?: number;
     depositPerUseNEAR?: Number;
     depositPerUseYocto?: string;
     metadata?: string;
@@ -109,6 +110,7 @@ export interface CreateDropParams {
     ftData?: FTData;
     nftData?: NFTData;
     fcData?: FCData;
+    simpleData?: SimpleData;
     hasBalance?: boolean;
 }
 export interface EnvVars {
@@ -120,7 +122,7 @@ export interface EnvVars {
     fundingAccount: Account;
     contractAccount: Account;
     viewAccount: any;
-    fundingKey: KeyPair;
+    fundingKeyPair: KeyPair;
     gas: string;
     gas300: string;
     attachedGas: string;

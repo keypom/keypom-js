@@ -81,6 +81,8 @@ export const createDrop = async ({
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount
 	} = getEnv()
 
+	account = getAccount({ account, wallet })
+
 	/// parse args
 	if (depositPerUseNEAR) {
 		depositPerUseYocto = parseNearAmount(depositPerUseNEAR.toString()) || '0'
@@ -131,7 +133,7 @@ export const createDrop = async ({
 
 	transactions.push({
 		receiverId,
-		signerId: account ? account?.accountId : fundingAccount.accountId,
+		signerId: account.accountId,
 		actions: [{
 			type: 'FunctionCall',
 			params: {
