@@ -118,7 +118,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
     var secretKeys: string[] = []
     for (let i = 0; i < numKeys; i++) {
         if (rootEntropy) {
-            const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy}` : rootEntropy;
+            const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy[i]}` : rootEntropy;
             const hash: ArrayBuffer = await hashBuf(stringToHash);
 
             const { secretKey, publicKey } = generateSeedPhrase(hash)

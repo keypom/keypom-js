@@ -37,7 +37,7 @@ export const addKeys = async ({
 	wallet,
 	dropId,
 	drop,
-	numKeys = 1,
+	numKeys,
 	publicKeys,
 	nftTokenIds,
 	rootEntropy,
@@ -55,6 +55,10 @@ export const addKeys = async ({
 		throw new Error("Either a dropId or drop object must be passed in.")
 	}
 
+	if (!publicKeys?.length && !numKeys) {
+		throw new Error("Either pass in publicKeys or set numKeys to a positive non-zero value.")
+	}
+
 	account = getAccount({ account, wallet });
 	const {
 		drop_id,
@@ -66,17 +70,6 @@ export const addKeys = async ({
 		nft: nftData = {},
 		next_key_id,
 	} = drop || await getDropInformation({dropId: dropId!});
-
-	let requiredDeposit = await estimateRequiredDeposit({
-		near,
-		depositPerUse: deposit_per_use,
-		numKeys,
-		usesPerKey: uses_per_key,
-		attachedGas: required_gas,
-		storage: parseNearAmount('0.2') as string,
-		ftData,
-	})
-	console.log('requiredDeposit for add keys: ', requiredDeposit)
 
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
@@ -102,6 +95,18 @@ export const addKeys = async ({
 		
 		publicKeys = keys.publicKeys
 	}
+
+	numKeys = publicKeys!.length;
+	let requiredDeposit = await estimateRequiredDeposit({
+		near,
+		depositPerUse: deposit_per_use,
+		numKeys,
+		usesPerKey: uses_per_key,
+		attachedGas: required_gas,
+		storage: parseNearAmount('0.2') as string,
+		ftData,
+	})
+	console.log('requiredDeposit for add keys: ', requiredDeposit)
 
 	const transactions: any[] = []
 

@@ -71,7 +71,7 @@ export const createDrop = async ({
 	account,
 	wallet,
 	dropId,
-	numKeys = 1,
+	numKeys = 0,
 	publicKeys,
 	rootEntropy,
 	depositPerUseNEAR,
@@ -144,6 +144,7 @@ export const createDrop = async ({
 		publicKeys = keys.publicKeys
 	}
 
+	numKeys = publicKeys!.length;
 	/// estimate required deposit
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
