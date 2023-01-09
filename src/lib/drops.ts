@@ -6,7 +6,7 @@ const {
 	},
 } = nearAPI;
 
-import { CreateDropParams, FTData, NFTData } from "./types";
+import { CreateDropParams, FTData, GetDropParams, NFTData } from "./types";
 import { getEnv } from "./keypom";
 import {
 	generateKeys,
@@ -136,7 +136,7 @@ export const createDrop = async ({
 
 	transactions.push({
 		receiverId,
-		signerId: account.accountId,
+		signerId: account!.accountId, // We know this is not undefined since getAccount throws
 		actions: [{
 			type: 'FunctionCall',
 			params: {
@@ -349,8 +349,10 @@ export const deleteDrops = async ({
 	withdrawBalance = true,
 }) => {
 	const {
-		gas300, receiverId, execute,
+		gas300, receiverId, execute, getAccount
 	} = getEnv()
+
+	account = getAccount({ account, wallet });
 
 	const responses = await Promise.all(drops.map(async ({
 		drop_id,

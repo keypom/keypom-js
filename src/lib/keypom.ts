@@ -49,7 +49,15 @@ export const getEnv = (): EnvVars  => ({
 
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = ({ account, wallet }) => account || wallet || fundingAccount
+const getAccount = ({ account, wallet }) => {
+	let returnedAccount = account || wallet || fundingAccount;
+	// If neither a wallet object, account object, or funding account is provided, throw an error
+	if (!returnedAccount) {
+		throw new Error('No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')
+	}
+
+	return returnedAccount
+}
 
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by

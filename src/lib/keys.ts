@@ -30,6 +30,8 @@ export const addKeys = async ({
 
 	const numKeys = publicKeys.length
 
+	account = getAccount({ account, wallet });
+
 	const {
 		drop_id,
 		registered_uses,
@@ -70,7 +72,7 @@ export const addKeys = async ({
 
 	if (ftData.contract_id) {
 		transactions.push(ftTransferCall({
-			account: getAccount({ account, wallet }),
+			account,
 			contractId: ftData.contract_id,
 			args: {
 				receiver_id: contractId,
@@ -85,7 +87,7 @@ export const addKeys = async ({
 
 	if (nftTokenIds && nftTokenIds.length > 0) {
 		const nftResponses = await nftTransferCall({
-			account: getAccount({ account, wallet }),
+			account,
 			contractId: nftData.contract_id,
 			receiverId: contractId,
 			tokenIds: nftTokenIds,
