@@ -190,18 +190,18 @@ export const execute = async ({
 	const {
         contractId,
 	} = getEnv()
-
-    let needsRedirect = false;
-    transactions.forEach((tx) => {
-        if (tx.receiverId !== contractId) needsRedirect = true
-        tx.actions.forEach((a) => {
-            const { deposit } = (a as any)?.params
-            if (deposit && deposit !== '0') needsRedirect = true
-        })
-    })
     
 	/// instance of walletSelector.wallet()
 	if (wallet) {
+        let needsRedirect = false;
+        transactions.forEach((tx) => {
+            if (tx.receiverId !== contractId) needsRedirect = true
+            tx.actions.forEach((a) => {
+                const { deposit } = (a as any)?.params
+                if (deposit && deposit !== '0') needsRedirect = true
+            })
+        })
+        
         if (needsRedirect) return await wallet.signAndSendTransactions({ transactions })
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = []

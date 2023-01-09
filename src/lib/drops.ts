@@ -125,11 +125,10 @@ export const createDrop = async ({
 		
 		// Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
 		const rootEntropyUsed = rootEntropy || fundingAccountDetails?.rootEntropy;
-		console.log('rootEntropyUsed: ', rootEntropyUsed)
 		// If either root entropy was passed into the function or the funder has some set, we should use that.
 		if(rootEntropyUsed) {
 			// Create an array of size numKeys with increasing strings from 0 -> numKeys - 1. Each element should also contain the dropId infront of the string 
-			const nonceDropIdMeta = Array.from(Array(numKeys).keys()).map(String).map((nonce) => `${dropId}_${nonce}`);
+			const nonceDropIdMeta = Array.from({length: numKeys}, (_, i) => `${dropId}_${i}`);
 			keys = await generateKeys({
 				numKeys,
 				rootEntropy: rootEntropyUsed,
@@ -143,7 +142,6 @@ export const createDrop = async ({
 		}
 		
 		publicKeys = keys.publicKeys
-		console.log('publicKeys: ', publicKeys)
 	}
 
 	/// estimate required deposit
