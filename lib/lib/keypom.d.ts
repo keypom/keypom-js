@@ -16,6 +16,7 @@ export declare const execute: (args: any) => Promise<void | (void | nearAPI.prov
  * @param {Near} near (OPTIONAL) The NEAR connection instance to use. If not passed in, it will create a new one.
  * @param {string} network The network to connect to either `mainnet` or `testnet`.
  * @param {Funder=} funder (OPTIONAL) The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
+ * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
  * @param {string} keypomContractId The account ID of the Keypom contract. If not passed in, it will use the most up-to-date account ID for whichever network is selected.
  *
  * @returns {Promise<Account | null>} If a funder is passed in, its account object is returned. Otherwise, it null is returned.
@@ -79,7 +80,7 @@ export declare const initKeypom: ({ near: _near, network, funder, keypomContract
  * Once the SDK is initialized, this function allows the current funder account to be updated. Having a funder is only necessary if you wish to sign transactions on the Keypom Protocol.
  *
  * @param {Funder} funder The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
- *
+ * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
  * @returns {Promise<Account>} The funder's account object is returned.
  *
  * @example <caption>After initializing the SDK, the funder is updated.</caption>
@@ -113,7 +114,7 @@ export declare const updateFunder: ({ funder }: {
     funder: Funder;
 }) => Promise<null>;
 /**
- * This allows the desired Keypom contract ID to be set. By default
+ * This allows the desired Keypom contract ID to be set. By default, the most up-to-date Keypom contract for the given network is set during initKeypom.
  *
  * @param {string} keypomContractId The account ID that should be used for the Keypom contract.
  *
