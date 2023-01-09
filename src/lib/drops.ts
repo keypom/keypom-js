@@ -232,13 +232,45 @@ export const getDrops = async ({ accountId }) => {
 	return drops
 }
 
+/**
+ * Get information about a specific drop given its drop ID.
+ * 
+ * @param {string} dropId The drop ID for the specific drop that you want to get information about.
+ * 
+ * @example <caption>Create a simple drop and retrieve information about it:</caption>
+ * ```js
+ *  
+ * ```
+*/
+export const getDropInformation = async ({ dropId } : {dropId: string}) => {
+	const {
+		viewAccount, contractId,
+	} = getEnv()
+
+	const dropInfo = await viewAccount.viewFunction2({
+		contractId,
+		methodName: 'get_drop_information',
+		args: {
+			drop_id: dropId,
+		},
+	})
+
+	return dropInfo
+}
+
+/**
+ * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
+ * 
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * 
+*/
 export const deleteDrops = async ({
 	account,
 	wallet,
 	drops,
 	withdrawBalance = true,
 }) => {
-
 	const {
 		gas, gas300, receiverId, execute,
 	} = getEnv()
@@ -255,7 +287,8 @@ export const deleteDrops = async ({
 
 		if (registered_uses !== 0 && (ft !== undefined || nft !== undefined)) {
 			responses.push(...(await execute({
-				account, wallet,
+				account, 
+				wallet,
 				transactions: [{
 					receiverId,
 					actions: [{
