@@ -3,7 +3,7 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair } from 'near-api-js/lib/utils';
-export type NearKeyPair = KeyPair;
+export declare type NearKeyPair = KeyPair;
 export interface NearAccount {
     accountId: string;
     signAndSendTransaction: () => {};
