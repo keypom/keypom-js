@@ -73,7 +73,7 @@ export const addKeys = async ({
 		numKeys,
 		usesPerKey: uses_per_key,
 		attachedGas: required_gas,
-		storage: parseNearAmount('5') as string,
+		storage: parseNearAmount('0.2') as string,
 		ftData,
 	})
 	console.log('requiredDeposit for add keys: ', requiredDeposit)
