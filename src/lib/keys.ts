@@ -236,11 +236,6 @@ export const addKeys = async ({
 	})
 
 	if (ftData.contract_id) {
-		console.log('ftData.balance_per_use: ', ftData.balance_per_use)
-		console.log('numKeys: ', numKeys)
-		console.log('registered_uses: ', registered_uses)
-		console.log('numKeys - registered_uses: ', numKeys - registered_uses)
-
 		transactions.push(ftTransferCall({
 			account: account!,
 			contractId: ftData.contract_id,
@@ -267,4 +262,63 @@ export const addKeys = async ({
 	}
 
 	return { responses, dropId: drop_id, keys }
+}
+
+export const deleteKeys = async ({
+	account,
+	wallet,
+	drop,
+	keys,
+	withdrawBalance = false,
+}) => {
+
+	const {
+		receiverId, execute,
+	} = getEnv()
+
+	const { drop_id, registered_uses } = drop
+	if (!keys) keys = drop.keys
+
+	const actions: any[] = []
+	if ((drop.ft || drop.nft) && registered_uses > 0) {
+		actions.push({
+			type: 'FunctionCall',
+			params: {
+				methodName: 'refund_assets',
+				args: {
+					drop_id,
+				},
+				gas: '100000000000000',
+			}
+		})
+	}
+	actions.push({
+		type: 'FunctionCall',
+		params: {
+			methodName: 'delete_keys',
+			args: {
+				drop_id,
+				public_keys: keys.map(key2str),
+			},
+			gas: '100000000000000',
+		}
+	})
+	
+	if (withdrawBalance) {
+		actions.push({
+			type: 'FunctionCall',
+			params: {
+				methodName: 'withdraw_from_balance',
+				args: {},
+				gas: '100000000000000',
+			}
+		})
+	}
+
+	const transactions: any[] = [{
+		receiverId,
+		actions,
+	}]
+
+	return execute({ transactions, account, wallet })
 }
