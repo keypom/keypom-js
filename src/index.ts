@@ -14,7 +14,6 @@ export {
 } from "./lib/drops";
 export {
 	addKeys,
-	deleteKeys,
 } from "./lib/keys";
 export {
 	claim,

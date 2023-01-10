@@ -37,7 +37,7 @@ let contractBase = 'v1-3.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
 
-type Maybe<T> = T | undefined;
+export type Maybe<T> = T | undefined;
 
 let near: Maybe<Near> = undefined;
 let connection: Maybe<Connection> = undefined;

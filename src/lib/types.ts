@@ -3,6 +3,7 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair } from 'near-api-js/lib/utils';
+import { Maybe } from './keypom';
 
 /// Initialization
 
@@ -132,6 +133,12 @@ export interface UsageConfig {
     autoDeleteDrop?: boolean
     /// When this drop is deleted and it is the owner's *last* drop, automatically withdraw their balance.
     autoWithdraw?: boolean
+}
+
+export interface CreateOrAddParams {
+	responses: any,
+	keys?: Maybe<GeneratedKeyPairs>,
+	dropId: string
 }
 
 export interface FTData {
