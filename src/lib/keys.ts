@@ -16,7 +16,7 @@ import {
 	generateKeys,
 	getUserBalance,
 } from "./keypom-utils";
-import { AddKeyParams, CreateOrAddParams } from "./types";
+import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from "./types";
 import { getDropInformation } from "./drops";
 
 /**
@@ -264,23 +264,54 @@ export const addKeys = async ({
 	return { responses, dropId: drop_id, keys }
 }
 
+/**
+ * Delete a set of keys from a drop and optionally withdraw any remaining balance you have on the Keypom contract.
+ * 
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string[] | string} publicKeys Specify a set of public keys to delete. If deleting a single publicKey, the string can be passed in without wrapping it in an array.
+ * @param {string} dropId Which drop ID do the keys belong to?
+ * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
+ * 
+ * @example <caption>Create a drop with 5 keys and delete the first one</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ * 
+ * // Create the simple drop with 5 random keys
+ * const {keys, dropId} = await createDrop({
+ * 	numKeys: 5,
+ * 	depositPerUseNEAR: 1,
+ * });
+ * 
+ * await deleteKeys({
+ * 	dropId,
+ * 	publicKeys: keys.publicKeys[0] // Can be wrapped in an array as well
+ * })
+```
+*/
 export const deleteKeys = async ({
 	account,
 	wallet,
-	drop,
-	keys,
+	publicKeys,
+	dropId,
 	withdrawBalance = false,
-}) => {
+}: DeleteKeyParams) => {
 
 	const {
 		receiverId, execute,
 	} = getEnv()
 
-	const { drop_id, registered_uses } = drop
-	if (!keys) keys = drop.keys
+	const { drop_id, registered_uses, ft, nft } = await getDropInformation({ dropId })
 
 	const actions: any[] = []
-	if ((drop.ft || drop.nft) && registered_uses > 0) {
+	if ((ft || nft) && registered_uses > 0) {
 		actions.push({
 			type: 'FunctionCall',
 			params: {
@@ -292,13 +323,20 @@ export const deleteKeys = async ({
 			}
 		})
 	}
+
+	// If the publicKeys provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
+    if (publicKeys && !Array.isArray(publicKeys)) {
+        publicKeys = [publicKeys]
+    }
+
 	actions.push({
 		type: 'FunctionCall',
 		params: {
 			methodName: 'delete_keys',
 			args: {
 				drop_id,
-				public_keys: keys.map(key2str),
+				// @ts-ignore - publicKeys is always an array here
+				public_keys: publicKeys.map(key2str),
 			},
 			gas: '100000000000000',
 		}

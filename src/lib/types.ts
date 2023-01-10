@@ -197,6 +197,14 @@ export interface DeleteDropParams {
 	withdrawBalance?: boolean
 }
 
+export interface DeleteKeyParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	publicKeys: string[] | string,
+	dropId: string,
+	withdrawBalance?: boolean
+}
+
 export interface AddKeyParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
