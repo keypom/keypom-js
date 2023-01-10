@@ -1,7 +1,108 @@
-import { CreateDropParams, GetDropParams } from "./types";
-export declare const createDrop: ({ account, wallet, dropId, publicKeys, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, hasBalance, }: CreateDropParams) => Promise<{
-    responses: any;
-}>;
+import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from "./types";
+/**
+ * Creates a new drop based on parameters passed in.
+ *
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string=} dropId (OPTIONAL) Specify a custom drop ID rather than using the incrementing nonce on the contract.
+ * @param {number} numKeys Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed into the function, the keys will be
+ * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly.
+ * @param {string[]=} publicKeys (OPTIONAL) Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter.
+ * @param {string=} rootEntropy (OPTIONAL) Specify an entropy to use for generating keys (will overload the funder's rootEntropy if applicable). This parameter only matters if the publicKeys variable is not passed in.
+ * @param {Number=} depositPerUseNEAR (OPTIONAL) How much $NEAR should be contained in each link. Unit in $NEAR (i.e 1 = 1 $NEAR)
+ * @param {string=} depositPerUseYocto (OPTIONAL) How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR)
+ * @param {string=} metadata (OPTIONAL) String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON.
+ * @param {DropConfig=} config (OPTIONAL) Allows specific drop behaviors to be configured such as the number of uses each key / link will have.
+ * @param {FTData=} ftData (OPTIONAL) For creating a fungible token drop, this contains necessary configurable information about the drop.
+ * @param {NFTData=} nftData (OPTIONAL) For creating a non-fungible token drop, this contains necessary configurable information about the drop.
+ * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
+ * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
+ * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
+ *
+ * @return {Promise<CreateOrAddParams>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
+ *
+ * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random.:</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
+ * // be completely random unless otherwise overwritten.
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ * // Create a drop with 10 completely random keys. The return value `keys` contains information about the generated keys
+ * const {keys} = await createDrop({
+ * 	numKeys: 10,
+ * 	depositPerUseNEAR: 1,
+ * });
+ *
+ * console.log('public keys: ', keys.publicKeys);
+ * console.log('private keys: ', keys.secretKeys);
+ * ```
+ * @example <caption>Init funder with root entropy and generate deterministic keys for a drop. Compare with manually generated keys</caption>
+ * // Initialize the SDK for the given network and NEAR connection. Root entropy is passed into the funder account so any generated keys
+ * // Will be based off that entropy.
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1",
+ * 		rootEntropy: "my-global-secret-password"
+ * 	}
+ * });
+ *
+ * // Create a simple drop with 5 keys. Each key will be derived based on the rootEntropy of the funder, the drop ID, and key nonce.
+ * const { keys: keysFromDrop, dropId } = await createDrop({
+ * 	numKeys: 5,
+ * 	depositPerUseNEAR: 1,
+ * });
+ *
+ * // Deterministically Generate the Private Keys:
+ * const nonceDropIdMeta = Array.from({length: 5}, (_, i) => `${dropId}_${i}`);
+ * const manualKeys = await generateKeys({
+ * 	numKeys: 5,
+ * 	rootEntropy: "my-global-secret-password",
+ * 	metaEntropy: nonceDropIdMeta
+ * })
+ *
+ * // Get the public and private keys from the keys generated by the drop
+ * const {publicKeys, secretKeys} = keysFromDrop;
+ * // Get the public and private keys from the keys that were manually generated
+ * const {publicKeys: pubKeysGenerated, secretKeys: secretKeysGenerated} = manualKeys;
+ * // These should match!
+ * console.log('secretKeys: ', secretKeys)
+ * console.log('secretKeysGenerated: ', secretKeysGenerated)
+ *
+ * // These should match!
+ * console.log('publicKeys: ', publicKeys)
+ * console.log('pubKeysGenerated: ', pubKeysGenerated)
+ *
+ * @example <caption>Use manually generated keys to create a drop</caption>
+ * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
+ * // be completely random unless otherwise overwritten.
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ * // Generate 10 random keys
+ * const {publicKeys} = await generateKeys({
+ * 	numKeys: 10
+ * });
+ *
+ * // Create a drop using the keys that were generated. Since keys are passed in, the return value won't contain information about the keys.
+ * await createDrop({
+ * 	publicKeys,
+ * 	depositPerUseNEAR: 1,
+ * });
+*/
+export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, useBalance, }: CreateDropParams) => Promise<CreateOrAddParams>;
 /**
  * Get the number of active drops for a given account ID. Active refers to ones exist on the contract and haven't been deleted.
  *
@@ -31,9 +132,9 @@ export declare const getDropSupply: ({ accountId, }: {
  * Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.
  *
  * @param {string} accountId The funding account that the drops belong to.
- * @param {string= | number=} (OPTIONAL) Where to start paginating through drops.
- * @param {number=} (OPTIONAL) How many drops to paginate through.
- * @param {boolean=} (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
+ * @param {string= | number=} start (OPTIONAL) Where to start paginating through drops.
+ * @param {number=} limit (OPTIONAL) How many drops to paginate through.
+ * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
  *
  * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
  * ```js
@@ -58,9 +159,78 @@ export declare const getDropSupply: ({ accountId, }: {
  * ```
 */
 export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropParams) => Promise<any>;
-export declare const deleteDrops: ({ account, wallet, drops, withdrawBalance, }: {
-    account: any;
-    wallet: any;
-    drops: any;
-    withdrawBalance?: boolean | undefined;
-}) => Promise<any[]>;
+/**
+ * Get information about a specific drop given its drop ID.
+ *
+ * @param {string} dropId The drop ID for the specific drop that you want to get information about.
+ * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
+ *
+ * @returns {string} Current user balance
+ *
+ * @example <caption>Create a simple drop and retrieve information about it:</caption>
+ * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * network: "testnet",
+ * });
+ *
+ * // Query for the drop information for a specific drop
+ * const userBalance = await getUserBalance({
+ * accountId: "benjiman.testnet"
+ * })
+ *
+ * console.log('userBalance: ', userBalance)
+ * ```
+*/
+export declare const getDropInformation: ({ dropId, withKeys }: {
+    dropId: string;
+    withKeys?: boolean | undefined;
+}) => Promise<any>;
+/**
+ * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
+ *
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string[]=} dropIds (OPTIONAL) Specify a set of drop IDs to delete.
+ * @param {any} drops (OPTIONAL) If the set of drop information for the drops you want to delete (from getDropInformation) is already known to the client, it can be passed in instead of the drop IDs to reduce computation.
+ * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
+ *
+ * @example <caption>Create 5 drops and delete each of them</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ * // loop to create 5 simple drops each with 5 more keys than the next
+ * for(var i = 0; i < 5; i++) {
+ * 	// create 10 keys with no entropy (all random)
+ * 	const {publicKeys} = await generateKeys({
+ * 		numKeys: 5 * (i+1) // First drop will have 5, then 10, then 15 etc..
+ * 	});
+ *
+ * 	// Create the simple
+ * 	await createDrop({
+ * 		publicKeys,
+ * 		depositPerUseNEAR: 1,
+ * 	});
+ * }
+ *
+ * let drops = await getDrops({accountId: "benji_demo.testnet"});
+ * console.log('drops: ', drops)
+ *
+ * await deleteDrops({
+ * 	drops
+ * })
+ *
+ * 	// Get the number of drops the account has after deletion (should be zero)
+ * 	const numDrops = await getDropSupply({
+ * 		accountId: "benjiman.testnet"
+ * });
+ * console.log('numDrops: ', numDrops)
+*/
+export declare const deleteDrops: ({ account, wallet, drops, dropIds, withdrawBalance, }: DeleteDropParams) => Promise<any[]>;

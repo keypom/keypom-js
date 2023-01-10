@@ -1,17 +1,20 @@
 export {
-	genKey,
+	generateKeys,
 	estimateRequiredDeposit,
 	ftTransferCall,
 	nftTransferCall,
+	getUserBalance
 } from "./lib/keypom-utils";
 export {
 	createDrop,
 	getDrops,
 	deleteDrops,
+	getDropInformation,
+	getDropSupply
 } from "./lib/drops";
 export {
 	addKeys,
-	deleteKeys,
+	deleteKeys
 } from "./lib/keys";
 export {
 	claim,

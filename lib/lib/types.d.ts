@@ -3,7 +3,13 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair } from 'near-api-js/lib/utils';
+import { Maybe } from './keypom';
 export declare type NearKeyPair = KeyPair;
+export interface GeneratedKeyPairs {
+    keyPairs: NearKeyPair[];
+    publicKeys: string[];
+    secretKeys: string[];
+}
 export interface NearAccount {
     accountId: string;
     signAndSendTransaction: () => {};
@@ -17,10 +23,12 @@ export interface Network {
 export interface Funder {
     accountId: string;
     secretKey: string;
-    seedPhrase: string;
+    seedPhrase?: string;
+    rootEntropy?: string;
+    fundingKeyPair?: NearKeyPair;
 }
 export interface InitKeypomParams {
-    near: any;
+    near: Near;
     network: string;
     keypomContractId: string;
     funder?: Funder;
@@ -30,6 +38,11 @@ export interface ExecuteParams {
     account: Account;
     wallet?: Wallet;
     fundingAccount?: Account;
+}
+export interface GenerateKeysParams {
+    numKeys: number;
+    rootEntropy?: string;
+    metaEntropy?: string[] | string;
 }
 export interface FTTransferCallParams {
     account: Account;
@@ -74,6 +87,11 @@ export interface UsageConfig {
     autoDeleteDrop?: boolean;
     autoWithdraw?: boolean;
 }
+export interface CreateOrAddParams {
+    responses: any;
+    keys?: Maybe<GeneratedKeyPairs>;
+    dropId: string;
+}
 export interface FTData {
     contractId?: string;
     senderId?: string;
@@ -99,10 +117,12 @@ export interface SimpleData {
     lazyRegister?: boolean;
 }
 export interface CreateDropParams {
-    account: Account;
+    account?: Account;
     wallet?: BrowserWalletBehaviour;
     dropId?: string;
+    numKeys: number;
     publicKeys?: string[];
+    rootEntropy?: string;
     depositPerUseNEAR?: Number;
     depositPerUseYocto?: string;
     metadata?: string;
@@ -111,7 +131,32 @@ export interface CreateDropParams {
     nftData?: NFTData;
     fcData?: FCData;
     simpleData?: SimpleData;
-    hasBalance?: boolean;
+    useBalance?: boolean;
+}
+export interface DeleteDropParams {
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
+    drops?: any;
+    dropIds?: string[];
+    withdrawBalance?: boolean;
+}
+export interface DeleteKeyParams {
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
+    publicKeys: string[] | string;
+    dropId: string;
+    withdrawBalance?: boolean;
+}
+export interface AddKeyParams {
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
+    dropId?: string;
+    drop?: any;
+    numKeys: number;
+    publicKeys?: string[];
+    nftTokenIds?: string[];
+    rootEntropy?: string;
+    useBalance?: boolean;
 }
 export interface GetDropParams {
     accountId: string;
@@ -120,15 +165,15 @@ export interface GetDropParams {
     withKeys: boolean;
 }
 export interface EnvVars {
-    near: Near;
-    connection: Connection;
-    keyStore: KeyStore;
-    logger: any;
-    networkId: string;
-    fundingAccount: Account;
-    contractAccount: Account;
-    viewAccount: any;
-    fundingKeyPair: KeyPair;
+    near?: Near;
+    connection?: Connection;
+    keyStore?: KeyStore;
+    logger?: any;
+    networkId?: string;
+    fundingAccount?: Account;
+    fundingAccountDetails?: Funder;
+    contractAccount?: Account;
+    viewAccount?: any;
     gas: string;
     gas300: string;
     attachedGas: string;

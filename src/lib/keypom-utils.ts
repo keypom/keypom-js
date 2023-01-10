@@ -3,7 +3,7 @@ import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector
 import type { Action } from "@near-wallet-selector/core";
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams } from "./types";
+import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, GeneratedKeyPairs } from "./types";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
@@ -40,10 +40,136 @@ export const snakeToCamel = (s) =>
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
-export const genKey = async (rootKey: string, meta: string, nonce: number): Promise<NearKeyPair> => {
-	const hash: ArrayBuffer = await hashBuf(`${rootKey}_${meta}_${nonce}`)
-	const { secretKey } = generateSeedPhrase(hash)
-	return KeyPair.fromString(secretKey)
+
+/**
+ * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.). 
+ * Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the meta entropy (could be a user's password) and the secret root key like a UUID).
+ * 
+ * @param {number} numKeys - The number of keys to generate
+ * @param {string=} rootEntropy (OPTIONAL) - A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random.
+ * @param {string=} metaEntropy (OPTIONAL) - An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply 
+ pass in the string itself directly (not within an array).
+ * 
+ * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
+ * 
+ * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
+ * // Generate 10 keys with no entropy (all random)
+ * let keys = await generateKeys({
+ *     numKeys: 10,
+ * })
+ * 
+ * let pubKey1 = keys.publicKeys[0];
+ * let secretKey1 = keys.secretKeys[0];
+ * 
+ * console.log('1st Public Key: ', pubKey1);
+ * console.log('1st Secret Key: ', secretKey1)
+ * 
+ * @example <caption>Generating 1 keypair based on entropy</caption>
+ * // Generate 1 key with the given entropy
+ * let keys = await generateKeys({
+ *     numKeys: 1,
+ *     entropy: {
+ *         rootKey: "my-global-password",
+ *         meta: "user-password-123",
+ *     } // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
+ * })
+ * 
+ * let pubKey = keys.publicKeys[0];
+ * let secretKey = keys.secretKeys[0];
+ * 
+ * console.log('Public Key: ', pubKey);
+ * console.log('Secret Key: ', secretKey)
+ * 
+ * @example <caption>Generating 2 keypairs each with their own entropy</caption>
+ * // Generate 2 keys each with their own unique entropy
+ * let keys = await generateKeys({
+ *     numKeys: 2,
+ *     entropy: [
+ *         {
+ *             rootKey: "my-global-password",
+ *             meta: "first-password",
+ *             nonce: 1
+ *         },
+ *         {
+ *             rootKey: "my-global-password",
+ *             meta: "second-password",
+ *             nonce: 2
+ *         }
+ *     ]
+ * })
+ * 
+ * console.log('Pub Keys ', keys.publicKeys);
+ * console.log('Secret Keys ', keys.secretKeys);
+ */
+export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
+    // If the metaEntropy provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
+    if (metaEntropy && !Array.isArray(metaEntropy)) {
+        metaEntropy = [metaEntropy]
+    }
+
+    // Ensure that if metaEntropy is provided, it should be the same length as the number of keys
+    const numEntropy = metaEntropy?.length || numKeys;
+    if (numEntropy != numKeys) {
+        throw new Error(`You must provide the same number of meta entropy values as the number of keys`)
+    }
+    
+    var keyPairs: NearKeyPair[] = []
+    var publicKeys: string[] = []
+    var secretKeys: string[] = []
+    for (let i = 0; i < numKeys; i++) {
+        if (rootEntropy) {
+            const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy[i]}` : rootEntropy;
+            const hash: ArrayBuffer = await hashBuf(stringToHash);
+
+            const { secretKey, publicKey } = generateSeedPhrase(hash)
+            var keyPair = KeyPair.fromString(secretKey);
+            keyPairs.push(keyPair);
+            publicKeys.push(publicKey)
+            secretKeys.push(secretKey)
+        } else {
+            var keyPair = await KeyPair.fromRandom('ed25519');
+            keyPairs.push(keyPair);
+            publicKeys.push(keyPair.getPublicKey().toString())
+            // @ts-ignore - not sure why it's saying secret key isn't property of keypair
+            secretKeys.push(keyPair.secretKey)
+        }
+    }
+
+    return {
+        keyPairs,
+        publicKeys,
+        secretKeys
+    }
+}
+
+/**
+ * Query for a user's current balance on the Keypom contract
+ * 
+ * @param {string} accountId The account ID of the user to retrieve the balance for.
+ * 
+ * @returns {string} The user's current balance
+ * 
+ * @example <caption>Query for a user's current balance on the Keypom contract</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * network: "testnet",
+ * });
+ * 
+ * // Query for the drop information for a specific drop
+ * const dropInfo = await getDropInformation({
+ * dropId: "1669840629120",
+ * withKeys: true
+ * })
+ * 
+ * console.log('dropInfo: ', dropInfo)
+ * ```
+*/
+export const getUserBalance = async ({
+    accountId
+}: {accountId: string}): Promise<string> => {
+    const { contractId, viewAccount } = getEnv()
+    return viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
 }
 
 export const keypomView = async ({ methodName, args }) => {
@@ -51,7 +177,11 @@ export const keypomView = async ({ methodName, args }) => {
 		viewAccount, contractId,
 	} = getEnv()
 
-    return viewAccount.viewFunction2({
+    if (!viewAccount) {
+        throw new Error('initKeypom must be called before view functions can be called.')
+    }
+
+    return viewAccount!.viewFunction2({
 		contractId,
 		methodName,
 		args
@@ -59,26 +189,26 @@ export const keypomView = async ({ methodName, args }) => {
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys
-export const hasDeposit = ({
-    accountId,
-    transactions,
-}) => {
-    const { contractId, viewAccount } = getEnv()
+// export const hasDeposit = ({
+//     accountId,
+//     transactions,
+// }) => {
+//     const { contractId, viewAccount } = getEnv()
 
-    const totalDeposit = transactions.reduce((a, c) =>
-        a.add(c.actions.reduce((a, c) => a.add(new BN(c.deposit || '0')), new BN('0')))
-    , new BN('0'))
+//     const totalDeposit = transactions.reduce((a, c) =>
+//         a.add(c.actions.reduce((a, c) => a.add(new BN(c.deposit || '0')), new BN('0')))
+//     , new BN('0'))
 
-	const userBalance = viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
+// 	const userBalance = viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
 
-    if (new BN(userBalance.gt(totalDeposit))) {
-        transactions
-            .filter(({ receiverId }) => contractId === receiverId)
-            .forEach((tx) => tx.actions.forEach((a) => {
-                if (/create_drop|add_keys/gi.test(a.methodName)) delete a.deposit
-            }))
-    }
-}
+//     if (new BN(userBalance.gt(totalDeposit))) {
+//         transactions
+//             .filter(({ receiverId }) => contractId === receiverId)
+//             .forEach((tx) => tx.actions.forEach((a) => {
+//                 if (/create_drop|add_keys/gi.test(a.methodName)) delete a.deposit
+//             }))
+//     }
+// }
 
 export const execute = async ({
 	transactions,
@@ -90,18 +220,18 @@ export const execute = async ({
 	const {
         contractId,
 	} = getEnv()
-
-    let needsRedirect = false;
-    transactions.forEach((tx) => {
-        if (tx.receiverId !== contractId) needsRedirect = true
-        tx.actions.forEach((a) => {
-            const { deposit } = (a as any)?.params
-            if (deposit && deposit !== '0') needsRedirect = true
-        })
-    })
     
 	/// instance of walletSelector.wallet()
 	if (wallet) {
+        let needsRedirect = false;
+        transactions.forEach((tx) => {
+            if (tx.receiverId !== contractId) needsRedirect = true
+            tx.actions.forEach((a) => {
+                const { deposit } = (a as any)?.params
+                if (deposit && deposit !== '0') needsRedirect = true
+            })
+        })
+        
         if (needsRedirect) return await wallet.signAndSendTransactions({ transactions })
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = []

@@ -21,7 +21,7 @@ const {
 	deleteKeys,
 	deleteDrops,
 	addKeys,
-	genKey,
+	generateKeys,
 } = keypom
 
 /// testing contracts
@@ -248,9 +248,14 @@ test('create nft drop and add 1 key', async (t) => {
 
 	const publicKeys = []
 	for (var i = 0; i < 1; i++) {
-		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
-		keyPairs.nft.push(keyPair)
-		publicKeys.push(keyPair.getPublicKey().toString());
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
+		})
+		
+		keyPairs.nft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
 	}
 
 	const res = await createDrop({
@@ -297,9 +302,14 @@ test('create an fc drop and 1 key', async (t) => {
 
 	const publicKeys = []
 	for (var i = 0; i < 1; i++) {
-		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
-		keyPairs.fc.push(keyPair)
-		publicKeys.push(keyPair.getPublicKey().toString());
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
+		})
+		
+		keyPairs.fc.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
 	}
 
 	const res = await createDrop({
@@ -332,14 +342,19 @@ test('get drops', async (t) => {
 test('add keys to simple drop', async (t) => {
 
 	const drop = drops[0]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
 	for (var i = 0; i < NUM_KEYS; i++) {
-		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
-		keyPairs.simple.push(keyPair)
-		publicKeys.push(keyPair.getPublicKey().toString());
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
+		
+		keyPairs.simple.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
 	}
 
 	await addKeys({
@@ -358,14 +373,19 @@ test('add keys to simple drop', async (t) => {
 test('add keys to ft drop', async (t) => {
 
 	const drop = drops[1]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
 	for (var i = 0; i < NUM_KEYS; i++) {
-		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
-		keyPairs.ft.push(keyPair)
-		publicKeys.push(keyPair.getPublicKey().toString());
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
+		
+		keyPairs.ft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
 	}
 
 	await addKeys({
@@ -384,14 +404,19 @@ test('add keys to ft drop', async (t) => {
 test('add 1 key to nft drop', async (t) => {
 
 	const drop = drops[2]
-	const { drop_id: dropId } = drop
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
 	/// create throw away keys
 	const publicKeys = []
 	for (var i = 0; i < 1; i++) {
-		const keyPair = await genKey('some secret entropy' + Date.now(), dropId, i)
-		keyPairs.nft.push(keyPair)
-		publicKeys.push(keyPair.getPublicKey().toString());
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
+		
+		keyPairs.nft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
 	}
 
 	await addKeys({
@@ -496,8 +521,8 @@ test('delete 1 key from simple drop', async (t) => {
 	if (!drops.length) return t.true(false)
 
 	await deleteKeys({
-		drop: drops[0],
-		keys: [drops[0].keys[0]]
+		dropId: drops[0].drop_id,
+		publicKeys: [drops[0].keys[0]]
 	})
 
 	drops = await getDrops({
