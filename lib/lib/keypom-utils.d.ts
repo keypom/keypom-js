@@ -66,14 +66,36 @@ export declare const key2str: (v: any) => any;
  * console.log('Secret Keys ', keys.secretKeys);
  */
 export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: GenerateKeysParams) => Promise<GeneratedKeyPairs>;
+/**
+ * Query for a user's current balance on the Keypom contract
+ *
+ * @param {string} accountId The account ID of the user to retrieve the balance for.
+ *
+ * @returns {string} The user's current balance
+ *
+ * @example <caption>Query for a user's current balance on the Keypom contract</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * network: "testnet",
+ * });
+ *
+ * // Query for the drop information for a specific drop
+ * const dropInfo = await getDropInformation({
+ * dropId: "1669840629120",
+ * withKeys: true
+ * })
+ *
+ * console.log('dropInfo: ', dropInfo)
+ * ```
+*/
+export declare const getUserBalance: ({ accountId }: {
+    accountId: string;
+}) => Promise<string>;
 export declare const keypomView: ({ methodName, args }: {
     methodName: any;
     args: any;
 }) => Promise<any>;
-export declare const hasDeposit: ({ accountId, transactions, }: {
-    accountId: any;
-    transactions: any;
-}) => void;
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
 export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | Transaction;
 export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;

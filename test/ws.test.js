@@ -521,8 +521,8 @@ test('delete 1 key from simple drop', async (t) => {
 	if (!drops.length) return t.true(false)
 
 	await deleteKeys({
-		drop: drops[0],
-		keys: [drops[0].keys[0]]
+		dropId: drops[0].drop_id,
+		publicKeys: [drops[0].keys[0]]
 	})
 
 	drops = await getDrops({

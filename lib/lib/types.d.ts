@@ -3,6 +3,7 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from 'near-api-js/lib/key_stores';
 import { KeyPair } from 'near-api-js/lib/utils';
+import { Maybe } from './keypom';
 export declare type NearKeyPair = KeyPair;
 export interface GeneratedKeyPairs {
     keyPairs: NearKeyPair[];
@@ -86,6 +87,11 @@ export interface UsageConfig {
     autoDeleteDrop?: boolean;
     autoWithdraw?: boolean;
 }
+export interface CreateOrAddParams {
+    responses: any;
+    keys?: Maybe<GeneratedKeyPairs>;
+    dropId: string;
+}
 export interface FTData {
     contractId?: string;
     senderId?: string;
@@ -125,7 +131,21 @@ export interface CreateDropParams {
     nftData?: NFTData;
     fcData?: FCData;
     simpleData?: SimpleData;
-    hasBalance?: boolean;
+    useBalance?: boolean;
+}
+export interface DeleteDropParams {
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
+    drops?: any;
+    dropIds?: string[];
+    withdrawBalance?: boolean;
+}
+export interface DeleteKeyParams {
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
+    publicKeys: string[] | string;
+    dropId: string;
+    withdrawBalance?: boolean;
 }
 export interface AddKeyParams {
     account?: Account;
@@ -136,7 +156,7 @@ export interface AddKeyParams {
     publicKeys?: string[];
     nftTokenIds?: string[];
     rootEntropy?: string;
-    hasBalance?: boolean;
+    useBalance?: boolean;
 }
 export interface GetDropParams {
     accountId: string;
