@@ -14,6 +14,7 @@ import {
 	ftTransferCall,
 	nftTransferCall,
 	generateKeys,
+	getUserBalance,
 } from "./keypom-utils";
 import { AddKeyParams } from "./types";
 import { getDropInformation } from "./drops";
@@ -30,7 +31,7 @@ import { getDropInformation } from "./drops";
  * @param {string[]=} publicKeys (OPTIONAL) Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter.
  * @param {string[]=} nftTokenIds (OPTIONAL) If the drop type is an NFT drop, the token IDs can be passed in so that the tokens are automatically sent to the Keypom contract rather
  * than having to do two separate transactions.
- * @param {boolean=} hasBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit.
+ * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
 */
 export const addKeys = async ({
 	account,
@@ -41,7 +42,7 @@ export const addKeys = async ({
 	publicKeys,
 	nftTokenIds,
 	rootEntropy,
-	hasBalance = false,
+	useBalance = false,
 }: AddKeyParams) => {
 	const {
 		near, gas, contractId, receiverId, getAccount, execute, fundingAccountDetails
@@ -106,7 +107,16 @@ export const addKeys = async ({
 		storage: parseNearAmount('0.2') as string,
 		ftData,
 	})
-	console.log('requiredDeposit for add keys: ', requiredDeposit)
+
+	var hasBalance = false;
+	if(useBalance) {
+		let userBal = await getUserBalance({accountId: account!.accountId});
+		if(userBal < requiredDeposit) {
+			throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
+		}
+
+		hasBalance = true;
+	}
 
 	const transactions: any[] = []
 

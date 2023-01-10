@@ -199,7 +199,7 @@ export interface AddKeyParams {
 	publicKeys?: string[],
 	nftTokenIds?: string[],
 	rootEntropy?: string,
-	hasBalance?: boolean,
+	useBalance?: boolean,
 }
 
 export interface GetDropParams {
