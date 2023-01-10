@@ -3,11 +3,14 @@ export {
 	estimateRequiredDeposit,
 	ftTransferCall,
 	nftTransferCall,
+	getUserBalance
 } from "./lib/keypom-utils";
 export {
 	createDrop,
 	getDrops,
 	deleteDrops,
+	getDropInformation,
+	getDropSupply
 } from "./lib/drops";
 export {
 	addKeys,

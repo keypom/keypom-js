@@ -179,7 +179,15 @@ export interface CreateDropParams {
 	nftData?: NFTData,
 	fcData?: FCData,
 	simpleData?: SimpleData
-	hasBalance?: boolean,
+	useBalance?: boolean,
+}
+
+export interface DeleteDropParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	drops?: any,
+	dropIds?: string[],
+	withdrawBalance?: boolean
 }
 
 export interface AddKeyParams {

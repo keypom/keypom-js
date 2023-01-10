@@ -6,7 +6,7 @@ const {
 	},
 } = nearAPI;
 
-import { CreateDropParams, FTData, GetDropParams, NFTData } from "./types";
+import { CreateDropParams, DeleteDropParams, FTData, GetDropParams, NFTData } from "./types";
 import { getEnv } from "./keypom";
 import {
 	generateKeys,
@@ -17,6 +17,7 @@ import {
 	nftTransferCall,
 	getStorageBase,
 	parseFTAmount,
+	getUserBalance,
 } from "./keypom-utils";
 import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
 
@@ -40,7 +41,7 @@ const KEY_LIMIT = 50;
  * @param {NFTData=} nftData (OPTIONAL) For creating a non-fungible token drop, this contains necessary configurable information about the drop.
  * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
  * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
- * @param {boolean=} hasBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit.
+ * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
  * 
  * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR:</caption>
  * ```js
@@ -82,7 +83,7 @@ export const createDrop = async ({
 	nftData = {},
 	simpleData = {},
 	fcData,
-	hasBalance = false,
+	useBalance = false,
 }: CreateDropParams) => {
 	const {
 		near, viewAccount,
@@ -156,6 +157,16 @@ export const createDrop = async ({
 		ftData,
 		fcData,
 	})
+
+	var hasBalance = false;
+	if(useBalance) {
+		let userBal = await getUserBalance({accountId: account!.accountId});
+		if(userBal < requiredDeposit) {
+			throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
+		}
+
+		hasBalance = true;
+	}
 
 	if (ftData?.balancePerUse) {
 		const metadata = await viewAccount.viewFunction2({
@@ -281,9 +292,9 @@ export const getDropSupply = async ({
  * Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.
  * 
  * @param {string} accountId The funding account that the drops belong to.
- * @param {string= | number=} (OPTIONAL) Where to start paginating through drops.
- * @param {number=} (OPTIONAL) How many drops to paginate through.
- * @param {boolean=} (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
+ * @param {string= | number=} start (OPTIONAL) Where to start paginating through drops.
+ * @param {number=} limit (OPTIONAL) How many drops to paginate through.
+ * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
  * 
  * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
  * ```js
@@ -348,13 +359,26 @@ export const getDrops = async ({
  * Get information about a specific drop given its drop ID.
  * 
  * @param {string} dropId The drop ID for the specific drop that you want to get information about.
+ * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
+ * 
+ * @returns {string} Current user balance
  * 
  * @example <caption>Create a simple drop and retrieve information about it:</caption>
  * ```js
- *  
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * network: "testnet",
+ * });
+ * 
+ * // Query for the drop information for a specific drop
+ * const userBalance = await getUserBalance({
+ * accountId: "benjiman.testnet"
+ * })
+ * 
+ * console.log('userBalance: ', userBalance)
  * ```
 */
-export const getDropInformation = async ({ dropId } : {dropId: string}) => {
+export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}) => {
 	const {
 		viewAccount, contractId,
 	} = getEnv()
@@ -367,6 +391,17 @@ export const getDropInformation = async ({ dropId } : {dropId: string}) => {
 		},
 	})
 
+	if (withKeys) {
+		dropInfo.keys = await keypomView({
+			methodName: 'get_keys_for_drop',
+			args: {
+				drop_id: dropId,
+				from_index: '0',
+				limit: KEY_LIMIT
+			}
+		});
+	}
+
 	return dropInfo
 }
 
@@ -375,19 +410,70 @@ export const getDropInformation = async ({ dropId } : {dropId: string}) => {
  * 
  * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
  * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string[]=} dropIds (OPTIONAL) Specify a set of drop IDs to delete.
+ * @param {any} drops (OPTIONAL) If the set of drop information for the drops you want to delete (from getDropInformation) is already known to the client, it can be passed in instead of the drop IDs to reduce computation.
+ * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
  * 
+ * @example <caption>Create 5 drops and delete each of them</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ * 
+ * // loop to create 5 simple drops each with 5 more keys than the next
+ * for(var i = 0; i < 5; i++) {
+ * 	// create 10 keys with no entropy (all random)
+ * 	const {publicKeys} = await generateKeys({
+ * 		numKeys: 5 * (i+1) // First drop will have 5, then 10, then 15 etc..
+ * 	});
+ * 
+ * 	// Create the simple 
+ * 	await createDrop({
+ * 		publicKeys,
+ * 		depositPerUseNEAR: 1,
+ * 	});
+ * }
+ * 
+ * let drops = await getDrops({accountId: "benji_demo.testnet"});
+ * console.log('drops: ', drops)
+ * 
+ * await deleteDrops({
+ * 	drops
+ * })
+ * 	
+ * 	// Get the number of drops the account has after deletion (should be zero)
+ * 	const numDrops = await getDropSupply({
+ * 		accountId: "benjiman.testnet"
+ * });
+ * console.log('numDrops: ', numDrops)
 */
 export const deleteDrops = async ({
 	account,
 	wallet,
 	drops,
+	dropIds,
 	withdrawBalance = true,
-}) => {
+}: DeleteDropParams) => {
 	const {
 		gas300, receiverId, execute, getAccount
 	} = getEnv()
 
 	account = getAccount({ account, wallet });
+
+	// If the drop information isn't passed in, we should get it from the drop IDs
+	if (!drops) {
+		if (!dropIds) {throw new Error('Must pass in either drops or dropIds')};
+
+		// For each drop ID in drop IDs, get the drop information
+		drops = await Promise.all(dropIds.map(async (dropId) => {
+			getDropInformation({ dropId })
+		}));
+	}
 
 	const responses = await Promise.all(drops.map(async ({
 		drop_id,
@@ -396,7 +482,6 @@ export const deleteDrops = async ({
 		ft,
 		nft,
 	}) => {
-
 		let keySupply = keys?.length || 0
 
 		const updateKeys = async () => {
@@ -405,10 +490,10 @@ export const deleteDrops = async ({
 					keySupply = await keypomView({
 						methodName: 'get_key_supply_for_drop',
 						args: {
-							drop_id,
+							drop_id: drop_id.toString(),
 						}
 					})
-				})
+				})()
 			]
 	
 			if (!keys) {
@@ -416,14 +501,14 @@ export const deleteDrops = async ({
 					keys = await keypomView({
 						methodName: 'get_keys_for_drop',
 						args: {
-							drop_id,
+							drop_id: drop_id.toString(),
 							from_index: '0',
 							limit: KEY_LIMIT,
 						}
 					})
-				}))
+				})())
 			}
-	
+			
 			await Promise.all(keyPromises)
 		}
 		await updateKeys()

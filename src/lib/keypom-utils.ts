@@ -142,6 +142,36 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
     }
 }
 
+/**
+ * Query for a user's current balance on the Keypom contract
+ * 
+ * @param {string} accountId The account ID of the user to retrieve the balance for.
+ * 
+ * @returns {string} The user's current balance
+ * 
+ * @example <caption>Query for a user's current balance on the Keypom contract</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
+ * await initKeypom({
+ * network: "testnet",
+ * });
+ * 
+ * // Query for the drop information for a specific drop
+ * const dropInfo = await getDropInformation({
+ * dropId: "1669840629120",
+ * withKeys: true
+ * })
+ * 
+ * console.log('dropInfo: ', dropInfo)
+ * ```
+*/
+export const getUserBalance = async ({
+    accountId
+}: {accountId: string}): Promise<string> => {
+    const { contractId, viewAccount } = getEnv()
+    return viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
+}
+
 export const keypomView = async ({ methodName, args }) => {
     const {
 		viewAccount, contractId,
@@ -159,26 +189,26 @@ export const keypomView = async ({ methodName, args }) => {
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys
-export const hasDeposit = ({
-    accountId,
-    transactions,
-}) => {
-    const { contractId, viewAccount } = getEnv()
+// export const hasDeposit = ({
+//     accountId,
+//     transactions,
+// }) => {
+//     const { contractId, viewAccount } = getEnv()
 
-    const totalDeposit = transactions.reduce((a, c) =>
-        a.add(c.actions.reduce((a, c) => a.add(new BN(c.deposit || '0')), new BN('0')))
-    , new BN('0'))
+//     const totalDeposit = transactions.reduce((a, c) =>
+//         a.add(c.actions.reduce((a, c) => a.add(new BN(c.deposit || '0')), new BN('0')))
+//     , new BN('0'))
 
-	const userBalance = viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
+// 	const userBalance = viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
 
-    if (new BN(userBalance.gt(totalDeposit))) {
-        transactions
-            .filter(({ receiverId }) => contractId === receiverId)
-            .forEach((tx) => tx.actions.forEach((a) => {
-                if (/create_drop|add_keys/gi.test(a.methodName)) delete a.deposit
-            }))
-    }
-}
+//     if (new BN(userBalance.gt(totalDeposit))) {
+//         transactions
+//             .filter(({ receiverId }) => contractId === receiverId)
+//             .forEach((tx) => tx.actions.forEach((a) => {
+//                 if (/create_drop|add_keys/gi.test(a.methodName)) delete a.deposit
+//             }))
+//     }
+// }
 
 export const execute = async ({
 	transactions,
