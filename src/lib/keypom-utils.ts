@@ -8,6 +8,7 @@ import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import * as nearAPI from 'near-api-js';
+import { AccessKeyPermission } from "near-api-js/lib/transaction";
 
 const {
     KeyPair,
