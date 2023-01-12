@@ -1,4 +1,4 @@
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from "./types";
+import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from './types/params';
 /**
  * Creates a new drop based on parameters passed in.
  *

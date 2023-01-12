@@ -1,7 +1,8 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, GeneratedKeyPairs } from "./types";
+import { GeneratedKeyPairs } from "./types/general";
+import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;

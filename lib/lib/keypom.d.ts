@@ -1,12 +1,13 @@
 import * as nearAPI from "near-api-js";
-import { EnvVars, Funder, InitKeypomParams } from "./types";
+import { EnvVars, Funder } from "./types/general";
+import { InitKeypomParams } from "./types/params";
 export declare type Maybe<T> = T | undefined;
 /**
  *
  * @returns {EnvVars} The environment variables used by the Keypom library.
  */
 export declare const getEnv: () => EnvVars;
-export declare const execute: (args: any) => Promise<void | nearAPI.providers.FinalExecutionOutcome[] | (void | nearAPI.providers.FinalExecutionOutcome)[]>;
+export declare const execute: (args: any) => Promise<void | (void | nearAPI.providers.FinalExecutionOutcome)[] | nearAPI.providers.FinalExecutionOutcome[]>;
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.
