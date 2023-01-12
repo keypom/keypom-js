@@ -1,21 +1,3 @@
-export interface CreateDropParams {
-	account?: Account,
-	wallet?: BrowserWalletBehaviour,
-	dropId?: string,
-	numKeys: number,
-	publicKeys?: string[],
-	rootEntropy?: string,
-	depositPerUseNEAR?: Number,
-	depositPerUseYocto?: string,
-	metadata?: string,
-	config?: DropConfig,
-	ftData?: FTData,
-	nftData?: NFTData,
-	fcData?: FCData,
-	simpleData?: SimpleData
-	useBalance?: boolean,
-}
-
 export interface DropConfig {
 	/// How many uses can each key have before it's deleted. If None, default to 1.
 	usesPerKey?: number,
