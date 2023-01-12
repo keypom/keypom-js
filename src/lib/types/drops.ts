@@ -1,3 +1,44 @@
+import { FCData } from "./fc"
+import { FTData } from "./ft"
+import { NFTData } from "./nft"
+import { SimpleData } from "./simple"
+
+export interface KeyInfo {
+    // Drop ID for the specific drop
+    dropId: string,
+    publicKey: string,
+
+    // Which use is the current key on?
+    curKeyUse: number,
+
+    // How many uses this key has left. Once 0 is reached, the key is deleted
+    remainingUses: number,
+
+    // When was the last time the key was used
+    lastUsed: number,
+
+    // How much allowance does the key have left. When the key is deleted, this is refunded to the funder's balance.
+    allowance: number,
+
+    // Nonce for the current key.
+    keyId: number,
+}
+
+export interface Drop {
+    dropId: string,
+    ownerId: string,
+    depositPerUse: string,
+    simple?: SimpleData,
+    nft?: NFTData,
+    ft?: FTData,
+    fc?: FCData,
+    config?: DropConfig,
+    metadata?: string,
+    registeredUses: number,
+    requiredGas: string,
+    nextKeyId: number
+}
+
 export interface DropConfig {
 	/// How many uses can each key have before it's deleted. If None, default to 1.
 	usesPerKey?: number,

@@ -1,4 +1,5 @@
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from './types/params';
+import { CreateDropParams, CreateOrAddParams, DeleteDropParams } from './types/params';
+export declare const KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in.
  *
@@ -103,89 +104,6 @@ import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } 
  * });
 */
 export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, useBalance, }: CreateDropParams) => Promise<CreateOrAddParams>;
-/**
- * Get the number of active drops for a given account ID. Active refers to ones exist on the contract and haven't been deleted.
- *
- * @param {string} accountId The account to get the number of active drops for.
- *
- * @returns {Promise<number>} The number of active drops for the given account ID.
- *
- * @example <caption>Query for the number of drops owned by an account</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * 	network: "testnet",
- * });
- *
- * // Query for the number of drops owned by the given account
- * const numDrops = await getDropSupply({
- * 	accountId: "benjiman.testnet"
- * })
- *
- * console.log('numDrops: ', numDrops)
- * ```
-*/
-export declare const getDropSupply: ({ accountId, }: {
-    accountId: string;
-}) => Promise<any>;
-/**
- * Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.
- *
- * @param {string} accountId The funding account that the drops belong to.
- * @param {string= | number=} start (OPTIONAL) Where to start paginating through drops.
- * @param {number=} limit (OPTIONAL) How many drops to paginate through.
- * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
- *
- * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * 	network: "testnet",
- * });
- *
- * // Get the number of drops the account has.
- * const numDrops = await getDropSupply({
- * 	accountId: "benjiman.testnet"
- * });
- *
- * // Query for drop information for the last 5 drops and their respective keys
- * const dropsAndKeys = await getDrops({
- * 	accountId: "benjiman.testnet",
- * 	start: numDrops - 5,
- * 	withKeys: true
- * })
- *
- * console.log('dropsAndKeys: ', dropsAndKeys)
- * ```
-*/
-export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropParams) => Promise<any>;
-/**
- * Get information about a specific drop given its drop ID.
- *
- * @param {string} dropId The drop ID for the specific drop that you want to get information about.
- * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
- *
- * @returns {string} Current user balance
- *
- * @example <caption>Create a simple drop and retrieve information about it:</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * network: "testnet",
- * });
- *
- * // Query for the drop information for a specific drop
- * const userBalance = await getUserBalance({
- * accountId: "benjiman.testnet"
- * })
- *
- * console.log('userBalance: ', userBalance)
- * ```
-*/
-export declare const getDropInformation: ({ dropId, withKeys }: {
-    dropId: string;
-    withKeys?: boolean | undefined;
-}) => Promise<any>;
 /**
  * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
  *

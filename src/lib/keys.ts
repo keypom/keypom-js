@@ -6,11 +6,11 @@ const {
 	},
 } = nearAPI;
 
-import { getDropInformation } from "./drops";
+import { getDropInformation, getUserBalance } from "./views";
 import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
-	getUserBalance, key2str, nftTransferCall
+	key2str, nftTransferCall
 } from "./keypom-utils";
 import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from './types/params';
 

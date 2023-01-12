@@ -2,15 +2,11 @@ export {
 	generateKeys,
 	estimateRequiredDeposit,
 	ftTransferCall,
-	nftTransferCall,
-	getUserBalance
+	nftTransferCall
 } from "./lib/keypom-utils";
 export {
 	createDrop,
-	getDrops,
 	deleteDrops,
-	getDropInformation,
-	getDropSupply
 } from "./lib/drops";
 export {
 	addKeys,
@@ -24,6 +20,7 @@ export {
 	initKeypom,
 	getEnv,
 } from "./lib/keypom";
+export * from "./lib/views";
 export * from "./lib/types/drops";
 export * from "./lib/types/fc";
 export * from "./lib/types/ft";

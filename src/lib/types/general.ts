@@ -48,3 +48,8 @@ export interface EnvVars {
 	getAccount: any
 	execute: any
 }
+
+export interface ContractSourceMetadata {
+    version: string,
+    link: string,
+}

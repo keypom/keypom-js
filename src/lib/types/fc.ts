@@ -1,3 +1,5 @@
+import { Maybe } from "../keypom";
+
 export interface Method {
 	receiverId: string;
 	methodName: string;
@@ -7,6 +9,11 @@ export interface Method {
 	dropIdField: string;
 }
 
+export interface FCConfig {
+	attachedGas?: string;
+}
+
 export interface FCData {
-	methods: Method[][]
+	methods: Array<Maybe<Array<Method>>>
+	config?: FCConfig
 }
