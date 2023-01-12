@@ -12,19 +12,49 @@ import { SimpleData } from './simple';
 export interface CreateDropParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
-	dropId?: string,
 	numKeys: number,
 	publicKeys?: string[],
-	rootEntropy?: string,
 	depositPerUseNEAR?: Number,
 	depositPerUseYocto?: string,
-	metadata?: string,
+	dropId?: string,
 	config?: DropConfig,
+	metadata?: string,
+	simpleData?: SimpleData
 	ftData?: FTData,
 	nftData?: NFTData,
 	fcData?: FCData,
-	simpleData?: SimpleData
+	// TODO add passwords per use and passwords per key
+	rootEntropy?: string,
 	useBalance?: boolean,
+}
+
+export interface AddKeyParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	numKeys: number,
+	publicKeys?: string[],
+	dropId?: string,
+	drop?: any,
+	// TODO add passwords per use and passwords per key
+	nftTokenIds?: string[],
+	rootEntropy?: string,
+	useBalance?: boolean,
+}
+
+export interface DeleteDropParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	drops?: any,
+	dropIds?: string[],
+	withdrawBalance?: boolean
+}
+
+export interface DeleteKeyParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	publicKeys: string[] | string,
+	dropId: string,
+	withdrawBalance?: boolean
 }
 
 export interface InitKeypomParams {
@@ -79,34 +109,6 @@ export interface CreateOrAddParams {
 	responses: any,
 	keys?: Maybe<GenerateKeysParams>,
 	dropId: string
-}
-
-export interface DeleteDropParams {
-	account?: Account,
-	wallet?: BrowserWalletBehaviour,
-	drops?: any,
-	dropIds?: string[],
-	withdrawBalance?: boolean
-}
-
-export interface DeleteKeyParams {
-	account?: Account,
-	wallet?: BrowserWalletBehaviour,
-	publicKeys: string[] | string,
-	dropId: string,
-	withdrawBalance?: boolean
-}
-
-export interface AddKeyParams {
-	account?: Account,
-	wallet?: BrowserWalletBehaviour,
-	dropId?: string,
-	drop?: any,
-	numKeys: number,
-	publicKeys?: string[],
-	nftTokenIds?: string[],
-	rootEntropy?: string,
-	useBalance?: boolean,
 }
 
 export interface GetDropParams {

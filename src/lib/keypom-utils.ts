@@ -253,6 +253,7 @@ export const execute = async ({
 	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
 }
 
+// TODO: Document this
 export const ftTransferCall = ({
     account,
     contractId,
@@ -277,6 +278,7 @@ export const ftTransferCall = ({
     return execute({ account, transactions: [tx]}) as Promise<void | FinalExecutionOutcome[]>
 }
 
+// TODO: Document this
 export const nftTransferCall = async ({
     account,
     contractId,
