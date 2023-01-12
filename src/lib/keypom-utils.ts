@@ -1,14 +1,14 @@
+import type { Action } from "@near-wallet-selector/core";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
-import type { Action } from "@near-wallet-selector/core";
+import BN from 'bn.js';
+import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
-import { NearKeyPair, EstimatorParams, ExecuteParams, FTTransferCallParams, NFTTransferCallParams, GenerateKeysParams, GeneratedKeyPairs } from "./types";
-import BN from 'bn.js';
-import { getEnv } from "./keypom";
 import { generateSeedPhrase } from 'near-seed-phrase';
-import * as nearAPI from 'near-api-js';
-import { AccessKeyPermission } from "near-api-js/lib/transaction";
+import { getEnv } from "./keypom";
+import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
+import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 
 const {
     KeyPair,

@@ -1,25 +1,18 @@
+import BN from 'bn.js';
 import * as nearAPI from "near-api-js";
-import BN from 'bn.js'
 const {
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
 
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams, FTData, GeneratedKeyPairs, GetDropParams, NFTData } from "./types";
-import { getEnv, Maybe } from "./keypom";
+import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
+import { getEnv } from "./keypom";
 import {
-	generateKeys,
-	keypomView,
-	key2str,
 	estimateRequiredDeposit,
-	ftTransferCall,
-	nftTransferCall,
-	getStorageBase,
-	parseFTAmount,
-	getUserBalance,
+	ftTransferCall, generateKeys, getStorageBase, getUserBalance, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
-import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from './types/params';
 
 const KEY_LIMIT = 50;
 

@@ -1,3 +1,7 @@
+import { Account, Connection, Near } from "near-api-js";
+import { KeyStore } from "near-api-js/lib/key_stores";
+import { KeyPair } from 'near-api-js/lib/utils';
+
 export type NearKeyPair = KeyPair
 
 export interface GeneratedKeyPairs {

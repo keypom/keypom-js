@@ -1,3 +1,14 @@
+import { Transaction } from '@near-wallet-selector/core';
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import { Account, Near } from "near-api-js";
+import { Maybe } from '../keypom';
+import { DropConfig } from './drops';
+import { FCData } from './fc';
+import { FTData } from './ft';
+import { Funder } from './general';
+import { NFTData } from './nft';
+import { SimpleData } from './simple';
+
 export interface CreateDropParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
@@ -66,7 +77,7 @@ export interface EstimatorParams {
 
 export interface CreateOrAddParams {
 	responses: any,
-	keys?: Maybe<GeneratedKeyPairs>,
+	keys?: Maybe<GenerateKeysParams>,
 	dropId: string
 }
 

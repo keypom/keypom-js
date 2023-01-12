@@ -4,14 +4,15 @@ const {
 	keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
 } = nearAPI;
 
-import { EnvVars, Funder, InitKeypomParams } from "./types";
-import { parseSeedPhrase } from 'near-seed-phrase'
-import {
-	execute as _execute,
-} from "./keypom-utils";
 import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
+import { parseSeedPhrase } from 'near-seed-phrase';
+import {
+	execute as _execute
+} from "./keypom-utils";
+import { EnvVars, Funder } from "./types/general";
+import { InitKeypomParams } from "./types/params";
 
 const gas = '200000000000000'
 const gas300 = '300000000000000'
