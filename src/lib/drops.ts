@@ -294,6 +294,9 @@ export const createDrop = async ({
 	
 	let tokenIds = nftData?.tokenIds
 	if (tokenIds && tokenIds?.length > 0) {
+		if (tokenIds.length > 2) {
+			throw new Error(`You can only automatically register 2 NFTs with 'createDrop'. If you need to register more NFTs you can use the method 'nftTransferCall' after you create the drop.`)
+		}
 		const nftTXs = await nftTransferCall({
 			account: account!,
 			contractId: nftData.contractId as string,

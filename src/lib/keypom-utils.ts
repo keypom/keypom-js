@@ -283,12 +283,26 @@ export const ftTransferCall = ({
 // TODO: Document this
 export const nftTransferCall = async ({
     account,
+    wallet,
     contractId,
     receiverId,
     tokenIds,
     msg,
     returnTransactions = false,
 }: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
+
+    const { getAccount } = getEnv();
+
+	account = getAccount({ account, wallet })
+
+    if (!account) {
+        throw new Error(`No account or wallet arguments provided, or funding account with 'initKeypom', for transferring NFTs.`)
+    }
+
+    if (tokenIds.length > 6) {
+        throw new Error(`This method can only transfer 6 NFTs in 1 batch transaction.`)
+    }
+
     const responses: Array<FinalExecutionOutcome[]> = []
 
     const transactions: Transaction[] = []
