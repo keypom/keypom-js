@@ -203,7 +203,7 @@ export const addKeys = async ({
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
 			basePassword,
-			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+			uses: passwordProtectedUses || Array.from({length: uses_per_key}, (_, i) => i+1)
 		})
 	}
 

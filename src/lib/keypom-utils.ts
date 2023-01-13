@@ -7,8 +7,9 @@ import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { getEnv } from "./keypom";
+import { PasswordPerUse } from "./types/drops";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
+import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 
 const {
     KeyPair,
@@ -452,10 +453,80 @@ const createAction = (action: Action): transactions.Action => {
 	}
 };
 
-export const getStorageBase = ({ nftData, fcData }) => {
-    if (fcData?.methods) return parseNearAmount('0.015')
-    if (nftData.contractId) return parseNearAmount('0.05')
-    return parseNearAmount('0.01')
+export const getStorageBase = ({
+    public_keys, 
+    deposit_per_use, 
+    drop_id, 
+    config, 
+    metadata, 
+    simple, 
+    ft, 
+    nft, 
+    fc, 
+    passwords_per_use
+}: CreateDropProtocolArgs) => {
+    const storageCostNEARPerByte = 0.00001;
+    let totalBytes = 0;
+    console.log('public_keys: ', public_keys)
+    console.log('deposit_per_use: ', deposit_per_use)
+    console.log('drop_id: ', drop_id)
+    console.log('config: ', config)
+    console.log('metadata: ', metadata)
+    console.log('simple: ', simple)
+    console.log('ft: ', ft)
+    console.log('nft: ', nft)
+    console.log('fc: ', fc)
+    console.log('passwords_per_use: ', passwords_per_use)
+    
+    // Use buffer in cases where window is undefined (since we're working with nodejs)
+    if (typeof window === 'undefined') {
+        // Keep track of the total amount of bytes
+
+        // Get the bytes per public key, multiply it by number of keys, and add it to the total
+        let bytesPerKey = Buffer.from("ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim").length;
+        let totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
+        console.log('totalBytesForKeys: ', totalBytesForKeys)
+        // Bytes for the deposit per use
+        let bytesForDeposit = Buffer.from(deposit_per_use.toString()).length;
+        console.log('bytesForDeposit: ', bytesForDeposit)
+        // Bytes for the drop ID
+        let bytesForDropId = Buffer.from(drop_id || "").length;
+        console.log('bytesForDropId: ', bytesForDropId)
+        // Bytes for the config
+        let bytesForConfig = Buffer.from(JSON.stringify(config || "")).length;
+        console.log('bytesForConfig: ', bytesForConfig)
+        // Bytes for the metadata
+        let bytesForMetadata = Buffer.from(metadata || "").length;
+        console.log('bytesForMetadata: ', bytesForMetadata)
+        // Bytes for the simple data
+        let bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length;
+        console.log('bytesForSimple: ', bytesForSimple)
+        // Bytes for the FT data
+        let bytesForFT = Buffer.from(JSON.stringify(ft || "")).length;
+        console.log('bytesForFT: ', bytesForFT)
+        // Bytes for the NFT data
+        let bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length;
+        console.log('bytesForNFT: ', bytesForNFT)
+        // Bytes for the FC data
+        let bytesForFC = Buffer.from(JSON.stringify(fc || "")).length;
+        console.log('bytesForFC: ', bytesForFC)
+        // Bytes for the passwords per use
+        let bytesForPasswords = Buffer.from(JSON.stringify(passwords_per_use || "")).length;
+        console.log('bytesForPasswords: ', bytesForPasswords)
+        totalBytes += totalBytesForKeys + bytesForDeposit + bytesForDropId + bytesForConfig + bytesForMetadata + bytesForSimple + bytesForFT + bytesForNFT + bytesForFC + bytesForPasswords;
+        console.log('totalBytes: ', totalBytes)
+    } else {
+        // USE BLOB
+        let size = new Blob([]).size;
+    }
+
+    // Add a 30% buffer to the total bytes
+    totalBytes = Math.round(totalBytes * 1.3);
+    console.log('totalBytes Rounded: ', totalBytes)
+    
+    const totalNEARAmount = (totalBytes * storageCostNEARPerByte).toString()
+    console.log('totalNEARAmount: ', totalNEARAmount)
+    return parseNearAmount(totalNEARAmount);
 }
 
 // Initiate the connection to the NEAR blockchain.
@@ -600,14 +671,14 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
  * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  * 
- * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
  */
 export async function generatePerUsePasswords({
     publicKeys,
     uses,
     basePassword
-}: {publicKeys: string[], uses: number[], basePassword: string}): Promise<Array<Array<{ pw: string; key_use: number }>>> {
-    let passwords: Array<Array<{ pw: string; key_use: number }>> = [];
+}: {publicKeys: string[], uses: number[], basePassword: string}): Promise<Array<Array<PasswordPerUse>>> {
+    let passwords: Array<Array<PasswordPerUse>> = [];
     
     // Loop through each pubKey to generate either the passwords
     for (var i = 0; i < publicKeys.length; i++) {

@@ -2,8 +2,9 @@ import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
 import * as nearAPI from 'near-api-js';
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
+import { PasswordPerUse } from "./types/drops";
 import { GeneratedKeyPairs } from "./types/general";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
+import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
@@ -120,10 +121,7 @@ export declare const ftTransferCall: ({ account, contractId, args, returnTransac
 export declare const nftTransferCall: ({ account, wallet, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
-export declare const getStorageBase: ({ nftData, fcData }: {
-    nftData: any;
-    fcData: any;
-}) => string | null;
+export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use }: CreateDropProtocolArgs) => string | null;
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;
 /**
  * Generate passwords for a set of public keys. A unique password will be created for each specified use of a public key where the use is NOT zero indexed (i.e 1st use = 1).
@@ -133,13 +131,10 @@ export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, u
  * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  *
- * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
  */
 export declare function generatePerUsePasswords({ publicKeys, uses, basePassword }: {
     publicKeys: string[];
     uses: number[];
     basePassword: string;
-}): Promise<Array<Array<{
-    pw: string;
-    key_use: number;
-}>>>;
+}): Promise<Array<Array<PasswordPerUse>>>;

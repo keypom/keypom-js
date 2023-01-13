@@ -12,7 +12,7 @@ import {
 	estimateRequiredDeposit,
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
-import { CreateDropParams, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
+import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
 
 export const KEY_LIMIT = 50;
@@ -233,8 +233,44 @@ export const createDrop = async ({
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
 			basePassword,
-			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+			uses: passwordProtectedUses || Array.from({length: config?.usesPerKey || 1}, (_, i) => i+1)
 		})
+	}
+
+	const createDropArgs: CreateDropProtocolArgs = {
+		drop_id: dropId,
+		public_keys: publicKeys || [],
+		deposit_per_use: depositPerUseYocto,
+		config: finalConfig,
+		metadata,
+		ft: ftData.contractId ? ({
+			contract_id: ftData.contractId,
+			sender_id: ftData.senderId,
+			balance_per_use: ftData.balancePerUse,
+		}) : undefined,
+		nft: nftData.contractId ? ({
+			contract_id: nftData.contractId,
+			sender_id: nftData.senderId,
+		}) : undefined,
+		fc: fcData?.methods ? ({
+			methods: fcData.methods.map((useMethods) => 
+				useMethods ? 
+				useMethods.map((method) => {
+					const ret: any = {}
+					ret.receiver_id = method.receiverId;
+					ret.method_name = method.methodName;
+					ret.args = method.args;
+					ret.attached_deposit = method.attachedDeposit;
+					ret.account_id_field = method.accountIdField;
+					ret.drop_id_field = method.dropIdField;
+					return ret
+				}) : undefined
+			)
+		}) : undefined,
+		simple: simpleData?.lazyRegister ? ({
+			lazy_register: simpleData.lazyRegister,
+		}) : undefined,
+		passwords_per_use: passwords
 	}
 
 	/// estimate required deposit
@@ -244,7 +280,7 @@ export const createDrop = async ({
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas: parseInt(attachedGas),
-		storage: getStorageBase({ nftData, fcData }),
+		storage: getStorageBase(createDropArgs),
 		ftData,
 		fcData,
 	})
@@ -278,41 +314,7 @@ export const createDrop = async ({
 			type: 'FunctionCall',
 			params: {
 				methodName: 'create_drop',
-				args: {
-					drop_id: dropId,
-					public_keys: publicKeys || [],
-					deposit_per_use: depositPerUseYocto,
-					config: finalConfig,
-					metadata,
-					ft: ftData.contractId ? ({
-						contract_id: ftData.contractId,
-						sender_id: ftData.senderId,
-						balance_per_use: ftData.balancePerUse,
-					}) : undefined,
-					nft: nftData.contractId ? ({
-						contract_id: nftData.contractId,
-						sender_id: nftData.senderId,
-					}) : undefined,
-					fc: fcData?.methods ? ({
-						methods: fcData.methods.map((useMethods) => 
-							useMethods ? 
-							useMethods.map((method) => {
-								const ret: any = {}
-								ret.receiver_id = method.receiverId;
-								ret.method_name = method.methodName;
-								ret.args = method.args;
-								ret.attached_deposit = method.attachedDeposit;
-								ret.account_id_field = method.accountIdField;
-								ret.drop_id_field = method.dropIdField;
-								return ret
-							}) : undefined
-						)
-					}) : undefined,
-					simple: simpleData?.lazyRegister ? ({
-						lazy_register: simpleData.lazyRegister,
-					}) : undefined,
-					passwords_per_use: passwords
-				},
+				args: createDropArgs,
 				gas,
 				deposit,
 			}
