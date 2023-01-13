@@ -78,8 +78,8 @@ export const claim = async ({
 	accountId,
 	newAccountId,
 	newPublicKey, 
+	password,
 }) => {
-
 	const {
 		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails,
 	} = getEnv()

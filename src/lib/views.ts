@@ -1,7 +1,7 @@
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
 import { keypomView } from "./keypom-utils"
-import { Drop, KeyInfo } from "./types/drops"
+import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
 import { GetDropParams } from "./types/params"
 

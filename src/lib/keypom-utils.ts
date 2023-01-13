@@ -40,7 +40,7 @@ export const snakeToCamel = (s) =>
 );
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
-const hashBuf = (str: string): Promise<ArrayBuffer> => sha256Hash(new TextEncoder().encode(str))
+const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
 
 /**
  * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.). 
@@ -558,3 +558,46 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
     // console.log('costs: ', costs.toString());
     return costs.toString();
 };
+
+/**
+ * Generate passwords for a set of public keys. A unique password will be created for each specified use of a public key where the use is NOT zero indexed (i.e 1st use = 1).
+ * The passwords will be generated via a double hash of the base password + public key + specific use
+ * 
+ * @param {string[]} publicKeys The public keys that will be used to generate the set of passwords
+ * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
+ * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
+ * 
+ * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ */
+export async function generatePerUsePasswords({
+    publicKeys,
+    uses,
+    basePassword
+}: {publicKeys: string[], uses: number[], basePassword: string}): Promise<Array<Array<{ pw: string; key_use: number }>>> {
+    let passwords: Array<Array<{ pw: string; key_use: number }>> = [];
+    
+    // Loop through each pubKey to generate either the passwords
+    for (var i = 0; i < publicKeys.length; i++) {
+        
+        // For each public key, we need to generate a password for each use
+        let passwordsPerUse: Array<{ pw: string; key_use: number }> = [];
+        for (var j = 0; j < uses.length; j++) {
+            // First inner hash takes in utf8 and returns hash
+            let innerHashBuff = await hashBuf(basePassword + publicKeys[i] + uses[j].toString());
+            let innerHash = Buffer.from(innerHashBuff).toString('hex');
+
+            // Outer hash takes in hex and returns hex
+            let outerHashBuff = await hashBuf(innerHash, true);
+            let outerHash = Buffer.from(outerHashBuff).toString('hex');
+
+            let jsonPw = {
+                pw: outerHash,
+                key_use: uses[j]
+            }
+            passwordsPerUse.push(jsonPw);
+        }
+        passwords.push(passwordsPerUse);
+    }
+
+    return passwords;
+}

@@ -23,8 +23,9 @@ export interface CreateDropParams {
 	ftData?: FTData,
 	nftData?: NFTData,
 	fcData?: FCData,
-	// TODO add passwords per use and passwords per key
 	rootEntropy?: string,
+    basePassword?: string,
+    passwordProtecedUses?: number[],
 	useBalance?: boolean,
 }
 
