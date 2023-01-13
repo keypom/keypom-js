@@ -86,7 +86,7 @@
  *
  * // Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
- * let passwordForClaim = await hash(basePassword + keys.publicKeys[0] + currentUse.toString());
+ * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
  *
  * // Claim the drop to the passed in account ID and use the password we generated above.
  * await claim({

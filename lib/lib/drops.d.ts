@@ -127,7 +127,7 @@ export declare const KEY_LIMIT = 50;
  *
  * // Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
- * let passwordForClaim = await hash(basePassword + keys.publicKeys[0] + currentUse.toString());
+ * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
  * ```
 */
 export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, }: CreateDropParams) => Promise<CreateOrAddReturn>;

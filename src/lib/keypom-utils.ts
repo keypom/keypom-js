@@ -57,10 +57,10 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * ```js
  * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
- * let passwordForClaim = await hash(basePassword + publicKey + currentUse.toString());
+ * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
  * ```
  */
-export const hash = async (str: string, fromHex = false): Promise<string> => {
+export const hashPassword = async (str: string, fromHex = false): Promise<string> => {
     let buf = await hashBuf(str, fromHex);
     return Buffer.from(buf).toString('hex');
 }

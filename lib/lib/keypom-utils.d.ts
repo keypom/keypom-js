@@ -20,10 +20,10 @@ export declare const key2str: (v: any) => any;
  * ```js
  * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
- * let passwordForClaim = await hash(basePassword + publicKey + currentUse.toString());
+ * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
  * ```
  */
-export declare const hash: (str: string, fromHex?: boolean) => Promise<string>;
+export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<string>;
 /**
  * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.).
  * Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the meta entropy (could be a user's password) and the secret root key like a UUID).
