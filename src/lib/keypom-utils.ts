@@ -18,6 +18,8 @@ const {
 	},
 } = nearAPI;
 
+export const exportedNearAPI = nearAPI;
+
 let sha256Hash
 if (typeof crypto === 'undefined') {
     const nodeCrypto = require('crypto');
