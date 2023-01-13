@@ -1,7 +1,7 @@
 import * as nearAPI from "near-api-js";
 import { EnvVars, Funder } from "./types/general";
 import { InitKeypomParams } from "./types/params";
-export declare type Maybe<T> = T | undefined;
+export type Maybe<T> = T | undefined;
 /**
  *
  * @returns {EnvVars} The environment variables used by the Keypom library.

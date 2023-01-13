@@ -2,7 +2,8 @@ export {
 	generateKeys,
 	estimateRequiredDeposit,
 	ftTransferCall,
-	nftTransferCall
+	nftTransferCall,
+	exportedNearAPI as nearAPI,
 } from "./lib/keypom-utils";
 export {
 	createDrop,

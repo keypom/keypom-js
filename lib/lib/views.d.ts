@@ -73,7 +73,7 @@ export declare const getKeyTotalSupply: () => Promise<number>;
  * });
  *
  * // Query for the first 50 keys on the contract
- * const keyInfo = await getKeyTotalSupply({
+ * const keyInfo = await getKeys({
  *   start: 0,
  *   limit: 50
  * });
@@ -145,7 +145,7 @@ export declare const getKeyInformation: ({ publicKey }: {
  * });
  *
  * // Query for the key information for the key that was created
- * const keyInfos = await getKeyInformation({
+ * const keyInfos = await getKeyInformationBatch({
  *     publicKeys: keys.publicKeys
  * })
  *
