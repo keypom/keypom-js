@@ -64,10 +64,42 @@
  * 	newPublicKey: publicKeys[1]
  * })
  * ```
+ * @example <caption>Creating a drop and adding a password to it. Generate the password using the hash function and pass it into claim the drop</caption>
+ *  * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ *
+ * const basePassword = "my-cool-password123";
+ * // Create a simple drop with 1 $NEAR and pass in a base password to create a unique password for each use of each key
+ * const {keys} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 1,
+ * 	basePassword
+ * });
+ *
+ * // Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
+ * let currentUse = 1;
+ * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
+ *
+ * // Claim the drop to the passed in account ID and use the password we generated above.
+ * await claim({
+ * 	secretKey: keys.secretKeys[0],
+ * 	accountId: "benjiman.testnet",
+ * 	password: passwordForClaim
+ * })
+ * ```
 */
-export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, }: {
+export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, password, }: {
     secretKey: any;
     accountId: any;
     newAccountId: any;
     newPublicKey: any;
+    password: any;
 }) => Promise<any>;

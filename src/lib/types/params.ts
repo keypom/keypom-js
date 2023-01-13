@@ -5,7 +5,7 @@ import { Maybe } from '../keypom';
 import { DropConfig } from './drops';
 import { FCData } from './fc';
 import { FTData } from './ft';
-import { Funder } from './general';
+import { Funder, GeneratedKeyPairs } from './general';
 import { NFTData } from './nft';
 import { SimpleData } from './simple';
 
@@ -23,8 +23,9 @@ export interface CreateDropParams {
 	ftData?: FTData,
 	nftData?: NFTData,
 	fcData?: FCData,
-	// TODO add passwords per use and passwords per key
 	rootEntropy?: string,
+    basePassword?: string,
+    passwordProtectedUses?: number[],
 	useBalance?: boolean,
 }
 
@@ -35,9 +36,10 @@ export interface AddKeyParams {
 	publicKeys?: string[],
 	dropId?: string,
 	drop?: any,
-	// TODO add passwords per use and passwords per key
 	nftTokenIds?: string[],
 	rootEntropy?: string,
+    basePassword?: string,
+    passwordProtectedUses?: number[],
 	useBalance?: boolean,
 }
 
@@ -106,9 +108,9 @@ export interface EstimatorParams {
     ftData?: FTData,
 }
 
-export interface CreateOrAddParams {
+export interface CreateOrAddReturn {
 	responses: any,
-	keys?: Maybe<GenerateKeysParams>,
+	keys?: Maybe<GeneratedKeyPairs>,
 	dropId: string
 }
 

@@ -9,6 +9,22 @@ export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
 /**
+ * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
+ *
+ * @param {string} str - the string you wish to hash. By default, this should be utf8 encoded. If the string is hex encoded, set the fromHex flag to true.
+ * @param {boolean} fromHex (OPTIONAL) - A flag that should be set if the string is hex encoded. Defaults to false.
+ *
+ * @returns {Promise<string>} - The resulting hash
+ *
+ * @example <caption>Generating the required password to pass into `claim` given a base password</caption>
+ * ```js
+ * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
+ * let currentUse = 1;
+ * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
+ * ```
+ */
+export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<string>;
+/**
  * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.).
  * Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the meta entropy (could be a user's password) and the secret root key like a UUID).
  *
@@ -109,3 +125,21 @@ export declare const getStorageBase: ({ nftData, fcData }: {
     fcData: any;
 }) => string | null;
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;
+/**
+ * Generate passwords for a set of public keys. A unique password will be created for each specified use of a public key where the use is NOT zero indexed (i.e 1st use = 1).
+ * The passwords will be generated via a double hash of the base password + public key + specific use
+ *
+ * @param {string[]} publicKeys The public keys that will be used to generate the set of passwords
+ * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
+ * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
+ *
+ * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ */
+export declare function generatePerUsePasswords({ publicKeys, uses, basePassword }: {
+    publicKeys: string[];
+    uses: number[];
+    basePassword: string;
+}): Promise<Array<Array<{
+    pw: string;
+    key_use: number;
+}>>>;

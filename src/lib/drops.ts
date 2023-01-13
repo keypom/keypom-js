@@ -10,9 +10,9 @@ import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit,
-	ftTransferCall, generateKeys, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
+	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from './types/params';
+import { CreateDropParams, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
 
 export const KEY_LIMIT = 50;
@@ -35,9 +35,11 @@ export const KEY_LIMIT = 50;
  * @param {NFTData=} nftData (OPTIONAL) For creating a non-fungible token drop, this contains necessary configurable information about the drop.
  * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
  * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
+ * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in.
+ * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
  * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
  * 
- * @return {Promise<CreateOrAddParams>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
+ * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  * 
  * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random.:</caption>
  * ```js
@@ -119,6 +121,31 @@ export const KEY_LIMIT = 50;
  * 	publicKeys,
  * 	depositPerUseNEAR: 1,
  * });
+ * 
+ * @example <caption>Create a simple drop with 1 key and 1 use per key. This 1 use-key should be password protected based on a base-password</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ * 
+ * 
+ * const basePassword = "my-cool-password123";
+ * // Create a simple drop with 1 $NEAR and pass in a base password to create a unique password for each use of each key
+ * const {keys} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 1,
+ * 	basePassword
+ * });
+ * 
+ * // Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
+ * let currentUse = 1;
+ * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
+ * ```
 */
 export const createDrop = async ({
 	account,
@@ -135,8 +162,10 @@ export const createDrop = async ({
 	nftData = {},
 	simpleData = {},
 	fcData,
+	basePassword,
+	passwordProtectedUses,
 	useBalance = false,
-}: CreateDropParams): Promise<CreateOrAddParams> => {
+}: CreateDropParams): Promise<CreateOrAddReturn> => {
 	const {
 		near, viewAccount,
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
@@ -198,6 +227,16 @@ export const createDrop = async ({
 	}
 
 	numKeys = publicKeys!.length;
+	let passwords;
+	if (basePassword) {
+		// Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
+		passwords = await generatePerUsePasswords({
+			publicKeys: publicKeys!,
+			basePassword,
+			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+		})
+	}
+
 	/// estimate required deposit
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
@@ -272,6 +311,7 @@ export const createDrop = async ({
 					simple: simpleData?.lazyRegister ? ({
 						lazy_register: simpleData.lazyRegister,
 					}) : undefined,
+					passwords_per_use: passwords
 				},
 				gas,
 				deposit,
