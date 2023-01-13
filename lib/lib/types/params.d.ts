@@ -5,7 +5,7 @@ import { Maybe } from '../keypom';
 import { DropConfig } from './drops';
 import { FCData } from './fc';
 import { FTData } from './ft';
-import { Funder } from './general';
+import { Funder, GeneratedKeyPairs } from './general';
 import { NFTData } from './nft';
 import { SimpleData } from './simple';
 export interface CreateDropParams {
@@ -96,9 +96,9 @@ export interface EstimatorParams {
     fcData?: FCData;
     ftData?: FTData;
 }
-export interface CreateOrAddParams {
+export interface CreateOrAddReturn {
     responses: any;
-    keys?: Maybe<GenerateKeysParams>;
+    keys?: Maybe<GeneratedKeyPairs>;
     dropId: string;
 }
 export interface GetDropParams {

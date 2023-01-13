@@ -42,6 +42,27 @@ export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
 
+
+/**
+ * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
+ * 
+ * @param {string} str - the string you wish to hash. By default, this should be utf8 encoded. If the string is hex encoded, set the fromHex flag to true.
+ * @param {boolean} fromHex (OPTIONAL) - A flag that should be set if the string is hex encoded. Defaults to false.
+ * 
+ * @returns {Promise<string>} - The resulting hash
+ * 
+ * @example <caption>Generating the required password to pass into `claim` given a base password</caption>
+ * ```js
+ * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
+ * let currentUse = 1;
+ * let passwordForClaim = await hash(basePassword + publicKey + currentUse.toString());
+ * ```
+ */
+export const hash = async (str: string, fromHex = false): Promise<string> => {
+    let buf = await hashBuf(str, fromHex);
+    return Buffer.from(buf).toString('hex');
+}
+
 /**
  * Generate ed25519 KeyPairs that can be used for Keypom linkdrops, or full access keys to claimed accounts. These keys can optionally be derived from some entropy such as a root password and metadata pertaining to each key (user provided password etc.). 
  * Entropy is useful for creating an onboarding experience where in order to recover a keypair, the client simply needs to provide the meta entropy (could be a user's password) and the secret root key like a UUID).

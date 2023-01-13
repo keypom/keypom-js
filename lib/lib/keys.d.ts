@@ -1,4 +1,4 @@
-import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from './types/params';
+import { AddKeyParams, CreateOrAddReturn, DeleteKeyParams } from './types/params';
 /**
  * Add keys to a specific drop
  *
@@ -15,7 +15,7 @@ import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from './types/params
  * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
  * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
  *
- * @return {Promise<CreateOrAddParams>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
+ * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  *
  * @example <caption>Create a basic empty simple drop and add 10 keys. Each key is completely random.:</caption>
  * ```js
@@ -114,7 +114,7 @@ import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from './types/params
  * 	dropId
  * })
 */
-export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenIds, rootEntropy, basePassword, passwordProtectedUses, useBalance, }: AddKeyParams) => Promise<CreateOrAddParams>;
+export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenIds, rootEntropy, basePassword, passwordProtectedUses, useBalance, }: AddKeyParams) => Promise<CreateOrAddReturn>;
 /**
  * Delete a set of keys from a drop and optionally withdraw any remaining balance you have on the Keypom contract.
  *

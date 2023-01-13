@@ -1,4 +1,4 @@
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams } from './types/params';
+import { CreateDropParams, CreateOrAddReturn, DeleteDropParams } from './types/params';
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in.
@@ -18,11 +18,11 @@ export declare const KEY_LIMIT = 50;
  * @param {NFTData=} nftData (OPTIONAL) For creating a non-fungible token drop, this contains necessary configurable information about the drop.
  * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
  * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
- * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all uses will have a password (which is the same) unless passwordProtecedUses is passed in.
- * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specify exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
+ * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in.
+ * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
  * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
  *
- * @return {Promise<CreateOrAddParams>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
+ * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  *
  * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random.:</caption>
  * ```js
@@ -104,8 +104,33 @@ export declare const KEY_LIMIT = 50;
  * 	publicKeys,
  * 	depositPerUseNEAR: 1,
  * });
+ *
+ * @example <caption>Create a simple drop with 1 key and 1 use per key. This 1 use-key should be password protected based on a base-password</caption>
+ * ```js
+ * // Initialize the SDK for the given network and NEAR connection
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ *
+ * const basePassword = "my-cool-password123";
+ * // Create a simple drop with 1 $NEAR and pass in a base password to create a unique password for each use of each key
+ * const {keys} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 1,
+ * 	basePassword
+ * });
+ *
+ * // Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
+ * let currentUse = 1;
+ * let passwordForClaim = await hash(basePassword + keys.publicKeys[0] + currentUse.toString());
+ * ```
 */
-export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, }: CreateDropParams) => Promise<CreateOrAddParams>;
+export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, }: CreateDropParams) => Promise<CreateOrAddReturn>;
 /**
  * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
  *

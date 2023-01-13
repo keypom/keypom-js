@@ -2,7 +2,8 @@ export {
 	generateKeys,
 	estimateRequiredDeposit,
 	ftTransferCall,
-	nftTransferCall
+	nftTransferCall,
+	hash
 } from "./lib/keypom-utils";
 export {
 	createDrop,
