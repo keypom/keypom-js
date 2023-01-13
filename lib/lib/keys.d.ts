@@ -1,4 +1,4 @@
-import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from "./types";
+import { AddKeyParams, CreateOrAddParams, DeleteKeyParams } from './types/params';
 /**
  * Add keys to a specific drop
  *

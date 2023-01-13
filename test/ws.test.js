@@ -402,7 +402,6 @@ test('add keys to ft drop', async (t) => {
 });
 
 test('add 1 key to nft drop', async (t) => {
-
 	const drop = drops[2]
 	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 

@@ -1,27 +1,21 @@
+import BN from 'bn.js';
 import * as nearAPI from "near-api-js";
-import BN from 'bn.js'
 const {
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
 
-import { CreateDropParams, CreateOrAddParams, DeleteDropParams, FTData, GeneratedKeyPairs, GetDropParams, NFTData } from "./types";
-import { getEnv, Maybe } from "./keypom";
+import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
+import { getEnv } from "./keypom";
 import {
-	generateKeys,
-	keypomView,
-	key2str,
 	estimateRequiredDeposit,
-	ftTransferCall,
-	nftTransferCall,
-	getStorageBase,
-	parseFTAmount,
-	getUserBalance,
+	ftTransferCall, generateKeys, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
-import { Transaction, FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { CreateDropParams, CreateOrAddParams, DeleteDropParams, GetDropParams } from './types/params';
+import { getDropInformation, getUserBalance } from './views';
 
-const KEY_LIMIT = 50;
+export const KEY_LIMIT = 50;
 
 /**
  * Creates a new drop based on parameters passed in.
@@ -261,16 +255,19 @@ export const createDrop = async ({
 						sender_id: nftData.senderId,
 					}) : undefined,
 					fc: fcData?.methods ? ({
-						methods: fcData.methods.map((useMethods) => useMethods.map((method) => {
-							const ret: any = {}
-							ret.receiver_id = method.receiverId;
-							ret.method_name = method.methodName;
-							ret.args = method.args;
-							ret.attached_deposit = method.attachedDeposit;
-							ret.account_id_field = method.accountIdField;
-							ret.drop_id_field = method.dropIdField;
-							return ret
-						}))
+						methods: fcData.methods.map((useMethods) => 
+							useMethods ? 
+							useMethods.map((method) => {
+								const ret: any = {}
+								ret.receiver_id = method.receiverId;
+								ret.method_name = method.methodName;
+								ret.args = method.args;
+								ret.attached_deposit = method.attachedDeposit;
+								ret.account_id_field = method.accountIdField;
+								ret.drop_id_field = method.dropIdField;
+								return ret
+							}) : undefined
+						)
 					}) : undefined,
 					simple: simpleData?.lazyRegister ? ({
 						lazy_register: simpleData.lazyRegister,
@@ -311,156 +308,6 @@ export const createDrop = async ({
 	let responses = await execute({ transactions, account, wallet })
 
 	return { responses, keys, dropId }
-}
-
-/**
- * Get the number of active drops for a given account ID. Active refers to ones exist on the contract and haven't been deleted.
- * 
- * @param {string} accountId The account to get the number of active drops for.
- * 
- * @returns {Promise<number>} The number of active drops for the given account ID.
- * 
- * @example <caption>Query for the number of drops owned by an account</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * 	network: "testnet",
- * });
- * 
- * // Query for the number of drops owned by the given account
- * const numDrops = await getDropSupply({
- * 	accountId: "benjiman.testnet"
- * })
- * 
- * console.log('numDrops: ', numDrops)
- * ```
-*/
-export const getDropSupply = async ({
-	accountId,
-}: { accountId: string }) => {
-	return keypomView({
-		methodName: 'get_drop_supply_for_owner',
-		args: {
-			account_id: accountId,
-		},
-	})
-}
-
-/**
- * Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.
- * 
- * @param {string} accountId The funding account that the drops belong to.
- * @param {string= | number=} start (OPTIONAL) Where to start paginating through drops.
- * @param {number=} limit (OPTIONAL) How many drops to paginate through.
- * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
- * 
- * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * 	network: "testnet",
- * });
- * 
- * // Get the number of drops the account has.
- * const numDrops = await getDropSupply({
- * 	accountId: "benjiman.testnet"
- * });
- * 
- * // Query for drop information for the last 5 drops and their respective keys
- * const dropsAndKeys = await getDrops({
- * 	accountId: "benjiman.testnet",
- * 	start: numDrops - 5,
- * 	withKeys: true
- * })
- * 
- * console.log('dropsAndKeys: ', dropsAndKeys)
- * ```
-*/
-export const getDrops = async ({
-	accountId,
-	start,
-	limit,
-	withKeys = false,
-}: GetDropParams) => {
-
-	const drops = await keypomView({
-		methodName: 'get_drops_for_owner',
-		args: {
-			account_id: accountId,
-			from_index: start ? start.toString() : undefined,
-			limit: limit ? limit : undefined,
-		},
-	})
-
-	if (withKeys) {
-		if (drops.length > 20) {
-			throw new Error(`Too many RPC requests in parallel. Use 'limit' arg 20 or less.`)
-		}
-
-		await Promise.all(drops.map(async (drop, i) => {
-			const { drop_id } = drop
-			drop.keys = await keypomView({
-				methodName: 'get_keys_for_drop',
-				args: {
-					drop_id,
-					from_index: '0',
-					limit: KEY_LIMIT
-				}
-			})
-		}))
-	}
-
-	return drops
-}
-
-/**
- * Get information about a specific drop given its drop ID.
- * 
- * @param {string} dropId The drop ID for the specific drop that you want to get information about.
- * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
- * 
- * @returns {string} Current user balance
- * 
- * @example <caption>Create a simple drop and retrieve information about it:</caption>
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * network: "testnet",
- * });
- * 
- * // Query for the drop information for a specific drop
- * const userBalance = await getUserBalance({
- * accountId: "benjiman.testnet"
- * })
- * 
- * console.log('userBalance: ', userBalance)
- * ```
-*/
-export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}) => {
-	const {
-		viewAccount, contractId,
-	} = getEnv()
-
-	const dropInfo = await viewAccount.viewFunction2({
-		contractId,
-		methodName: 'get_drop_information',
-		args: {
-			drop_id: dropId,
-		},
-	})
-
-	if (withKeys) {
-		dropInfo.keys = await keypomView({
-			methodName: 'get_keys_for_drop',
-			args: {
-				drop_id: dropId,
-				from_index: '0',
-				limit: KEY_LIMIT
-			}
-		});
-	}
-
-	return dropInfo
 }
 
 /**
@@ -643,3 +490,5 @@ export const deleteDrops = async ({
 
 	return responses
 }
+
+// TODO: add register & unregister uses

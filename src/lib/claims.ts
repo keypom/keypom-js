@@ -72,6 +72,7 @@ import { getEnv } from "./keypom";
  * })
  * ```
 */
+// TODO: Add password support
 export const claim = async ({
 	secretKey,
 	accountId,
