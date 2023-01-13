@@ -78,7 +78,8 @@ export interface FTTransferCallParams {
     returnTransaction?: boolean;
 }
 export interface NFTTransferCallParams {
-    account: Account;
+    account?: Account;
+    wallet?: BrowserWalletBehaviour;
     contractId: string;
     receiverId: string;
     tokenIds: string[];

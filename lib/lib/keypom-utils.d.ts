@@ -1,8 +1,10 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
+import * as nearAPI from 'near-api-js';
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { GeneratedKeyPairs } from "./types/general";
 import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
+export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
@@ -115,7 +117,7 @@ export declare const keypomView: ({ methodName, args }: {
 }) => Promise<any>;
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
 export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | Transaction;
-export declare const nftTransferCall: ({ account, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
+export declare const nftTransferCall: ({ account, wallet, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
 export declare const getStorageBase: ({ nftData, fcData }: {

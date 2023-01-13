@@ -18,6 +18,8 @@ const {
 	},
 } = nearAPI;
 
+export const exportedNearAPI = nearAPI;
+
 let sha256Hash
 if (typeof crypto === 'undefined') {
     const nodeCrypto = require('crypto');
@@ -302,12 +304,22 @@ export const ftTransferCall = ({
 // TODO: Document this
 export const nftTransferCall = async ({
     account,
+    wallet,
     contractId,
     receiverId,
     tokenIds,
     msg,
     returnTransactions = false,
 }: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
+
+    const { getAccount } = getEnv();
+
+	account = getAccount({ account, wallet })
+
+    if (tokenIds.length > 6) {
+        throw new Error(`This method can only transfer 6 NFTs in 1 batch transaction.`)
+    }
+
     const responses: Array<FinalExecutionOutcome[]> = []
 
     const transactions: Transaction[] = []
@@ -316,7 +328,7 @@ export const nftTransferCall = async ({
     for (let i = 0; i < tokenIds.length; i++) {
         const tx: Transaction = {
             receiverId: contractId,
-            signerId: account.accountId,
+            signerId: account!.accountId,
             actions: [{
                 type: 'FunctionCall',
                 params: {
@@ -335,7 +347,7 @@ export const nftTransferCall = async ({
         if (returnTransactions) continue
 
         responses.push(<FinalExecutionOutcome[]> await execute({
-            account,
+            account: account!,
             transactions,
         }))
     }

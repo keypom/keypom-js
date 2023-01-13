@@ -3,7 +3,8 @@ export {
 	estimateRequiredDeposit,
 	ftTransferCall,
 	nftTransferCall,
-	hash
+	hash,
+	exportedNearAPI as nearAPI
 } from "./lib/keypom-utils";
 export {
 	createDrop,
