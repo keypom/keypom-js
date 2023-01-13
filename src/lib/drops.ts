@@ -36,7 +36,7 @@ export const KEY_LIMIT = 50;
  * @param {FCData=} fcData (OPTIONAL) For creating a function call drop, this contains necessary configurable information about the drop.
  * @param {SimpleData=} simpleData (OPTIONAL) For creating a simple drop, this contains necessary configurable information about the drop.
  * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all uses will have a password (which is the same) unless passwordProtecedUses is passed in.
- * @param {number[]=} passwordProtecedUses (OPTIONAL) For doing password protected drops, specify exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
+ * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specify exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
  * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
  * 
  * @return {Promise<CreateOrAddParams>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
@@ -138,7 +138,7 @@ export const createDrop = async ({
 	simpleData = {},
 	fcData,
 	basePassword,
-	passwordProtecedUses,
+	passwordProtectedUses,
 	useBalance = false,
 }: CreateDropParams): Promise<CreateOrAddParams> => {
 	const {
@@ -202,6 +202,16 @@ export const createDrop = async ({
 	}
 
 	numKeys = publicKeys!.length;
+	let passwords;
+	if (basePassword) {
+		// Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
+		passwords = await generatePerUsePasswords({
+			publicKeys: publicKeys!,
+			basePassword,
+			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+		})
+	}
+
 	/// estimate required deposit
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
@@ -276,6 +286,7 @@ export const createDrop = async ({
 					simple: simpleData?.lazyRegister ? ({
 						lazy_register: simpleData.lazyRegister,
 					}) : undefined,
+					passwords_per_use: passwords
 				},
 				gas,
 				deposit,

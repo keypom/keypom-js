@@ -23,6 +23,8 @@ export interface CreateDropParams {
     nftData?: NFTData;
     fcData?: FCData;
     rootEntropy?: string;
+    basePassword?: string;
+    passwordProtectedUses?: number[];
     useBalance?: boolean;
 }
 export interface AddKeyParams {
@@ -34,6 +36,8 @@ export interface AddKeyParams {
     drop?: any;
     nftTokenIds?: string[];
     rootEntropy?: string;
+    basePassword?: string;
+    passwordProtectedUses?: number[];
     useBalance?: boolean;
 }
 export interface DeleteDropParams {

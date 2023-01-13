@@ -72,7 +72,6 @@ import { getEnv } from "./keypom";
  * })
  * ```
 */
-// TODO: Add password support
 export const claim = async ({
 	secretKey,
 	accountId,
@@ -109,6 +108,7 @@ export const claim = async ({
 				args: {
 					new_account_id: newAccountId,
 					new_public_key: newPublicKey,
+					password
 				},
 				gas: attachedGas,
 			}
@@ -116,7 +116,8 @@ export const claim = async ({
 			{
 				methodName: 'claim',
 				args: {
-					account_id: accountId
+					account_id: accountId,
+					password
 				},
 				gas: attachedGas,
 			}

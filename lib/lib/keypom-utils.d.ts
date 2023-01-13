@@ -107,3 +107,21 @@ export declare const getStorageBase: ({ nftData, fcData }: {
     fcData: any;
 }) => string | null;
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;
+/**
+ * Generate passwords for a set of public keys. A unique password will be created for each specified use of a public key where the use is NOT zero indexed (i.e 1st use = 1).
+ * The passwords will be generated via a double hash of the base password + public key + specific use
+ *
+ * @param {string[]} publicKeys The public keys that will be used to generate the set of passwords
+ * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
+ * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
+ *
+ * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ */
+export declare function generatePerUsePasswords({ publicKeys, uses, basePassword }: {
+    publicKeys: string[];
+    uses: number[];
+    basePassword: string;
+}): Promise<Array<Array<{
+    pw: string;
+    key_use: number;
+}>>>;

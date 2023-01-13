@@ -65,9 +65,10 @@
  * })
  * ```
 */
-export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, }: {
+export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, password, }: {
     secretKey: any;
     accountId: any;
     newAccountId: any;
     newPublicKey: any;
+    password: any;
 }) => Promise<any>;
