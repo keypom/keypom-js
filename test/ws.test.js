@@ -115,7 +115,7 @@ test('delete drops', async (t) => {
 
 	console.log('drops', drops)
 
-	if (!drops.length) return t.true(true)
+	if (!drops?.length) return t.true(true)
 
 	await deleteDrops({ drops })
 
@@ -136,7 +136,7 @@ test('create simple drop', async (t) => {
 	})
 
 	const { responses } = res
-	// console.log(responses)
+	console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
@@ -201,7 +201,7 @@ test('create ft drop', async (t) => {
 		ftData: {
 			contractId: FT_CONTRACT_ID,
 			senderId: accountId,
-			balancePerUse
+			absoluteAmount: balancePerUse
 		}
 	})
 

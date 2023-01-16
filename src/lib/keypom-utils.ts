@@ -466,33 +466,35 @@ export const getStorageBase = ({
     const storageCostNEARPerByte = 0.00001;
     let totalBytes = 0;
 
+
+
     // Get the bytes per public key, multiply it by number of keys, and add it to the total
     let bytesPerKey = Buffer.from("ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim").length;
     let totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
     // console.log('totalBytesForKeys: ', totalBytesForKeys)
     // Bytes for the deposit per use
-    let bytesForDeposit = Buffer.from(deposit_per_use.toString()).length;
+    let bytesForDeposit = Buffer.from(deposit_per_use.toString()).length + 40;
     // console.log('bytesForDeposit: ', bytesForDeposit)
     // Bytes for the drop ID
-    let bytesForDropId = Buffer.from(drop_id || "").length;
+    let bytesForDropId = Buffer.from(drop_id || "").length + 40;
     // console.log('bytesForDropId: ', bytesForDropId)
     // Bytes for the config
-    let bytesForConfig = Buffer.from(JSON.stringify(config || "")).length;
+    let bytesForConfig = Buffer.from(JSON.stringify(config || "")).length + 40;
     // console.log('bytesForConfig: ', bytesForConfig)
     // Bytes for the metadata. 66 comes from collection initialization
     let bytesForMetadata = Buffer.from(metadata || "").length + 66;
     // console.log('bytesForMetadata: ', bytesForMetadata)
     // Bytes for the simple data
-    let bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length;
+    let bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length + 40;
     // console.log('bytesForSimple: ', bytesForSimple)
     // Bytes for the FT data
-    let bytesForFT = Buffer.from(JSON.stringify(ft || "")).length;
+    let bytesForFT = Buffer.from(JSON.stringify(ft || "")).length + 40;
     // console.log('bytesForFT: ', bytesForFT)
     // Bytes for the NFT data
-    let bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length;
+    let bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length + 40;
     // console.log('bytesForNFT: ', bytesForNFT)
     // Bytes for the FC data
-    let bytesForFC = Buffer.from(JSON.stringify(fc || "")).length;
+    let bytesForFC = Buffer.from(JSON.stringify(fc || "")).length + 40;
     // console.log('bytesForFC: ', bytesForFC)
 
     // Bytes for the passwords per use
@@ -538,13 +540,10 @@ export const estimateRequiredDeposit = async ({
     fcData,
     ftData,
 }: EstimatorParams): Promise<string>  => {
-    ftData = toCamel(ftData);
-    fcData = toCamel(fcData);
-
     const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
-    // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
+     console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
 
     let actualAllowance = estimatePessimisticAllowance(attachedGas);
     // console.log('actualAllowance: ', actualAllowance.toString())
@@ -602,14 +601,15 @@ const estimatePessimisticAllowance = (attachedGas: number): BN => {
 
 // Estimate the amount of allowance required for a given attached gas.
 const getNoneFcsAndDepositRequired = (fcData: FCData | undefined, usesPerKey: number) => {
-
     let depositRequiredForFcDrops = new BN(0);
     let numNoneFcs = 0;
-    if (!fcData) {
+    if (!fcData || Object.keys(fcData).length === 0) {
         return {numNoneFcs, depositRequiredForFcDrops};
     }
 
     let numMethodData = fcData.methods.length;
+    console.log('numMethodData: ', numMethodData)
+    console.log('usesPerKey: ', usesPerKey)
 
     // If there's one method data specified and more than 1 claim per key, that data is to be used
     // For all the claims. In this case, we need to tally all the deposits for each method in all method data.
@@ -729,10 +729,8 @@ export const toCamel = o => {
 	} else {
 	  newO = {}
 	  for (origKey in o) {
-		console.log('origKey: ', origKey)
 		if (o.hasOwnProperty(origKey)) {
 		  newKey = snakeToCamel(origKey);
-		  console.log('newKey: ', newKey)
 		  value = o[origKey]
 		  if (value instanceof Array || (value !== null && value.constructor === Object)) {
 			value = toCamel(value)

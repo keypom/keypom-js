@@ -10,7 +10,7 @@ import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit,
-	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
+	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount, toCamel
 } from "./keypom-utils";
 import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
@@ -298,6 +298,7 @@ export const createDrop = async ({
 		fcData,
 	})
 
+	console.log('requiredDeposit: ', requiredDeposit)
 	var hasBalance = false;
 	if(useBalance) {
 		let userBal = await getUserBalance({accountId: account!.accountId});
