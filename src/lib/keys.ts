@@ -258,7 +258,7 @@ export const addKeys = async ({
 			contractId: ftData.contract_id,
 			args: {
 				receiver_id: contractId,
-				amount: new BN(ftData.balance_per_use).mul(new BN(numKeys - registered_uses)).toString(),
+				amount: new BN(ftData.balance_per_use!).mul(new BN(numKeys)).mul(new BN(uses_per_key)).toString(),
 				msg: drop_id.toString(),
 			},
 			returnTransaction: true

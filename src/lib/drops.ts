@@ -347,7 +347,7 @@ export const createDrop = async ({
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
-				amount: new BN(ftBalancePerUse!).mul(new BN(publicKeys.length)).toString(),
+				amount: new BN(ftBalancePerUse!).mul(new BN(numKeys)).mul(new BN(finalConfig.uses_per_key)).toString(),
 				msg: dropId.toString(),
 			},
 			returnTransaction: true
