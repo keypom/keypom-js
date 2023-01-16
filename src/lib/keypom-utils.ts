@@ -501,27 +501,27 @@ export const getStorageBase = ({
     // Magic numbers come from plotting SDK data against protocol data and finding the best fit
     let bytesForPasswords = Buffer.from(JSON.stringify(passwords_per_use || "")).length * 4;
     
-    console.log('bytesForPasswords: ', bytesForPasswords)
+    // console.log('bytesForPasswords: ', bytesForPasswords)
     totalBytes += totalBytesForKeys + bytesForDeposit + bytesForDropId + bytesForConfig + bytesForMetadata + bytesForSimple + bytesForFT + bytesForNFT + bytesForFC + bytesForPasswords;
     
-    console.log('totalBytes: ', totalBytes)
+    // console.log('totalBytes: ', totalBytes)
 
     // Add a 30% buffer to the total bytes
     totalBytes = Math.round(totalBytes * 1.3);
-    console.log('totalBytes Rounded: ', totalBytes)
+    // console.log('totalBytes Rounded: ', totalBytes)
     
 
     let totalNEARAmount = (totalBytes * storageCostNEARPerByte)
-    console.log('totalNEARAmount BEFORE: ', totalNEARAmount)
+    // console.log('totalNEARAmount BEFORE: ', totalNEARAmount)
     // Accounting for protocol storage for access keys
     // Magic numbers come from plotting SDK data against protocol data and finding the best fit 
     totalNEARAmount += (public_keys?.length || 0) * 0.005373134328 + 0.00376;
-    console.log('totalNEARAmount AFTER pk: ', totalNEARAmount.toString())
+    // console.log('totalNEARAmount AFTER pk: ', totalNEARAmount.toString())
 
     // Multi use passwords need a little extra storage
     if (passwords_per_use) {
         totalNEARAmount += -0.00155 * ((config?.uses_per_key || 1) - 1) + 0.00285687;
-        console.log('totalNEARAmount AFTER pw per use conversion: ', totalNEARAmount.toString())
+        // console.log('totalNEARAmount AFTER pw per use conversion: ', totalNEARAmount.toString())
     }
 
     // Turns it into yocto
