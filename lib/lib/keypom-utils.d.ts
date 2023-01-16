@@ -7,7 +7,6 @@ import { GeneratedKeyPairs } from "./types/general";
 import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
-export declare const snakeToCamel: (s: any) => any;
 export declare const key2str: (v: any) => any;
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
@@ -138,3 +137,5 @@ export declare function generatePerUsePasswords({ publicKeys, uses, basePassword
     uses: number[];
     basePassword: string;
 }): Promise<Array<Array<PasswordPerUse>>>;
+export declare const snakeToCamel: (str: any) => any;
+export declare const toCamel: (o: any) => any;
