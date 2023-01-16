@@ -136,7 +136,6 @@ test('create simple drop', async (t) => {
 	})
 
 	const { responses } = res
-	console.log(responses)
 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)

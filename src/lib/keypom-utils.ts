@@ -466,8 +466,6 @@ export const getStorageBase = ({
     const storageCostNEARPerByte = 0.00001;
     let totalBytes = 0;
 
-
-
     // Get the bytes per public key, multiply it by number of keys, and add it to the total
     let bytesPerKey = Buffer.from("ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim").length;
     let totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
@@ -543,7 +541,6 @@ export const estimateRequiredDeposit = async ({
     const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
-     console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
 
     let actualAllowance = estimatePessimisticAllowance(attachedGas);
     // console.log('actualAllowance: ', actualAllowance.toString())
@@ -608,8 +605,6 @@ const getNoneFcsAndDepositRequired = (fcData: FCData | undefined, usesPerKey: nu
     }
 
     let numMethodData = fcData.methods.length;
-    console.log('numMethodData: ', numMethodData)
-    console.log('usesPerKey: ', usesPerKey)
 
     // If there's one method data specified and more than 1 claim per key, that data is to be used
     // For all the claims. In this case, we need to tally all the deposits for each method in all method data.

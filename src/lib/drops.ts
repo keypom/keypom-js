@@ -298,7 +298,6 @@ export const createDrop = async ({
 		fcData,
 	})
 
-	console.log('requiredDeposit: ', requiredDeposit)
 	var hasBalance = false;
 	if(useBalance) {
 		let userBal = await getUserBalance({accountId: account!.accountId});
