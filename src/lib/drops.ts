@@ -274,13 +274,14 @@ export const createDrop = async ({
 	}
 
 	/// estimate required deposit
+	const storageCalculated = getStorageBase(createDropArgs);
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas: parseInt(attachedGas),
-		storage: getStorageBase(createDropArgs),
+		storage: storageCalculated,
 		ftData,
 		fcData,
 	})
