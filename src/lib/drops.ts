@@ -237,6 +237,18 @@ export const createDrop = async ({
 		})
 	}
 
+	if (ftData) {
+		var ftBalancePerUse = ftData?.absoluteAmount || "0"
+		
+		if (ftData.amount) {
+			const metadata = await viewAccount.viewFunction2({
+				contractId: ftData.contractId,
+				methodName: 'ft_metadata',
+			})
+			ftBalancePerUse = parseFTAmount(ftData.amount, metadata.decimals);
+		}
+	}
+
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
 		public_keys: publicKeys || [],
@@ -246,7 +258,7 @@ export const createDrop = async ({
 		ft: ftData.contractId ? ({
 			contract_id: ftData.contractId,
 			sender_id: ftData.senderId,
-			balance_per_use: ftData.balancePerUse,
+			balance_per_use: ftBalancePerUse!,
 		}) : undefined,
 		nft: nftData.contractId ? ({
 			contract_id: nftData.contractId,
@@ -296,14 +308,6 @@ export const createDrop = async ({
 		hasBalance = true;
 	}
 
-	if (ftData?.balancePerUse) {
-		const metadata = await viewAccount.viewFunction2({
-			contractId: ftData.contractId,
-			methodName: 'ft_metadata',
-		})
-		ftData.balancePerUse = parseFTAmount(ftData.balancePerUse, metadata.decimals);
-	}
-
 	const deposit = !hasBalance ? requiredDeposit : '0'
 	
 	let transactions: Transaction[] = []
@@ -322,13 +326,13 @@ export const createDrop = async ({
 		}]
 	})
 
-	if (ftData.contractId && publicKeys?.length) {
+	if (ftData?.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
 			account: account!,
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
-				amount: new BN(ftData.balancePerUse).mul(new BN(publicKeys.length)).toString(),
+				amount: new BN(ftBalancePerUse!).mul(new BN(publicKeys.length)).toString(),
 				msg: dropId.toString(),
 			},
 			returnTransaction: true

@@ -8,6 +8,7 @@ import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { getEnv } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
+import { FCData } from "./types/fc";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
 import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 
@@ -38,9 +39,6 @@ export const ATTACHED_GAS_FROM_WALLET: number = 100000000000000; // 100 TGas
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE: BN = new BN("1000000000000000000000");
 
-export const snakeToCamel = (s) =>
-    s.toLowerCase().replace(/([-_][a-z])/g, (m) => m.toUpperCase().replace(/-_/g, '')
-);
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
@@ -540,6 +538,9 @@ export const estimateRequiredDeposit = async ({
     fcData,
     ftData,
 }: EstimatorParams): Promise<string>  => {
+    ftData = toCamel(ftData);
+    fcData = toCamel(fcData);
+
     const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
@@ -571,8 +572,8 @@ export const estimateRequiredDeposit = async ({
     
     // console.log('requiredDeposit B4 FT costs: ', requiredDeposit.toString())
     
-    if (ftData?.contractId != null) {
-        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contractId || ftData.contractId);
+    if (ftData?.contractId) {
+        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData?.contractId);
         requiredDeposit = requiredDeposit.add(new BN(extraFtCosts));
 
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
@@ -600,11 +601,11 @@ const estimatePessimisticAllowance = (attachedGas: number): BN => {
 };
 
 // Estimate the amount of allowance required for a given attached gas.
-const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
+const getNoneFcsAndDepositRequired = (fcData: FCData | undefined, usesPerKey: number) => {
 
     let depositRequiredForFcDrops = new BN(0);
     let numNoneFcs = 0;
-    if (fcData == null) {
+    if (!fcData) {
         return {numNoneFcs, depositRequiredForFcDrops};
     }
 
@@ -617,8 +618,8 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
 
         // Keep track of the total attached deposit across all methods in the method data
         let attachedDeposit = new BN(0);
-        for (let i = 0; i < methodData.length; i++) {
-            attachedDeposit = attachedDeposit.add(new BN(methodData[i].attachedDeposit));
+        for (let i = 0; i < (methodData?.length || 0); i++) {
+            attachedDeposit = attachedDeposit.add(new BN(methodData![i].attachedDeposit));
         }
 
         depositRequiredForFcDrops = depositRequiredForFcDrops.add(attachedDeposit).mul(usesPerKey);
@@ -638,8 +639,8 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
         if (!isNoneFc) {
             // Keep track of the total attached deposit across all methods in the method data
             let attachedDeposit = new BN(0);
-            for (let j = 0; j < methodData.length; j++) {
-                attachedDeposit = attachedDeposit.add(new BN(methodData[j].attachedDeposit));
+            for (let j = 0; j < (methodData?.length || 0); j++) {
+                attachedDeposit = attachedDeposit.add(new BN(methodData![j].attachedDeposit));
             }
 
             depositRequiredForFcDrops = depositRequiredForFcDrops.add(attachedDeposit);
@@ -704,3 +705,41 @@ export async function generatePerUsePasswords({
 
     return passwords;
 }
+
+// Taken from https://stackoverflow.com/a/61375162/16441367
+export const snakeToCamel = str =>
+  str.toLowerCase().replace(/([-_][a-z])/g, group =>
+    group
+      .toUpperCase()
+      .replace('-', '')
+      .replace('_', '')
+  );
+  
+
+// Taken from https://stackoverflow.com/a/26215431/16441367
+export const toCamel = o => {
+	var newO, origKey, newKey, value
+	if (o instanceof Array) {
+	  return o.map(function(value) {
+		  if (typeof value === "object") {
+			value = toCamel(value)
+		  }
+		  return value
+	  })
+	} else {
+	  newO = {}
+	  for (origKey in o) {
+		console.log('origKey: ', origKey)
+		if (o.hasOwnProperty(origKey)) {
+		  newKey = snakeToCamel(origKey);
+		  console.log('newKey: ', newKey)
+		  value = o[origKey]
+		  if (value instanceof Array || (value !== null && value.constructor === Object)) {
+			value = toCamel(value)
+		  }
+		  newO[newKey] = value
+		}
+	  }
+	}
+	return newO
+  }
