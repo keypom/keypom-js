@@ -3,6 +3,7 @@
 		"src/**/*"
 	],
 	"compilerOptions": {
+		"jsx": "react",
 		/* Visit https://aka.ms/tsconfig to read more about this file */
 		"incremental": true, /* Enable incremental compilation */
 		"target": "es5", /* Specify ECMAScript target version: */

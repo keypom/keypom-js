@@ -54,10 +54,15 @@ let viewAccount: any = undefined;
  * 
  * @returns {EnvVars} The environment variables used by the Keypom library.
  */
-export const getEnv = (): EnvVars  => ({
-	near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
-	gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
-})
+export const getEnv = (): EnvVars  => {
+	if (!near) {
+		throw new Error('Keypom uninitialized. Please call initKeypom or initKeypomContext')
+	}
+	return {
+		near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
+		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
+	}
+}
 
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
