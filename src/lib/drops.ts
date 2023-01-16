@@ -14,6 +14,8 @@ import {
 } from "./keypom-utils";
 import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
+import { assert, assertValidDropConfig, assertValidFCData, isValidAccountObj } from './checks';
+import { Account } from 'near-api-js';
 
 export const KEY_LIMIT = 50;
 
@@ -171,10 +173,8 @@ export const createDrop = async ({
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
 	} = getEnv()
 
-	if (!near) {
-		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
-	}
-
+	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = getAccount({ account, wallet })
 
 	/// parse args
@@ -184,10 +184,19 @@ export const createDrop = async ({
 	if (!depositPerUseYocto) depositPerUseYocto = '0'
 
 	// Ensure that if the dropID is passed in, it's greater than 1 billion
-	if (dropId && parseInt(dropId) < 1000000000) {
-		throw new Error('All custom drop IDs must be greater than 1_000_000_000');
-	}
+	assert(parseInt(dropId || "1000000000") >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
 	if (!dropId) dropId = Date.now().toString()
+
+	try {
+		const dropInfo = await viewAccount.viewFunction2({
+			contractId: ftData.contractId,
+			methodName: 'get_drop_information',
+			args: {
+				drop_id: dropId
+			}
+		})
+		assert(!dropInfo, `Drop with ID ${dropId} already exists. Please use a different drop ID.`);
+	} catch(_) {}
 
 	const finalConfig = {
 		uses_per_key: config?.usesPerKey || 1,
@@ -200,6 +209,8 @@ export const createDrop = async ({
 		},
 		time: config?.time,
 	}
+
+	assertValidDropConfig(finalConfig);
 
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
@@ -235,6 +246,8 @@ export const createDrop = async ({
 			basePassword,
 			uses: passwordProtectedUses || Array.from({length: config?.usesPerKey || 1}, (_, i) => i+1)
 		})
+
+		assert(numKeys <= 50, "Cannot add 50 keys at once with passwords");
 	}
 
 	if (ftData) {
@@ -248,6 +261,8 @@ export const createDrop = async ({
 			ftBalancePerUse = parseFTAmount(ftData.amount, metadata.decimals);
 		}
 	}
+
+	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key);
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -288,7 +303,7 @@ export const createDrop = async ({
 	/// estimate required deposit
 	const storageCalculated = getStorageBase(createDropArgs);
 	let requiredDeposit = await estimateRequiredDeposit({
-		near,
+		near: near!,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
