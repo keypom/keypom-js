@@ -40,13 +40,14 @@ export interface EnvVars {
 	fundingAccountDetails?: Funder,
 	contractAccount?: Account,
 	viewAccount?: any,
-	gas: string,
-	gas300: string,
-	attachedGas: string,
-	contractId: string,
-	receiverId: string,
-	getAccount: any
-	execute: any
+	gas?: string,
+	gas300?: string,
+	attachedGas?: string,
+	contractId?: string,
+	receiverId?: string,
+	error?: string,
+	getAccount?: any
+	execute?: any
 }
 
 export interface ContractSourceMetadata {
