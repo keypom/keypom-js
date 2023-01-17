@@ -292,6 +292,11 @@ export const createDrop = async ({
 		passwords_per_use: passwords
 	}
 
+	// If there is no ft data, nft data, or fc data, ensure the deposit per use is greater than 0
+	if (createDropArgs.fc === undefined && createDropArgs.ft === undefined && createDropArgs.nft === undefined) {
+		assert(depositPerUseYocto != "0", "Deposit per use must be greater than 0 for simple drops");
+	}
+
 	/// estimate required deposit
 	const storageCalculated = getStorageBase(createDropArgs);
 	let requiredDeposit = await estimateRequiredDeposit({
