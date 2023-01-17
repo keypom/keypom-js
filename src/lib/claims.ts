@@ -117,7 +117,7 @@ export const claim = async ({
 
 	assert(near && networkId && keyStore, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	const keyPair = KeyPair.fromString(secretKey)
-	await keyStore!.setKey(networkId!, contractId, keyPair)
+	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
 	assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')

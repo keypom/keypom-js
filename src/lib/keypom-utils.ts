@@ -649,7 +649,7 @@ export const estimateRequiredDeposit = async ({
     }
 
 
-    return requiredDeposit.toString();
+    return requiredDeposit.toString() || "0";
 };
 
 // Estimate the amount of allowance required for a given attached gas.
@@ -728,7 +728,7 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
     // console.log('storageBalanceBounds: ', storageBalanceBounds)
     let costs: BN = new BN(min).mul(new BN(numKeys)).mul(new BN(usesPerKey)).add(new BN(min));
     // console.log('costs: ', costs.toString());
-    return costs.toString();
+    return costs.toString() || "0";
 };
 
 /**

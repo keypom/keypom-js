@@ -299,7 +299,7 @@ export const createDrop = async ({
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
-		attachedGas: parseInt(attachedGas),
+		attachedGas: parseInt(attachedGas!),
 		storage: storageCalculated,
 		ftData,
 		fcData,
@@ -320,14 +320,14 @@ export const createDrop = async ({
 	let transactions: Transaction[] = []
 
 	transactions.push({
-		receiverId,
+		receiverId: receiverId!,
 		signerId: account!.accountId, // We know this is not undefined since getAccount throws
 		actions: [{
 			type: 'FunctionCall',
 			params: {
 				methodName: 'create_drop',
 				args: createDropArgs,
-				gas,
+				gas: gas!,
 				deposit,
 			}
 		}]
