@@ -43,3 +43,7 @@ export interface UsageConfig {
     autoDeleteDrop?: boolean;
     autoWithdraw?: boolean;
 }
+export interface PasswordPerUse {
+    pw: string;
+    key_use: number;
+}

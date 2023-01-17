@@ -11,7 +11,7 @@ import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
 	generatePerUsePasswords,
-	key2str, nftTransferCall
+	key2str, nftTransferCall, toCamel
 } from "./keypom-utils";
 import { AddKeyParams, CreateOrAddReturn, DeleteKeyParams } from './types/params';
 
@@ -168,6 +168,7 @@ export const addKeys = async ({
 		config: { uses_per_key },
 		ft: ftData = {},
 		nft: nftData = {},
+		fc: fcData,
 		next_key_id,
 	} = drop || await getDropInformation({dropId: dropId!});
 
@@ -203,9 +204,12 @@ export const addKeys = async ({
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
 			basePassword,
-			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+			uses: passwordProtectedUses || Array.from({length: uses_per_key}, (_, i) => i+1)
 		})
 	}
+
+	const camelFTData = toCamel(ftData);
+	const camelFCData = toCamel(fcData);
 
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
@@ -214,8 +218,10 @@ export const addKeys = async ({
 		usesPerKey: uses_per_key,
 		attachedGas: required_gas,
 		storage: parseNearAmount('0.2') as string,
-		ftData,
+		fcData: camelFCData,
+		ftData: camelFTData
 	})
+	console.log('requiredDeposit: ', requiredDeposit)
 
 	var hasBalance = false;
 	if(useBalance) {

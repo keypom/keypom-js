@@ -88,3 +88,8 @@ export interface UsageConfig {
     /// When this drop is deleted and it is the owner's *last* drop, automatically withdraw their balance.
     autoWithdraw?: boolean
 }
+
+export interface PasswordPerUse {
+	pw: string; 
+    key_use: number
+}

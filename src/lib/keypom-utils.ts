@@ -7,8 +7,10 @@ import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { getEnv } from "./keypom";
+import { PasswordPerUse } from "./types/drops";
+import { FCData } from "./types/fc";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
-import { EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
+import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
 
 const {
     KeyPair,
@@ -37,9 +39,6 @@ export const ATTACHED_GAS_FROM_WALLET: number = 100000000000000; // 100 TGas
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE: BN = new BN("1000000000000000000000");
 
-export const snakeToCamel = (s) =>
-    s.toLowerCase().replace(/([-_][a-z])/g, (m) => m.toUpperCase().replace(/-_/g, '')
-);
 export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
@@ -452,10 +451,79 @@ const createAction = (action: Action): transactions.Action => {
 	}
 };
 
-export const getStorageBase = ({ nftData, fcData }) => {
-    if (fcData?.methods) return parseNearAmount('0.015')
-    if (nftData.contractId) return parseNearAmount('0.05')
-    return parseNearAmount('0.01')
+export const getStorageBase = ({
+    public_keys, 
+    deposit_per_use, 
+    drop_id, 
+    config, 
+    metadata, 
+    simple, 
+    ft, 
+    nft, 
+    fc, 
+    passwords_per_use
+}: CreateDropProtocolArgs) => {
+    const storageCostNEARPerByte = 0.00001;
+    let totalBytes = 0;
+
+    // Get the bytes per public key, multiply it by number of keys, and add it to the total
+    let bytesPerKey = Buffer.from("ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim").length;
+    let totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
+    // console.log('totalBytesForKeys: ', totalBytesForKeys)
+    // Bytes for the deposit per use
+    let bytesForDeposit = Buffer.from(deposit_per_use.toString()).length + 40;
+    // console.log('bytesForDeposit: ', bytesForDeposit)
+    // Bytes for the drop ID
+    let bytesForDropId = Buffer.from(drop_id || "").length + 40;
+    // console.log('bytesForDropId: ', bytesForDropId)
+    // Bytes for the config
+    let bytesForConfig = Buffer.from(JSON.stringify(config || "")).length + 40;
+    // console.log('bytesForConfig: ', bytesForConfig)
+    // Bytes for the metadata. 66 comes from collection initialization
+    let bytesForMetadata = Buffer.from(metadata || "").length + 66;
+    // console.log('bytesForMetadata: ', bytesForMetadata)
+    // Bytes for the simple data
+    let bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length + 40;
+    // console.log('bytesForSimple: ', bytesForSimple)
+    // Bytes for the FT data
+    let bytesForFT = Buffer.from(JSON.stringify(ft || "")).length + 40;
+    // console.log('bytesForFT: ', bytesForFT)
+    // Bytes for the NFT data
+    let bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length + 40;
+    // console.log('bytesForNFT: ', bytesForNFT)
+    // Bytes for the FC data
+    let bytesForFC = Buffer.from(JSON.stringify(fc || "")).length + 40;
+    // console.log('bytesForFC: ', bytesForFC)
+
+    // Bytes for the passwords per use
+    // Magic numbers come from plotting SDK data against protocol data and finding the best fit
+    let bytesForPasswords = Buffer.from(JSON.stringify(passwords_per_use || "")).length * 4;
+    
+    // console.log('bytesForPasswords: ', bytesForPasswords)
+    totalBytes += totalBytesForKeys + bytesForDeposit + bytesForDropId + bytesForConfig + bytesForMetadata + bytesForSimple + bytesForFT + bytesForNFT + bytesForFC + bytesForPasswords;
+    
+    // console.log('totalBytes: ', totalBytes)
+
+    // Add a 30% buffer to the total bytes
+    totalBytes = Math.round(totalBytes * 1.3);
+    // console.log('totalBytes Rounded: ', totalBytes)
+    
+
+    let totalNEARAmount = (totalBytes * storageCostNEARPerByte)
+    // console.log('totalNEARAmount BEFORE: ', totalNEARAmount)
+    // Accounting for protocol storage for access keys
+    // Magic numbers come from plotting SDK data against protocol data and finding the best fit 
+    totalNEARAmount += (public_keys?.length || 0) * 0.005373134328 + 0.00376;
+    // console.log('totalNEARAmount AFTER pk: ', totalNEARAmount.toString())
+
+    // Multi use passwords need a little extra storage
+    if (passwords_per_use) {
+        totalNEARAmount += -0.00155 * ((config?.uses_per_key || 1) - 1) + 0.00285687;
+        // console.log('totalNEARAmount AFTER pw per use conversion: ', totalNEARAmount.toString())
+    }
+
+    // Turns it into yocto
+    return parseNearAmount(totalNEARAmount.toString());
 }
 
 // Initiate the connection to the NEAR blockchain.
@@ -473,7 +541,6 @@ export const estimateRequiredDeposit = async ({
     const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
-    // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
 
     let actualAllowance = estimatePessimisticAllowance(attachedGas);
     // console.log('actualAllowance: ', actualAllowance.toString())
@@ -501,8 +568,8 @@ export const estimateRequiredDeposit = async ({
     
     // console.log('requiredDeposit B4 FT costs: ', requiredDeposit.toString())
     
-    if (ftData?.contractId != null) {
-        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData.contractId || ftData.contractId);
+    if (ftData?.contractId) {
+        let extraFtCosts = await getFtCosts(near, numKeys, usesPerKey, ftData?.contractId);
         requiredDeposit = requiredDeposit.add(new BN(extraFtCosts));
 
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
@@ -530,11 +597,10 @@ const estimatePessimisticAllowance = (attachedGas: number): BN => {
 };
 
 // Estimate the amount of allowance required for a given attached gas.
-const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
-
+const getNoneFcsAndDepositRequired = (fcData: FCData | undefined, usesPerKey: number) => {
     let depositRequiredForFcDrops = new BN(0);
     let numNoneFcs = 0;
-    if (fcData == null) {
+    if (!fcData || Object.keys(fcData).length === 0) {
         return {numNoneFcs, depositRequiredForFcDrops};
     }
 
@@ -547,8 +613,8 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
 
         // Keep track of the total attached deposit across all methods in the method data
         let attachedDeposit = new BN(0);
-        for (let i = 0; i < methodData.length; i++) {
-            attachedDeposit = attachedDeposit.add(new BN(methodData[i].attachedDeposit));
+        for (let i = 0; i < (methodData?.length || 0); i++) {
+            attachedDeposit = attachedDeposit.add(new BN(methodData![i].attachedDeposit));
         }
 
         depositRequiredForFcDrops = depositRequiredForFcDrops.add(attachedDeposit).mul(usesPerKey);
@@ -568,8 +634,8 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
         if (!isNoneFc) {
             // Keep track of the total attached deposit across all methods in the method data
             let attachedDeposit = new BN(0);
-            for (let j = 0; j < methodData.length; j++) {
-                attachedDeposit = attachedDeposit.add(new BN(methodData[j].attachedDeposit));
+            for (let j = 0; j < (methodData?.length || 0); j++) {
+                attachedDeposit = attachedDeposit.add(new BN(methodData![j].attachedDeposit));
             }
 
             depositRequiredForFcDrops = depositRequiredForFcDrops.add(attachedDeposit);
@@ -600,14 +666,14 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
  * @param {string[]} uses An array of numbers that dictate which uses should be password protected. The 1st use of a key is 1 (NOT zero indexed).
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  * 
- * @returns {Promise<Array<Array<{ pw: string; key_use: number }>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
  */
 export async function generatePerUsePasswords({
     publicKeys,
     uses,
     basePassword
-}: {publicKeys: string[], uses: number[], basePassword: string}): Promise<Array<Array<{ pw: string; key_use: number }>>> {
-    let passwords: Array<Array<{ pw: string; key_use: number }>> = [];
+}: {publicKeys: string[], uses: number[], basePassword: string}): Promise<Array<Array<PasswordPerUse>>> {
+    let passwords: Array<Array<PasswordPerUse>> = [];
     
     // Loop through each pubKey to generate either the passwords
     for (var i = 0; i < publicKeys.length; i++) {
@@ -634,3 +700,39 @@ export async function generatePerUsePasswords({
 
     return passwords;
 }
+
+// Taken from https://stackoverflow.com/a/61375162/16441367
+export const snakeToCamel = str =>
+  str.toLowerCase().replace(/([-_][a-z])/g, group =>
+    group
+      .toUpperCase()
+      .replace('-', '')
+      .replace('_', '')
+  );
+  
+
+// Taken from https://stackoverflow.com/a/26215431/16441367
+export const toCamel = o => {
+	var newO, origKey, newKey, value
+	if (o instanceof Array) {
+	  return o.map(function(value) {
+		  if (typeof value === "object") {
+			value = toCamel(value)
+		  }
+		  return value
+	  })
+	} else {
+	  newO = {}
+	  for (origKey in o) {
+		if (o.hasOwnProperty(origKey)) {
+		  newKey = snakeToCamel(origKey);
+		  value = o[origKey]
+		  if (value instanceof Array || (value !== null && value.constructor === Object)) {
+			value = toCamel(value)
+		  }
+		  newO[newKey] = value
+		}
+	  }
+	}
+	return newO
+  }
