@@ -2,7 +2,7 @@ import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account, Near } from "near-api-js";
 import { Maybe } from '../keypom';
-import { DropConfig } from './drops';
+import { DropConfig, PasswordPerUse } from './drops';
 import { FCData } from './fc';
 import { FTData } from './ft';
 import { Funder, GeneratedKeyPairs } from './general';
@@ -112,6 +112,59 @@ export interface CreateOrAddReturn {
 	responses: any,
 	keys?: Maybe<GeneratedKeyPairs>,
 	dropId: string
+}
+
+export interface CreateDropProtocolArgs {
+	public_keys?: string[],
+	deposit_per_use: string,
+
+	drop_id?: string,
+	config?: {
+		uses_per_key?: number,
+		time?: {
+			start?: number,
+			end?: number,
+			throttle?: number,
+			interval?: number,
+		},
+		usage?: {
+			permission?: string,
+			refund_deposit?: boolean,
+			auto_delete_drop?: boolean,
+			auto_withdraw?: boolean
+		},
+		root_account_id?: string,
+	},
+	metadata?: string,
+
+	simple?: {
+		lazy_register?: boolean
+	},
+	ft?: {
+		contract_id?: string,
+		sender_id?: string,
+		balance_per_use?: string
+	},
+	nft?: {
+		sender_id?: string,
+		contract_id?: string,
+	},
+	fc?: {
+		methods: Array<Maybe<Array<{
+			receiver_id: string,
+			method_name: string,
+			args: string,
+			attached_deposit: string,
+			account_id_field?: string,
+			drop_id_field?: string,
+			key_id_field?: string
+		}>>>,
+		config?: {
+			attached_gas?: string
+		}
+	},
+
+	passwords_per_use?: Array<Maybe<Array<PasswordPerUse>>>,
 }
 
 export interface GetDropParams {

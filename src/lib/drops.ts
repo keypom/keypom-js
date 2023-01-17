@@ -10,9 +10,9 @@ import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit,
-	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
+	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount, toCamel
 } from "./keypom-utils";
-import { CreateDropParams, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
+import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
 
 export const KEY_LIMIT = 50;
@@ -233,18 +233,67 @@ export const createDrop = async ({
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
 			basePassword,
-			uses: passwordProtectedUses || Array.from({length: numKeys}, (_, i) => i+1)
+			uses: passwordProtectedUses || Array.from({length: config?.usesPerKey || 1}, (_, i) => i+1)
 		})
 	}
 
+	if (ftData) {
+		var ftBalancePerUse = ftData?.absoluteAmount || "0"
+		
+		if (ftData.amount) {
+			const metadata = await viewAccount.viewFunction2({
+				contractId: ftData.contractId,
+				methodName: 'ft_metadata',
+			})
+			ftBalancePerUse = parseFTAmount(ftData.amount, metadata.decimals);
+		}
+	}
+
+	const createDropArgs: CreateDropProtocolArgs = {
+		drop_id: dropId,
+		public_keys: publicKeys || [],
+		deposit_per_use: depositPerUseYocto,
+		config: finalConfig,
+		metadata,
+		ft: ftData.contractId ? ({
+			contract_id: ftData.contractId,
+			sender_id: ftData.senderId,
+			balance_per_use: ftBalancePerUse!,
+		}) : undefined,
+		nft: nftData.contractId ? ({
+			contract_id: nftData.contractId,
+			sender_id: nftData.senderId,
+		}) : undefined,
+		fc: fcData?.methods ? ({
+			methods: fcData.methods.map((useMethods) => 
+				useMethods ? 
+				useMethods.map((method) => {
+					const ret: any = {}
+					ret.receiver_id = method.receiverId;
+					ret.method_name = method.methodName;
+					ret.args = method.args;
+					ret.attached_deposit = method.attachedDeposit;
+					ret.account_id_field = method.accountIdField;
+					ret.drop_id_field = method.dropIdField;
+					return ret
+				}) : undefined
+			)
+		}) : undefined,
+		simple: simpleData?.lazyRegister ? ({
+			lazy_register: simpleData.lazyRegister,
+		}) : undefined,
+		passwords_per_use: passwords
+	}
+
 	/// estimate required deposit
+	const storageCalculated = getStorageBase(createDropArgs);
 	let requiredDeposit = await estimateRequiredDeposit({
 		near,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
 		attachedGas: parseInt(attachedGas),
-		storage: getStorageBase({ nftData, fcData }),
+		storage: storageCalculated,
 		ftData,
 		fcData,
 	})
@@ -259,14 +308,6 @@ export const createDrop = async ({
 		hasBalance = true;
 	}
 
-	if (ftData?.balancePerUse) {
-		const metadata = await viewAccount.viewFunction2({
-			contractId: ftData.contractId,
-			methodName: 'ft_metadata',
-		})
-		ftData.balancePerUse = parseFTAmount(ftData.balancePerUse, metadata.decimals);
-	}
-
 	const deposit = !hasBalance ? requiredDeposit : '0'
 	
 	let transactions: Transaction[] = []
@@ -278,54 +319,20 @@ export const createDrop = async ({
 			type: 'FunctionCall',
 			params: {
 				methodName: 'create_drop',
-				args: {
-					drop_id: dropId,
-					public_keys: publicKeys || [],
-					deposit_per_use: depositPerUseYocto,
-					config: finalConfig,
-					metadata,
-					ft: ftData.contractId ? ({
-						contract_id: ftData.contractId,
-						sender_id: ftData.senderId,
-						balance_per_use: ftData.balancePerUse,
-					}) : undefined,
-					nft: nftData.contractId ? ({
-						contract_id: nftData.contractId,
-						sender_id: nftData.senderId,
-					}) : undefined,
-					fc: fcData?.methods ? ({
-						methods: fcData.methods.map((useMethods) => 
-							useMethods ? 
-							useMethods.map((method) => {
-								const ret: any = {}
-								ret.receiver_id = method.receiverId;
-								ret.method_name = method.methodName;
-								ret.args = method.args;
-								ret.attached_deposit = method.attachedDeposit;
-								ret.account_id_field = method.accountIdField;
-								ret.drop_id_field = method.dropIdField;
-								return ret
-							}) : undefined
-						)
-					}) : undefined,
-					simple: simpleData?.lazyRegister ? ({
-						lazy_register: simpleData.lazyRegister,
-					}) : undefined,
-					passwords_per_use: passwords
-				},
+				args: createDropArgs,
 				gas,
 				deposit,
 			}
 		}]
 	})
 
-	if (ftData.contractId && publicKeys?.length) {
+	if (ftData?.contractId && publicKeys?.length) {
 		transactions.push(ftTransferCall({
 			account: account!,
 			contractId: ftData.contractId,
 			args: {
 				receiver_id: contractId,
-				amount: new BN(ftData.balancePerUse).mul(new BN(publicKeys.length)).toString(),
+				amount: new BN(ftBalancePerUse!).mul(new BN(publicKeys.length)).toString(),
 				msg: dropId.toString(),
 			},
 			returnTransaction: true
