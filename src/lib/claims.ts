@@ -1,4 +1,5 @@
 import * as nearAPI from "near-api-js";
+import { assert } from "./checks";
 const {
 	KeyPair,
 } = nearAPI;
@@ -111,23 +112,15 @@ export const claim = async ({
 	password,
 }) => {
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails,
+		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
 	} = getEnv()
 
-	if (!keyStore) {
-		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
-	}
-
+	assert(near && networkId && keyStore, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	const keyPair = KeyPair.fromString(secretKey)
-	await keyStore.setKey(networkId!, contractId, keyPair)
+	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
-	if (newAccountId && !newPublicKey) {
-		throw new Error('If creating a new account, a newPublicKey must be passed in.')
-	}
-
-	if (!newAccountId && !accountId) {
-		throw new Error('Either an accountId or newAccountId must be passed in.')
-	}
+	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
+	assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
 
 	const transactions: any[] = [{
 		receiverId,

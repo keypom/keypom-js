@@ -13,6 +13,7 @@ import {
 } from "./keypom-utils";
 import { EnvVars, Funder } from "./types/general";
 import { InitKeypomParams } from "./types/params";
+import { assert, isValidFunderObject, isValidNearObject } from "./checks";
 
 const gas = '200000000000000'
 const gas300 = '300000000000000'
@@ -31,6 +32,17 @@ const networks = {
 		nodeUrl: 'https://rpc.testnet.near.org',
 		walletUrl: 'https://wallet.testnet.near.org',
 		helperUrl: 'https://helper.testnet.near.org'
+	}
+}
+
+let officialKeypomContracts = {
+	mainnet: {
+		"v1.keypom.near": true,
+		"v1-3.keypom.near": true
+	},
+	testnet: {
+		"v1.keypom.testnet": true,
+		"v1-3.keypom.testnet": true
 	}
 }
 
@@ -152,8 +164,10 @@ export const initKeypom = async ({
 	funder,
 	keypomContractId,
 }: InitKeypomParams) => {
-
+	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
+	
 	if (_near) {
+		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
 		near = _near
 		keyStore = near.config.keyStore
 	} else {
@@ -173,6 +187,11 @@ export const initKeypom = async ({
 	}
 
 	if (keypomContractId) {
+		assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+		if (keypomContractId != "v1-3.keypom.near" || keypomContractId != "v1-3.keypom.near") {
+			console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
+		}
+
 		contractId = receiverId = keypomContractId
 	}
 
@@ -225,9 +244,8 @@ export const initKeypom = async ({
 export const updateFunder = async ({
 	funder
 }:{funder: Funder}) => {
-	if (near == undefined) {
-		throw new Error("You must initialize the SDK via `initKeypom` before updating the funder account.");
-	}
+	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the funder account.")
+	assert(isValidFunderObject(funder), "The funder object passed in is not valid. Please pass in a valid funder object.");
 
 	let { accountId, secretKey, seedPhrase } = funder
 	if (seedPhrase) {
@@ -274,9 +292,10 @@ export const updateFunder = async ({
 export const updateKeypomContractId = async ({
 	keypomContractId
 }:{keypomContractId: string}) => {
-
-	if (near == undefined) {
-		throw new Error("You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.");
+	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
+	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+	if (keypomContractId != "v1-3.keypom.near" || keypomContractId != "v1-3.keypom.near") {
+		console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 	}
 
 	contractId = receiverId = keypomContractId

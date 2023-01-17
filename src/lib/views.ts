@@ -1,3 +1,4 @@
+import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
 import { keypomView } from "./keypom-utils"
@@ -237,6 +238,8 @@ export const getDropInformation = async ({ dropId, withKeys = false } : {dropId:
 		viewAccount, contractId,
 	} = getEnv()
 
+	assert(viewAccount, 'initKeypom must be called before view functions can be called.');
+
 	const dropInfo = await viewAccount.viewFunction2({
 		contractId,
 		methodName: 'get_drop_information',
@@ -440,9 +443,7 @@ export const getDrops = async ({
 	})
 
 	if (withKeys) {
-		if (drops.length > 20) {
-			throw new Error(`Too many RPC requests in parallel. Use 'limit' arg 20 or less.`)
-		}
+		assert(drops.length <= 20, `Too many RPC requests in parallel. Use 'limit' arg 20 or less.`)
 
 		await Promise.all(drops.map(async (drop, i) => {
 			const { drop_id } = drop

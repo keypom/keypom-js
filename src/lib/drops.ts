@@ -12,8 +12,10 @@ import {
 	estimateRequiredDeposit,
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount, toCamel
 } from "./keypom-utils";
-import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams } from './types/params';
+import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams, RegisterUsesParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
+import { assert, assertDropIdUnique, assertValidDropConfig, assertValidFCData, isValidAccountObj } from './checks';
+import { Account } from 'near-api-js';
 
 export const KEY_LIMIT = 50;
 
@@ -171,11 +173,10 @@ export const createDrop = async ({
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
 	} = getEnv()
 
-	if (!near) {
-		throw new Error('Keypom SDK is not initialized. Please call `initKeypom`.')
-	}
-
+	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = getAccount({ account, wallet })
+	assert(contractId == "v1-3.keypom.near" || contractId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -184,10 +185,10 @@ export const createDrop = async ({
 	if (!depositPerUseYocto) depositPerUseYocto = '0'
 
 	// Ensure that if the dropID is passed in, it's greater than 1 billion
-	if (dropId && parseInt(dropId) < 1000000000) {
-		throw new Error('All custom drop IDs must be greater than 1_000_000_000');
-	}
+	assert(parseInt(dropId || "1000000000") >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
 	if (!dropId) dropId = Date.now().toString()
+
+	await assertDropIdUnique(dropId);
 
 	const finalConfig = {
 		uses_per_key: config?.usesPerKey || 1,
@@ -200,6 +201,8 @@ export const createDrop = async ({
 		},
 		time: config?.time,
 	}
+
+	assertValidDropConfig(finalConfig);
 
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
@@ -229,6 +232,8 @@ export const createDrop = async ({
 	numKeys = publicKeys!.length;
 	let passwords;
 	if (basePassword) {
+		assert(numKeys <= 50, "Cannot add 50 keys at once with passwords");
+		
 		// Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
@@ -248,6 +253,8 @@ export const createDrop = async ({
 			ftBalancePerUse = parseFTAmount(ftData.amount, metadata.decimals);
 		}
 	}
+
+	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key);
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -285,14 +292,19 @@ export const createDrop = async ({
 		passwords_per_use: passwords
 	}
 
+	// If there is no ft data, nft data, or fc data, ensure the deposit per use is greater than 0
+	if (createDropArgs.fc === undefined && createDropArgs.ft === undefined && createDropArgs.nft === undefined) {
+		assert(depositPerUseYocto != "0", "Deposit per use must be greater than 0 for simple drops");
+	}
+
 	/// estimate required deposit
 	const storageCalculated = getStorageBase(createDropArgs);
 	let requiredDeposit = await estimateRequiredDeposit({
-		near,
+		near: near!,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key,
-		attachedGas: parseInt(attachedGas),
+		attachedGas: parseInt(attachedGas!),
 		storage: storageCalculated,
 		ftData,
 		fcData,
@@ -313,28 +325,25 @@ export const createDrop = async ({
 	let transactions: Transaction[] = []
 
 	transactions.push({
-		receiverId,
+		receiverId: receiverId!,
 		signerId: account!.accountId, // We know this is not undefined since getAccount throws
 		actions: [{
 			type: 'FunctionCall',
 			params: {
 				methodName: 'create_drop',
 				args: createDropArgs,
-				gas,
+				gas: gas!,
 				deposit,
 			}
 		}]
 	})
 
 	if (ftData?.contractId && publicKeys?.length) {
-		transactions.push(ftTransferCall({
+		transactions.push(await ftTransferCall({
 			account: account!,
 			contractId: ftData.contractId,
-			args: {
-				receiver_id: contractId,
-				amount: new BN(ftBalancePerUse!).mul(new BN(publicKeys.length)).toString(),
-				msg: dropId.toString(),
-			},
+			absoluteAmount: new BN(ftBalancePerUse!).mul(new BN(numKeys)).mul(new BN(finalConfig.uses_per_key)).toString(),
+			dropId,
 			returnTransaction: true
 		}) as Transaction)
 	}
@@ -347,9 +356,8 @@ export const createDrop = async ({
 		const nftTXs = await nftTransferCall({
 			account: account!,
 			contractId: nftData.contractId as string,
-			receiverId: contractId,
 			tokenIds,
-			msg: dropId.toString(),
+			dropId: dropId.toString(),
 			returnTransactions: true
 		}) as Transaction[]
 		transactions = transactions.concat(nftTXs)
@@ -415,11 +423,14 @@ export const deleteDrops = async ({
 	withdrawBalance = true,
 }: DeleteDropParams) => {
 	const {
-		gas300, receiverId, execute, getAccount
+		gas300, receiverId, execute, getAccount,
 	} = getEnv()
-
+	
+	assert(receiverId == "v1-3.keypom.near" || receiverId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = getAccount({ account, wallet });
-
+	
 	// If the drop information isn't passed in, we should get it from the drop IDs
 	if (!drops) {
 		if (!dropIds) {throw new Error('Must pass in either drops or dropIds')};
@@ -431,12 +442,15 @@ export const deleteDrops = async ({
 	}
 
 	const responses = await Promise.all(drops.map(async ({
+		owner_id,
 		drop_id,
 		keys,
 		registered_uses,
 		ft,
 		nft,
 	}) => {
+		assert(owner_id == account!.accountId, 'Only the owner of the drop can delete drops.');
+
 		let keySupply = keys?.length || 0
 
 		const updateKeys = async () => {
@@ -541,4 +555,29 @@ export const deleteDrops = async ({
 	return responses
 }
 
-// TODO: add register & unregister uses
+
+// This should be done later. Very small number of drops will have lazy registrations enabled.
+// /**
+//  * Allows a user to register uses for a simple drop that has lazy registrations enabled. This drop can be over-registered.
+//  * 
+//  * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+//  * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+//  * @param {string[]=} dropId Specify the drop ID of the drop you want to register uses on
+//  * 
+//  * @example <caption>Create 5 drops and delete each of them</caption>
+//  * ```js
+//  * ```
+// */
+// export const registerUses = async ({
+// 	account,
+// 	wallet,
+// 	dropId,
+// 	numUses,
+// 	useBalance = false,
+// }: RegisterUsesParams) => {
+// 	const {
+// 		gas300, receiverId, execute, getAccount
+// 	} = getEnv()
+
+// 	account = getAccount({ account, wallet });
+// }

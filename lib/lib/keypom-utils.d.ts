@@ -116,8 +116,69 @@ export declare const keypomView: ({ methodName, args }: {
     args: any;
 }) => Promise<any>;
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
-export declare const ftTransferCall: ({ account, contractId, args, returnTransaction, }: FTTransferCallParams) => Promise<void | FinalExecutionOutcome[]> | Transaction;
-export declare const nftTransferCall: ({ account, wallet, contractId, receiverId, tokenIds, msg, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
+/**
+ * For FT Drops, keys need to be registered before they can be used. This is done via the `ft_transfer_call` method on the FT contract.
+ * This is a convenience method to make that process easier.
+ *
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string} contractId The fungible token contract ID.
+ * @param {string} absoluteAmount Amount of tokens to transfer but considering the decimal amount (non human-readable).
+   Example: transferring one wNEAR should be passed in as "1000000000000000000000000" and NOT "1"
+ * @param {string} amount Human readable format for the amount of tokens to transfer.
+   Example: transferring one wNEAR should be passed in as "1" and NOT "1000000000000000000000000"
+ * @param {string} dropId The drop ID to register the keys for.
+ * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
+ *
+ * @example <caption>Send FTs using the funder account (not passing in any accounts into the call)</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ * await ftTransferCall({
+ *     contractId: "ft.keypom.testnet",
+ *     amount: "1",
+ *     dropId: "1231231",
+ * )};
+ * ```
+*/
+export declare const ftTransferCall: ({ account, wallet, contractId, absoluteAmount, amount, dropId, returnTransaction, }: FTTransferCallParams) => Promise<Promise<void | FinalExecutionOutcome[]> | Transaction>;
+/**
+ * For NFT Drops, keys need to be registered before they can be used. This is done via the `nft_transfer_call` method on the NFT contract.
+ * This is a convenience method to make that process easier.
+ *
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string} contractId The fungible token contract ID.
+ * @param {string[]} tokenIds A set of token IDs that should be sent to the Keypom contract in order to register keys.
+ * @param {string} dropId The drop ID to register the keys for.
+ * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
+ *
+ * @example <caption>Send 3 NFTs using the funder account (not passing in any accounts into the call)</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ *
+ * await nftTransferCall({
+ *     contractId: "nft.keypom.testnet",
+ *     tokenIds: ["1", "2", "3],
+ *     dropId: "1231231",
+ * )};
+ * ```
+*/
+export declare const nftTransferCall: ({ account, wallet, contractId, tokenIds, dropId, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
 export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use }: CreateDropProtocolArgs) => string | null;

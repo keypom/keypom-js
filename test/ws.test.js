@@ -371,6 +371,7 @@ test('add keys to simple drop', async (t) => {
 
 test('add keys to ft drop', async (t) => {
 
+	console.log('drops for FTs!!: ', drops)
 	const drop = drops[1]
 	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
@@ -387,6 +388,7 @@ test('add keys to ft drop', async (t) => {
 		publicKeys.push(keys.publicKeys[0]);
 	}
 
+	console.log('drop (FTs): ', drop)
 	await addKeys({
 		drop,
 		publicKeys,
@@ -529,4 +531,16 @@ test('delete 1 key from simple drop', async (t) => {
 	})
 
 	t.is(drops[0].keys.length, NUM_KEYS - 2)
+});
+
+test('invalid args being passed in', async (t) => {
+	try {
+		await createDrop({
+			account: "foobar.testnet"
+		});
+
+		t.is(1, 2, 'should have thrown an error')
+	} catch(e) {}
+
+	t.is(1, 1, 'no error was thrown! :)')
 });
