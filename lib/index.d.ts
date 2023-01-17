@@ -1,4 +1,5 @@
 export { generateKeys, estimateRequiredDeposit, ftTransferCall, nftTransferCall, hashPassword, exportedNearAPI as nearAPI } from "./lib/keypom-utils";
+export { useKeypom, KeypomContextProvider, } from './components/KeypomContext';
 export { createDrop, deleteDrops, } from "./lib/drops";
 export { addKeys, deleteKeys } from "./lib/keys";
 export { claim, } from "./lib/claims";
