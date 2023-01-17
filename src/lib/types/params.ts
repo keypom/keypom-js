@@ -43,6 +43,14 @@ export interface AddKeyParams {
 	useBalance?: boolean,
 }
 
+export interface RegisterUsesParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	dropId: string,
+	numUses: number,
+	useBalance?: boolean,
+}
+
 export interface DeleteDropParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
@@ -80,9 +88,12 @@ export interface GenerateKeysParams {
 }
 
 export interface FTTransferCallParams {
-    account: Account,
+    account?: Account,
+	wallet?: BrowserWalletBehaviour,
     contractId: string,
-    args: object,
+	absoluteAmount?: string
+    amount?: string,
+	dropId: string,
     returnTransaction?: boolean,
 }
 
@@ -90,9 +101,8 @@ export interface NFTTransferCallParams {
 	account?: Account,
 	wallet?: BrowserWalletBehaviour,
     contractId: string,
-    receiverId: string,
     tokenIds: string[],
-    msg: string | null,
+    dropId: string,
 	returnTransactions?: boolean,
 }
 

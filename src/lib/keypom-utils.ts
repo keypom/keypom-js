@@ -6,6 +6,7 @@ import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { generateSeedPhrase } from 'near-seed-phrase';
+import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
@@ -132,9 +133,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
 
     // Ensure that if metaEntropy is provided, it should be the same length as the number of keys
     const numEntropy = metaEntropy?.length || numKeys;
-    if (numEntropy != numKeys) {
-        throw new Error(`You must provide the same number of meta entropy values as the number of keys`)
-    }
+    assert(numEntropy == numKeys, `You must provide the same number of meta entropy values as the number of keys`)
     
     var keyPairs: NearKeyPair[] = []
     var publicKeys: string[] = []
@@ -192,6 +191,7 @@ export const getUserBalance = async ({
     accountId
 }: {accountId: string}): Promise<string> => {
     const { contractId, viewAccount } = getEnv()
+    assert(viewAccount, 'initKeypom must be called before view functions can be called.');
     return viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
 }
 
@@ -200,9 +200,7 @@ export const keypomView = async ({ methodName, args }) => {
 		viewAccount, contractId,
 	} = getEnv()
 
-    if (!viewAccount) {
-        throw new Error('initKeypom must be called before view functions can be called.')
-    }
+    assert(viewAccount, 'initKeypom must be called before view functions can be called.');
 
     return viewAccount!.viewFunction2({
 		contractId,
@@ -239,7 +237,6 @@ export const execute = async ({
 	wallet,
     fundingAccount,
 }: ExecuteParams): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
-
 	const {
         contractId,
 	} = getEnv()
@@ -268,28 +265,78 @@ export const execute = async ({
 
 	/// instance of NEAR Account (backend usage)
 	const nearAccount = account || fundingAccount
-	if (!nearAccount) {
-		throw new Error(`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
-	}
+    assert(nearAccount,`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
 
 	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
 }
 
-// TODO: Document this
-export const ftTransferCall = ({
+/**
+ * For FT Drops, keys need to be registered before they can be used. This is done via the `ft_transfer_call` method on the FT contract.
+ * This is a convenience method to make that process easier.
+ * 
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string} contractId The fungible token contract ID.
+ * @param {string} absoluteAmount Amount of tokens to transfer but considering the decimal amount (non human-readable).
+   Example: transferring one wNEAR should be passed in as "1000000000000000000000000" and NOT "1"
+ * @param {string} amount Human readable format for the amount of tokens to transfer.
+   Example: transferring one wNEAR should be passed in as "1" and NOT "1000000000000000000000000"
+ * @param {string} dropId The drop ID to register the keys for.
+ * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
+ * 
+ * @example <caption>Send FTs using the funder account (not passing in any accounts into the call)</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ * 
+ * await ftTransferCall({
+ *     contractId: "ft.keypom.testnet",
+ *     amount: "1",
+ *     dropId: "1231231",
+ * )};
+ * ```
+*/
+export const ftTransferCall = async ({
     account,
+    wallet,
     contractId,
-    args,
+    absoluteAmount,
+    amount,
+    dropId,
     returnTransaction = false,
-}: FTTransferCallParams): Promise<void | FinalExecutionOutcome[]> | Transaction => {
+}: FTTransferCallParams): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
+    const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
+	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
+	account = getAccount({ account, wallet })
+
+    if (amount) {
+        const metadata = await viewAccount.viewFunction2({
+            contractId,
+            methodName: 'ft_metadata',
+        })
+
+        absoluteAmount = parseFTAmount(amount, metadata.decimals);
+    }
+
     const tx: Transaction = {
         receiverId: contractId,
-        signerId: account.accountId,
+        signerId: account!.accountId,
         actions: [{
             type: 'FunctionCall',
             params: {
                 methodName: 'ft_transfer_call',
-                args,
+                args: {
+                    receiver_id: keypomContractId,
+                    amount: absoluteAmount,
+                    msg: dropId.toString()
+                },
                 gas: '50000000000000',
                 deposit: '1',
             }
@@ -297,27 +344,53 @@ export const ftTransferCall = ({
     }
 
     if (returnTransaction) return tx
-    return execute({ account, transactions: [tx]}) as Promise<void | FinalExecutionOutcome[]>
+    return execute({ account: account!, transactions: [tx]}) as Promise<void | FinalExecutionOutcome[]>
 }
 
-// TODO: Document this
+/**
+ * For NFT Drops, keys need to be registered before they can be used. This is done via the `nft_transfer_call` method on the NFT contract.
+ * This is a convenience method to make that process easier.
+ * 
+ * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
+ * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
+ * @param {string} contractId The fungible token contract ID.
+ * @param {string[]} tokenIds A set of token IDs that should be sent to the Keypom contract in order to register keys.
+ * @param {string} dropId The drop ID to register the keys for.
+ * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
+ * 
+ * @example <caption>Send 3 NFTs using the funder account (not passing in any accounts into the call)</caption>
+ *  * ```js
+ * // Initialize the SDK on testnet
+ * await initKeypom({
+ * 	network: "testnet",
+ * 	funder: {
+ * 		accountId: "benji_demo.testnet",
+ * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ * 	}
+ * });
+ * 
+ * await nftTransferCall({
+ *     contractId: "nft.keypom.testnet",
+ *     tokenIds: ["1", "2", "3],
+ *     dropId: "1231231",
+ * )};
+ * ```
+*/
 export const nftTransferCall = async ({
     account,
     wallet,
     contractId,
-    receiverId,
     tokenIds,
-    msg,
+    dropId,
     returnTransactions = false,
 }: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
 
-    const { getAccount } = getEnv();
-
+    const { getAccount, near, receiverId } = getEnv();
+	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = getAccount({ account, wallet })
 
-    if (tokenIds.length > 6) {
-        throw new Error(`This method can only transfer 6 NFTs in 1 batch transaction.`)
-    }
+    assert(tokenIds.length < 6, `This method can only transfer 6 NFTs in 1 batch transaction.`)
 
     const responses: Array<FinalExecutionOutcome[]> = []
 
@@ -335,7 +408,7 @@ export const nftTransferCall = async ({
                     args: {
                         receiver_id: receiverId,
                         token_id: tokenIds[i],
-                        msg
+                        msg: dropId.toString()
                     },
                     gas: '50000000000000',
                     deposit: '1',
@@ -388,7 +461,7 @@ const signAndSendTransactions = async (account: Account, txs: SignAndSendTransac
 
 export const transformTransactions = (transactions: SignAndSendTransactionParams[]): SignAndSendTransactionOptions[] => transactions.map(({ receiverId, actions: _actions }) => {
     const actions = _actions.map((action) =>
-        createAction(action)
+    createAction(action)
     );
     let txnOption: SignAndSendTransactionOptions = {
         receiverId: receiverId as string,

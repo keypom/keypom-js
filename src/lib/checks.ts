@@ -1,13 +1,23 @@
-import { Account } from "near-api-js";
+import { Account, Near } from "near-api-js";
 import { FCData } from "./types/fc";
 import BN from 'bn.js';
+import { getEnv } from "./keypom";
+import { Funder } from "./types/general";
 
 export function isValidAccountObj(o: Account | undefined): o is Account {
     if (o) {
-        return (o as Account).connection !== undefined;
+        return (o as Account).connection !== undefined && (o as Account).accountId !== undefined;
     }
 
     return true
+}
+
+export function isValidNearObject(o: Near): o is Near {
+    return (o as Near).connection !== undefined && (o as Near).config !== undefined && (o as Near).accountCreator !== undefined;
+}
+
+export function isValidFunderObject(o: Funder): o is Funder {
+    return (o as Funder).accountId !== undefined && (o as Funder).secretKey !== undefined;
 }
 
 export const assert = (exp, m) => {
@@ -83,4 +93,21 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
             assert(fcData.methods[0] != undefined, "cannot have a single none function call");
         }
     }
+}
+
+export const assertDropIdUnique = async (dropId: string) => {
+    const {
+		viewAccount, contractId
+	} = getEnv()
+
+    try {
+        const dropInfo = await viewAccount.viewFunction2({
+            contractId,
+            methodName: 'get_drop_information',
+            args: {
+                drop_id: dropId
+            }
+        })
+        assert(!dropInfo, `Drop with ID ${dropId} already exists. Please use a different drop ID.`);
+    } catch(_) {}
 }

@@ -106,430 +106,432 @@ test('init', async (t) => {
 	t.true(true)
 });
 
-// test('delete drops', async (t) => {
+test('delete drops', async (t) => {
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	console.log('drops', drops)
+	console.log('drops', drops)
 
-// 	if (!drops?.length) return t.true(true)
+	if (!drops?.length) return t.true(true)
 
-// 	await deleteDrops({ drops })
+	await deleteDrops({ drops })
 
-// 	drops = await getDrops({
-// 		accountId
-// 	})
+	drops = await getDrops({
+		accountId
+	})
 
-// 	t.is(drops.length, 0)
-// });
+	t.is(drops.length, 0)
+});
 
-// test('create simple drop', async (t) => {
+test('create simple drop', async (t) => {
 
-// 	const dropId = Date.now().toString()
+	const dropId = Date.now().toString()
 
-// 	const res = await createDrop({
-// 		dropId,
-// 		depositPerUseNEAR: 0.02,
-// 	})
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.02,
+	})
 
-// 	const { responses } = res
-// 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+	const { responses } = res
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-// 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
-// });
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
+});
 
-// test('create ft drop', async (t) => {
-// 	/// Auto minting for FT Testing (SDK only handles auto transferring to register keys)
-// 	const balancePerUse = '1'
-// 	const { viewAccount } = getEnv()
+test('create ft drop', async (t) => {
+	/// Auto minting for FT Testing (SDK only handles auto transferring to register keys)
+	const balancePerUse = '1'
+	const { viewAccount } = getEnv()
 	
-// 	const storageDeposit = await viewAccount.viewFunction2({
-// 		contractId: FT_CONTRACT_ID,
-// 		methodName: 'storage_balance_of',
-// 		args: {
-// 			account_id: accountId,
-// 		}
-// 	})
+	const storageDeposit = await viewAccount.viewFunction2({
+		contractId: FT_CONTRACT_ID,
+		methodName: 'storage_balance_of',
+		args: {
+			account_id: accountId,
+		}
+	})
 
-// 	const transactions = []
+	const transactions = []
 
-// 	if (!storageDeposit) {
-// 		transactions.push({
-// 			receiverId: FT_CONTRACT_ID,
-// 			actions: [{
-// 				type: 'FunctionCall',
-// 				params: {
-// 					methodName: 'storage_deposit',
-// 					args: {
-// 						account_id: accountId,
-// 					},
-// 					gas: '100000000000000',
-// 					deposit: parseNearAmount('0.1')
-// 				}
-// 			}]
-// 		})
-// 	}
+	if (!storageDeposit) {
+		transactions.push({
+			receiverId: FT_CONTRACT_ID,
+			actions: [{
+				type: 'FunctionCall',
+				params: {
+					methodName: 'storage_deposit',
+					args: {
+						account_id: accountId,
+					},
+					gas: '100000000000000',
+					deposit: parseNearAmount('0.1')
+				}
+			}]
+		})
+	}
 
-// 	transactions.push({
-// 		receiverId: FT_CONTRACT_ID,
-// 		actions: [{
-// 			type: 'FunctionCall',
-// 			params: {
-// 				methodName: 'ft_mint',
-// 				args: {
-// 					account_id: accountId,
-// 					amount: new BN(balancePerUse).mul(new BN(NUM_KEYS)).toString()
-// 				},
-// 				gas: '100000000000000',
-// 			}
-// 		}]
-// 	})
+	transactions.push({
+		receiverId: FT_CONTRACT_ID,
+		actions: [{
+			type: 'FunctionCall',
+			params: {
+				methodName: 'ft_mint',
+				args: {
+					account_id: accountId,
+					amount: new BN(balancePerUse).mul(new BN(NUM_KEYS)).toString()
+				},
+				gas: '100000000000000',
+			}
+		}]
+	})
 
-// 	const ftRes = await execute({ transactions, fundingAccount })
+	const ftRes = await execute({ transactions, fundingAccount })
 
-// 	/// create the drop
+	/// create the drop
 
-// 	const dropId = Date.now().toString()
+	const dropId = Date.now().toString()
 
-// 	const res = await createDrop({
-// 		dropId,
-// 		depositPerUseNEAR: 0.02,
-// 		ftData: {
-// 			contractId: FT_CONTRACT_ID,
-// 			senderId: accountId,
-// 			absoluteAmount: balancePerUse
-// 		}
-// 	})
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.02,
+		ftData: {
+			contractId: FT_CONTRACT_ID,
+			senderId: accountId,
+			absoluteAmount: balancePerUse
+		}
+	})
 
-// 	const { responses } = res
-// 	// console.log(responses)
-// 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+	const { responses } = res
+	// console.log(responses)
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-// 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
-// });
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
+});
 
-// let nftTokenIds = []
-// test('create nft drop and add 1 key', async (t) => {
+let nftTokenIds = []
+test('create nft drop and add 1 key', async (t) => {
 
-// 	/// Auto minting 2 NFTs for testing
+	/// Auto minting 2 NFTs for testing
 
-// 	let tokenId1 = `Keypom1-${Date.now()}`;
-// 	let tokenId2 = `Keypom2-${Date.now()}`;
-// 	const action1 = {
-// 		type: 'FunctionCall',
-// 		params: {
-// 			methodName: 'nft_mint',
-// 			args: {
-// 				receiver_id: accountId,
-// 				metadata: NFT_METADATA,
-// 				token_id: tokenId1,
-// 			},
-// 			gas: '100000000000000',
-// 			deposit: parseNearAmount('0.1')
-// 		}
-// 	}
-// 	const action2 = JSON.parse(JSON.stringify(action1))
-// 	action2.params.args.token_id = tokenId2
-// 	nftTokenIds.push(tokenId1, tokenId2)
+	let tokenId1 = `Keypom1-${Date.now()}`;
+	let tokenId2 = `Keypom2-${Date.now()}`;
+	const action1 = {
+		type: 'FunctionCall',
+		params: {
+			methodName: 'nft_mint',
+			args: {
+				receiver_id: accountId,
+				metadata: NFT_METADATA,
+				token_id: tokenId1,
+			},
+			gas: '100000000000000',
+			deposit: parseNearAmount('0.1')
+		}
+	}
+	const action2 = JSON.parse(JSON.stringify(action1))
+	action2.params.args.token_id = tokenId2
+	nftTokenIds.push(tokenId1, tokenId2)
 
-// 	const nftRes = await execute({
-// 		fundingAccount,
-// 		transactions: [{
-// 			receiverId: NFT_CONTRACT_ID,
-// 			actions: [action1, action2]
-// 		}]
-// 	})
+	const nftRes = await execute({
+		fundingAccount,
+		transactions: [{
+			receiverId: NFT_CONTRACT_ID,
+			actions: [action1, action2]
+		}]
+	})
 
-// 	const dropId = Date.now().toString()
+	const dropId = Date.now().toString()
 
-// 	const publicKeys = []
-// 	for (var i = 0; i < 1; i++) {
-// 		const keys = await generateKeys({
-// 			numKeys: 1,
-// 			rootEntropy: 'some secret entropy' + Date.now(),
-// 			metaEntropy: `${dropId}_${i}`
-// 		})
+	const publicKeys = []
+	for (var i = 0; i < 1; i++) {
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
+		})
 		
-// 		keyPairs.nft.push(keys.keyPairs[0])
-// 		publicKeys.push(keys.publicKeys[0]);
-// 	}
+		keyPairs.nft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
+	}
 
-// 	const res = await createDrop({
-// 		dropId,
-// 		depositPerUseNEAR: 0.02,
-// 		publicKeys,
-// 		nftData: {
-// 			contractId: NFT_CONTRACT_ID,
-// 			senderId: accountId,
-// 			/// if you're passing keys, what NFT tokens to auto send to Keypom so keys can claim them?
-// 			tokenIds: nftTokenIds.slice(0, 1),
-// 		}
-// 	})
+	const res = await createDrop({
+		dropId,
+		depositPerUseNEAR: 0.02,
+		publicKeys,
+		nftData: {
+			contractId: NFT_CONTRACT_ID,
+			senderId: accountId,
+			/// if you're passing keys, what NFT tokens to auto send to Keypom so keys can claim them?
+			tokenIds: nftTokenIds.slice(0, 1),
+		}
+	})
 
-// 	const { responses } = res
-// 	// console.log(responses)
-// 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+	const { responses } = res
+	// console.log(responses)
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-// 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
-// });
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
+});
 
-// test('create an fc drop and 1 key', async (t) => {
+test('create an fc drop and 1 key', async (t) => {
 
-// 	let fcData = {
-// 		methods: [
-// 			[{
-// 				receiverId: "dev-1664052531433-97566156431683",
-// 				methodName: "nft_mint",
-// 				args: JSON.stringify({
-// 					"foo": "bar",
-// 					"keypom_args": {
-// 						"account_id_field": "receiver_id",
-// 						"drop_id_field" : "mint_id"
-// 					}
-// 				}),
-// 				attachedDeposit: parseNearAmount("1"),
-// 				accountIdField: "receiver_id",
-// 				dropIdField: "mint_id"
-// 			}]
-// 		]
-// 	}
+	let fcData = {
+		methods: [
+			[{
+				receiverId: "dev-1664052531433-97566156431683",
+				methodName: "nft_mint",
+				args: JSON.stringify({
+					"foo": "bar",
+					"keypom_args": {
+						"account_id_field": "receiver_id",
+						"drop_id_field" : "mint_id"
+					}
+				}),
+				attachedDeposit: parseNearAmount("1"),
+				accountIdField: "receiver_id",
+				dropIdField: "mint_id"
+			}]
+		]
+	}
 
-// 	const dropId = Date.now().toString()
+	const dropId = Date.now().toString()
 
-// 	const publicKeys = []
-// 	for (var i = 0; i < 1; i++) {
-// 		const keys = await generateKeys({
-// 			numKeys: 1,
-// 			rootEntropy: 'some secret entropy' + Date.now(),
-// 			metaEntropy: `${dropId}_${i}`
-// 		})
+	const publicKeys = []
+	for (var i = 0; i < 1; i++) {
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${i}`
+		})
 		
-// 		keyPairs.fc.push(keys.keyPairs[0])
-// 		publicKeys.push(keys.publicKeys[0]);
-// 	}
+		keyPairs.fc.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
+	}
 
-// 	const res = await createDrop({
-// 		dropId,
-// 		// see claim tests, expected this drop auto deletes when last key is used
-// 		config: {
-// 			usage: {
-// 				autoDeleteDrop: true,
-// 			}
-// 		},
-// 		depositPerUseNEAR: 0.02,
-// 		publicKeys,
-// 		fcData
-// 	})
+	const res = await createDrop({
+		dropId,
+		// see claim tests, expected this drop auto deletes when last key is used
+		config: {
+			usage: {
+				autoDeleteDrop: true,
+			}
+		},
+		depositPerUseNEAR: 0.02,
+		publicKeys,
+		fcData
+	})
 
-// 	const { responses } = res
-// 	// console.log(responses)
-// 	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
+	const { responses } = res
+	// console.log(responses)
+	const resWithDropId = responses.find((res) => Buffer.from(res.status.SuccessValue, 'base64').toString())
 
-// 	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
-// });
+	t.is(Buffer.from(resWithDropId.status.SuccessValue, 'base64').toString().replaceAll('"', ''), dropId)
+});
 
-// test('get drops', async (t) => {
-// 	drops = await getDrops({
-// 		accountId
-// 	})
-// 	t.is(drops.length, 4)
-// });
+test('get drops', async (t) => {
+	drops = await getDrops({
+		accountId
+	})
+	t.is(drops.length, 4)
+});
 
-// test('add keys to simple drop', async (t) => {
+test('add keys to simple drop', async (t) => {
 
-// 	const drop = drops[0]
-// 	const { drop_id: dropId, next_key_id: nextKeyId } = drop
+	const drop = drops[0]
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
-// 	/// create throw away keys
-// 	const publicKeys = []
-// 	for (var i = 0; i < NUM_KEYS; i++) {
-// 		const keys = await generateKeys({
-// 			numKeys: 1,
-// 			rootEntropy: 'some secret entropy' + Date.now(),
-// 			metaEntropy: `${dropId}_${nextKeyId + i}`
-// 		})
+	/// create throw away keys
+	const publicKeys = []
+	for (var i = 0; i < NUM_KEYS; i++) {
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
 		
-// 		keyPairs.simple.push(keys.keyPairs[0])
-// 		publicKeys.push(keys.publicKeys[0]);
-// 	}
+		keyPairs.simple.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
+	}
 
-// 	await addKeys({
-// 		drop,
-// 		publicKeys,
-// 	})
+	await addKeys({
+		drop,
+		publicKeys,
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[0].keys.length, NUM_KEYS)
-// });
+	t.is(drops[0].keys.length, NUM_KEYS)
+});
 
-// test('add keys to ft drop', async (t) => {
+test('add keys to ft drop', async (t) => {
 
-// 	const drop = drops[1]
-// 	const { drop_id: dropId, next_key_id: nextKeyId } = drop
+	console.log('drops for FTs!!: ', drops)
+	const drop = drops[1]
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
-// 	/// create throw away keys
-// 	const publicKeys = []
-// 	for (var i = 0; i < NUM_KEYS; i++) {
-// 		const keys = await generateKeys({
-// 			numKeys: 1,
-// 			rootEntropy: 'some secret entropy' + Date.now(),
-// 			metaEntropy: `${dropId}_${nextKeyId + i}`
-// 		})
+	/// create throw away keys
+	const publicKeys = []
+	for (var i = 0; i < NUM_KEYS; i++) {
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
 		
-// 		keyPairs.ft.push(keys.keyPairs[0])
-// 		publicKeys.push(keys.publicKeys[0]);
-// 	}
+		keyPairs.ft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
+	}
 
-// 	await addKeys({
-// 		drop,
-// 		publicKeys,
-// 	})
+	console.log('drop (FTs): ', drop)
+	await addKeys({
+		drop,
+		publicKeys,
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[1].keys.length, NUM_KEYS)
-// });
+	t.is(drops[1].keys.length, NUM_KEYS)
+});
 
-// test('add 1 key to nft drop', async (t) => {
-// 	const drop = drops[2]
-// 	const { drop_id: dropId, next_key_id: nextKeyId } = drop
+test('add 1 key to nft drop', async (t) => {
+	const drop = drops[2]
+	const { drop_id: dropId, next_key_id: nextKeyId } = drop
 
-// 	/// create throw away keys
-// 	const publicKeys = []
-// 	for (var i = 0; i < 1; i++) {
-// 		const keys = await generateKeys({
-// 			numKeys: 1,
-// 			rootEntropy: 'some secret entropy' + Date.now(),
-// 			metaEntropy: `${dropId}_${nextKeyId + i}`
-// 		})
+	/// create throw away keys
+	const publicKeys = []
+	for (var i = 0; i < 1; i++) {
+		const keys = await generateKeys({
+			numKeys: 1,
+			rootEntropy: 'some secret entropy' + Date.now(),
+			metaEntropy: `${dropId}_${nextKeyId + i}`
+		})
 		
-// 		keyPairs.nft.push(keys.keyPairs[0])
-// 		publicKeys.push(keys.publicKeys[0]);
-// 	}
+		keyPairs.nft.push(keys.keyPairs[0])
+		publicKeys.push(keys.publicKeys[0]);
+	}
 
-// 	await addKeys({
-// 		drop,
-// 		publicKeys,
-// 		nftTokenIds: nftTokenIds.slice(1)
-// 	})
+	await addKeys({
+		drop,
+		publicKeys,
+		nftTokenIds: nftTokenIds.slice(1)
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[2].keys.length, 2)
-// });
+	t.is(drops[2].keys.length, 2)
+});
 
-// test('get drops after keys', async (t) => {
-// 	drops = await getDrops({
-// 		accountId
-// 	})
-// 	console.log(drops)
-// 	t.is(drops.length, 4)
-// 	t.is(drops[0].registered_uses, 10)
-// 	t.is(drops[1].registered_uses, 10)
-// 	t.is(drops[2].registered_uses, 2)
-// 	t.is(drops[3].registered_uses, 1)
-// });
+test('get drops after keys', async (t) => {
+	drops = await getDrops({
+		accountId
+	})
+	console.log(drops)
+	t.is(drops.length, 4)
+	t.is(drops[0].registered_uses, 10)
+	t.is(drops[1].registered_uses, 10)
+	t.is(drops[2].registered_uses, 2)
+	t.is(drops[3].registered_uses, 1)
+});
 
-// test('claim simple drop', async (t) => {
+test('claim simple drop', async (t) => {
 
-// 	if (!drops.length) return t.true(false)
+	if (!drops.length) return t.true(false)
 
-// 	await claim({
-// 		accountId,
-// 		secretKey: keyPairs.simple[0].secretKey
-// 	})
+	await claim({
+		accountId,
+		secretKey: keyPairs.simple[0].secretKey
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[0].keys.length, NUM_KEYS - 1)
-// });
+	t.is(drops[0].keys.length, NUM_KEYS - 1)
+});
 
-// test('create account and claim ft drop', async (t) => {
+test('create account and claim ft drop', async (t) => {
 
-// 	if (!drops.length) return t.true(false)
+	if (!drops.length) return t.true(false)
 
-// 	await claim({
-// 		newAccountId: `someone-${Date.now()}.testnet`,
-// 		newPublicKey: testKeyPair.getPublicKey().toString(), 
-// 		secretKey: keyPairs.ft[0].secretKey
-// 	})
+	await claim({
+		newAccountId: `someone-${Date.now()}.testnet`,
+		newPublicKey: testKeyPair.getPublicKey().toString(), 
+		secretKey: keyPairs.ft[0].secretKey
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[1].keys.length, NUM_KEYS - 1)
-// });
+	t.is(drops[1].keys.length, NUM_KEYS - 1)
+});
 
-// test('create account and claim nft drop', async (t) => {
+test('create account and claim nft drop', async (t) => {
 
-// 	if (!drops.length) return t.true(false)
+	if (!drops.length) return t.true(false)
 
-// 	await claim({
-// 		newAccountId: `someone-${Date.now()}.testnet`,
-// 		newPublicKey: testKeyPair.getPublicKey().toString(), 
-// 		secretKey: keyPairs.nft[0].secretKey
-// 	})
+	await claim({
+		newAccountId: `someone-${Date.now()}.testnet`,
+		newPublicKey: testKeyPair.getPublicKey().toString(), 
+		secretKey: keyPairs.nft[0].secretKey
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[2].keys.length, 1)
-// });
+	t.is(drops[2].keys.length, 1)
+});
 
-// test('claim fc drop', async (t) => {
+test('claim fc drop', async (t) => {
 
-// 	if (!drops.length) return t.true(false)
+	if (!drops.length) return t.true(false)
 
-// 	await claim({
-// 		accountId,
-// 		secretKey: keyPairs.fc[0].secretKey
-// 	})
+	await claim({
+		accountId,
+		secretKey: keyPairs.fc[0].secretKey
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	// the fc drop, having only 1 key, was removed automatically
-// 	t.is(drops.length, 3)
-// });
+	// the fc drop, having only 1 key, was removed automatically
+	t.is(drops.length, 3)
+});
 
-// test('delete 1 key from simple drop', async (t) => {
+test('delete 1 key from simple drop', async (t) => {
 
-// 	if (!drops.length) return t.true(false)
+	if (!drops.length) return t.true(false)
 
-// 	await deleteKeys({
-// 		dropId: drops[0].drop_id,
-// 		publicKeys: [drops[0].keys[0]]
-// 	})
+	await deleteKeys({
+		dropId: drops[0].drop_id,
+		publicKeys: [drops[0].keys[0]]
+	})
 
-// 	drops = await getDrops({
-// 		accountId,
-// 		withKeys: true,
-// 	})
+	drops = await getDrops({
+		accountId,
+		withKeys: true,
+	})
 
-// 	t.is(drops[0].keys.length, NUM_KEYS - 2)
-// });
+	t.is(drops[0].keys.length, NUM_KEYS - 2)
+});
 
 test('invalid args being passed in', async (t) => {
 	try {
