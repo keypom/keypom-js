@@ -1,6 +1,7 @@
 export {
 	generateKeys,
 	estimateRequiredDeposit,
+	getStorageBase,
 	ftTransferCall,
 	nftTransferCall,
 	hashPassword,

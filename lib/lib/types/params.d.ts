@@ -26,6 +26,7 @@ export interface CreateDropParams {
     basePassword?: string;
     passwordProtectedUses?: number[];
     useBalance?: boolean;
+    returnTransactions?: boolean;
 }
 export interface AddKeyParams {
     account?: Account;
@@ -107,7 +108,9 @@ export interface EstimatorParams {
     ftData?: FTData;
 }
 export interface CreateOrAddReturn {
-    responses: any;
+    responses?: any;
+    transactions?: Transaction[];
+    requiredDeposit?: string;
     keys?: Maybe<GeneratedKeyPairs>;
     dropId: string;
 }
