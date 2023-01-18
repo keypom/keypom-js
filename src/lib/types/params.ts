@@ -42,6 +42,7 @@ export interface AddKeyParams {
     basePassword?: string,
     passwordProtectedUses?: number[],
 	useBalance?: boolean,
+	returnTransactions?: boolean,
 }
 
 export interface RegisterUsesParams {
@@ -117,6 +118,18 @@ export interface EstimatorParams {
     keyStorage?: string | null,
     fcData?: FCData,
     ftData?: FTData,
+}
+
+export interface AddToBalanceParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour,
+	absoluteAmount?: string
+    amount?: string,
+}
+
+export interface WithdrawBalanceParams {
+	account?: Account,
+	wallet?: BrowserWalletBehaviour
 }
 
 export interface CreateOrAddReturn {

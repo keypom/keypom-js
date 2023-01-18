@@ -1,6 +1,7 @@
 const test = require('ava');
 const BN = require('bn.js');
 const nearAPI = require("near-api-js");
+const { getUserBalance } = require('../lib');
 const {
 	Near,
 	KeyPair,
@@ -22,6 +23,8 @@ const {
 	deleteDrops,
 	addKeys,
 	generateKeys,
+	withdrawBalance,
+	addToBalance
 } = keypom
 
 /// testing contracts
@@ -532,6 +535,27 @@ test('delete 1 key from simple drop', async (t) => {
 
 	t.is(drops[0].keys.length, NUM_KEYS - 2)
 });
+
+test('Create drop and return requiredDeposit so it can be added to balance', async (t) => {
+	await withdrawBalance({});
+
+	const {requiredDeposit} = await createDrop({
+		numKeys: 50,
+		depositPerUseYocto: '1',
+		basePassword: "foobar",
+		returnTransactions: true 
+	})
+	console.log('requiredDeposit: ', requiredDeposit);
+
+	await addToBalance({
+		absoluteAmount: requiredDeposit.toString(),
+	});
+
+	const curBal = await getUserBalance({accountId: "benji_demo.testnet"});
+
+	t.is(curBal.toString(), requiredDeposit.toString());
+});
+
 
 test('invalid args being passed in', async (t) => {
 	try {

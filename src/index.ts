@@ -1,4 +1,8 @@
 export {
+	addToBalance,
+	withdrawBalance
+} from "./lib/balances";
+export {
 	generateKeys,
 	estimateRequiredDeposit,
 	getStorageBase,
