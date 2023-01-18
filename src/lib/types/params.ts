@@ -68,9 +68,9 @@ export interface DeleteKeyParams {
 }
 
 export interface InitKeypomParams {
-	near: Near;
+	near?: Near;
 	network: string;
-	keypomContractId: string;
+	keypomContractId?: string;
 	funder?: Funder;
 }
 
