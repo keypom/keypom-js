@@ -39,6 +39,7 @@ export const KEY_LIMIT = 50;
  * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in.
  * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
  * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
+ * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
  * 
  * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  * 
@@ -166,6 +167,7 @@ export const createDrop = async ({
 	basePassword,
 	passwordProtectedUses,
 	useBalance = false,
+	returnTransactions = false
 }: CreateDropParams): Promise<CreateOrAddReturn> => {
 	const {
 		near, viewAccount,
@@ -362,9 +364,13 @@ export const createDrop = async ({
 		transactions = transactions.concat(nftTXs)
 	}
 	
+	if (returnTransactions) {
+		return { keys, dropId, transactions, requiredDeposit }
+	}
+
 	let responses = await execute({ transactions, account, wallet })
 
-	return { responses, keys, dropId }
+	return { responses, keys, dropId, requiredDeposit }
 }
 
 /**
