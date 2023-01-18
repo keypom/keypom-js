@@ -6,6 +6,7 @@ const {
 	},
 } = nearAPI;
 
+import { Transaction } from "@near-wallet-selector/core";
 import { getDropInformation, getUserBalance } from "./views";
 import { getEnv } from "./keypom";
 import {
@@ -169,7 +170,8 @@ export const addKeys = async ({
 		nft: nftData = {},
 		fc: fcData,
 		next_key_id,
-	} = drop || await getDropInformation({dropId: dropId!});
+	} = drop || await getDropInformation({ dropId: dropId! });
+	dropId = drop_id
 
 	assert(owner_id === account!.accountId, 'You are not the owner of this drop. You cannot add keys to it.')
 
@@ -233,7 +235,7 @@ export const addKeys = async ({
 		hasBalance = true;
 	}
 
-	const transactions: any[] = []
+	let transactions: any[] = []
 
 	transactions.push({
 		receiverId,
@@ -262,17 +264,22 @@ export const addKeys = async ({
 		}))
 	}
 
-	let responses = await execute({ transactions, account, wallet })
-
-	if (nftTokenIds && nftTokenIds.length > 0) {
-		const nftResponses = await nftTransferCall({
+	let tokenIds = nftTokenIds
+	if (tokenIds && tokenIds?.length > 0) {
+		if (tokenIds.length > 2) {
+			throw new Error(`You can only automatically register 2 NFTs with 'createDrop'. If you need to register more NFTs you can use the method 'nftTransferCall' after you create the drop.`)
+		}
+		const nftTXs = await nftTransferCall({
 			account: account!,
-			contractId: nftData.contract_id,
-			tokenIds: nftTokenIds,
-			dropId: drop_id.toString(),
-		})
-		responses = responses.concat(nftResponses)
+			contractId: nftData.contractId as string,
+			tokenIds,
+			dropId: dropId!.toString(),
+			returnTransactions: true
+		}) as Transaction[]
+		transactions = transactions.concat(nftTXs)
 	}
+
+	let responses = await execute({ transactions, account, wallet })
 
 	return { responses, dropId: drop_id, keys }
 }

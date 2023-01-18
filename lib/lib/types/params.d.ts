@@ -63,9 +63,9 @@ export interface DeleteKeyParams {
     withdrawBalance?: boolean;
 }
 export interface InitKeypomParams {
-    near: Near;
+    near?: Near;
     network: string;
-    keypomContractId: string;
+    keypomContractId?: string;
     funder?: Funder;
 }
 export interface ExecuteParams {

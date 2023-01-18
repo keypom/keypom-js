@@ -15,7 +15,6 @@ import {
 import { CreateDropParams, CreateDropProtocolArgs, CreateOrAddReturn, DeleteDropParams, GetDropParams, RegisterUsesParams } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
 import { assert, assertDropIdUnique, assertValidDropConfig, assertValidFCData, isValidAccountObj } from './checks';
-import { Account } from 'near-api-js';
 
 export const KEY_LIMIT = 50;
 
