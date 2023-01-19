@@ -25,11 +25,11 @@ await fundingAccount.functionCall(
 	parseNearAmount("0.1")
 );
 
-// Keep track of an array of the keyPairs we create
+// Keep track of an array of the key pairs we create and the public keys we pass into the contract
 let keyPairs = [];
-// Keep track of the public keys to pass into the contract
 let pubKeys = [];
 console.log("Creating keypairs");
+// Generate keypairs and store them into the arrays defined above
 let keyPair = await KeyPair.fromRandom('ed25519'); 
 keyPairs.push(keyPair);   
 pubKeys.push(keyPair.publicKey.toString());   
