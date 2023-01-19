@@ -1,6 +1,6 @@
 import type { Action } from "@near-wallet-selector/core";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
+import { Transaction } from "@near-wallet-selector/core/lib/wallet";
 import BN from 'bn.js';
 import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
@@ -267,7 +267,7 @@ export const execute = async ({
 	const nearAccount = account || fundingAccount
     assert(nearAccount,`Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`)
 
-	return await signAndSendTransactions(nearAccount, transformTransactions(<SignAndSendTransactionParams[]> transactions))
+	return await signAndSendTransactions(nearAccount, transformTransactions(<Transaction[]> transactions))
 }
 
 /**
@@ -459,7 +459,7 @@ const signAndSendTransactions = async (account: Account, txs: SignAndSendTransac
     return responses
 }
 
-export const transformTransactions = (transactions: SignAndSendTransactionParams[]): SignAndSendTransactionOptions[] => transactions.map(({ receiverId, actions: _actions }) => {
+export const transformTransactions = (transactions: Transaction[]): SignAndSendTransactionOptions[] => transactions.map(({ receiverId, actions: _actions }) => {
     const actions = _actions.map((action) =>
     createAction(action)
     );
