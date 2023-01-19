@@ -36,9 +36,9 @@ try {
 					receiver_id: 'nft.examples.testnet',
 					method_name: "nft_mint",
 					args: JSON.stringify({
-            		    token_id: "my-function-call-token",
-            		    receiver_id: "minqi.testnet",
-            		    metadata: {
+            		    		token_id: "my-function-call-token",
+            		    		receiver_id: "minqi.testnet",
+            		    		metadata: {
 						    title: "My Keypom NFT",
 						    description: "Keypom is lit fam",
 						    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",

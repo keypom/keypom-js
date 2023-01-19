@@ -12,7 +12,8 @@ const {
 	generateKeys,
 } = keypom
 
-
+// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
+// Here we are connecting to the testnet network
 console.log("Initiating NEAR connection");
 await initKeypom({
     network: 'testnet', 
