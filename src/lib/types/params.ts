@@ -197,7 +197,7 @@ export interface CreateDropProtocolArgs {
 
 export interface GetDropParams {
 	accountId: string,
-	start: string | number,
-	limit: number,
-	withKeys: boolean,
+	start?: string | number,
+	limit?: number,
+	withKeys?: boolean,
 }
