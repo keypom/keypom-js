@@ -26,5 +26,8 @@
     "require": [
       "dotenv/config"
     ]
+  },
+  "devDependencies": {
+    "typedoc": "^0.23.24"
   }
 }
