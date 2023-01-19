@@ -4,7 +4,6 @@ const {
 	keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
 } = nearAPI;
 
-import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
@@ -12,7 +11,7 @@ import {
 	execute as _execute
 } from "./keypom-utils";
 import { EnvVars, Funder } from "./types/general";
-import { InitKeypomParams } from "./types/params";
+import { InitKeypomParams, AnyWallet } from "./types/params";
 import { assert, isValidFunderObject, isValidNearObject } from "./checks";
 
 const gas = '200000000000000'
@@ -78,8 +77,8 @@ export const getEnv = (): EnvVars  => {
 
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalletBehaviour}) : Account | BrowserWalletBehaviour => {
-	let returnedAccount = account || wallet || fundingAccount;
+const getAccount = async ({ account, wallet }: {account: Account, wallet: AnyWallet}) : Promise<Account | AnyWallet> => {
+	let returnedAccount = account || await wallet || fundingAccount;
 
 	// If neither a wallet object, account object, or funding account is provided, throw an error
 	if (!returnedAccount) {

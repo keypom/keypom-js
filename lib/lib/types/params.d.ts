@@ -8,7 +8,7 @@ import { FTData } from './ft';
 import { Funder, GeneratedKeyPairs } from './general';
 import { NFTData } from './nft';
 import { SimpleData } from './simple';
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+export declare type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 export interface CreateDropParams {
     account?: Account;
     wallet?: AnyWallet;
@@ -181,4 +181,3 @@ export interface GetDropParams {
     limit: number;
     withKeys: boolean;
 }
-export {};

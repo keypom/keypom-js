@@ -9,7 +9,7 @@ import { Funder, GeneratedKeyPairs } from './general';
 import { NFTData } from './nft';
 import { SimpleData } from './simple';
 
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 
 export interface CreateDropParams {
 	account?: Account,

@@ -41,7 +41,7 @@ export const addToBalance = async ({
 	} = getEnv()
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 
     let deposit = absoluteAmount || '0';
     if (amount) {
@@ -100,7 +100,7 @@ export const withdrawBalance = async ({
 	} = getEnv()
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 
 	const actions: any[] = []
 	actions.push({

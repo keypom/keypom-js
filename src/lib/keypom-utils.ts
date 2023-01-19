@@ -314,7 +314,7 @@ export const ftTransferCall = async ({
     const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 
     if (amount) {
         const metadata = await viewAccount.viewFunction2({
@@ -388,7 +388,7 @@ export const nftTransferCall = async ({
     const { getAccount, near, receiverId } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 
     assert(tokenIds.length < 6, `This method can only transfer 6 NFTs in 1 batch transaction.`)
 

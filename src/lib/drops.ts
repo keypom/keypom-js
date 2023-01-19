@@ -176,7 +176,7 @@ export const createDrop = async ({
 
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 	assert(contractId == "v1-3.keypom.near" || contractId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 
 	/// parse args
@@ -434,7 +434,7 @@ export const deleteDrops = async ({
 	assert(receiverId == "v1-3.keypom.near" || receiverId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 	
 	// If the drop information isn't passed in, we should get it from the drop IDs
 	if (!drops) {
@@ -584,5 +584,5 @@ export const deleteDrops = async ({
 // 		gas300, receiverId, execute, getAccount
 // 	} = getEnv()
 
-// 	account = getAccount({ account, wallet });
+// 	account = await getAccount({ account, wallet });
 // }
