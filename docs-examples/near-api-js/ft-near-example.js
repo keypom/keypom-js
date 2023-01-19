@@ -3,12 +3,12 @@ const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/for
 const { KeyPair } = require("near-api-js");
 
 
-// Initiate connection to the NEAR blockchain.
+// Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
 const fundingAccount = await near.account("minqi.testnet");
 
-//get amount to transfer and see if owner has enough balance to fund drop
+// Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 let amountToTransfer = parseNearAmount("1")
 let funderFungibleTokenBal = await fundingAccount.viewFunction(
 	"ft.keypom.testnet", 
@@ -17,15 +17,17 @@ let funderFungibleTokenBal = await fundingAccount.viewFunction(
 		account_id: "minqi.testnet"
 	}
 );
+
+// Check if the owner has enough FT balance to fund drop
 if (new BN(funderFungibleTokenBal).lte(new BN(amountToTransfer))){
 	throw new Error('funder does not have enough Fungible Tokens for this drop. Top up and try again.');
 }
 
-// Keep track of an array of the keyPairs we create
+// Keep track of an array of the keyPairs we create and public keys to pass into the contract
 let keyPairs = [];
-// Keep track of the public keys to pass into the contract
 let pubKeys = [];
 console.log("Creating keypairs");
+// Generate keypairs and store them in the arrays defined above
 let keyPair = await KeyPair.fromRandom('ed25519'); 
 keyPairs.push(keyPair);   
 pubKeys.push(keyPair.publicKey.toString());   
@@ -43,11 +45,14 @@ try {
 			ft: {
 				contract_id: "ft.keypom.testnet",
 				sender_id: "minqi.testnet",
+				// This balance per use is balance of FTs per use. 
+				// parseNearAmount is used for conveience to convert to 10^24
 				balance_per_use: parseNearAmount("1")
 			}
 		}, 
 		"300000000000000",
-		parseNearAmount("10")
+		// Attached deposit of 1.5 $NEAR
+		parseNearAmount("1.5")
 	);
 } catch(e) {
 	console.log('error creating drop: ', e);
@@ -62,10 +67,14 @@ try {
 			account_id: "minqi.testnet",
 		},
 		"300000000000000",
+		// We are using 0.1 $NEAR to pay the storage deposit to include our account ID in their registered list of users. 
+		// Realistically, this will be more than enough and will be refunded the excess
 		parseNearAmount("0.1")
 	);
+
+	// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
 	let dropId = await getRecentDropId(fundingAccount, "minqi.testnet", "v1-3.keypom.testnet");
-	console.log('dropId: ', dropId);
+
 	await fundingAccount.functionCall(
 		"ft.keypom.testnet", 
 		'ft_transfer_call', 
@@ -75,7 +84,8 @@ try {
 			msg: dropId.toString()
 		},
 		"300000000000000",
-		"1"
+		// Attached deposit of 0.1 $NEAR
+		parseNearAmount("0.1")
 	);
 } catch(e) {
 	console.log('error sending FTs', e);

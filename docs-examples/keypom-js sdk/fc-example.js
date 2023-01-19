@@ -14,6 +14,8 @@ const {
 	generateKeys,
 } = keypom
 
+// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
+// Here we are connecting to the testnet network
 console.log("Initiating NEAR connection");
 await initKeypom({
     network: 'testnet', 
@@ -29,7 +31,10 @@ await initKeypom({
 await createDrop({
     numKeys: 1,
     depositPerUseNEAR: "1",
+	// With our function call for this drop, we wish to allow the user to lazy mint an NFT
     fcData: {
+		// 2D array of function calls. In this case, there is 1 function call to make for a key use
+		// By default, if only one array of methods is present, this array of function calls will be used for all key uses
 	    methods: [
 			[{
 				receiverId: "nft.examples.testnet",
@@ -43,8 +48,8 @@ await createDrop({
 					    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 					}
 				}),
+				// Attached deposit of 1 $NEAR for when the receiver makes this function call
 				attachedDeposit: parseNearAmount("1"),
-				accountIdField: "minqi.testnet"
 			}]
 		]
 	},

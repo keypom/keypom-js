@@ -36,6 +36,7 @@ await fundingAccount.functionCall(
 	parseNearAmount("0.1")
 );
 
+// Initiate Keypom using existing NEAR testnet connection
 await initKeypom({
 	near: near,
 	funder: {

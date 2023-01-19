@@ -8,11 +8,11 @@ console.log("Initiating NEAR connection");
 let near = await initiateNearConnection('testnet');
 const fundingAccount = await near.account('minqi.testnet');
 
-// Keep track of an array of the keyPairs we create
+// Keep track of an array of the key pairs we create and the public keys we pass into the contract
 let keyPairs = [];
-// Keep track of the public keys to pass into the contract
 let pubKeys = [];
-console.log("Creating keypair");
+console.log("Creating keypairs");
+// Generate keypairs and store them into the arrays defined above
 let keyPair = await KeyPair.fromRandom('ed25519'); 
 keyPairs.push(keyPair);   
 pubKeys.push(keyPair.publicKey.toString());   
@@ -29,7 +29,7 @@ try {
 			deposit_per_use: parseNearAmount('1'),
 		}, 
 		"300000000000000",
-		// Change this deposit value to whatever is needed to fund your drop; this will be added to your balance...?
+		// Attached deposit of 1 $NEAR
 		parseNearAmount("1"),
 	);
 } catch(e) {

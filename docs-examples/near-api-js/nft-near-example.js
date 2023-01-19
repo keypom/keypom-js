@@ -22,6 +22,7 @@ await fundingAccount.functionCall(
 		token_id: "my-token",
 	},
 	"300000000000000",
+	// Attached deposit of 0.1 $NEAR
 	parseNearAmount("0.1")
 );
 
@@ -34,7 +35,7 @@ let keyPair = await KeyPair.fromRandom('ed25519');
 keyPairs.push(keyPair);   
 pubKeys.push(keyPair.publicKey.toString());   
 
-// Create drop with NFT data
+// Create drop with NFT data and transfer NFTs to Keypom
 // Note that the user is responsible for error checking when using NEAR-API-JS
 // The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 try {
@@ -45,16 +46,22 @@ try {
 			public_keys: pubKeys,
 			deposit_per_use: parseNearAmount("1"),
 			nft: {
+				// Who will be sending the NFTs to the Keypom contract
 				sender_id: "minqi.testnet",
+				// NFT Contract Id that the tokens will come from
 				contract_id: "nft.examples.testnet"
 			}
 		}, 
 		"300000000000000",
+		// Attached deposit of 1 $NEAR
 		parseNearAmount("1")
 	);
+	
+	// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
+	let dropId = await getRecentDropId(fundingAccount, "minqi.testnet", "v1-3.keypom.testnet");
 
-	let dropId = await getRecentDropId(fundingAccount, FUNDING_ACCOUNT_ID, KEYPOM_CONTRACT);
-
+	// Transfer the NFT to the Keypom contract. 
+	// This gives Keypom the ownership and thus the ability to give it to the recipient when they use the linkdrop
 	await fundingAccount.functionCall(
 		"nft.examples.testnet", 
 		'nft_transfer_call', 
@@ -64,7 +71,8 @@ try {
 			msg: dropId.toString()
 		},
 		"300000000000000",
-		"1"
+		// Attached deposit of 1 $NEAR
+		parseNearAmount("1")
 	);
 } catch(e) {
 	console.log('error creating drop: ', e);
