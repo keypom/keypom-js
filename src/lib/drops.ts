@@ -160,8 +160,8 @@ export const createDrop = async ({
 	depositPerUseYocto,
 	metadata,
 	config = {},
-	ftData = {},
-	nftData = {},
+	ftData,
+	nftData,
 	simpleData = {},
 	fcData,
 	basePassword,
@@ -263,12 +263,12 @@ export const createDrop = async ({
 		deposit_per_use: depositPerUseYocto,
 		config: finalConfig,
 		metadata,
-		ft: ftData.contractId ? ({
+		ft: ftData?.contractId ? ({
 			contract_id: ftData.contractId,
 			sender_id: ftData.senderId,
 			balance_per_use: ftBalancePerUse!,
 		}) : undefined,
-		nft: nftData.contractId ? ({
+		nft: nftData?.contractId ? ({
 			contract_id: nftData.contractId,
 			sender_id: nftData.senderId,
 		}) : undefined,
@@ -283,6 +283,7 @@ export const createDrop = async ({
 					ret.attached_deposit = method.attachedDeposit;
 					ret.account_id_field = method.accountIdField;
 					ret.drop_id_field = method.dropIdField;
+					ret.key_id_field = method.keyIdField;
 					return ret
 				}) : undefined
 			)
@@ -350,7 +351,7 @@ export const createDrop = async ({
 	}
 	
 	let tokenIds = nftData?.tokenIds
-	if (tokenIds && tokenIds?.length > 0) {
+	if (nftData && tokenIds && tokenIds?.length > 0) {
 		if (tokenIds.length > 2) {
 			throw new Error(`You can only automatically register 2 NFTs with 'createDrop'. If you need to register more NFTs you can use the method 'nftTransferCall' after you create the drop.`)
 		}

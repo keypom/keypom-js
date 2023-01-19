@@ -7,7 +7,8 @@
     "test": "yarn build && yarn ava",
     "ava": "ava test/ws.test.js -vs --timeout=5m",
     "build": "npx tsc",
-    "publish": "npx tsc && npm publish"
+    "publish": "npx tsc && npm publish",
+    "build-docs": "npx typedoc --options typedoc.json --excludeInternal"
   },
   "author": "mattlockyer",
   "license": "MIT",
