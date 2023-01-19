@@ -30,6 +30,7 @@ export interface CreateDropParams {
     passwordProtectedUses?: number[],
 	useBalance?: boolean,
 	returnTransactions?: boolean,
+	successUrl?: string,
 }
 
 export interface AddKeyParams {
@@ -83,6 +84,7 @@ export interface ExecuteParams {
 	account: Account,
 	wallet?: AnyWallet,
     fundingAccount?: Account,
+	successUrl?: string,
 }
 
 export interface GenerateKeysParams {

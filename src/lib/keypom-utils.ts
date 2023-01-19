@@ -236,6 +236,7 @@ export const execute = async ({
 	account,
 	wallet,
     fundingAccount,
+    successUrl,
 }: ExecuteParams): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
 	const {
         contractId,
@@ -245,6 +246,7 @@ export const execute = async ({
 	if (wallet) {
         // wallet might be Promise<Wallet> or value, either way doesn't matter
         wallet = await wallet;
+        // might be able to sign transactions with app key
         let needsRedirect = false;
         transactions.forEach((tx) => {
             if (tx.receiverId !== contractId) needsRedirect = true
@@ -254,12 +256,12 @@ export const execute = async ({
             })
         })
         
-        if (needsRedirect) return await wallet.signAndSendTransactions({ transactions })
+        if (needsRedirect) return await wallet.signAndSendTransactions({ transactions, callbackUrl: successUrl })
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = []
         for (const tx of transactions) {
             responses.push(await wallet.signAndSendTransaction({
-                actions: tx.actions
+                actions: tx.actions,
             }))
         }
         return responses

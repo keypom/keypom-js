@@ -167,11 +167,12 @@ export const createDrop = async ({
 	basePassword,
 	passwordProtectedUses,
 	useBalance = false,
-	returnTransactions = false
+	returnTransactions = false,
+	successUrl,
 }: CreateDropParams): Promise<CreateOrAddReturn> => {
 	const {
 		near, viewAccount,
-		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
+		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
 
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
@@ -368,7 +369,7 @@ export const createDrop = async ({
 		return { keys, dropId, transactions, requiredDeposit }
 	}
 
-	let responses = await execute({ transactions, account, wallet })
+	let responses = await execute({ transactions, account, wallet, successUrl })
 
 	return { responses, keys, dropId, requiredDeposit }
 }

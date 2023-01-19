@@ -115,7 +115,7 @@ export declare const keypomView: ({ methodName, args }: {
     methodName: any;
     args: any;
 }) => Promise<any>;
-export declare const execute: ({ transactions, account, wallet, fundingAccount, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
+export declare const execute: ({ transactions, account, wallet, fundingAccount, successUrl, }: ExecuteParams) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
 /**
  * For FT Drops, keys need to be registered before they can be used. This is done via the `ft_transfer_call` method on the FT contract.
  * This is a convenience method to make that process easier.

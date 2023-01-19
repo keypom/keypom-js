@@ -131,7 +131,7 @@ export declare const KEY_LIMIT = 50;
  * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
  * ```
 */
-export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions }: CreateDropParams) => Promise<CreateOrAddReturn>;
+export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions, successUrl, }: CreateDropParams) => Promise<CreateOrAddReturn>;
 /**
  * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
  *
