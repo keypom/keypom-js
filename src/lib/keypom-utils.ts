@@ -241,8 +241,10 @@ export const execute = async ({
         contractId,
 	} = getEnv()
     
-	/// instance of walletSelector.wallet()
+	// instance of walletSelector.wallet()
 	if (wallet) {
+        // wallet might be Promise<Wallet> or value, either way doesn't matter
+        wallet = await wallet;
         let needsRedirect = false;
         transactions.forEach((tx) => {
             if (tx.receiverId !== contractId) needsRedirect = true

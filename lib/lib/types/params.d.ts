@@ -73,7 +73,7 @@ export interface InitKeypomParams {
 export interface ExecuteParams {
     transactions: Transaction[];
     account: Account;
-    wallet?: Wallet;
+    wallet?: AnyWallet;
     fundingAccount?: Account;
 }
 export interface GenerateKeysParams {
