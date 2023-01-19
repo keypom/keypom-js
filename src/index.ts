@@ -9,8 +9,12 @@ export {
 	ftTransferCall,
 	nftTransferCall,
 	hashPassword,
-	exportedNearAPI as nearAPI
+	exportedNearAPI as nearAPI,
 } from "./lib/keypom-utils";
+import { exportedNearAPI } from "./lib/keypom-utils";
+export const {
+	parseNearAmount, formatNearAmount
+} = exportedNearAPI.utils.format;
 export {
 	useKeypom,
 	KeypomContextProvider,
