@@ -8,9 +8,10 @@ import { FTData } from './ft';
 import { Funder, GeneratedKeyPairs } from './general';
 import { NFTData } from './nft';
 import { SimpleData } from './simple';
+declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export interface CreateDropParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     numKeys: number;
     publicKeys?: string[];
     depositPerUseNEAR?: Number;
@@ -26,10 +27,11 @@ export interface CreateDropParams {
     basePassword?: string;
     passwordProtectedUses?: number[];
     useBalance?: boolean;
+    returnTransactions?: boolean;
 }
 export interface AddKeyParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     numKeys: number;
     publicKeys?: string[];
     dropId?: string;
@@ -39,24 +41,25 @@ export interface AddKeyParams {
     basePassword?: string;
     passwordProtectedUses?: number[];
     useBalance?: boolean;
+    returnTransactions?: boolean;
 }
 export interface RegisterUsesParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     dropId: string;
     numUses: number;
     useBalance?: boolean;
 }
 export interface DeleteDropParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     drops?: any;
     dropIds?: string[];
     withdrawBalance?: boolean;
 }
 export interface DeleteKeyParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     publicKeys: string[] | string;
     dropId: string;
     withdrawBalance?: boolean;
@@ -80,7 +83,7 @@ export interface GenerateKeysParams {
 }
 export interface FTTransferCallParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     contractId: string;
     absoluteAmount?: string;
     amount?: string;
@@ -89,7 +92,7 @@ export interface FTTransferCallParams {
 }
 export interface NFTTransferCallParams {
     account?: Account;
-    wallet?: BrowserWalletBehaviour;
+    wallet?: AnyWallet;
     contractId: string;
     tokenIds: string[];
     dropId: string;
@@ -106,8 +109,20 @@ export interface EstimatorParams {
     fcData?: FCData;
     ftData?: FTData;
 }
+export interface AddToBalanceParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    absoluteAmount?: string;
+    amount?: string;
+}
+export interface WithdrawBalanceParams {
+    account?: Account;
+    wallet?: AnyWallet;
+}
 export interface CreateOrAddReturn {
-    responses: any;
+    responses?: any;
+    transactions?: Transaction[];
+    requiredDeposit?: string;
     keys?: Maybe<GeneratedKeyPairs>;
     dropId: string;
 }
@@ -166,3 +181,4 @@ export interface GetDropParams {
     limit: number;
     withKeys: boolean;
 }
+export {};

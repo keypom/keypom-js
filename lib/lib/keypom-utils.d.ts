@@ -1,5 +1,5 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { SignAndSendTransactionParams, Transaction } from "@near-wallet-selector/core/lib/wallet";
+import { Transaction } from "@near-wallet-selector/core/lib/wallet";
 import * as nearAPI from 'near-api-js';
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { PasswordPerUse } from "./types/drops";
@@ -180,7 +180,7 @@ export declare const ftTransferCall: ({ account, wallet, contractId, absoluteAmo
 */
 export declare const nftTransferCall: ({ account, wallet, contractId, tokenIds, dropId, returnTransactions, }: NFTTransferCallParams) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
-export declare const transformTransactions: (transactions: SignAndSendTransactionParams[]) => SignAndSendTransactionOptions[];
+export declare const transformTransactions: (transactions: Transaction[]) => SignAndSendTransactionOptions[];
 export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use }: CreateDropProtocolArgs) => string | null;
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: EstimatorParams) => Promise<string>;
 /**
