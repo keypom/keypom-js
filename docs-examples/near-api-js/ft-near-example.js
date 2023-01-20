@@ -7,7 +7,7 @@ async function ftDropNear(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
-const fundingAccount = await near.account("minqi.testnet");
+const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 let amountToTransfer = parseNearAmount("1")
@@ -15,7 +15,7 @@ let funderFungibleTokenBal = await fundingAccount.viewFunction(
 	"ft.keypom.testnet", 
 	'ft_balance_of',
 	{
-		account_id: "minqi.testnet"
+		account_id: "keypom-docs-demo.testnet"
 	}
 );
 
@@ -45,7 +45,7 @@ try {
 			deposit_per_use: parseNearAmount("1"),
 			ft: {
 				contract_id: "ft.keypom.testnet",
-				sender_id: "minqi.testnet",
+				sender_id: "keypom-docs-demo.testnet",
 				// This balance per use is balance of FTs per use. 
 				// parseNearAmount is used for conveience to convert to 10^24
 				balance_per_use: parseNearAmount("1")
@@ -65,7 +65,7 @@ try {
 		FT_CONTRACT_ID, 
 		'storage_deposit',
 		{
-			account_id: "minqi.testnet",
+			account_id: "keypom-docs-demo.testnet",
 		},
 		"300000000000000",
 		// We are using 0.1 $NEAR to pay the storage deposit to include our account ID in their registered list of users. 
@@ -74,7 +74,7 @@ try {
 	);
 
 	// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
-	let dropId = await getRecentDropId(fundingAccount, "minqi.testnet", "v1-3.keypom.testnet");
+	let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v1-3.keypom.testnet");
 
 	await fundingAccount.functionCall(
 		"ft.keypom.testnet", 

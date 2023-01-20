@@ -6,7 +6,7 @@ async function fcDropNear(){
 // Initiate connection to the NEAR blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
-const fundingAccount = await near.account("minqi.testnet");
+const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Keep track of an array of the keyPairs we create and the public keys to pass into the contract
 let keyPairs = [];
@@ -37,7 +37,7 @@ try {
 					method_name: "nft_mint",
 					args: JSON.stringify({
             		    		token_id: "near-api-token-002",
-            		    		receiver_id: "minqi.testnet",
+            		    		receiver_id: "keypom-docs-demo.testnet",
             		    		metadata: {
 						    title: "My Keypom NFT",
 						    description: "Keypom is lit fam",

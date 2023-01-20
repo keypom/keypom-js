@@ -19,7 +19,7 @@ async function ftDropKeypom(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
-const fundingAccount = await near.account("minqi.testnet");
+const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 let amountToTransfer = parseNearAmount("1")
@@ -27,7 +27,7 @@ let funderFungibleTokenBal = await fundingAccount.viewFunction(
 	"ft.keypom.testnet", 
 	'ft_balance_of',
 	{
-		account_id: "minqi.testnet"
+		account_id: "keypom-docs-demo.testnet"
 	}
 );
 
@@ -40,8 +40,8 @@ if (new BN(funderFungibleTokenBal).lte(new BN(amountToTransfer))){
 await initKeypom({
 	near: near,
 	funder: {
-        accountId: "minqi.testnet", 
-        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
+        accountId: "keypom-docs-demo.testnet", 
+        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
 	}
 });
 
@@ -55,7 +55,7 @@ await createDrop({
     depositPerUseNEAR: 1,
     ftData: {
 		contractId: "ft.keypom.testnet",
-		senderId: "minqi.testnet",
+		senderId: "keypom-docs-demo.testnet",
 		// This balance per use is balance of FTs per use. 
 		// parseNearAmount is used for conveience to convert to 10^24
 		amount: "1"

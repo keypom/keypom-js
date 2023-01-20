@@ -20,8 +20,8 @@ console.log("Initiating NEAR connection");
 await initKeypom({
     network: 'testnet', 
     funder: {
-        accountId: "minqi.testnet", 
-        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
+        accountId: "keypom-docs-demo.testnet", 
+        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
     }
 });
 
@@ -41,7 +41,7 @@ await createDrop({
 			methodName: "nft_mint",
 			args: JSON.stringify({
 	            	token_id: "keypom-sdk-token-02",
-	            	receiver_id: "minqi.testnet",
+	            	receiver_id: "keypom-docs-demo.testnet",
 	            	metadata: {
 				    title: "My Keypom NFT",
 				    description: "Keypom is lit fam",

@@ -17,14 +17,14 @@ async function nftDropKeypom(){
 // Initiate connection to NEAR testnet blockchain
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
-const fundingAccount = await near.account("minqi.testnet");
+const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
 await fundingAccount.functionCall(
 	"nft.examples.testnet", 
 	'nft_mint', 
 	{
-		receiver_id: "minqi.testnet",
+		receiver_id: "keypom-docs-demo.testnet",
 		metadata: {
 		    title: "My Keypom NFT",
 		    description: "Keypom is lit fam :D",
@@ -40,8 +40,8 @@ await fundingAccount.functionCall(
 await initKeypom({
 	near: near,
 	funder: {
-        accountId: "minqi.testnet", 
-        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
+        accountId: "keypom-docs-demo.testnet", 
+        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
 	}
 });
 // Create drop with nft data
@@ -55,7 +55,7 @@ await createDrop({
 	    // NFT Contract Id that the tokens will come from
 	    contractId: "nft.examples.testnet",
 	    // Who will be sending the NFTs to the Keypom contract
-	    senderId: "minqi.testnet",
+	    senderId: "keypom-docs-demo.testnet",
 	    // List of tokenIDs
 	    tokenIds: ["keypom-sdk-token-01"]
 	}

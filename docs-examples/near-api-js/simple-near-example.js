@@ -6,7 +6,7 @@ async function simpleDropNear(){
 // Initiate connection to the NEAR blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection('testnet');
-const fundingAccount = await near.account('minqi.testnet');
+const fundingAccount = await near.account('keypom-docs-demo.testnet');
 
 // Keep track of an array of the key pairs we create and the public keys we pass into the contract
 let keyPairs = [];

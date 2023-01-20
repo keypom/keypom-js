@@ -6,14 +6,14 @@ async function nftDropNear(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
-const fundingAccount = await near.account("minqi.testnet");
+const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
 await fundingAccount.functionCall(
 	"nft.examples.testnet", 
 	'nft_mint', 
 	{
-		receiver_id: "minqi.testnet",
+		receiver_id: "keypom-docs-demo.testnet",
 		metadata: {
 		    title: "My Keypom NFT",
 		    description: "Keypom is lit fam :D",
@@ -47,7 +47,7 @@ try {
 			deposit_per_use: parseNearAmount("1"),
 			nft: {
 				// Who will be sending the NFTs to the Keypom contract
-				sender_id: "minqi.testnet",
+				sender_id: "keypom-docs-demo.testnet",
 				// NFT Contract Id that the tokens will come from
 				contract_id: "nft.examples.testnet"
 			}
@@ -58,7 +58,7 @@ try {
 	);
 	
 	// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
-	let dropId = await getRecentDropId(fundingAccount, "minqi.testnet", "v1-3.keypom.testnet");
+	let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v1-3.keypom.testnet");
 
 	// Transfer the NFT to the Keypom contract. 
 	// This gives Keypom the ownership and thus the ability to give it to the recipient when they use the linkdrop
