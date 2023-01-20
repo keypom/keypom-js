@@ -2,7 +2,7 @@ const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GA
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair } = require("near-api-js");
 
-
+async function nftDropNear(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
@@ -19,7 +19,7 @@ await fundingAccount.functionCall(
 		    description: "Keypom is lit fam :D",
 		    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 		},
-		token_id: "my-token",
+		token_id: "near-api-token-01",
 	},
 	"300000000000000",
 	// Attached deposit of 0.1 $NEAR
@@ -67,7 +67,7 @@ try {
 		'nft_transfer_call', 
 		{
 			receiver_id: "v1-3.keypom.testnet",
-			token_id: "my-token",
+			token_id: "near-api-token-01",
 			msg: dropId.toString()
 		},
 		"300000000000000",
@@ -77,3 +77,6 @@ try {
 } catch(e) {
 	console.log('error creating drop: ', e);
 }
+}
+
+nftDropNear()

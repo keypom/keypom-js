@@ -1,8 +1,9 @@
 const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair } = require("near-api-js");
+const { BN } = require("bn.js");
 
-
+async function ftDropNear(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
@@ -37,7 +38,7 @@ pubKeys.push(keyPair.publicKey.toString());
 // The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 try {
 	await fundingAccount.functionCall(
-		KEYPOM_CONTRACT, 
+		"v1-3.keypom.testnet", 
 		'create_drop', 
 		{
 			public_keys: pubKeys,
@@ -90,3 +91,5 @@ try {
 } catch(e) {
 	console.log('error sending FTs', e);
 }
+}
+ftDropNear()

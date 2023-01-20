@@ -1,6 +1,6 @@
 const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const keypom = require("../lib");
+const keypom = require("../../lib");
 const {
 	execute,
 	initKeypom,
@@ -13,7 +13,7 @@ const {
 	addKeys,
 	generateKeys,
 } = keypom
-
+async function nftDropKeypom(){
 // Initiate connection to NEAR testnet blockchain
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
@@ -30,7 +30,7 @@ await fundingAccount.functionCall(
 		    description: "Keypom is lit fam :D",
 		    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 		},
-		token_id: "my-token",
+		token_id: "keypom-sdk-token-01",
 	},
 	"300000000000000",
 	parseNearAmount("0.1")
@@ -41,7 +41,7 @@ await initKeypom({
 	near: near,
 	funder: {
         accountId: "minqi.testnet", 
-        secretKey: MY_PRVK
+        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
 	}
 });
 // Create drop with nft data
@@ -57,7 +57,8 @@ await createDrop({
 	    // Who will be sending the NFTs to the Keypom contract
 	    senderId: "minqi.testnet",
 	    // List of tokenIDs
-	    tokenIds: ["my-token"]
+	    tokenIds: ["keypom-sdk-token-01"]
 	}
 });
-
+}
+nftDropKeypom()

@@ -1,6 +1,6 @@
 const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const keypom = require("../lib");
+const keypom = require("../../lib");
 const {
 	execute,
 	initKeypom,
@@ -13,7 +13,7 @@ const {
 	addKeys,
 	generateKeys,
 } = keypom
-
+async function fcDropKeypom(){
 // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 // Here we are connecting to the testnet network
 console.log("Initiating NEAR connection");
@@ -21,7 +21,7 @@ await initKeypom({
     network: 'testnet', 
     funder: {
         accountId: "minqi.testnet", 
-        secretKey: MY_PRVK
+        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
     }
 });
 
@@ -40,7 +40,7 @@ await createDrop({
 			receiverId: "nft.examples.testnet",
 			methodName: "nft_mint",
 			args: JSON.stringify({
-	            	token_id: "my-function-call-token",
+	            	token_id: "keypom-sdk-token-02",
 	            	receiver_id: "minqi.testnet",
 	            	metadata: {
 				    title: "My Keypom NFT",
@@ -54,3 +54,5 @@ await createDrop({
 		]
 	},
 });
+}
+fcDropKeypom()

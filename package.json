@@ -7,7 +7,16 @@
     "test": "yarn build && yarn ava",
     "ava": "ava test/ws.test.js -vs --timeout=5m",
     "build": "npx tsc",
-    "publish": "npx tsc && npm publish"
+    "publish": "npx tsc && npm publish",
+    "fc-keypom": "node docs-examples/keypom-js-sdk/fc-example.js",
+    "ft-keypom": "node docs-examples/keypom-js-sdk/ft-example.js",
+    "nft-keypom": "node docs-examples/keypom-js-sdk/nft-example.js",
+    "simple-keypom": "node docs-examples/keypom-js-sdk/simple-example.js",
+    "fc-near": "node docs-examples/near-api-js/fc-near-example.js",
+    "ft-near": "node docs-examples/near-api-js/ft-near-example.js",
+    "nft-near": "node docs-examples/near-api-js/nft-near-example.js",
+    "simple-near": "node docs-examples/near-api-js/simple-near-example.js"
+
   },
   "author": "mattlockyer",
   "license": "MIT",

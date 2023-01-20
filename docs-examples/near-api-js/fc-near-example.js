@@ -2,7 +2,7 @@ const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GA
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair } = require("near-api-js");
 
-
+async function fcDropNear(){
 // Initiate connection to the NEAR blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
@@ -36,7 +36,7 @@ try {
 					receiver_id: 'nft.examples.testnet',
 					method_name: "nft_mint",
 					args: JSON.stringify({
-            		    		token_id: "my-function-call-token",
+            		    		token_id: "near-api-token-002",
             		    		receiver_id: "minqi.testnet",
             		    		metadata: {
 						    title: "My Keypom NFT",
@@ -56,4 +56,5 @@ try {
 } catch(e) {
 	console.log('error creating drop: ', e);
 }
-
+}
+fcDropNear()

@@ -2,7 +2,7 @@ const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GA
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair } = require("near-api-js");
 
-
+async function simpleDropNear(){
 // Initiate connection to the NEAR blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection('testnet');
@@ -35,3 +35,5 @@ try {
 } catch(e) {
 	console.log('error creating drop: ', e);
 }
+}
+simpleDropNear()

@@ -1,6 +1,7 @@
 const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const keypom = require("../lib");
+const { BN } = require("bn.js");
+const keypom = require("../../lib");
 const {
 	execute,
 	initKeypom,
@@ -14,6 +15,7 @@ const {
 	generateKeys,
 } = keypom
 
+async function ftDropKeypom(){
 // Initiate connection to the NEAR testnet blockchain.
 console.log("Initiating NEAR connection");
 let near = await initiateNearConnection("testnet");
@@ -39,7 +41,7 @@ await initKeypom({
 	near: near,
 	funder: {
         accountId: "minqi.testnet", 
-        secretKey: MY_PRVK
+        secretKey: "ed25519:3hsCWpjczaPoNejnC2A1McGvnJQipAJUDmo6tEZ6XH6qwxfxTLkpQ8hMNG3jxg1zXEe5Ke2qoqUq76jJpeNKxaMa"
 	}
 });
 
@@ -47,6 +49,7 @@ await initKeypom({
 // Note that the SDK does error checks to ensure all the information passed in will succeed when creating a drop.
 // If any information is not valid, the SDK will panic and the drop will NOT be created.
 // These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
+console.log(parseNearAmount("1"))
 await createDrop({
     numKeys: 1,
     depositPerUseNEAR: 1,
@@ -55,7 +58,10 @@ await createDrop({
 		senderId: "minqi.testnet",
 		// This balance per use is balance of FTs per use. 
 		// parseNearAmount is used for conveience to convert to 10^24
-		balancePerUse: parseNearAmount("1")
+		amount: "1"
 	},
 });
 // Note that Keypom createDrop will auto-register you onto the contract if you are not yet registered.
+}
+
+ftDropKeypom()
