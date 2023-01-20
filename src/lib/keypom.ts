@@ -55,7 +55,6 @@ export type Maybe<T> = T | undefined;
 let near: Maybe<Near> = undefined;
 let connection: Maybe<Connection> = undefined;
 let keyStore: Maybe<KeyStore> = undefined;
-let logger: any = undefined;
 let networkId: Maybe<string> = undefined;
 let fundingAccount: Maybe<Account> = undefined;
 let fundingAccountDetails: Maybe<Funder> = undefined;
@@ -67,11 +66,9 @@ let viewAccount: any = undefined;
  * @returns {EnvVars} The environment variables used by the Keypom library.
  */
 export const getEnv = (): EnvVars  => {
-	if (!near) {
-		throw new Error('Keypom uninitialized. Please call initKeypom or initKeypomContext')
-	}
+	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
 	return {
-		near, connection, keyStore, logger, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
+		near, connection, keyStore, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
 		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
 	}
 }
@@ -82,9 +79,7 @@ const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalle
 	let returnedAccount = account || wallet || fundingAccount;
 
 	// If neither a wallet object, account object, or funding account is provided, throw an error
-	if (!returnedAccount) {
-		throw new Error('No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')
-	}
+	assert(returnedAccount, 'No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')
 
 	return returnedAccount
 }
@@ -246,12 +241,13 @@ export const updateFunder = async ({
 }:{funder: Funder}) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the funder account.")
 	assert(isValidFunderObject(funder), "The funder object passed in is not valid. Please pass in a valid funder object.");
+	assert(funder.secretKey || funder.seedPhrase, "The funder object passed in must have either a secretKey or seedphrase");
 
 	let { accountId, secretKey, seedPhrase } = funder
 	if (seedPhrase) {
 		secretKey = parseSeedPhrase(seedPhrase).secretKey
 	}
-	funder.fundingKeyPair = KeyPair.fromString(secretKey)
+	funder.fundingKeyPair = KeyPair.fromString(secretKey!)
 	await keyStore!.setKey(networkId!, accountId, funder.fundingKeyPair)
 	
 	fundingAccountDetails = funder;
