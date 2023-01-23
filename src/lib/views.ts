@@ -41,6 +41,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  * 
  * console.log('keyBalance: ', keyBalance)
  * ```
+ * @group View Functions
 */
 export const getKeyBalance = async ({
 	publicKey,
@@ -72,6 +73,7 @@ export const getKeyBalance = async ({
  * 
  * console.log('numKeys: ', numKeys)
  * ```
+ * @group View Functions
 */
 export const getKeyTotalSupply = async (): Promise<number> => {
 	return keypomView({
@@ -105,6 +107,7 @@ export const getKeyTotalSupply = async (): Promise<number> => {
  * 
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export const getKeys = async ({
     start,
@@ -151,6 +154,7 @@ export const getKeys = async ({
  * 
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export const getKeyInformation = async ({
     publicKey
@@ -195,6 +199,7 @@ export const getKeyInformation = async ({
  * 
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export const getKeyInformationBatch = async ({
     publicKeys
@@ -241,6 +246,7 @@ export const getKeyInformationBatch = async ({
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
 export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
@@ -303,6 +309,7 @@ export const getDropInformation = async ({ dropId, withKeys = false } : {dropId:
  * 
  * console.log('keySupply: ', keySupply)
  * ```
+ * @group View Functions
 */
 export const getKeySupplyForDrop = async ({
     dropId
@@ -349,6 +356,7 @@ export const getKeySupplyForDrop = async ({
  * 
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export const getKeysForDrop = async ({
     dropId,
@@ -396,6 +404,7 @@ export const getKeysForDrop = async ({
  * 
  * console.log('dropSupply: ', dropSupply)
  * ```
+ * @group View Functions
 */
 export const getDropSupplyForOwner = async ({
     accountId,
@@ -438,6 +447,7 @@ export const getDropSupplyForOwner = async ({
  * 
  * console.log('dropsAndKeys: ', dropsAndKeys)
  * ```
+ * @group View Functions
 */
 export const getDrops = async ({
 	accountId,
@@ -505,6 +515,7 @@ export const getDrops = async ({
  * 
  * console.log('tokenSupply: ', tokenSupply)
  * ```
+ * @group View Functions
 */
 export const getNftSupplyForDrop = async ({
     dropId
@@ -541,6 +552,7 @@ export const getNftSupplyForDrop = async ({
  * 
  * console.log('tokenList: ', tokenList)
  * ```
+ * @group View Functions
 */
 export const getNftTokenIDsForDrop = async ({
     dropId,
@@ -580,6 +592,7 @@ export const getNftTokenIDsForDrop = async ({
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
 export const getUserBalance = async ({
     accountId
@@ -611,6 +624,7 @@ export const getUserBalance = async ({
  * 
  * console.log('metadata: ', metadata)
  * ```
+ * @group View Functions
 */
 export const getContractSourceMetadata = async (): Promise<ContractSourceMetadata> => {
     return keypomView({

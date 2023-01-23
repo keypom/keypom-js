@@ -103,6 +103,7 @@ import { getEnv } from "./keypom";
  * 	password: passwordForClaim
  * })
  * ```
+ * @group Creating, And Claiming Drops
 */
 export const claim = async ({
 	secretKey,

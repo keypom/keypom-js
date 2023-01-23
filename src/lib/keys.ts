@@ -134,6 +134,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  * 	dropId
  * })
  * ```
+ * @group Creating, And Claiming Drops
 */
 export const addKeys = async ({
 	account,
@@ -351,7 +352,8 @@ export const addKeys = async ({
  * 	dropId,
  * 	publicKeys: keys.publicKeys[0] // Can be wrapped in an array as well
  * })
-```
+ * ```
+ * @group Deleting State
 */
 export const deleteKeys = async ({
 	account,

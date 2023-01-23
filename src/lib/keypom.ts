@@ -66,6 +66,7 @@ let viewAccount: any = undefined;
 /**
  * 
  * @returns {EnvVars} The environment variables used by the Keypom library.
+ * @group Keypom SDK Environment
  */
 export const getEnv = (): EnvVars  => {
 	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
@@ -150,6 +151,7 @@ const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalle
  * // Get the drops for the given owner
  * const dropsForOwner = await getDrops({accountId: "benjiman.testnet"});
  * ``` 
+ * @group Keypom SDK Environment
 */
 export const initKeypom = async ({
 	near: _near,
@@ -248,6 +250,7 @@ export const initKeypom = async ({
  *
  *	return;
  * ``` 
+ * @group Keypom SDK Environment
 */
 export const updateFunder = async ({
 	funder
@@ -298,6 +301,7 @@ export const updateFunder = async ({
  *
  *	return;
  * ``` 
+ * @group Keypom SDK Environment
 */
 export const updateKeypomContractId = async ({
 	keypomContractId

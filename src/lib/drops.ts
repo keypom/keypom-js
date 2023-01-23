@@ -149,6 +149,7 @@ export const KEY_LIMIT = 50;
  * let currentUse = 1;
  * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
  * ```
+ * @group Creating, And Claiming Drops
 */
 export const createDrop = async ({
 	account,
@@ -457,6 +458,7 @@ export const createDrop = async ({
  * });
  * console.log('numDrops: ', numDrops)
  * ```
+ * @group Deleting State
 */
 export const deleteDrops = async ({
 	account,

@@ -1,6 +1,5 @@
 import { KeyInfo } from "./types/drops";
 import { ContractSourceMetadata } from "./types/general";
-import { GetDropParams } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 /**
  * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
@@ -9,7 +8,8 @@ import { ProtocolReturnedDrop } from "./types/protocol";
  *
  * @returns {Promise<string>} The amount of yoctoNEAR that is contained within the key
  *
- * @example <caption>Create a 1 $NEAR linkdrop and query for its balance</caption>
+ * @example
+ * Create a 1 $NEAR linkdrop and query for its balance:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -42,7 +42,8 @@ export declare const getKeyBalance: ({ publicKey, }: {
  *
  * @returns {Promise<number>} The amount of keys.
  *
- * @example <caption>Query for the key supply on the `v1.keypom.testnet` contract</caption>
+ * @example
+ * Query for the key supply on the `v1.keypom.testnet` contract:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls
  * await initKeypom({
@@ -60,12 +61,13 @@ export declare const getKeyTotalSupply: () => Promise<number>;
 /**
  * Paginate through all active keys on the contract and return a vector of key info.
  *
- * @param {string= | number=} start (OPTIONAL) Where to start paginating through keys.
- * @param {number=} limit (OPTIONAL) How many keys to paginate through.
+ * @param {string= | number=} __namedParameters.start (OPTIONAL) Where to start paginating through keys.
+ * @param {number=} __namedParameters.limit (OPTIONAL) How many keys to paginate through.
  *
  * @returns {Promise<Array<KeyInfo>>} Vector of KeyInfo.
  *
- * @example <caption>Query for first 50 keys on the `v1.keypom.testnet` contract</caption>
+ * @example
+ * Query for first 50 keys on the `v1.keypom.testnet` contract:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls
  * await initKeypom({
@@ -93,7 +95,8 @@ export declare const getKeys: ({ start, limit }: {
  *
  * @returns {Promise<KeyInfo>} Key information struct for that specific key.
  *
- * @example <caption>Create a drop and query for the key information</caption>
+ * @example
+ * Create a drop and query for the key information:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -128,7 +131,8 @@ export declare const getKeyInformation: ({ publicKey }: {
  *
  * @returns {Promise<Array<KeyInfo>>} Array of Key information structs for the keys passed in
  *
- * @example <caption>Create a drop and query for the key information for all keys created</caption>
+ * @example
+ * Create a drop and query for the key information for all keys created:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -164,7 +168,8 @@ export declare const getKeyInformationBatch: ({ publicKeys }: {
  *
  * @returns {Drop} Drop information which may or may not have a keys field of type `KeyInfo` depending on if withKeys is specified as true.
  *
- * @example <caption>Create a simple drop and retrieve information about it:</caption>
+ * @example
+ * Create a simple drop and retrieve information about it::
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -201,7 +206,8 @@ export declare const getDropInformation: ({ dropId, withKeys }: {
  *
  * @returns {Promise<number>} Number of active keys
  *
- * @example <caption>Create a drop with 5 keys and query for the key supply</caption>
+ * @example
+ * Create a drop with 5 keys and query for the key supply:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -238,7 +244,8 @@ export declare const getKeySupplyForDrop: ({ dropId }: {
  *
  * @returns {Promise<Array<KeyInfo>>} Vector of KeyInfo objects returned from pagination
  *
- * @example <caption>Create a drop with 5 keys and return all the key info objects</caption>
+ * @example
+ * Create a drop with 5 keys and return all the key info objects:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -275,7 +282,8 @@ export declare const getKeysForDrop: ({ dropId, start, limit }: {
  *
  * @returns {Promise<number>} Amount of drops
  *
- * @example <caption>Create a drop and check how many the owner has</caption>
+ * @example
+ * Create a drop and check how many the owner has:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -310,7 +318,8 @@ export declare const getDropSupplyForOwner: ({ accountId, }: {
  * @param {number=} limit (OPTIONAL) How many drops to paginate through.
  * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
  *
- * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
+ * @example
+ * Get drop information for the last 5 drops owned by a given account:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
@@ -332,7 +341,16 @@ export declare const getDropSupplyForOwner: ({ accountId, }: {
  * console.log('dropsAndKeys: ', dropsAndKeys)
  * ```
 */
-export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropParams) => Promise<ProtocolReturnedDrop[]>;
+export declare const getDrops: ({ accountId, start, limit, withKeys, }: {
+    /** The funding account that the drops belong to. */
+    accountId: string;
+    /** Where to start paginating through drops. */
+    start: string | number;
+    /** How many drops to paginate through. */
+    limit: number;
+    /** Whether or not to include key information for the first 50 keys in each drop. */
+    withKeys: boolean;
+}) => Promise<ProtocolReturnedDrop[]>;
 /**
  * Return the total supply of token IDs for a given NFT drop,
  *
@@ -340,8 +358,9 @@ export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropP
  *
  * @returns {Promise<number>} The amount of token IDs on the drop
  *
- * @example <caption>Query for the supply of tokens on a specific drop</caption>
- *  * ```js
+ * @example
+ * Query for the supply of tokens on a specific drop:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -367,8 +386,9 @@ export declare const getNftSupplyForDrop: ({ dropId }: {
  *
  * @returns {Promise<Array<string>>} Vector of token IDs
  *
- * @example <caption>Query for a list of token IDs on a specific drop</caption>
- *  * ```js
+ * @example
+ * Query for a list of token IDs on a specific drop:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -394,8 +414,9 @@ export declare const getNftTokenIDsForDrop: ({ dropId, start, limit }: {
  *
  * @returns {string} The user's current balance
  *
- * @example <caption>Query for a user's current balance on the Keypom contract</caption>
- *  * ```js
+ * @example
+ * Query for a user's current balance on the Keypom contract:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -419,8 +440,9 @@ export declare const getUserBalance: ({ accountId }: {
  *
  * @returns {ContractSourceMetadata} The contract's source metadata
  *
- * @example <caption>Query for the current Keypom contract's source metadata</caption>
- *  * ```js
+ * @example
+ * Query for the current Keypom contract's source metadata:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",

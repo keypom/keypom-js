@@ -27,6 +27,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  *     amount: "1",
  * )};
  * ```
+ * @group User Balance Functions
 */
 export const addToBalance = async ({
 	account,
@@ -103,6 +104,7 @@ export const addToBalance = async ({
  * 
  * await withdrawBalance({});
  * ```
+ * @group User Balance Functions
 */
 export const withdrawBalance = async ({
 	account,

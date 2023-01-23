@@ -34,6 +34,8 @@ export {
 	execute,
 	initKeypom,
 	getEnv,
+	updateKeypomContractId,
+	updateFunder
 } from "./lib/keypom";
 export * from "./lib/views";
 export * from "./lib/types/drops";

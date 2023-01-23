@@ -64,6 +64,7 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * let currentUse = 1;
  * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
  * ```
+ * @group Utility
  */
 export const hashPassword = async (str: string, fromHex = false): Promise<string> => {
     let buf = await hashBuf(str, fromHex);
@@ -138,6 +139,7 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * console.log('Pub Keys ', keys.publicKeys);
  * console.log('Secret Keys ', keys.secretKeys);
  * ```
+ * @group Utility
  */
 export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
 	/** The number of keys to generate. */
@@ -209,6 +211,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group User Balance Functions
 */
 export const getUserBalance = async ({
     accountId
@@ -321,6 +324,7 @@ export const execute = async ({
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export const ftTransferCall = async ({
     account,
@@ -416,6 +420,7 @@ export const ftTransferCall = async ({
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export const nftTransferCall = async ({
     account,
@@ -578,6 +583,7 @@ const createAction = (action: Action): transactions.Action => {
 	}
 };
 
+/** @group Utility */
 export const getStorageBase = ({
     public_keys, 
     deposit_per_use, 
@@ -653,7 +659,7 @@ export const getStorageBase = ({
     return parseNearAmount(totalNEARAmount.toString());
 }
 
-// Initiate the connection to the NEAR blockchain.
+/** Initiate the connection to the NEAR blockchain. @group Utility */
 export const estimateRequiredDeposit = async ({
     near,
     depositPerUse,
@@ -813,6 +819,7 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  * 
  * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @group Utility
  */
 export async function generatePerUsePasswords({
     publicKeys,
