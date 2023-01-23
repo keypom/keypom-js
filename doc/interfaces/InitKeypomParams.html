@@ -15,12 +15,15 @@
 <li><a href="../modules.html">keypom-js</a></li>
 <li><a href="InitKeypomParams.html">InitKeypomParams</a></li></ul>
 <h1>Interface InitKeypomParams</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>Parameters that should be passed in when initializing the Keypom SDK through <code>initKeypom</code></p>
+</div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">InitKeypomParams</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L74">src/lib/types/params.ts:74</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L133">src/lib/types/params.ts:133</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -37,24 +40,35 @@
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="funder" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>funder</span><a href="#funder" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
-<div class="tsd-signature">funder<span class="tsd-signature-symbol">?:</span> <a href="Funder.html" class="tsd-signature-type" data-tsd-kind="Interface">Funder</a></div><aside class="tsd-sources">
+<div class="tsd-signature">funder<span class="tsd-signature-symbol">?:</span> <a href="Funder.html" class="tsd-signature-type" data-tsd-kind="Interface">Funder</a></div>
+<div class="tsd-comment tsd-typography"><p>The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.</p>
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L78">src/lib/types/params.ts:78</a></li></ul></aside></section>
+<li>If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.</li>
+</ul>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L142">src/lib/types/params.ts:142</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="keypomContractId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>keypom<wbr/>Contract<wbr/>Id</span><a href="#keypomContractId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">keypom<wbr/>Contract<wbr/>Id<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">keypom<wbr/>Contract<wbr/>Id<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Instead of using the most up-to-date, default Keypom contract, you can specify a specific account ID to use. If an older version is specified, some features of the SDK might not be usable.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L77">src/lib/types/params.ts:77</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L146">src/lib/types/params.ts:146</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="near" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>near</span><a href="#near" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">near<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Near</span></div><aside class="tsd-sources">
+<div class="tsd-signature">near<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Near</span></div>
+<div class="tsd-comment tsd-typography"><p>The NEAR connection instance to use. If not passed in, it will create a new one.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L75">src/lib/types/params.ts:75</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L135">src/lib/types/params.ts:135</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="network" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>network</span><a href="#network" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">network<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">network<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>The network to connect to either <code>mainnet</code> or <code>testnet</code>.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L76">src/lib/types/params.ts:76</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L137">src/lib/types/params.ts:137</a></li></ul></aside></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">

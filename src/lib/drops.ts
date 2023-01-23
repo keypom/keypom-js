@@ -442,12 +442,13 @@ export const deleteDrops = async ({
 		if (!dropIds) {throw new Error('Must pass in either drops or dropIds')};
 
 		// For each drop ID in drop IDs, get the drop information
+		// @ts-ignore - the Promise.all doesn't return type `ProtocolReturnedDrop[]`
 		drops = await Promise.all(dropIds.map(async (dropId) => {
 			getDropInformation({ dropId })
 		}));
 	}
 
-	const responses = await Promise.all(drops.map(async ({
+	const responses = await Promise.all(drops!.map(async ({
 		owner_id,
 		drop_id,
 		keys,
@@ -522,7 +523,7 @@ export const deleteDrops = async ({
 							methodName: 'delete_keys',
 							args: {
 								drop_id,
-								public_keys: keys.map(key2str),
+								public_keys: keys!.map(key2str),
 							},
 							gas: gas300,
 						}
@@ -530,7 +531,7 @@ export const deleteDrops = async ({
 				}]
 			})))
 
-			if (keySupply > keys.length) {
+			if (keySupply > (keys?.length || 0)) {
 				await updateKeys()
 				await deleteKeys()
 			}

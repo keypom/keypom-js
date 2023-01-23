@@ -15,12 +15,15 @@
 <li><a href="../modules.html">keypom-js</a></li>
 <li><a href="FTTransferCallParams.html">FTTransferCallParams</a></li></ul>
 <h1>Interface FTTransferCallParams</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>Parameters that should be passed in when calling <code>ftTransferCall</code> in order to transfer FTs to the Keypom contract for registering key uses.</p>
+</div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">FTTransferCallParams</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L94">src/lib/types/params.ts:94</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L167">src/lib/types/params.ts:167</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -40,39 +43,57 @@
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="absoluteAmount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>absolute<wbr/>Amount</span><a href="#absoluteAmount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></h3>
-<div class="tsd-signature">absolute<wbr/>Amount<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">absolute<wbr/>Amount<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Amount of tokens to transfer but considering the decimal amount (non human-readable).
+ Example: transferring one wNEAR should be passed in as &quot;1000000000000000000000000&quot; and NOT &quot;1&quot;</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L98">src/lib/types/params.ts:98</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L177">src/lib/types/params.ts:177</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="account" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>account</span><a href="#account" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Account</span></div><aside class="tsd-sources">
+<div class="tsd-signature">account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Account</span></div>
+<div class="tsd-comment tsd-typography"><p>Account object that if passed in, will be used to sign the txn instead of the funder account.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L95">src/lib/types/params.ts:95</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L169">src/lib/types/params.ts:169</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="amount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>amount</span><a href="#amount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">amount<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">amount<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Human readable format for the amount of tokens to transfer.</p>
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L99">src/lib/types/params.ts:99</a></li></ul></aside></section>
+<li>Example: transferring one wNEAR should be passed in as &quot;1&quot; and NOT &quot;1000000000000000000000000&quot;</li>
+</ul>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L182">src/lib/types/params.ts:182</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="contractId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>contract<wbr/>Id</span><a href="#contractId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">contract<wbr/>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">contract<wbr/>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>The fungible token contract ID.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L97">src/lib/types/params.ts:97</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L173">src/lib/types/params.ts:173</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="dropId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>drop<wbr/>Id</span><a href="#dropId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">drop<wbr/>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature">drop<wbr/>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>The drop ID to register the keys for.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L100">src/lib/types/params.ts:100</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L184">src/lib/types/params.ts:184</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="returnTransaction" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>return<wbr/>Transaction</span><a href="#returnTransaction" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">return<wbr/>Transaction<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature">return<wbr/>Transaction<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>If true, the transaction will be returned instead of being signed and sent.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L101">src/lib/types/params.ts:101</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L186">src/lib/types/params.ts:186</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="wallet" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>wallet</span><a href="#wallet" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<div class="tsd-signature">wallet<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AnyWallet</span></div><aside class="tsd-sources">
+<div class="tsd-signature">wallet<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AnyWallet</span></div>
+<div class="tsd-comment tsd-typography"><p>If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/8afa7af/src/lib/types/params.ts#L96">src/lib/types/params.ts:96</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/types/params.ts#L171">src/lib/types/params.ts:171</a></li></ul></aside></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">

@@ -19,7 +19,7 @@ export declare const execute: (args: any) => Promise<void | (void | nearAPI.prov
  * @param {string} network The network to connect to either `mainnet` or `testnet`.
  * @param {Funder=} funder (OPTIONAL) The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
  * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
- * @param {string} keypomContractId The account ID of the Keypom contract. If not passed in, it will use the most up-to-date account ID for whichever network is selected.
+ * @param {string=} keypomContractId (OPTIONAL) Instead of using the most up-to-date, default Keypom contract, you can specify a specific account ID to use. If an older version is specified, some features of the SDK might not be usable.
  *
  * @returns {Promise<Account | null>} If a funder is passed in, its account object is returned. Otherwise, it null is returned.
  *

@@ -167,13 +167,15 @@ export const addKeys = async ({
 		registered_uses,
 		required_gas,
 		deposit_per_use,
-		config: { uses_per_key },
-		ft: ftData = {},
-		nft: nftData = {},
+		config,
+		ft: ftData,
+		nft: nftData,
 		fc: fcData,
 		next_key_id,
 	} = drop || await getDropInformation({ dropId: dropId! });
 	dropId = drop_id
+
+	const uses_per_key = config?.uses_per_key || 1;
 
 	assert(owner_id === account!.accountId, 'You are not the owner of this drop. You cannot add keys to it.')
 
@@ -223,7 +225,7 @@ export const addKeys = async ({
 		depositPerUse: deposit_per_use,
 		numKeys,
 		usesPerKey: uses_per_key,
-		attachedGas: required_gas,
+		attachedGas: parseInt(required_gas),
 		storage: parseNearAmount('0.2') as string,
 		fcData: camelFCData,
 		ftData: camelFTData
@@ -256,7 +258,7 @@ export const addKeys = async ({
 		}]
 	})
 
-	if (ftData.contract_id) {
+	if (ftData?.contract_id) {
 		transactions.push(await ftTransferCall({
 			account: account!,
 			contractId: ftData.contract_id,

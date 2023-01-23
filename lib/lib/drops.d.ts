@@ -1,3 +1,4 @@
+import * as nearAPI from "near-api-js";
 import { CreateDropParams, CreateOrAddReturn, DeleteDropParams } from './types/params';
 export declare const KEY_LIMIT = 50;
 /**
@@ -179,4 +180,4 @@ export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys
  * });
  * console.log('numDrops: ', numDrops)
 */
-export declare const deleteDrops: ({ account, wallet, drops, dropIds, withdrawBalance, }: DeleteDropParams) => Promise<any[]>;
+export declare const deleteDrops: ({ account, wallet, drops, dropIds, withdrawBalance, }: DeleteDropParams) => Promise<(void | nearAPI.providers.FinalExecutionOutcome[])[][]>;

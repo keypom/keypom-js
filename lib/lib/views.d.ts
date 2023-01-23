@@ -1,6 +1,7 @@
 import { KeyInfo } from "./types/drops";
 import { ContractSourceMetadata } from "./types/general";
 import { GetDropParams } from "./types/params";
+import { ProtocolReturnedDrop } from "./types/protocol";
 /**
  * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
  *
@@ -192,7 +193,7 @@ export declare const getKeyInformationBatch: ({ publicKeys }: {
 export declare const getDropInformation: ({ dropId, withKeys }: {
     dropId: string;
     withKeys?: boolean | undefined;
-}) => Promise<any>;
+}) => Promise<ProtocolReturnedDrop>;
 /**
  * Returns the total supply of active keys for a given drop
  *
@@ -331,7 +332,7 @@ export declare const getDropSupplyForOwner: ({ accountId, }: {
  * console.log('dropsAndKeys: ', dropsAndKeys)
  * ```
 */
-export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropParams) => Promise<any>;
+export declare const getDrops: ({ accountId, start, limit, withKeys, }: GetDropParams) => Promise<ProtocolReturnedDrop[]>;
 /**
  * Return the total supply of token IDs for a given NFT drop,
  *

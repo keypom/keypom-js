@@ -43,3 +43,4 @@ export * from "./lib/types/general";
 export * from "./lib/types/nft";
 export * from "./lib/types/params";
 export * from "./lib/types/simple";
+export * from "./lib/types/protocol";

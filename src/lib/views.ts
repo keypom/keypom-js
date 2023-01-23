@@ -5,6 +5,7 @@ import { keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
 import { GetDropParams } from "./types/params"
+import { ProtocolReturnedDrop } from "./types/protocol"
 
 /**
  * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
@@ -233,7 +234,7 @@ export const getKeyInformationBatch = async ({
  * console.log('dropInfo: ', dropInfo)
  * ```
 */
-export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}) => {
+export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
 		viewAccount, contractId,
 	} = getEnv()
@@ -431,7 +432,7 @@ export const getDrops = async ({
 	start,
 	limit,
 	withKeys = false,
-}: GetDropParams) => {
+}: GetDropParams): Promise<ProtocolReturnedDrop[]> => {
 
 	const drops = await keypomView({
 		methodName: 'get_drops_for_owner',
