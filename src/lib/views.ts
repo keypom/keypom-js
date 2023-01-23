@@ -1,11 +1,13 @@
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
 import { keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
-import { GetDropParams } from "./types/params"
 import { ProtocolReturnedDrop } from "./types/protocol"
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
  * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
@@ -81,8 +83,8 @@ export const getKeyTotalSupply = async (): Promise<number> => {
 /**
  * Paginate through all active keys on the contract and return a vector of key info.
  * 
- * @param {string= | number=} start (OPTIONAL) Where to start paginating through keys.
- * @param {number=} limit (OPTIONAL) How many keys to paginate through.
+ * @param {string= | number=} __namedParameters.start (OPTIONAL) Where to start paginating through keys.
+ * @param {number=} __namedParameters.limit (OPTIONAL) How many keys to paginate through.
  * 
  * @returns {Promise<Array<KeyInfo>>} Vector of KeyInfo.
  * 
@@ -442,7 +444,16 @@ export const getDrops = async ({
 	start,
 	limit,
 	withKeys = false,
-}: GetDropParams): Promise<ProtocolReturnedDrop[]> => {
+}: {
+	/** The funding account that the drops belong to. */
+	accountId: string,
+	/** Where to start paginating through drops. */
+	start: string | number,
+	/** How many drops to paginate through. */
+	limit: number,
+	/** Whether or not to include key information for the first 50 keys in each drop. */
+	withKeys: boolean,
+}): Promise<ProtocolReturnedDrop[]> => {
 
 	const drops = await keypomView({
 		methodName: 'get_drops_for_owner',

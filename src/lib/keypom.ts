@@ -5,15 +5,17 @@ const {
 } = nearAPI;
 
 import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
+import { Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
+import { assert, isValidFunderObject, isValidNearObject } from "./checks";
 import {
 	execute as _execute
 } from "./keypom-utils";
 import { EnvVars, Funder } from "./types/general";
-import { InitKeypomParams } from "./types/params";
-import { assert, isValidFunderObject, isValidNearObject } from "./checks";
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 const gas = '200000000000000'
 const gas300 = '300000000000000'
@@ -90,13 +92,7 @@ const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalle
  * 
  * To update the funder account, refer to the `updateFunder` function. If you only wish to use view methods and not sign transactions, no funder account is needed.
  * If you wish to update the Keypom Contract ID being used, refer to the `updateKeypomContractId` function.
- * 
- * @param {Near} near (OPTIONAL) The NEAR connection instance to use. If not passed in, it will create a new one.
- * @param {string} network The network to connect to either `mainnet` or `testnet`.
- * @param {Funder=} funder (OPTIONAL) The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
- * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
- * @param {string=} keypomContractId (OPTIONAL) Instead of using the most up-to-date, default Keypom contract, you can specify a specific account ID to use. If an older version is specified, some features of the SDK might not be usable.
- * 
+ *
  * @returns {Promise<Account | null>} If a funder is passed in, its account object is returned. Otherwise, it null is returned.
  * 
  * @example 
@@ -160,7 +156,21 @@ export const initKeypom = async ({
 	network,
 	funder,
 	keypomContractId,
-}: InitKeypomParams) => {
+}: {
+	/** The NEAR connection instance to use. If not passed in, it will create a new one. */
+	near?: Near;
+	/** The network to connect to either `mainnet` or `testnet`. */
+	network: string;
+	/**
+	 * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
+     * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
+	 */
+	funder?: Funder;
+	/**
+	 * Instead of using the most up-to-date, default Keypom contract, you can specify a specific account ID to use. If an older version is specified, some features of the SDK might not be usable.
+	 */
+	keypomContractId?: string;
+}) => {
 	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
 	
 	if (_near) {

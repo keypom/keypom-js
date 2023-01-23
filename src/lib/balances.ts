@@ -1,18 +1,15 @@
 import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
-import { AddToBalanceParams, WithdrawBalanceParams } from "./types/params";
+
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import { Account } from "near-api-js";
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
  * Deposit some amount of $NEAR or yoctoNEAR$ into the Keypom contract. This amount can then be used to create drops or add keys without
  * Having to explicitly attach a deposit everytime. It can be thought of like a bank account.
- * 
- * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
- * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * @param {string} absoluteAmount Amount of tokens to add but considering the decimal amount (non human-readable).
-   Example: depositing 1 $NEAR should be passed in as "1000000000000000000000000" and NOT "1"
- * @param {string} amount Human readable format for the amount of tokens to deposit.
-   Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
  * 
  * @example
  * Add 1 $NEAR to the account balance
@@ -36,7 +33,24 @@ export const addToBalance = async ({
 	wallet,
 	amount,
     absoluteAmount
-}: AddToBalanceParams) => {
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/** 
+	 * Amount of tokens to add but considering the decimal amount (non human-readable).
+	 * @example
+	 * Transferring one $NEAR should be passed in as "1000000000000000000000000" and NOT "1" 
+	*/
+	absoluteAmount?: string
+	/**
+	 * Human readable format for the amount of tokens to add.
+	 * @example
+	 * Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
+	 */
+	amount?: string,
+}) => {
 	const {
 		receiverId, execute, getAccount
 	} = getEnv()
@@ -71,9 +85,6 @@ export const addToBalance = async ({
 /**
  * Withdraw all the $NEAR from your balance in the Keypom contract. 
  * 
- * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
- * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * 
  * @example 
  * Add 1 $NEAR to the account balance and then withdraw it
  * ```js
@@ -96,7 +107,12 @@ export const addToBalance = async ({
 export const withdrawBalance = async ({
 	account,
 	wallet
-}: WithdrawBalanceParams) => {
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+}) => {
 	const {
 		receiverId, execute, getAccount
 	} = getEnv()
