@@ -7,36 +7,31 @@ const {
 } = nearAPI;
 
 import { Transaction } from "@near-wallet-selector/core";
-import { getDropInformation, getUserBalance } from "./views";
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import { Account } from "near-api-js";
+import { assert, isValidAccountObj } from './checks';
 import { getEnv } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
 	generatePerUsePasswords,
 	key2str, nftTransferCall, toCamel
 } from "./keypom-utils";
-import { AddKeyParams, CreateOrAddReturn, DeleteKeyParams } from './types/params';
-import { assert, isValidAccountObj } from './checks';
+import { ProtocolReturnedDrop } from './types/protocol';
+import { CreateOrAddReturn } from './types/params';
+import { getDropInformation, getUserBalance } from "./views";
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
- * Add keys to a specific drop
- * 
- * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
- * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * @param {string=} dropId (OPTIONAL) Specify the drop ID for which you want to add keys to.
- * @param {any} drop (OPTIONAL) If the drop information from getDropInformation is already known to the client, it can be passed in instead of the drop ID to reduce computation.
- * @param {number} numKeys Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed into the function, the keys will be
- * deterministically generated using the drop ID, key nonces, and entropy. Otherwise, each key will be generated randomly.
- * @param {string[]=} publicKeys (OPTIONAL) Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter.
- * @param {string[]=} nftTokenIds (OPTIONAL) If the drop type is an NFT drop, the token IDs can be passed in so that the tokens are automatically sent to the Keypom contract rather
- * than having to do two separate transactions.
- * @param {string=} basePassword (OPTIONAL) For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in.
- * @param {number[]=} passwordProtectedUses (OPTIONAL) For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use.
- * @param {boolean=} useBalance (OPTIONAL) If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw.
- * @param {boolean=} returnTransactions (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
+ * Add keys that are manually generated and passed in, or automatically generated to an existing drop. If they're
+ * automatically generated, they can be based off a set of entropy. For NFT and FT drops, assets can automatically be sent to Keypom to register keys as part of the payload.
+ * The deposit is estimated based on parameters that are passed in and the transaction can be returned instead of signed and sent to the network. This can allow you to get the 
+ * required deposit from the return value and use that to fund the account's Keypom balance to avoid multiple transactions being signed in the case of a drop with many keys.
  * 
  * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  * 
- * @example <caption>Create a basic empty simple drop and add 10 keys. Each key is completely random.:</caption>
+ * @example
+ * Create a basic empty simple drop and add 10 keys. Each key is completely random:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
@@ -62,7 +57,10 @@ import { assert, isValidAccountObj } from './checks';
  * console.log('public keys: ', keys.publicKeys);
  * console.log('private keys: ', keys.secretKeys);
  * ``` 
- * @example <caption>Init funder with root entropy, create empty drop and add generate deterministic keys. Compare with manually generated keys</caption>
+ * 
+ * @example
+ * Init funder with root entropy, create empty drop and add generate deterministic keys. Compare with manually generated keys:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. Root entropy is passed into the funder account so any generated keys
  * // Will be based off that entropy.
  * await initKeypom({
@@ -104,8 +102,11 @@ import { assert, isValidAccountObj } from './checks';
  * // These should match!
  * console.log('publicKeys: ', publicKeys)
  * console.log('pubKeysGenerated: ', pubKeysGenerated)
+ * ```
  * 
- * @example <caption>Create an empty drop and add manually created keys</caption>
+ * @example
+ * Create an empty drop and add manually created keys:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
  * await initKeypom({
@@ -132,6 +133,8 @@ import { assert, isValidAccountObj } from './checks';
  * 	publicKeys,
  * 	dropId
  * })
+ * ```
+ * @group Creating, And Claiming Drops
 */
 export const addKeys = async ({
 	account,
@@ -146,7 +149,39 @@ export const addKeys = async ({
 	passwordProtectedUses,
 	useBalance = false,
 	returnTransactions = false
-}: AddKeyParams): Promise<CreateOrAddReturn> => {
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/**
+	 * Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed in, the keys will be
+     * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly. 
+	*/
+	numKeys: number,
+	/** Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter. */
+	publicKeys?: string[],
+	/**  Specify the drop ID for which you want to add keys to. */
+	dropId?: string,
+	/** If the drop information from getDropInformation is already known to the client, it can be passed in instead of the drop ID to reduce computation. */
+	drop?: ProtocolReturnedDrop,
+	/** 
+	 * If the drop type is an NFT drop, the token IDs can be passed in so that the tokens are automatically sent to the Keypom contract rather
+     * than having to do two separate transactions. A maximum of 2 token IDs can be sent during the `addKeys` function. To send more token IDs in
+	 * order to register key uses, use the `nftTransferCall` function.
+	 */
+	nftTokenIds?: string[],
+	/** Specify an entropy to use for generating keys (will overload the funder's rootEntropy if applicable). This parameter only matters if the publicKeys variable is not passed in. */
+	rootEntropy?: string,
+	/** For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in. */
+    basePassword?: string,
+	/** For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use. */
+    passwordProtectedUses?: number[],
+	/** If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw. */
+	useBalance?: boolean,
+	/** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
+	returnTransactions?: boolean,
+}): Promise<CreateOrAddReturn> => {
 	const {
 		near, gas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
@@ -166,13 +201,15 @@ export const addKeys = async ({
 		registered_uses,
 		required_gas,
 		deposit_per_use,
-		config: { uses_per_key },
-		ft: ftData = {},
-		nft: nftData = {},
+		config,
+		ft: ftData,
+		nft: nftData,
 		fc: fcData,
 		next_key_id,
 	} = drop || await getDropInformation({ dropId: dropId! });
 	dropId = drop_id
+
+	const uses_per_key = config?.uses_per_key || 1;
 
 	assert(owner_id === account!.accountId, 'You are not the owner of this drop. You cannot add keys to it.')
 
@@ -222,7 +259,7 @@ export const addKeys = async ({
 		depositPerUse: deposit_per_use,
 		numKeys,
 		usesPerKey: uses_per_key,
-		attachedGas: required_gas,
+		attachedGas: parseInt(required_gas),
 		storage: parseNearAmount('0.2') as string,
 		fcData: camelFCData,
 		ftData: camelFTData
@@ -255,7 +292,7 @@ export const addKeys = async ({
 		}]
 	})
 
-	if (ftData.contract_id) {
+	if (ftData?.contract_id) {
 		transactions.push(await ftTransferCall({
 			account: account!,
 			contractId: ftData.contract_id,
@@ -292,13 +329,8 @@ export const addKeys = async ({
 /**
  * Delete a set of keys from a drop and optionally withdraw any remaining balance you have on the Keypom contract.
  * 
- * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
- * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * @param {string[] | string} publicKeys Specify a set of public keys to delete. If deleting a single publicKey, the string can be passed in without wrapping it in an array.
- * @param {string} dropId Which drop ID do the keys belong to?
- * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
- * 
- * @example <caption>Create a drop with 5 keys and delete the first one</caption>
+ * @example 
+ * Create a drop with 5 keys and delete the first one:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -319,7 +351,8 @@ export const addKeys = async ({
  * 	dropId,
  * 	publicKeys: keys.publicKeys[0] // Can be wrapped in an array as well
  * })
-```
+ * ```
+ * @group Deleting State
 */
 export const deleteKeys = async ({
 	account,
@@ -327,7 +360,18 @@ export const deleteKeys = async ({
 	publicKeys,
 	dropId,
 	withdrawBalance = false,
-}: DeleteKeyParams) => {
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/** Specify a set of public keys to delete. If deleting a single publicKey, the string can be passed in without wrapping it in an array. */
+	publicKeys: string[] | string,
+	/** Which drop ID do the keys belong to? */
+	dropId: string,
+	/**Whether or not to withdraw any remaining balance on the Keypom contract. */
+	withdrawBalance?: boolean
+}) => {
 
 	const {
 		receiverId, execute, getAccount

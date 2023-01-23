@@ -1,7 +1,26 @@
 import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account, Near } from "near-api-js";
+import { Account } from "near-api-js";
 import { Maybe } from '../keypom';
+<<<<<<< HEAD
+import { PasswordPerUse } from './drops';
+import { GeneratedKeyPairs } from './general';
+type AnyWallet = BrowserWalletBehaviour | Wallet;
+/**
+ * Information returned when creating a drop or adding keys via `createDrop` and `addKeys` respectively.
+ */
+export interface CreateOrAddReturn {
+    /** The responses to any transactions that were signed and sent to the network. */
+    responses?: any;
+    /** Information about the transactions if `returnTransactions` is specified in the arguments. This will result in the information being returned instead of signed and sent.  */
+    transactions?: Transaction[];
+    /** The required deposit that should be attached to the transaction. */
+    requiredDeposit?: string;
+    /** Any keys that were automatically generated. */
+    keys?: Maybe<GeneratedKeyPairs>;
+    /** The drop ID for the drop that is being interacted with. */
+    dropId: string;
+=======
 import { DropConfig, PasswordPerUse } from './drops';
 import { FCData } from './fc';
 import { FTData } from './ft';
@@ -43,7 +62,11 @@ export interface AddKeyParams {
     passwordProtectedUses?: number[];
     useBalance?: boolean;
     returnTransactions?: boolean;
+>>>>>>> main
 }
+/**
+ * @ignore
+ */
 export interface RegisterUsesParams {
     account?: Account;
     wallet?: AnyWallet;
@@ -51,6 +74,9 @@ export interface RegisterUsesParams {
     numUses: number;
     useBalance?: boolean;
 }
+<<<<<<< HEAD
+/** @internal */
+=======
 export interface DeleteDropParams {
     account?: Account;
     wallet?: AnyWallet;
@@ -128,6 +154,7 @@ export interface CreateOrAddReturn {
     keys?: Maybe<GeneratedKeyPairs>;
     dropId: string;
 }
+>>>>>>> main
 export interface CreateDropProtocolArgs {
     public_keys?: string[];
     deposit_per_use: string;
@@ -177,9 +204,13 @@ export interface CreateDropProtocolArgs {
     };
     passwords_per_use?: Array<Maybe<Array<PasswordPerUse>>>;
 }
+<<<<<<< HEAD
+export {};
+=======
 export interface GetDropParams {
     accountId: string;
     start?: string | number;
     limit?: number;
     withKeys?: boolean;
 }
+>>>>>>> main

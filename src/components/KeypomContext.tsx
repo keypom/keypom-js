@@ -5,6 +5,7 @@ import { EnvVars } from "../lib/types/general"
 
 const KeypomContext = React.createContext<EnvVars | null>(null)
 
+/** @group Keypom SDK Environment */
 export const KeypomContextProvider: React.FC<{
 	children: ReactNode;
 }> = ({ children }) => {
@@ -37,6 +38,7 @@ export const KeypomContextProvider: React.FC<{
 	);
 };
 
+/** @group Keypom SDK Environment */
 export function useKeypom() {
 	let context = useContext(KeypomContext);
 

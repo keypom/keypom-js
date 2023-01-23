@@ -1,53 +1,31 @@
 import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account, Near } from "near-api-js";
+import { Account } from "near-api-js";
 import { Maybe } from '../keypom';
-import { DropConfig, PasswordPerUse } from './drops';
-import { FCData } from './fc';
-import { FTData } from './ft';
-import { Funder, GeneratedKeyPairs } from './general';
-import { NFTData } from './nft';
-import { SimpleData } from './simple';
+import { PasswordPerUse } from './drops';
+import { GeneratedKeyPairs } from './general';
 
 export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 
-export interface CreateDropParams {
-	account?: Account,
-	wallet?: AnyWallet,
-	numKeys: number,
-	publicKeys?: string[],
-	depositPerUseNEAR?: Number,
-	depositPerUseYocto?: string,
-	dropId?: string,
-	config?: DropConfig,
-	metadata?: string,
-	simpleData?: SimpleData
-	ftData?: FTData,
-	nftData?: NFTData,
-	fcData?: FCData,
-	rootEntropy?: string,
-    basePassword?: string,
-    passwordProtectedUses?: number[],
-	useBalance?: boolean,
-	returnTransactions?: boolean,
-	successUrl?: string,
+/**
+ * Information returned when creating a drop or adding keys via `createDrop` and `addKeys` respectively.
+ */
+export interface CreateOrAddReturn {
+	/** The responses to any transactions that were signed and sent to the network. */
+	responses?: any,
+	/** Information about the transactions if `returnTransactions` is specified in the arguments. This will result in the information being returned instead of signed and sent.  */
+	transactions?: Transaction[],
+	/** The required deposit that should be attached to the transaction. */
+	requiredDeposit?: string,
+	/** Any keys that were automatically generated. */
+	keys?: Maybe<GeneratedKeyPairs>,
+	/** The drop ID for the drop that is being interacted with. */
+	dropId: string
 }
 
-export interface AddKeyParams {
-	account?: Account,
-	wallet?: AnyWallet,
-	numKeys: number,
-	publicKeys?: string[],
-	dropId?: string,
-	drop?: any,
-	nftTokenIds?: string[],
-	rootEntropy?: string,
-    basePassword?: string,
-    passwordProtectedUses?: number[],
-	useBalance?: boolean,
-	returnTransactions?: boolean,
-}
-
+/**
+ * @ignore
+ */
 export interface RegisterUsesParams {
 	account?: Account,
 	wallet?: AnyWallet,
@@ -56,94 +34,7 @@ export interface RegisterUsesParams {
 	useBalance?: boolean,
 }
 
-export interface DeleteDropParams {
-	account?: Account,
-	wallet?: AnyWallet,
-	drops?: any,
-	dropIds?: string[],
-	withdrawBalance?: boolean
-}
-
-export interface DeleteKeyParams {
-	account?: Account,
-	wallet?: AnyWallet,
-	publicKeys: string[] | string,
-	dropId: string,
-	withdrawBalance?: boolean
-}
-
-export interface InitKeypomParams {
-	near?: Near;
-	network: string;
-	keypomContractId?: string;
-	funder?: Funder;
-}
-
-export interface ExecuteParams {
-	transactions: Transaction[],
-	account: Account,
-	wallet?: AnyWallet,
-    fundingAccount?: Account,
-	successUrl?: string,
-}
-
-export interface GenerateKeysParams {
-	numKeys: number;
-	rootEntropy?: string;
-	metaEntropy?: string[] | string;
-}
-
-export interface FTTransferCallParams {
-    account?: Account,
-	wallet?: AnyWallet,
-    contractId: string,
-	absoluteAmount?: string
-    amount?: string,
-	dropId: string,
-    returnTransaction?: boolean,
-}
-
-export interface NFTTransferCallParams {
-	account?: Account,
-	wallet?: AnyWallet,
-    contractId: string,
-    tokenIds: string[],
-    dropId: string,
-	returnTransactions?: boolean,
-}
-
-export interface EstimatorParams {
-    near: Near,
-    depositPerUse: string,
-    numKeys: number,
-    usesPerKey: number,
-    attachedGas: number,
-    storage?: string | null,
-    keyStorage?: string | null,
-    fcData?: FCData,
-    ftData?: FTData,
-}
-
-export interface AddToBalanceParams {
-	account?: Account,
-	wallet?: AnyWallet,
-	absoluteAmount?: string
-    amount?: string,
-}
-
-export interface WithdrawBalanceParams {
-	account?: Account,
-	wallet?: AnyWallet
-}
-
-export interface CreateOrAddReturn {
-	responses?: any,
-	transactions?: Transaction[],
-	requiredDeposit?: string,
-	keys?: Maybe<GeneratedKeyPairs>,
-	dropId: string
-}
-
+/** @internal */
 export interface CreateDropProtocolArgs {
 	public_keys?: string[],
 	deposit_per_use: string,
@@ -195,11 +86,4 @@ export interface CreateDropProtocolArgs {
 	},
 
 	passwords_per_use?: Array<Maybe<Array<PasswordPerUse>>>,
-}
-
-export interface GetDropParams {
-	accountId: string,
-	start?: string | number,
-	limit?: number,
-	withKeys?: boolean,
 }

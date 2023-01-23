@@ -1,10 +1,13 @@
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
 import { keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
-import { GetDropParams } from "./types/params"
+import { ProtocolReturnedDrop } from "./types/protocol"
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
  * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
@@ -13,7 +16,8 @@ import { GetDropParams } from "./types/params"
  * 
  * @returns {Promise<string>} The amount of yoctoNEAR that is contained within the key
  * 
- * @example <caption>Create a 1 $NEAR linkdrop and query for its balance</caption>
+ * @example
+ * Create a 1 $NEAR linkdrop and query for its balance:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -37,6 +41,7 @@ import { GetDropParams } from "./types/params"
  * 
  * console.log('keyBalance: ', keyBalance)
  * ```
+ * @group View Functions
 */
 export const getKeyBalance = async ({
 	publicKey,
@@ -54,7 +59,8 @@ export const getKeyBalance = async ({
  * 
  * @returns {Promise<number>} The amount of keys.
  * 
- * @example <caption>Query for the key supply on the `v1.keypom.testnet` contract</caption>
+ * @example
+ * Query for the key supply on the `v1.keypom.testnet` contract:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls
  * await initKeypom({
@@ -67,6 +73,7 @@ export const getKeyBalance = async ({
  * 
  * console.log('numKeys: ', numKeys)
  * ```
+ * @group View Functions
 */
 export const getKeyTotalSupply = async (): Promise<number> => {
 	return keypomView({
@@ -78,12 +85,13 @@ export const getKeyTotalSupply = async (): Promise<number> => {
 /**
  * Paginate through all active keys on the contract and return a vector of key info.
  * 
- * @param {string= | number=} start (OPTIONAL) Where to start paginating through keys.
- * @param {number=} limit (OPTIONAL) How many keys to paginate through.
+ * @param {string= | number=} __namedParameters.start (OPTIONAL) Where to start paginating through keys.
+ * @param {number=} __namedParameters.limit (OPTIONAL) How many keys to paginate through.
  * 
  * @returns {Promise<Array<KeyInfo>>} Vector of KeyInfo.
  * 
- * @example <caption>Query for first 50 keys on the `v1.keypom.testnet` contract</caption>
+ * @example 
+ * Query for first 50 keys on the `v1.keypom.testnet` contract:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls
  * await initKeypom({
@@ -99,6 +107,7 @@ export const getKeyTotalSupply = async (): Promise<number> => {
  * 
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export const getKeys = async ({
     start,
@@ -120,7 +129,8 @@ export const getKeys = async ({
  * 
  * @returns {Promise<KeyInfo>} Key information struct for that specific key.
  * 
- * @example <caption>Create a drop and query for the key information</caption>
+ * @example 
+ * Create a drop and query for the key information:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -144,6 +154,7 @@ export const getKeys = async ({
  * 
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export const getKeyInformation = async ({
     publicKey
@@ -163,7 +174,8 @@ export const getKeyInformation = async ({
  * 
  * @returns {Promise<Array<KeyInfo>>} Array of Key information structs for the keys passed in
  * 
- * @example <caption>Create a drop and query for the key information for all keys created</caption>
+ * @example 
+ * Create a drop and query for the key information for all keys created:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -187,6 +199,7 @@ export const getKeyInformation = async ({
  * 
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export const getKeyInformationBatch = async ({
     publicKeys
@@ -207,7 +220,8 @@ export const getKeyInformationBatch = async ({
  * 
  * @returns {Drop} Drop information which may or may not have a keys field of type `KeyInfo` depending on if withKeys is specified as true.
  * 
- * @example <caption>Create a simple drop and retrieve information about it:</caption>
+ * @example 
+ * Create a simple drop and retrieve information about it::
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -232,8 +246,9 @@ export const getKeyInformationBatch = async ({
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
-export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}) => {
+export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
 		viewAccount, contractId,
 	} = getEnv()
@@ -269,7 +284,8 @@ export const getDropInformation = async ({ dropId, withKeys = false } : {dropId:
  * 
  * @returns {Promise<number>} Number of active keys
  * 
- * @example <caption>Create a drop with 5 keys and query for the key supply</caption>
+ * @example 
+ * Create a drop with 5 keys and query for the key supply:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -293,6 +309,7 @@ export const getDropInformation = async ({ dropId, withKeys = false } : {dropId:
  * 
  * console.log('keySupply: ', keySupply)
  * ```
+ * @group View Functions
 */
 export const getKeySupplyForDrop = async ({
     dropId
@@ -314,7 +331,8 @@ export const getKeySupplyForDrop = async ({
  * 
  * @returns {Promise<Array<KeyInfo>>} Vector of KeyInfo objects returned from pagination
  * 
- * @example <caption>Create a drop with 5 keys and return all the key info objects</caption>
+ * @example 
+ * Create a drop with 5 keys and return all the key info objects:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -338,6 +356,7 @@ export const getKeySupplyForDrop = async ({
  * 
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export const getKeysForDrop = async ({
     dropId,
@@ -361,7 +380,8 @@ export const getKeysForDrop = async ({
  * 
  * @returns {Promise<number>} Amount of drops
  * 
- * @example <caption>Create a drop and check how many the owner has</caption>
+ * @example 
+ * Create a drop and check how many the owner has:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -384,6 +404,7 @@ export const getKeysForDrop = async ({
  * 
  * console.log('dropSupply: ', dropSupply)
  * ```
+ * @group View Functions
 */
 export const getDropSupplyForOwner = async ({
     accountId,
@@ -404,7 +425,8 @@ export const getDropSupplyForOwner = async ({
  * @param {number=} limit (OPTIONAL) How many drops to paginate through.
  * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
  * 
- * @example <caption>Get drop information for the last 5 drops owned by a given account</caption>
+ * @example 
+ * Get drop information for the last 5 drops owned by a given account:
  * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
@@ -425,13 +447,23 @@ export const getDropSupplyForOwner = async ({
  * 
  * console.log('dropsAndKeys: ', dropsAndKeys)
  * ```
+ * @group View Functions
 */
 export const getDrops = async ({
 	accountId,
 	start,
 	limit,
 	withKeys = false,
-}: GetDropParams) => {
+}: {
+	/** The funding account that the drops belong to. */
+	accountId: string,
+	/** Where to start paginating through drops. */
+	start: string | number,
+	/** How many drops to paginate through. */
+	limit: number,
+	/** Whether or not to include key information for the first 50 keys in each drop. */
+	withKeys: boolean,
+}): Promise<ProtocolReturnedDrop[]> => {
 
 	const drops = await keypomView({
 		methodName: 'get_drops_for_owner',
@@ -468,8 +500,9 @@ export const getDrops = async ({
  * 
  * @returns {Promise<number>} The amount of token IDs on the drop
  * 
- * @example <caption>Query for the supply of tokens on a specific drop</caption>
- *  * ```js
+ * @example 
+ * Query for the supply of tokens on a specific drop:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -482,6 +515,7 @@ export const getDrops = async ({
  * 
  * console.log('tokenSupply: ', tokenSupply)
  * ```
+ * @group View Functions
 */
 export const getNftSupplyForDrop = async ({
     dropId
@@ -503,8 +537,9 @@ export const getNftSupplyForDrop = async ({
  * 
  * @returns {Promise<Array<string>>} Vector of token IDs
  * 
- * @example <caption>Query for a list of token IDs on a specific drop</caption>
- *  * ```js
+ * @example 
+ * Query for a list of token IDs on a specific drop:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -517,6 +552,7 @@ export const getNftSupplyForDrop = async ({
  * 
  * console.log('tokenList: ', tokenList)
  * ```
+ * @group View Functions
 */
 export const getNftTokenIDsForDrop = async ({
     dropId,
@@ -540,8 +576,9 @@ export const getNftTokenIDsForDrop = async ({
  * 
  * @returns {string} The user's current balance
  * 
- * @example <caption>Query for a user's current balance on the Keypom contract</caption>
- *  * ```js
+ * @example 
+ * Query for a user's current balance on the Keypom contract:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -555,6 +592,7 @@ export const getNftTokenIDsForDrop = async ({
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
 export const getUserBalance = async ({
     accountId
@@ -573,8 +611,9 @@ export const getUserBalance = async ({
  * 
  * @returns {ContractSourceMetadata} The contract's source metadata
  * 
- * @example <caption>Query for the current Keypom contract's source metadata</caption>
- *  * ```js
+ * @example 
+ * Query for the current Keypom contract's source metadata:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -585,6 +624,7 @@ export const getUserBalance = async ({
  * 
  * console.log('metadata: ', metadata)
  * ```
+ * @group View Functions
 */
 export const getContractSourceMetadata = async (): Promise<ContractSourceMetadata> => {
     return keypomView({

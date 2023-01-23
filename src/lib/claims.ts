@@ -9,12 +9,8 @@ import { getEnv } from "./keypom";
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
  * 
- * @param {string} secretKey The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not.
- * @param {string=} accountId (OPTIONAL) The account ID of an existing account that will be used to claim the drop.
- * @param {string=} newAccountId (OPTIONAL) If passed in, a new account ID will be created and the drop will be claimed to that account. This must be an account that does not exist yet.
- * @param {string=} newPublicKey (OPTIONAL) If creating a new account, a public key must be passed in to be used as the full access key for the newly created account.
- * 
- * @example <caption>Creating a simple $NEAR drop and claiming to an existing account</caption>
+ * @example
+ * Creating a simple $NEAR drop and claiming to an existing account:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -42,7 +38,9 @@ import { getEnv } from "./keypom";
  * 	accountId: "benjiman.testnet"
  * })
  * ```
- * @example <caption>Creating a simple $NEAR drop and using it to create a brand new NEAR account</caption>
+ * 
+ * @example
+ * Creating a simple $NEAR drop and using it to create a brand new NEAR account:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -72,8 +70,10 @@ import { getEnv } from "./keypom";
  * 	newPublicKey: publicKeys[1]
  * })
  * ```
- * @example <caption>Creating a drop and adding a password to it. Generate the password using the hash function and pass it into claim the drop</caption>
- *  * ```js
+ * 
+ * @example
+ * Creating a drop and adding a password to it. Generate the password using the hash function and pass it into claim the drop:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
  * 	network: "testnet",
@@ -103,6 +103,7 @@ import { getEnv } from "./keypom";
  * 	password: passwordForClaim
  * })
  * ```
+ * @group Creating, And Claiming Drops
 */
 export const claim = async ({
 	secretKey,
@@ -110,6 +111,17 @@ export const claim = async ({
 	newAccountId,
 	newPublicKey, 
 	password,
+}: {
+	/** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */
+	secretKey: string,
+	/** The account ID of an existing account that will be used to claim the drop. */
+	accountId?: string, 
+	/** If passed in, a new account ID will be created and the drop will be claimed to that account. This must be an account that does not exist yet. */
+	newAccountId?: string, 
+	/** If creating a new account, a public key must be passed in to be used as the full access key for the newly created account. */
+	newPublicKey?: string, 
+	/** If a password is required to use the key, it can be passed in */
+	password?: string
 }) => {
 	const {
 		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,

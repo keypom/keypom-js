@@ -1,11 +1,17 @@
 export { addToBalance, withdrawBalance } from "./lib/balances";
 export { generateKeys, estimateRequiredDeposit, getStorageBase, ftTransferCall, nftTransferCall, hashPassword, exportedNearAPI as nearAPI, } from "./lib/keypom-utils";
-export declare const parseNearAmount: typeof import("near-api-js/lib/utils/format").parseNearAmount, formatNearAmount: typeof import("near-api-js/lib/utils/format").formatNearAmount;
+export declare const 
+/** @group Utility */
+parseNearAmount: typeof import("near-api-js/lib/utils/format").parseNearAmount, 
+/** @group Utility */
+formatNearAmount: typeof import("near-api-js/lib/utils/format").formatNearAmount;
 export { useKeypom, KeypomContextProvider, } from './components/KeypomContext';
 export { createDrop, deleteDrops, } from "./lib/drops";
 export { addKeys, deleteKeys } from "./lib/keys";
 export { claim, } from "./lib/claims";
-export { execute, initKeypom, getEnv, } from "./lib/keypom";
+export { 
+/** @group Utility */
+execute, initKeypom, getEnv, updateKeypomContractId, updateFunder } from "./lib/keypom";
 export * from "./lib/views";
 export * from "./lib/types/drops";
 export * from "./lib/types/fc";
@@ -14,3 +20,4 @@ export * from "./lib/types/general";
 export * from "./lib/types/nft";
 export * from "./lib/types/params";
 export * from "./lib/types/simple";
+export * from "./lib/types/protocol";

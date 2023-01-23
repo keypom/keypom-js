@@ -1,6 +1,7 @@
 import type { Action } from "@near-wallet-selector/core";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { Transaction } from "@near-wallet-selector/core/lib/wallet";
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import BN from 'bn.js';
 import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
@@ -10,8 +11,11 @@ import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
+import { FTData } from "./types/ft";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
-import { CreateDropProtocolArgs, EstimatorParams, ExecuteParams, FTTransferCallParams, GenerateKeysParams, NFTTransferCallParams } from "./types/params";
+import { CreateDropProtocolArgs } from "./types/params";
+
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 const {
     KeyPair,
@@ -53,12 +57,14 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * 
  * @returns {Promise<string>} - The resulting hash
  * 
- * @example <caption>Generating the required password to pass into `claim` given a base password</caption>
+ * @example
+ * Generating the required password to pass into `claim` given a base password:
  * ```js
  * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
  * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
  * ```
+ * @group Utility
  */
 export const hashPassword = async (str: string, fromHex = false): Promise<string> => {
     let buf = await hashBuf(str, fromHex);
@@ -76,7 +82,9 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  * 
- * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
+ * @example
+ * Generating 10 unique random keypairs with no entropy:
+ * ```js
  * // Generate 10 keys with no entropy (all random)
  * let keys = await generateKeys({
  *     numKeys: 10,
@@ -87,8 +95,11 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('1st Public Key: ', pubKey1);
  * console.log('1st Secret Key: ', secretKey1)
+ * ```
  * 
- * @example <caption>Generating 1 keypair based on entropy</caption>
+ * @example
+ * Generating 1 keypair based on entropy:
+ * ```js
  * // Generate 1 key with the given entropy
  * let keys = await generateKeys({
  *     numKeys: 1,
@@ -103,8 +114,11 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('Public Key: ', pubKey);
  * console.log('Secret Key: ', secretKey)
+ * ```
  * 
- * @example <caption>Generating 2 keypairs each with their own entropy</caption>
+ * @example 
+ * Generating 2 keypairs each with their own entropy:
+ * ```js
  * // Generate 2 keys each with their own unique entropy
  * let keys = await generateKeys({
  *     numKeys: 2,
@@ -124,8 +138,18 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('Pub Keys ', keys.publicKeys);
  * console.log('Secret Keys ', keys.secretKeys);
+ * ```
+ * @group Utility
  */
-export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
+export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
+	/** The number of keys to generate. */
+	numKeys: number;
+	/** A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random. */
+	rootEntropy?: string;
+	/** An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply 
+ pass in the string itself directly (not within an array). */
+	metaEntropy?: string[] | string;
+}): Promise<GeneratedKeyPairs> => {
     // If the metaEntropy provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
     if (metaEntropy && !Array.isArray(metaEntropy)) {
         metaEntropy = [metaEntropy]
@@ -171,8 +195,9 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
  * 
  * @returns {string} The user's current balance
  * 
- * @example <caption>Query for a user's current balance on the Keypom contract</caption>
- *  * ```js
+ * @example
+ * Query for a user's current balance on the Keypom contract:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -186,6 +211,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group User Balance Functions
 */
 export const getUserBalance = async ({
     accountId
@@ -231,13 +257,20 @@ export const keypomView = async ({ methodName, args }) => {
 //     }
 // }
 
+/** @group Utility */
 export const execute = async ({
 	transactions,
 	account,
 	wallet,
     fundingAccount,
     successUrl,
-}: ExecuteParams): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
+}: {
+	transactions: Transaction[],
+	account: Account,
+	wallet?: Wallet,
+    fundingAccount?: Account,
+    successUrl?: string,
+}): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
 	const {
         contractId,
 	} = getEnv()
@@ -278,18 +311,9 @@ export const execute = async ({
  * For FT Drops, keys need to be registered before they can be used. This is done via the `ft_transfer_call` method on the FT contract.
  * This is a convenience method to make that process easier.
  * 
- * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
- * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * @param {string} contractId The fungible token contract ID.
- * @param {string} absoluteAmount Amount of tokens to transfer but considering the decimal amount (non human-readable).
-   Example: transferring one wNEAR should be passed in as "1000000000000000000000000" and NOT "1"
- * @param {string} amount Human readable format for the amount of tokens to transfer.
-   Example: transferring one wNEAR should be passed in as "1" and NOT "1000000000000000000000000"
- * @param {string} dropId The drop ID to register the keys for.
- * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
- * 
- * @example <caption>Send FTs using the funder account (not passing in any accounts into the call)</caption>
- *  * ```js
+ * @example
+ * Send FTs using the funder account (not passing in any accounts into the call):
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",
@@ -305,6 +329,7 @@ export const execute = async ({
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export const ftTransferCall = async ({
     account,
@@ -314,7 +339,27 @@ export const ftTransferCall = async ({
     amount,
     dropId,
     returnTransaction = false,
-}: FTTransferCallParams): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
+}: {
+    /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/** The fungible token contract ID. */
+    contractId: string,
+	/** Amount of tokens to transfer but considering the decimal amount (non human-readable).
+	 *  Example: transferring one wNEAR should be passed in as "1000000000000000000000000" and NOT "1" 
+    */
+	absoluteAmount?: string
+	/**
+	 * Human readable format for the amount of tokens to transfer.
+     * Example: transferring one wNEAR should be passed in as "1" and NOT "1000000000000000000000000"
+	 */
+    amount?: string,
+	/** The drop ID to register the keys for. */
+	dropId: string,
+	/** If true, the transaction will be returned instead of being signed and sent. */
+    returnTransaction?: boolean,
+}): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
     const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
@@ -357,13 +402,14 @@ export const ftTransferCall = async ({
  * 
  * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
  * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
- * @param {string} contractId The fungible token contract ID.
+ * @param {string} contractId The non-fungible token contract ID.
  * @param {string[]} tokenIds A set of token IDs that should be sent to the Keypom contract in order to register keys.
  * @param {string} dropId The drop ID to register the keys for.
  * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
  * 
- * @example <caption>Send 3 NFTs using the funder account (not passing in any accounts into the call)</caption>
- *  * ```js
+ * @example
+ * Send 3 NFTs using the funder account (not passing in any accounts into the call):
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",
@@ -379,6 +425,7 @@ export const ftTransferCall = async ({
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export const nftTransferCall = async ({
     account,
@@ -387,7 +434,20 @@ export const nftTransferCall = async ({
     tokenIds,
     dropId,
     returnTransactions = false,
-}: NFTTransferCallParams): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/** The non-fungible token contract ID. */
+    contractId: string,
+	/** A set of token IDs that should be sent to the Keypom contract in order to register keys. */
+    tokenIds: string[],
+	/** The drop ID to register the keys for. */
+    dropId: string,
+	/** If true, the transaction will be returned instead of being signed and sent. */
+	returnTransactions?: boolean,
+}): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
 
     const { getAccount, near, receiverId } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
@@ -528,6 +588,7 @@ const createAction = (action: Action): transactions.Action => {
 	}
 };
 
+/** @group Utility */
 export const getStorageBase = ({
     public_keys, 
     deposit_per_use, 
@@ -603,7 +664,7 @@ export const getStorageBase = ({
     return parseNearAmount(totalNEARAmount.toString());
 }
 
-// Initiate the connection to the NEAR blockchain.
+/** Initiate the connection to the NEAR blockchain. @group Utility */
 export const estimateRequiredDeposit = async ({
     near,
     depositPerUse,
@@ -614,7 +675,26 @@ export const estimateRequiredDeposit = async ({
     keyStorage = parseNearAmount("0.0065"),
     fcData,
     ftData,
-}: EstimatorParams): Promise<string>  => {
+}: {
+	/** The NEAR connection instance used to interact with the chain. This can either the connection that the SDK uses from `getEnv` or a separate connection. */
+    near: Near,
+	/** How much yoctoNEAR each key will transfer upon use. */
+    depositPerUse: string,
+	/** How many keys are being added to the drop. */
+    numKeys: number,
+	/** How many uses each key has. */
+    usesPerKey: number,
+	/** How much Gas will be attached to each key's use. */
+    attachedGas: number,
+	/** The estimated storage costs (can be retrieved through `getStorageBase`). */
+    storage?: string | null,
+	/** How much storage an individual key uses. */
+    keyStorage?: string | null,
+	/** The FC data for the drop that is being created. */
+    fcData?: FCData,
+	/** The FT data for the drop that is being created. */
+    ftData?: FTData,
+}): Promise<string>  => {
     const numKeysBN: BN = new BN(numKeys.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
@@ -744,6 +824,7 @@ const getFtCosts = async (near: Near, numKeys: number, usesPerKey: number, ftCon
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  * 
  * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @group Utility
  */
 export async function generatePerUsePasswords({
     publicKeys,
