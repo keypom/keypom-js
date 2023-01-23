@@ -76,6 +76,7 @@ export const getEnv = (): EnvVars  => {
 	}
 }
 
+/** @group Utility */
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
 const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalletBehaviour}) : Account | BrowserWalletBehaviour => {

@@ -116,6 +116,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  * 	dropId
  * })
  * ```
+ * @group Creating, And Claiming Drops
 */
 export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenIds, rootEntropy, basePassword, passwordProtectedUses, useBalance, returnTransactions }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
@@ -175,7 +176,8 @@ export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicK
  * 	dropId,
  * 	publicKeys: keys.publicKeys[0] // Can be wrapped in an array as well
  * })
-```
+ * ```
+ * @group Deleting State
 */
 export declare const deleteKeys: ({ account, wallet, publicKeys, dropId, withdrawBalance, }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */

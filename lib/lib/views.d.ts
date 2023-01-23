@@ -33,6 +33,7 @@ import { ProtocolReturnedDrop } from "./types/protocol";
  *
  * console.log('keyBalance: ', keyBalance)
  * ```
+ * @group View Functions
 */
 export declare const getKeyBalance: ({ publicKey, }: {
     publicKey: string;
@@ -56,6 +57,7 @@ export declare const getKeyBalance: ({ publicKey, }: {
  *
  * console.log('numKeys: ', numKeys)
  * ```
+ * @group View Functions
 */
 export declare const getKeyTotalSupply: () => Promise<number>;
 /**
@@ -83,6 +85,7 @@ export declare const getKeyTotalSupply: () => Promise<number>;
  *
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export declare const getKeys: ({ start, limit }: {
     start?: string | number | undefined;
@@ -120,6 +123,7 @@ export declare const getKeys: ({ start, limit }: {
  *
  * console.log('keyInfo: ', keyInfo)
  * ```
+ * @group View Functions
 */
 export declare const getKeyInformation: ({ publicKey }: {
     publicKey: string;
@@ -156,6 +160,7 @@ export declare const getKeyInformation: ({ publicKey }: {
  *
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export declare const getKeyInformationBatch: ({ publicKeys }: {
     publicKeys: string[];
@@ -194,6 +199,7 @@ export declare const getKeyInformationBatch: ({ publicKeys }: {
  *
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
 export declare const getDropInformation: ({ dropId, withKeys }: {
     dropId: string;
@@ -231,6 +237,7 @@ export declare const getDropInformation: ({ dropId, withKeys }: {
  *
  * console.log('keySupply: ', keySupply)
  * ```
+ * @group View Functions
 */
 export declare const getKeySupplyForDrop: ({ dropId }: {
     dropId: string;
@@ -269,6 +276,7 @@ export declare const getKeySupplyForDrop: ({ dropId }: {
  *
  * console.log('keyInfos: ', keyInfos)
  * ```
+ * @group View Functions
 */
 export declare const getKeysForDrop: ({ dropId, start, limit }: {
     dropId: string;
@@ -306,6 +314,7 @@ export declare const getKeysForDrop: ({ dropId, start, limit }: {
  *
  * console.log('dropSupply: ', dropSupply)
  * ```
+ * @group View Functions
 */
 export declare const getDropSupplyForOwner: ({ accountId, }: {
     accountId: string;
@@ -340,6 +349,7 @@ export declare const getDropSupplyForOwner: ({ accountId, }: {
  *
  * console.log('dropsAndKeys: ', dropsAndKeys)
  * ```
+ * @group View Functions
 */
 export declare const getDrops: ({ accountId, start, limit, withKeys, }: {
     /** The funding account that the drops belong to. */
@@ -373,6 +383,7 @@ export declare const getDrops: ({ accountId, start, limit, withKeys, }: {
  *
  * console.log('tokenSupply: ', tokenSupply)
  * ```
+ * @group View Functions
 */
 export declare const getNftSupplyForDrop: ({ dropId }: {
     dropId: string;
@@ -401,6 +412,7 @@ export declare const getNftSupplyForDrop: ({ dropId }: {
  *
  * console.log('tokenList: ', tokenList)
  * ```
+ * @group View Functions
 */
 export declare const getNftTokenIDsForDrop: ({ dropId, start, limit }: {
     dropId: string;
@@ -430,6 +442,7 @@ export declare const getNftTokenIDsForDrop: ({ dropId, start, limit }: {
  *
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group View Functions
 */
 export declare const getUserBalance: ({ accountId }: {
     accountId: string;
@@ -453,5 +466,6 @@ export declare const getUserBalance: ({ accountId }: {
  *
  * console.log('metadata: ', metadata)
  * ```
+ * @group View Functions
 */
 export declare const getContractSourceMetadata: () => Promise<ContractSourceMetadata>;

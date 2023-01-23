@@ -95,6 +95,7 @@
  * 	password: passwordForClaim
  * })
  * ```
+ * @group Creating, And Claiming Drops
 */
 export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, password, }: {
     /** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */

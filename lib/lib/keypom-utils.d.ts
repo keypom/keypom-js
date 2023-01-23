@@ -28,6 +28,7 @@ export declare const key2str: (v: any) => any;
  * let currentUse = 1;
  * let passwordForClaim = await hashPassword(basePassword + publicKey + currentUse.toString());
  * ```
+ * @group Utility
  */
 export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<string>;
 /**
@@ -98,6 +99,7 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * console.log('Pub Keys ', keys.publicKeys);
  * console.log('Secret Keys ', keys.secretKeys);
  * ```
+ * @group Utility
  */
 export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
     /** The number of keys to generate. */
@@ -131,6 +133,7 @@ export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
  *
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * @group User Balance Functions
 */
 export declare const getUserBalance: ({ accountId }: {
     accountId: string;
@@ -139,7 +142,7 @@ export declare const keypomView: ({ methodName, args }: {
     methodName: any;
     args: any;
 }) => Promise<any>;
-/** @internal */
+/** @group Utility */
 export declare const execute: ({ transactions, account, wallet, fundingAccount, }: {
     transactions: Transaction[];
     account: Account;
@@ -168,6 +171,7 @@ export declare const execute: ({ transactions, account, wallet, fundingAccount, 
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export declare const ftTransferCall: ({ account, wallet, contractId, absoluteAmount, amount, dropId, returnTransaction, }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
@@ -219,6 +223,7 @@ export declare const ftTransferCall: ({ account, wallet, contractId, absoluteAmo
  *     dropId: "1231231",
  * )};
  * ```
+ * @group Registering Key Uses
 */
 export declare const nftTransferCall: ({ account, wallet, contractId, tokenIds, dropId, returnTransactions, }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
@@ -236,7 +241,9 @@ export declare const nftTransferCall: ({ account, wallet, contractId, tokenIds, 
 }) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: Transaction[]) => SignAndSendTransactionOptions[];
+/** @group Utility */
 export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use }: CreateDropProtocolArgs) => string | null;
+/** Initiate the connection to the NEAR blockchain. @group Utility */
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: {
     /** The NEAR connection instance used to interact with the chain. This can either the connection that the SDK uses from `getEnv` or a separate connection. */
     near: Near;
@@ -266,6 +273,7 @@ export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, u
  * @param {string=} basePassword All the passwords will be generated from this base password. It will be double hashed with the public key.
  *
  * @returns {Promise<Array<Array<PasswordPerUse>>>} An array of objects for each key where each object has a password and maps it to its specific key use.
+ * @group Utility
  */
 export declare function generatePerUsePasswords({ publicKeys, uses, basePassword }: {
     publicKeys: string[];

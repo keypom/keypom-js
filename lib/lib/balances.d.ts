@@ -21,6 +21,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  *     amount: "1",
  * )};
  * ```
+ * @group User Balance Functions
 */
 export declare const addToBalance: ({ account, wallet, amount, absoluteAmount }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
@@ -61,6 +62,7 @@ export declare const addToBalance: ({ account, wallet, amount, absoluteAmount }:
  *
  * await withdrawBalance({});
  * ```
+ * @group User Balance Functions
 */
 export declare const withdrawBalance: ({ account, wallet }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */

@@ -6,9 +6,11 @@ declare let near: Maybe<Near>;
 /**
  *
  * @returns {EnvVars} The environment variables used by the Keypom library.
+ * @group Keypom SDK Environment
  */
 export declare const getEnv: () => EnvVars;
-export declare const execute: (args: any) => Promise<void | nearAPI.providers.FinalExecutionOutcome[] | (void | nearAPI.providers.FinalExecutionOutcome)[]>;
+/** @group Utility */
+export declare const execute: (args: any) => Promise<void | (void | nearAPI.providers.FinalExecutionOutcome)[] | nearAPI.providers.FinalExecutionOutcome[]>;
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.
@@ -73,6 +75,7 @@ export declare const execute: (args: any) => Promise<void | nearAPI.providers.Fi
  * // Get the drops for the given owner
  * const dropsForOwner = await getDrops({accountId: "benjiman.testnet"});
  * ```
+ * @group Keypom SDK Environment
 */
 export declare const initKeypom: ({ near: _near, network, funder, keypomContractId, }: {
     /** The NEAR connection instance to use. If not passed in, it will create a new one. */
@@ -123,6 +126,7 @@ export declare const initKeypom: ({ near: _near, network, funder, keypomContract
  *
  *	return;
  * ```
+ * @group Keypom SDK Environment
 */
 export declare const updateFunder: ({ funder }: {
     funder: Funder;
@@ -156,6 +160,7 @@ export declare const updateFunder: ({ funder }: {
  *
  *	return;
  * ```
+ * @group Keypom SDK Environment
 */
 export declare const updateKeypomContractId: ({ keypomContractId }: {
     keypomContractId: string;

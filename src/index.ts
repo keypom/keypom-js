@@ -13,7 +13,10 @@ export {
 } from "./lib/keypom-utils";
 import { exportedNearAPI } from "./lib/keypom-utils";
 export const {
-	parseNearAmount, formatNearAmount
+	/** @group Utility */
+	parseNearAmount, 
+	/** @group Utility */
+	formatNearAmount
 } = exportedNearAPI.utils.format;
 export {
 	useKeypom,
@@ -31,6 +34,7 @@ export {
 	claim,
 } from "./lib/claims";
 export {
+	/** @group Utility */
 	execute,
 	initKeypom,
 	getEnv,

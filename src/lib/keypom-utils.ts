@@ -257,7 +257,7 @@ export const keypomView = async ({ methodName, args }) => {
 //     }
 // }
 
-/** @internal */
+/** @group Utility */
 export const execute = async ({
 	transactions,
 	account,

@@ -132,6 +132,7 @@ export declare const KEY_LIMIT = 50;
  * let currentUse = 1;
  * let passwordForClaim = await hashPassword(basePassword + keys.publicKeys[0] + currentUse.toString());
  * ```
+ * @group Creating, And Claiming Drops
 */
 export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
@@ -216,6 +217,7 @@ export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys
  * });
  * console.log('numDrops: ', numDrops)
  * ```
+ * @group Deleting State
 */
 export declare const deleteDrops: ({ account, wallet, drops, dropIds, withdrawBalance, }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
