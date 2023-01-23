@@ -1,16 +1,11 @@
 import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account, Near } from "near-api-js";
+import { Account } from "near-api-js";
 import { Maybe } from '../keypom';
-import { DropConfig, PasswordPerUse } from './drops';
-import { FCData } from './fc';
-import { FTData } from './ft';
-import { Funder, GeneratedKeyPairs } from './general';
-import { NFTData } from './nft';
-import { ProtocolReturnedDrop } from './protocol';
-import { SimpleData } from './simple';
+import { PasswordPerUse } from './drops';
+import { GeneratedKeyPairs } from './general';
 
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 
 /**
  * Information returned when creating a drop or adding keys via `createDrop` and `addKeys` respectively.

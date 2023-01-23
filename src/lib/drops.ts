@@ -169,7 +169,8 @@ export const createDrop = async ({
 	basePassword,
 	passwordProtectedUses,
 	useBalance = false,
-	returnTransactions = false
+	returnTransactions = false,
+	successUrl
 }: {
 	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
 	account?: Account,
@@ -210,15 +211,17 @@ export const createDrop = async ({
 	useBalance?: boolean,
 	/** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
 	returnTransactions?: boolean,
+	/** When signing with a wallet, a success URl can be included that the user will be redirected to once the transaction has been successfully signed. */
+	successUrl?: string
 }): Promise<CreateOrAddReturn> => {
 	const {
 		near, viewAccount,
-		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccount, fundingAccountDetails
+		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
 
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 	assert(contractId == "v1-3.keypom.near" || contractId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 
 	/// parse args
@@ -411,7 +414,7 @@ export const createDrop = async ({
 		return { keys, dropId, transactions, requiredDeposit }
 	}
 
-	let responses = await execute({ transactions, account, wallet })
+	let responses = await execute({ transactions, account, wallet, successUrl })
 
 	return { responses, keys, dropId, requiredDeposit }
 }
@@ -485,7 +488,7 @@ export const deleteDrops = async ({
 	assert(receiverId == "v1-3.keypom.near" || receiverId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 	
 	// If the drop information isn't passed in, we should get it from the drop IDs
 	if (!drops) {
@@ -636,5 +639,5 @@ export const deleteDrops = async ({
 // 		gas300, receiverId, execute, getAccount
 // 	} = getEnv()
 
-// 	account = getAccount({ account, wallet });
+// 	account = await getAccount({ account, wallet });
 // }

@@ -188,13 +188,12 @@ export const addKeys = async ({
 
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
 
 	assert(drop || dropId, 'Either a dropId or drop object must be passed in.')
 	assert(numKeys || publicKeys?.length, "Either pass in publicKeys or set numKeys to a positive non-zero value.")
 	assert(receiverId == "v1-3.keypom.near" || receiverId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 	
 	const {
 		drop_id,
@@ -382,7 +381,7 @@ export const deleteKeys = async ({
 	const { owner_id, drop_id, registered_uses, ft, nft } = await getDropInformation({ dropId })
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet });
+	account = await getAccount({ account, wallet });
 	assert(owner_id == account!.accountId, 'Only the owner of the drop can delete keys.')
 
 	const actions: any[] = []

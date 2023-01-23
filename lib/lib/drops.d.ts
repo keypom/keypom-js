@@ -134,47 +134,7 @@ export declare const KEY_LIMIT = 50;
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions }: {
-    /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
-    account?: nearAPI.Account | undefined;
-    /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
-    wallet?: AnyWallet | undefined;
-    /**
-     * Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed in, the keys will be
-     * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly.
-    */
-    numKeys: number;
-    /** Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter. */
-    publicKeys?: string[] | undefined;
-    /** How much $NEAR should be contained in each link. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-    depositPerUseNEAR?: Number | undefined;
-    /** How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
-    depositPerUseYocto?: string | undefined;
-    /** Specify a custom drop ID rather than using the incrementing nonce on the contract. */
-    dropId?: string | undefined;
-    /** Allows specific drop behaviors to be configured such as the number of uses each key / link will have. */
-    config?: DropConfig | undefined;
-    /** String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON. */
-    metadata?: string | undefined;
-    /** For creating a simple drop, this contains necessary configurable information about the drop. */
-    simpleData?: SimpleData | undefined;
-    /** For creating a fungible token drop, this contains necessary configurable information about the drop. */
-    ftData?: FTData | undefined;
-    /** For creating a non-fungible token drop, this contains necessary configurable information about the drop. */
-    nftData?: NFTData | undefined;
-    /** For creating a function call drop, this contains necessary configurable information about the drop. */
-    fcData?: FCData | undefined;
-    /** Specify an entropy to use for generating keys (will overload the funder's rootEntropy if applicable). This parameter only matters if the publicKeys variable is not passed in. */
-    rootEntropy?: string | undefined;
-    /** For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in. */
-    basePassword?: string | undefined;
-    /** For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use. */
-    passwordProtectedUses?: number[] | undefined;
-    /** If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw. */
-    useBalance?: boolean | undefined;
-    /** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
-    returnTransactions?: boolean | undefined;
-}) => Promise<CreateOrAddReturn>;
+export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions, successUrl, }: CreateDropParams) => Promise<CreateOrAddReturn>;
 /**
  * Delete a set of drops and optionally withdraw any remaining balance you have on the Keypom contract.
  *

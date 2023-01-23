@@ -79,8 +79,8 @@ export const getEnv = (): EnvVars  => {
 /** @group Utility */
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalletBehaviour}) : Account | BrowserWalletBehaviour => {
-	let returnedAccount = account || wallet || fundingAccount;
+const getAccount = async ({ account, wallet }: {account: Account, wallet: AnyWallet}) : Promise<Account | AnyWallet> => {
+	let returnedAccount = account || await wallet || fundingAccount;
 
 	// If neither a wallet object, account object, or funding account is provided, throw an error
 	assert(returnedAccount, 'No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')

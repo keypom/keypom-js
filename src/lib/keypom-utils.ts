@@ -263,18 +263,23 @@ export const execute = async ({
 	account,
 	wallet,
     fundingAccount,
+    successUrl,
 }: {
 	transactions: Transaction[],
 	account: Account,
 	wallet?: Wallet,
     fundingAccount?: Account,
+    successUrl?: string,
 }): Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>> => {
 	const {
         contractId,
 	} = getEnv()
     
-	/// instance of walletSelector.wallet()
+	// instance of walletSelector.wallet()
 	if (wallet) {
+        // wallet might be Promise<Wallet> or value, either way doesn't matter
+        wallet = await wallet;
+        // might be able to sign transactions with app key
         let needsRedirect = false;
         transactions.forEach((tx) => {
             if (tx.receiverId !== contractId) needsRedirect = true
@@ -284,12 +289,12 @@ export const execute = async ({
             })
         })
         
-        if (needsRedirect) return await wallet.signAndSendTransactions({ transactions })
+        if (needsRedirect) return await wallet.signAndSendTransactions({ transactions, callbackUrl: successUrl })
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = []
         for (const tx of transactions) {
             responses.push(await wallet.signAndSendTransaction({
-                actions: tx.actions
+                actions: tx.actions,
             }))
         }
         return responses
@@ -358,7 +363,7 @@ export const ftTransferCall = async ({
     const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 
     if (amount) {
         const metadata = await viewAccount.viewFunction2({
@@ -447,7 +452,7 @@ export const nftTransferCall = async ({
     const { getAccount, near, receiverId } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
-	account = getAccount({ account, wallet })
+	account = await getAccount({ account, wallet })
 
     assert(tokenIds.length < 6, `This method can only transfer 6 NFTs in 1 batch transaction.`)
 

@@ -2,6 +2,7 @@ import { Transaction } from '@near-wallet-selector/core';
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
 import { Maybe } from '../keypom';
+<<<<<<< HEAD
 import { PasswordPerUse } from './drops';
 import { GeneratedKeyPairs } from './general';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
@@ -19,6 +20,49 @@ export interface CreateOrAddReturn {
     keys?: Maybe<GeneratedKeyPairs>;
     /** The drop ID for the drop that is being interacted with. */
     dropId: string;
+=======
+import { DropConfig, PasswordPerUse } from './drops';
+import { FCData } from './fc';
+import { FTData } from './ft';
+import { Funder, GeneratedKeyPairs } from './general';
+import { NFTData } from './nft';
+import { SimpleData } from './simple';
+export declare type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
+export interface CreateDropParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    numKeys: number;
+    publicKeys?: string[];
+    depositPerUseNEAR?: Number;
+    depositPerUseYocto?: string;
+    dropId?: string;
+    config?: DropConfig;
+    metadata?: string;
+    simpleData?: SimpleData;
+    ftData?: FTData;
+    nftData?: NFTData;
+    fcData?: FCData;
+    rootEntropy?: string;
+    basePassword?: string;
+    passwordProtectedUses?: number[];
+    useBalance?: boolean;
+    returnTransactions?: boolean;
+    successUrl?: string;
+}
+export interface AddKeyParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    numKeys: number;
+    publicKeys?: string[];
+    dropId?: string;
+    drop?: any;
+    nftTokenIds?: string[];
+    rootEntropy?: string;
+    basePassword?: string;
+    passwordProtectedUses?: number[];
+    useBalance?: boolean;
+    returnTransactions?: boolean;
+>>>>>>> main
 }
 /**
  * @ignore
@@ -30,7 +74,87 @@ export interface RegisterUsesParams {
     numUses: number;
     useBalance?: boolean;
 }
+<<<<<<< HEAD
 /** @internal */
+=======
+export interface DeleteDropParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    drops?: any;
+    dropIds?: string[];
+    withdrawBalance?: boolean;
+}
+export interface DeleteKeyParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    publicKeys: string[] | string;
+    dropId: string;
+    withdrawBalance?: boolean;
+}
+export interface InitKeypomParams {
+    near?: Near;
+    network: string;
+    keypomContractId?: string;
+    funder?: Funder;
+}
+export interface ExecuteParams {
+    transactions: Transaction[];
+    account: Account;
+    wallet?: AnyWallet;
+    fundingAccount?: Account;
+    successUrl?: string;
+}
+export interface GenerateKeysParams {
+    numKeys: number;
+    rootEntropy?: string;
+    metaEntropy?: string[] | string;
+}
+export interface FTTransferCallParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    contractId: string;
+    absoluteAmount?: string;
+    amount?: string;
+    dropId: string;
+    returnTransaction?: boolean;
+}
+export interface NFTTransferCallParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    contractId: string;
+    tokenIds: string[];
+    dropId: string;
+    returnTransactions?: boolean;
+}
+export interface EstimatorParams {
+    near: Near;
+    depositPerUse: string;
+    numKeys: number;
+    usesPerKey: number;
+    attachedGas: number;
+    storage?: string | null;
+    keyStorage?: string | null;
+    fcData?: FCData;
+    ftData?: FTData;
+}
+export interface AddToBalanceParams {
+    account?: Account;
+    wallet?: AnyWallet;
+    absoluteAmount?: string;
+    amount?: string;
+}
+export interface WithdrawBalanceParams {
+    account?: Account;
+    wallet?: AnyWallet;
+}
+export interface CreateOrAddReturn {
+    responses?: any;
+    transactions?: Transaction[];
+    requiredDeposit?: string;
+    keys?: Maybe<GeneratedKeyPairs>;
+    dropId: string;
+}
+>>>>>>> main
 export interface CreateDropProtocolArgs {
     public_keys?: string[];
     deposit_per_use: string;
@@ -80,4 +204,13 @@ export interface CreateDropProtocolArgs {
     };
     passwords_per_use?: Array<Maybe<Array<PasswordPerUse>>>;
 }
+<<<<<<< HEAD
 export {};
+=======
+export interface GetDropParams {
+    accountId: string;
+    start?: string | number;
+    limit?: number;
+    withKeys?: boolean;
+}
+>>>>>>> main
