@@ -14,7 +14,8 @@ import { getEnv } from "./keypom";
  * @param {string=} newAccountId (OPTIONAL) If passed in, a new account ID will be created and the drop will be claimed to that account. This must be an account that does not exist yet.
  * @param {string=} newPublicKey (OPTIONAL) If creating a new account, a public key must be passed in to be used as the full access key for the newly created account.
  * 
- * @example <caption>Creating a simple $NEAR drop and claiming to an existing account</caption>
+ * @example
+ * Creating a simple $NEAR drop and claiming to an existing account:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -42,7 +43,9 @@ import { getEnv } from "./keypom";
  * 	accountId: "benjiman.testnet"
  * })
  * ```
- * @example <caption>Creating a simple $NEAR drop and using it to create a brand new NEAR account</caption>
+ * 
+ * @example
+ * Creating a simple $NEAR drop and using it to create a brand new NEAR account:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -72,8 +75,10 @@ import { getEnv } from "./keypom";
  * 	newPublicKey: publicKeys[1]
  * })
  * ```
- * @example <caption>Creating a drop and adding a password to it. Generate the password using the hash function and pass it into claim the drop</caption>
- *  * ```js
+ * 
+ * @example
+ * Creating a drop and adding a password to it. Generate the password using the hash function and pass it into claim the drop:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
  * 	network: "testnet",

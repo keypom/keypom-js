@@ -26,55 +26,13 @@ If you wish to update the Keypom Contract ID being used, refer to the <code>upda
 
 <h3>Returns</h3><p>If a funder is passed in, its account object is returned. Otherwise, it null is returned.</p>
 
-<h3>Example</h3><caption>Using a pre-created NEAR connection instance with an UnencryptedFileSystemKeyStore:</caption>
-```js
-const path = require("path");
-const homedir = require("os").homedir();
-const { KeyPair, keyStores, connect } = require("near-api-js");
-const { initKeypom, getDrops } = require("keypom-js");
+<h3>Example</h3><p>Using a pre-created NEAR connection instance with an UnencryptedFileSystemKeyStore:</p>
+<pre><code class="language-js"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">path</span><span class="hl-2"> = </span><span class="hl-3">require</span><span class="hl-2">(</span><span class="hl-5">&quot;path&quot;</span><span class="hl-2">);</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">homedir</span><span class="hl-2"> = </span><span class="hl-3">require</span><span class="hl-2">(</span><span class="hl-5">&quot;os&quot;</span><span class="hl-2">).</span><span class="hl-3">homedir</span><span class="hl-2">();</span><br/><span class="hl-6">const</span><span class="hl-2"> { </span><span class="hl-7">KeyPair</span><span class="hl-2">, </span><span class="hl-7">keyStores</span><span class="hl-2">, </span><span class="hl-7">connect</span><span class="hl-2"> } = </span><span class="hl-3">require</span><span class="hl-2">(</span><span class="hl-5">&quot;near-api-js&quot;</span><span class="hl-2">);</span><br/><span class="hl-6">const</span><span class="hl-2"> { </span><span class="hl-7">initKeypom</span><span class="hl-2">, </span><span class="hl-7">getDrops</span><span class="hl-2"> } = </span><span class="hl-3">require</span><span class="hl-2">(</span><span class="hl-5">&quot;keypom-js&quot;</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Establish the network we wish to work on</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">network</span><span class="hl-2"> = </span><span class="hl-5">&quot;testnet&quot;</span><span class="hl-2">;</span><br/><span class="hl-0">// Get the location where the credentials are stored for our KeyStore</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">CREDENTIALS_DIR</span><span class="hl-2"> = </span><span class="hl-5">&quot;.near-credentials&quot;</span><span class="hl-2">;</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">credentialsPath</span><span class="hl-2"> = (</span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-4">path</span><span class="hl-2">).</span><span class="hl-3">join</span><span class="hl-2">(</span><span class="hl-4">homedir</span><span class="hl-2">, </span><span class="hl-7">CREDENTIALS_DIR</span><span class="hl-2">);</span><br/><span class="hl-2">(</span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-4">path</span><span class="hl-2">).</span><span class="hl-4">join</span><span class="hl-2">;</span><br/><span class="hl-6">let</span><span class="hl-2"> </span><span class="hl-4">keyStore</span><span class="hl-2"> = </span><span class="hl-6">new</span><span class="hl-2"> </span><span class="hl-4">keyStores</span><span class="hl-2">.</span><span class="hl-3">UnencryptedFileSystemKeyStore</span><span class="hl-2">(</span><span class="hl-4">credentialsPath</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Establish the configuration for the connection</span><br/><span class="hl-6">let</span><span class="hl-2"> </span><span class="hl-4">nearConfig</span><span class="hl-2"> = {</span><br/><span class="hl-2">        </span><span class="hl-4">networkId:</span><span class="hl-2"> </span><span class="hl-4">network</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">keyStore</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">nodeUrl:</span><span class="hl-2"> </span><span class="hl-5">`https://rpc.</span><span class="hl-6">${</span><span class="hl-4">network</span><span class="hl-6">}</span><span class="hl-5">.near.org`</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">walletUrl:</span><span class="hl-2"> </span><span class="hl-5">`https://wallet.</span><span class="hl-6">${</span><span class="hl-4">network</span><span class="hl-6">}</span><span class="hl-5">.near.org`</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">helperUrl:</span><span class="hl-2"> </span><span class="hl-5">`https://helper.</span><span class="hl-6">${</span><span class="hl-4">network</span><span class="hl-6">}</span><span class="hl-5">.near.org`</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">explorerUrl:</span><span class="hl-2"> </span><span class="hl-5">`https://explorer.</span><span class="hl-6">${</span><span class="hl-4">network</span><span class="hl-6">}</span><span class="hl-5">.near.org`</span><span class="hl-2">,</span><br/><span class="hl-2">};</span><br/><span class="hl-0">// Connect to the NEAR blockchain and get the connection instance</span><br/><span class="hl-6">let</span><span class="hl-2"> </span><span class="hl-4">near</span><span class="hl-2"> = </span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">connect</span><span class="hl-2">(</span><span class="hl-4">nearConfig</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Initialize the SDK for the given network and NEAR connection</span><br/><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">initKeypom</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-4">near</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">network</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Get the drops for the given owner</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">dropsForOwner</span><span class="hl-2"> = </span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">getDrops</span><span class="hl-2">({</span><span class="hl-4">accountId:</span><span class="hl-2"> </span><span class="hl-5">&quot;benjiman.testnet&quot;</span><span class="hl-2">});</span>
+</code></pre>
 
-<p>// Establish the network we wish to work on
-const network = &quot;testnet&quot;;
-// Get the location where the credentials are stored for our KeyStore
-const CREDENTIALS_DIR = &quot;.near-credentials&quot;;
-const credentialsPath = (await path).join(homedir, CREDENTIALS_DIR);
-(await path).join;
-let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);</p>
-<p>// Establish the configuration for the connection
-let nearConfig = {
-        networkId: network,
-        keyStore,
-        nodeUrl: <code>https://rpc.${network}.near.org</code>,
-        walletUrl: <code>https://wallet.${network}.near.org</code>,
-        helperUrl: <code>https://helper.${network}.near.org</code>,
-        explorerUrl: <code>https://explorer.${network}.near.org</code>,
-};
-// Connect to the NEAR blockchain and get the connection instance
-let near = await connect(nearConfig);</p>
-<p>// Initialize the SDK for the given network and NEAR connection
-await initKeypom({
-        near,
-        network
-});</p>
-<p>// Get the drops for the given owner
-const dropsForOwner = await getDrops({accountId: &quot;benjiman.testnet&quot;});
-```</p>
-
-<h3>Example</h3><caption>Creating an entirely new NEAR connection instance by using initKeypom and passing in a funder account:</caption>
-```js
-const { initKeypom, getDrops } = require("keypom-js");
-
-<p>// Initialize the SDK for the given network and NEAR connection
-await initKeypom({
-        network: &quot;testnet&quot;,
-        funder: {
-            accountId: &quot;benji_demo.testnet&quot;,
-            secretKey: &quot;ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1&quot;
-        }
-});</p>
-<p>// Get the drops for the given owner
-const dropsForOwner = await getDrops({accountId: &quot;benjiman.testnet&quot;});
-```</p>
+<h3>Example</h3><p>Creating an entirely new NEAR connection instance by using initKeypom and passing in a funder account:</p>
+<pre><code class="language-js"><span class="hl-6">const</span><span class="hl-2"> { </span><span class="hl-7">initKeypom</span><span class="hl-2">, </span><span class="hl-7">getDrops</span><span class="hl-2"> } = </span><span class="hl-3">require</span><span class="hl-2">(</span><span class="hl-5">&quot;keypom-js&quot;</span><span class="hl-2">);</span><br/><br/><span class="hl-0">// Initialize the SDK for the given network and NEAR connection</span><br/><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">initKeypom</span><span class="hl-2">({</span><br/><span class="hl-2">        </span><span class="hl-4">network:</span><span class="hl-2"> </span><span class="hl-5">&quot;testnet&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">        </span><span class="hl-4">funder:</span><span class="hl-2"> {</span><br/><span class="hl-2">            </span><span class="hl-4">accountId:</span><span class="hl-2"> </span><span class="hl-5">&quot;benji_demo.testnet&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">            </span><span class="hl-4">secretKey:</span><span class="hl-2"> </span><span class="hl-5">&quot;ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1&quot;</span><br/><span class="hl-2">        }</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Get the drops for the given owner</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">dropsForOwner</span><span class="hl-2"> = </span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">getDrops</span><span class="hl-2">({</span><span class="hl-4">accountId:</span><span class="hl-2"> </span><span class="hl-5">&quot;benjiman.testnet&quot;</span><span class="hl-2">});</span>
+</code></pre>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -83,7 +41,7 @@ const dropsForOwner = await getDrops({accountId: &quot;benjiman.testnet&quot;});
 <h5>__namedParameters: <a href="../interfaces/InitKeypomParams.html" class="tsd-signature-type" data-tsd-kind="Interface">InitKeypomParams</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/keypom.ts#L156">src/lib/keypom.ts:156</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/03a0d4a/src/lib/keypom.ts#L158">src/lib/keypom.ts:158</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -111,6 +69,7 @@ const dropsForOwner = await getDrops({accountId: &quot;benjiman.testnet&quot;});
 <li class="tsd-kind-interface"><a href="../interfaces/AddToBalanceParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Add<wbr/>To<wbr/>Balance<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/ContractSourceMetadata.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Contract<wbr/>Source<wbr/>Metadata</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/CreateDropParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Drop<wbr/>Params</a></li>
+<li class="tsd-kind-interface"><a href="../interfaces/CreateDropProtocolArgs.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Drop<wbr/>Protocol<wbr/>Args</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/CreateOrAddReturn.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Or<wbr/>Add<wbr/>Return</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/DeleteDropParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Delete<wbr/>Drop<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/DeleteKeyParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Delete<wbr/>Key<wbr/>Params</a></li>
@@ -118,6 +77,7 @@ const dropsForOwner = await getDrops({accountId: &quot;benjiman.testnet&quot;});
 <li class="tsd-kind-interface"><a href="../interfaces/DropConfig.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Drop<wbr/>Config</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/EnvVars.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Env<wbr/>Vars</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/EstimatorParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Estimator<wbr/>Params</a></li>
+<li class="tsd-kind-interface"><a href="../interfaces/ExecuteParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Execute<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FCConfig.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FCConfig</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FCData.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FCData</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FTData.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FTData</a></li>

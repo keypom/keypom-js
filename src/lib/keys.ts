@@ -36,7 +36,8 @@ import { assert, isValidAccountObj } from './checks';
  * 
  * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  * 
- * @example <caption>Create a basic empty simple drop and add 10 keys. Each key is completely random.:</caption>
+ * @example
+ * Create a basic empty simple drop and add 10 keys. Each key is completely random:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
@@ -62,7 +63,10 @@ import { assert, isValidAccountObj } from './checks';
  * console.log('public keys: ', keys.publicKeys);
  * console.log('private keys: ', keys.secretKeys);
  * ``` 
- * @example <caption>Init funder with root entropy, create empty drop and add generate deterministic keys. Compare with manually generated keys</caption>
+ * 
+ * @example
+ * Init funder with root entropy, create empty drop and add generate deterministic keys. Compare with manually generated keys:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. Root entropy is passed into the funder account so any generated keys
  * // Will be based off that entropy.
  * await initKeypom({
@@ -104,8 +108,11 @@ import { assert, isValidAccountObj } from './checks';
  * // These should match!
  * console.log('publicKeys: ', publicKeys)
  * console.log('pubKeysGenerated: ', pubKeysGenerated)
+ * ```
  * 
- * @example <caption>Create an empty drop and add manually created keys</caption>
+ * @example
+ * Create an empty drop and add manually created keys:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
  * await initKeypom({
@@ -132,6 +139,7 @@ import { assert, isValidAccountObj } from './checks';
  * 	publicKeys,
  * 	dropId
  * })
+ * ```
 */
 export const addKeys = async ({
 	account,
@@ -301,7 +309,8 @@ export const addKeys = async ({
  * @param {string} dropId Which drop ID do the keys belong to?
  * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
  * 
- * @example <caption>Create a drop with 5 keys and delete the first one</caption>
+ * @example 
+ * Create a drop with 5 keys and delete the first one:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({

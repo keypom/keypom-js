@@ -53,7 +53,8 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * 
  * @returns {Promise<string>} - The resulting hash
  * 
- * @example <caption>Generating the required password to pass into `claim` given a base password</caption>
+ * @example
+ * Generating the required password to pass into `claim` given a base password:
  * ```js
  * 	// Create the password to pass into claim which is a hash of the basePassword, public key and whichever use we are on
  * let currentUse = 1;
@@ -76,7 +77,9 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  * 
- * @example <caption>Generating 10 unique random keypairs with no entropy</caption>
+ * @example
+ * Generating 10 unique random keypairs with no entropy:
+ * ```js
  * // Generate 10 keys with no entropy (all random)
  * let keys = await generateKeys({
  *     numKeys: 10,
@@ -87,8 +90,11 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('1st Public Key: ', pubKey1);
  * console.log('1st Secret Key: ', secretKey1)
+ * ```
  * 
- * @example <caption>Generating 1 keypair based on entropy</caption>
+ * @example
+ * Generating 1 keypair based on entropy:
+ * ```js
  * // Generate 1 key with the given entropy
  * let keys = await generateKeys({
  *     numKeys: 1,
@@ -103,8 +109,11 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('Public Key: ', pubKey);
  * console.log('Secret Key: ', secretKey)
+ * ```
  * 
- * @example <caption>Generating 2 keypairs each with their own entropy</caption>
+ * @example 
+ * Generating 2 keypairs each with their own entropy:
+ * ```js
  * // Generate 2 keys each with their own unique entropy
  * let keys = await generateKeys({
  *     numKeys: 2,
@@ -124,6 +133,7 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * 
  * console.log('Pub Keys ', keys.publicKeys);
  * console.log('Secret Keys ', keys.secretKeys);
+ * ```
  */
 export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: GenerateKeysParams): Promise<GeneratedKeyPairs> => {
     // If the metaEntropy provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
@@ -171,8 +181,9 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: Generate
  * 
  * @returns {string} The user's current balance
  * 
- * @example <caption>Query for a user's current balance on the Keypom contract</caption>
- *  * ```js
+ * @example
+ * Query for a user's current balance on the Keypom contract:
+ * ```js
  * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
  * await initKeypom({
  * network: "testnet",
@@ -284,8 +295,9 @@ export const execute = async ({
  * @param {string} dropId The drop ID to register the keys for.
  * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
  * 
- * @example <caption>Send FTs using the funder account (not passing in any accounts into the call)</caption>
- *  * ```js
+ * @example
+ * Send FTs using the funder account (not passing in any accounts into the call):
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",
@@ -358,8 +370,9 @@ export const ftTransferCall = async ({
  * @param {string} dropId The drop ID to register the keys for.
  * @param {boolean=} returnTransaction (OPTIONAL) If true, the transaction will be returned instead of being signed and sent.
  * 
- * @example <caption>Send 3 NFTs using the funder account (not passing in any accounts into the call)</caption>
- *  * ```js
+ * @example
+ * Send 3 NFTs using the funder account (not passing in any accounts into the call):
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",

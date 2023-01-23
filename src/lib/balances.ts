@@ -14,8 +14,9 @@ import { AddToBalanceParams, WithdrawBalanceParams } from "./types/params";
  * @param {string} amount Human readable format for the amount of tokens to deposit.
    Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
  * 
- * @example <caption>Add 1 $NEAR to the account balance</caption>
- *  * ```js
+ * @example
+ * Add 1 $NEAR to the account balance
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",
@@ -73,8 +74,9 @@ export const addToBalance = async ({
  * @param {Account=} account (OPTIONAL) If specified, the passed in account will be used to sign the txn instead of the funder account.
  * @param {BrowserWalletBehaviour=} wallet (OPTIONAL) If using a browser wallet through wallet selector and that wallet should sign the transaction, pass it in.
  * 
- * @example <caption>Add 1 $NEAR to the account balance and then withdraw it</caption>
- *  * ```js
+ * @example 
+ * Add 1 $NEAR to the account balance and then withdraw it
+ * ```js
  * // Initialize the SDK on testnet
  * await initKeypom({
  * 	network: "testnet",

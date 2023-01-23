@@ -99,7 +99,8 @@ const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalle
  * 
  * @returns {Promise<Account | null>} If a funder is passed in, its account object is returned. Otherwise, it null is returned.
  * 
- * @example <caption>Using a pre-created NEAR connection instance with an UnencryptedFileSystemKeyStore:</caption>
+ * @example 
+ * Using a pre-created NEAR connection instance with an UnencryptedFileSystemKeyStore:
  * ```js
  * const path = require("path");
  * const homedir = require("os").homedir();
@@ -136,7 +137,8 @@ const getAccount = ({ account, wallet }: {account: Account, wallet: BrowserWalle
  * const dropsForOwner = await getDrops({accountId: "benjiman.testnet"});
  * ``` 
  * 
- * @example <caption>Creating an entirely new NEAR connection instance by using initKeypom and passing in a funder account:</caption>
+ * @example
+ * Creating an entirely new NEAR connection instance by using initKeypom and passing in a funder account:
  * ```js
  * const { initKeypom, getDrops } = require("keypom-js");
  * 
@@ -209,7 +211,8 @@ export const initKeypom = async ({
  * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
  * @returns {Promise<Account>} The funder's account object is returned.
  * 
- * @example <caption>After initializing the SDK, the funder is updated.</caption>
+ * @example
+ * After initializing the SDK, the funder is updated.
  * ```js
  * const path = require("path");
  * const homedir = require("os").homedir();
@@ -261,7 +264,8 @@ export const updateFunder = async ({
  * 
  * @param {string} keypomContractId The account ID that should be used for the Keypom contract.
  * 
- * @example <caption>After initializing the SDK, the Keypom contract ID is updated.</caption>
+ * @example 
+ * After initializing the SDK, the Keypom contract ID is updated.
  * ```js
  * const path = require("path");
  * const homedir = require("os").homedir();

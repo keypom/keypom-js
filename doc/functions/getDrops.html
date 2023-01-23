@@ -21,25 +21,9 @@
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Paginate through drops owned by an account. If specified, information for the first 50 keys in each drop can be returned as well.</p>
 
-<h3>Example</h3><caption>Get drop information for the last 5 drops owned by a given account</caption>
-```js
-// Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
-await initKeypom({
-    network: "testnet",
-});
-
-<p>// Get the number of drops the account has.
-const numDrops = await getDropSupply({
-    accountId: &quot;benjiman.testnet&quot;
-});</p>
-<p>// Query for drop information for the last 5 drops and their respective keys
-const dropsAndKeys = await getDrops({
-    accountId: &quot;benjiman.testnet&quot;,
-    start: numDrops - 5,
-    withKeys: true
-})</p>
-<p>console.log(&#39;dropsAndKeys: &#39;, dropsAndKeys)
-```</p>
+<h3>Example</h3><p>Get drop information for the last 5 drops owned by a given account:</p>
+<pre><code class="language-js"><span class="hl-0">// Initialize the SDK on testnet. No funder is passed in since we&#39;re only doing view calls.</span><br/><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">initKeypom</span><span class="hl-2">({</span><br/><span class="hl-2">    </span><span class="hl-4">network:</span><span class="hl-2"> </span><span class="hl-5">&quot;testnet&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Get the number of drops the account has.</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">numDrops</span><span class="hl-2"> = </span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">getDropSupply</span><span class="hl-2">({</span><br/><span class="hl-2">    </span><span class="hl-4">accountId:</span><span class="hl-2"> </span><span class="hl-5">&quot;benjiman.testnet&quot;</span><br/><span class="hl-2">});</span><br/><br/><span class="hl-0">// Query for drop information for the last 5 drops and their respective keys</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">dropsAndKeys</span><span class="hl-2"> = </span><span class="hl-1">await</span><span class="hl-2"> </span><span class="hl-3">getDrops</span><span class="hl-2">({</span><br/><span class="hl-2">    </span><span class="hl-4">accountId:</span><span class="hl-2"> </span><span class="hl-5">&quot;benjiman.testnet&quot;</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-4">start:</span><span class="hl-2"> </span><span class="hl-4">numDrops</span><span class="hl-2"> - </span><span class="hl-8">5</span><span class="hl-2">,</span><br/><span class="hl-2">    </span><span class="hl-4">withKeys:</span><span class="hl-2"> </span><span class="hl-6">true</span><br/><span class="hl-2">})</span><br/><br/><span class="hl-4">console</span><span class="hl-2">.</span><span class="hl-3">log</span><span class="hl-2">(</span><span class="hl-5">&#39;dropsAndKeys: &#39;</span><span class="hl-2">, </span><span class="hl-4">dropsAndKeys</span><span class="hl-2">)</span>
+</code></pre>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -48,7 +32,7 @@ const dropsAndKeys = await getDrops({
 <h5>__namedParameters: <a href="../interfaces/GetDropParams.html" class="tsd-signature-type" data-tsd-kind="Interface">GetDropParams</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ProtocolReturnedDrop.html" class="tsd-signature-type" data-tsd-kind="Interface">ProtocolReturnedDrop</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a18c2a1/src/lib/views.ts#L430">src/lib/views.ts:430</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/03a0d4a/src/lib/views.ts#L440">src/lib/views.ts:440</a></li></ul></aside></li></ul></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -76,6 +60,7 @@ const dropsAndKeys = await getDrops({
 <li class="tsd-kind-interface"><a href="../interfaces/AddToBalanceParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Add<wbr/>To<wbr/>Balance<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/ContractSourceMetadata.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Contract<wbr/>Source<wbr/>Metadata</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/CreateDropParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Drop<wbr/>Params</a></li>
+<li class="tsd-kind-interface"><a href="../interfaces/CreateDropProtocolArgs.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Drop<wbr/>Protocol<wbr/>Args</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/CreateOrAddReturn.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Create<wbr/>Or<wbr/>Add<wbr/>Return</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/DeleteDropParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Delete<wbr/>Drop<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/DeleteKeyParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Delete<wbr/>Key<wbr/>Params</a></li>
@@ -83,6 +68,7 @@ const dropsAndKeys = await getDrops({
 <li class="tsd-kind-interface"><a href="../interfaces/DropConfig.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Drop<wbr/>Config</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/EnvVars.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Env<wbr/>Vars</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/EstimatorParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Estimator<wbr/>Params</a></li>
+<li class="tsd-kind-interface"><a href="../interfaces/ExecuteParams.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>Execute<wbr/>Params</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FCConfig.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FCConfig</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FCData.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FCData</a></li>
 <li class="tsd-kind-interface"><a href="../interfaces/FTData.html" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-256-path"></use><use href="#icon-256-text"></use></svg>FTData</a></li>

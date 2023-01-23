@@ -43,7 +43,8 @@ export const KEY_LIMIT = 50;
  * 
  * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  * 
- * @example <caption>Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random.:</caption>
+ * @example
+ * Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
@@ -64,7 +65,10 @@ export const KEY_LIMIT = 50;
  * console.log('public keys: ', keys.publicKeys);
  * console.log('private keys: ', keys.secretKeys);
  * ``` 
- * @example <caption>Init funder with root entropy and generate deterministic keys for a drop. Compare with manually generated keys</caption>
+ * 
+ * @example
+ * Init funder with root entropy and generate deterministic keys for a drop. Compare with manually generated keys:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. Root entropy is passed into the funder account so any generated keys
  * // Will be based off that entropy.
  * await initKeypom({
@@ -101,8 +105,11 @@ export const KEY_LIMIT = 50;
  * // These should match!
  * console.log('publicKeys: ', publicKeys)
  * console.log('pubKeysGenerated: ', pubKeysGenerated)
+ * ```
  * 
- * @example <caption>Use manually generated keys to create a drop</caption>
+ * @example
+ * Use manually generated keys to create a drop:
+ * ```js
  * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
  * // be completely random unless otherwise overwritten.
  * await initKeypom({
@@ -123,8 +130,10 @@ export const KEY_LIMIT = 50;
  * 	publicKeys,
  * 	depositPerUseNEAR: 1,
  * });
+ * ```
  * 
- * @example <caption>Create a simple drop with 1 key and 1 use per key. This 1 use-key should be password protected based on a base-password</caption>
+ * @example 
+ * Create a simple drop with 1 key and 1 use per key. This 1 use-key should be password protected based on a base-password:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -383,7 +392,8 @@ export const createDrop = async ({
  * @param {any} drops (OPTIONAL) If the set of drop information for the drops you want to delete (from getDropInformation) is already known to the client, it can be passed in instead of the drop IDs to reduce computation.
  * @param {boolean=} withdrawBalance (OPTIONAL) Whether or not to withdraw any remaining balance on the Keypom contract.
  * 
- * @example <caption>Create 5 drops and delete each of them</caption>
+ * @example
+ * Create 5 drops and delete each of them:
  * ```js
  * // Initialize the SDK for the given network and NEAR connection
  * await initKeypom({
@@ -420,6 +430,7 @@ export const createDrop = async ({
  * 		accountId: "benjiman.testnet"
  * });
  * console.log('numDrops: ', numDrops)
+ * ```
 */
 export const deleteDrops = async ({
 	account,
