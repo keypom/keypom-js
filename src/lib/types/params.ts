@@ -4,6 +4,7 @@ import { Account } from "near-api-js";
 import { Maybe } from '../keypom';
 import { PasswordPerUse } from './drops';
 import { GeneratedKeyPairs } from './general';
+import { ProtocolReturnedDropConfig, ProtocolReturnedFCData, ProtocolReturnedFTData, ProtocolReturnedNFTData, ProtocolReturnedSimpleData } from './protocol';
 
 export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 
@@ -40,50 +41,11 @@ export interface CreateDropProtocolArgs {
 	deposit_per_use: string,
 
 	drop_id?: string,
-	config?: {
-		uses_per_key?: number,
-		time?: {
-			start?: number,
-			end?: number,
-			throttle?: number,
-			interval?: number,
-		},
-		usage?: {
-			permission?: string,
-			refund_deposit?: boolean,
-			auto_delete_drop?: boolean,
-			auto_withdraw?: boolean
-		},
-		root_account_id?: string,
-	},
+	config?: ProtocolReturnedDropConfig,
 	metadata?: string,
-
-	simple?: {
-		lazy_register?: boolean
-	},
-	ft?: {
-		contract_id?: string,
-		sender_id?: string,
-		balance_per_use?: string
-	},
-	nft?: {
-		sender_id?: string,
-		contract_id?: string,
-	},
-	fc?: {
-		methods: Array<Maybe<Array<{
-			receiver_id: string,
-			method_name: string,
-			args: string,
-			attached_deposit: string,
-			account_id_field?: string,
-			drop_id_field?: string,
-			key_id_field?: string
-		}>>>,
-		config?: {
-			attached_gas?: string
-		}
-	},
-
+	simple?: ProtocolReturnedSimpleData,
+	ft?: ProtocolReturnedFTData,
+	nft?: ProtocolReturnedNFTData,
+	fc?: ProtocolReturnedFCData,
 	passwords_per_use?: Array<Maybe<Array<PasswordPerUse>>>,
 }

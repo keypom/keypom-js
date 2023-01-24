@@ -1,6 +1,16 @@
 import * as nearAPI from "near-api-js";
 import { Near } from "near-api-js";
 import { EnvVars, Funder } from "./types/general";
+export declare const supportedKeypomContracts: {
+    mainnet: {
+        "v1-3.keypom.near": boolean;
+        "v1-4.keypom.near": boolean;
+    };
+    testnet: {
+        "v1-3.keypom.testnet": boolean;
+        "v1-4.keypom.testnet": boolean;
+    };
+};
 export type Maybe<T> = T | undefined;
 declare let near: Maybe<Near>;
 /**
@@ -9,12 +19,8 @@ declare let near: Maybe<Near>;
  * @group Keypom SDK Environment
  */
 export declare const getEnv: () => EnvVars;
-<<<<<<< HEAD
 /** @group Utility */
-export declare const execute: (args: any) => Promise<void | (void | nearAPI.providers.FinalExecutionOutcome)[] | nearAPI.providers.FinalExecutionOutcome[]>;
-=======
 export declare const execute: (args: any) => Promise<void | nearAPI.providers.FinalExecutionOutcome[] | (void | nearAPI.providers.FinalExecutionOutcome)[]>;
->>>>>>> main
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.

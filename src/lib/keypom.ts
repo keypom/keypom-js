@@ -48,6 +48,17 @@ let officialKeypomContracts = {
 	}
 }
 
+export const supportedKeypomContracts = {
+	mainnet: {
+		"v1-3.keypom.near": true,
+		"v1-4.keypom.near": true
+	},
+	testnet: {
+		"v1-3.keypom.testnet": true,
+		"v1-4.keypom.testnet": true
+	}
+}
+
 let contractBase = 'v1-3.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
@@ -198,7 +209,7 @@ export const initKeypom = async ({
 
 	if (keypomContractId) {
 		assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
-		if (keypomContractId != "v1-3.keypom.near" || keypomContractId != "v1-3.keypom.near") {
+		if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
 			console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 		}
 
@@ -309,7 +320,7 @@ export const updateKeypomContractId = async ({
 }:{keypomContractId: string}) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
 	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
-	if (keypomContractId != "v1-3.keypom.near" || keypomContractId != "v1-3.keypom.near") {
+	if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
 		console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 	}
 
