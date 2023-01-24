@@ -16,7 +16,23 @@ const {
 async function nftDropKeypom(){
 // Initiate connection to NEAR testnet blockchain
 console.log("Initiating NEAR connection");
-let near = await initiateNearConnection("testnet");
+const network = "testnet"
+
+const CREDENTIALS_DIR = ".near-credentials";
+const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+
+let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+
+let nearConfig = {
+	networkId: network,
+	keyStore: keyStore,
+	nodeUrl: `https://rpc.${network}.near.org`,
+	walletUrl: `https://wallet.${network}.near.org`,
+	helperUrl: `https://helper.${network}.near.org`,
+	explorerUrl: `https://explorer.${network}.near.org`,
+};
+
+let near = await connect(nearConfig);
 const fundingAccount = await near.account("keypom-docs-demo.testnet");
 
 // Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA

@@ -12,16 +12,21 @@ const {
 	addKeys,
 	generateKeys,
 } = keypom
+// const path = require("path");
+// const homedir = require("os").homedir();
+// const network = "testnet"
+// const myAccountId = "keypom-docs-demo.testnet"
+// const credentialsPath =  path.join(homedir, `.near-credentials/${network}/${myAccountId}.json`);
+// const myAccountInfo = require(credentialsPath)
 
 async function simpleDropKeypom(){
 // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 // Here we are connecting to the testnet network
-console.log("Initiating NEAR connection");
 await initKeypom({
-    network: 'testnet', 
+    network: "testnet", 
     funder: {
         accountId: "keypom-docs-demo.testnet", 
-        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
+        secretKey: "ed25519:66rWCwr7RTRpcLvpzCapSejmTBNbuWTDupv9T8H6YuYkgtcHeVKm3CgbPHTyD8VmidpfG7i3xnComzfnt4o5JfkU"
     }
 });
 

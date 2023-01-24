@@ -13,15 +13,15 @@ const {
 	addKeys,
 	generateKeys,
 } = keypom
+
 async function fcDropKeypom(){
 // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 // Here we are connecting to the testnet network
-console.log("Initiating NEAR connection");
 await initKeypom({
-    network: 'testnet', 
+    network: "testnet", 
     funder: {
         accountId: "keypom-docs-demo.testnet", 
-        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
+        secretKey: "ed25519:66rWCwr7RTRpcLvpzCapSejmTBNbuWTDupv9T8H6YuYkgtcHeVKm3CgbPHTyD8VmidpfG7i3xnComzfnt4o5JfkU"
     }
 });
 

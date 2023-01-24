@@ -1,11 +1,29 @@
 const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair } = require("near-api-js");
+const { KeyPair, keyStores, connect } = require("near-api-js");
+const path = require("path");
+const homedir = require("os").homedir();
 
 async function simpleDropNear(){
 // Initiate connection to the NEAR blockchain.
 console.log("Initiating NEAR connection");
-let near = await initiateNearConnection('testnet');
+const network = "testnet"
+
+const CREDENTIALS_DIR = ".near-credentials";
+const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+
+let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+
+let nearConfig = {
+	networkId: network,
+	keyStore: keyStore,
+	nodeUrl: `https://rpc.${network}.near.org`,
+	walletUrl: `https://wallet.${network}.near.org`,
+	helperUrl: `https://helper.${network}.near.org`,
+	explorerUrl: `https://explorer.${network}.near.org`,
+};
+
+let near = await connect(nearConfig);
 const fundingAccount = await near.account('keypom-docs-demo.testnet');
 
 // Keep track of an array of the key pairs we create and the public keys we pass into the contract
