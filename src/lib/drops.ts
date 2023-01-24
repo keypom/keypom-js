@@ -12,7 +12,7 @@ import { Account } from "near-api-js";
 import { assert, assertDropIdUnique, assertValidDropConfig, assertValidFCData, isValidAccountObj } from './checks';
 import { FCData } from './types/fc';
 import { FTData } from './types/ft';
-import { getEnv } from "./keypom";
+import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit,
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
@@ -215,14 +215,14 @@ export const createDrop = async ({
 	successUrl?: string
 }): Promise<CreateOrAddReturn> => {
 	const {
-		near, viewAccount,
+		near, viewAccount, networkId,
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
 
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
-	assert(contractId == "v1-3.keypom.near" || contractId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -482,10 +482,10 @@ export const deleteDrops = async ({
 	withdrawBalance?: boolean
 }) => {
 	const {
-		gas300, receiverId, execute, getAccount,
+		gas300, receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
 	
-	assert(receiverId == "v1-3.keypom.near" || receiverId == "v1-3.keypom.testnet", "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });

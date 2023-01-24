@@ -133,6 +133,26 @@ export interface ProtocolReturnedUsageConfig {
      * In the case where `autoDeleteDrop` is set to true and the drop is the owner's last, should their balance be automatically withdrawn? If this isn't specified, it defaults to false.
      */
     auto_withdraw?: boolean
+
+    /** When calling `create_account` on the root account, which keypom args should be attached to the payload. */
+    account_creation_fields?: {
+        /**
+         * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the `create_account` function.
+        */
+        account_id_field?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the drop's ID into when calling the `create_account` function.
+        */
+        drop_id_field?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the key's ID into when calling the `create_account` function.
+        */
+        key_id_field?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the drop funder's account ID into when calling the `create_account` function.
+        */
+        funder_id_field?: string,
+    },
 }
 
 export interface ProtocolReturnedSimpleData {

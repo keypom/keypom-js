@@ -36,6 +36,11 @@ export interface Method {
 	 * As an example, if an NFT contract wanted to gate only users with an odd key ID to be able to mint an NFT and their parameter was called `keypom_key_id`, then the `keyIdField` would be `keypom_key_id`.
 	*/
 	keyIdField?: string;
+	/**
+	 * Specifies what field Keypom should auto-inject the drop funder's account ID into when calling the function.
+	 * As an example, if an NFT contract wanted to gate only users that had a key coming from a specific funder's drops, it could expect a field called `keypom_funder_id` and the `funderIdField` would be `keypom_funder_id`.
+	*/
+	funderIdField?: string,
 }
 
 /** 
