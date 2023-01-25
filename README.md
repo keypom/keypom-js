@@ -68,6 +68,14 @@ Developers should be able to focus on building without needing to understand exa
 
 The Keypom SDK was built with flexibility in mind. We want to support integrating Keypom whether you're creating a dApp built with the with the [wallet-selector](https://github.com/near/wallet-selector), creating a backend, or if you're simply using a local node script.
 
+To build the complete TypeDocs locally, run the following command:
+
+```ts
+yarn build-docs && cd doc && python -m http.server 4200
+```
+
+Alternatively, you can visit the official Keypom docs which host the type docs found [here](TODO).
+
 # Getting Started
 
 The first thing to do when getting started with the SDK is to call the `initKeypom` function. This will initialize the state and establish a connection to the NEAR blockchain. This *must* be done before using any other function that interacts with the chain. The exception is if you're only using utility functions such as `generateKeys` which does not interact with the blockchain. 
@@ -499,9 +507,15 @@ const numDrops = await getDropSupply({
 console.log('numDrops: ', numDrops)
 ```
 
-## Helper Functions
-
 ## Account Balances for Smooth UX
+
+In order to make the UX of using Keypom seamless, the SDK supports the Protocol's debiting account model. All costs and refunds can go through your account's balance which is stored on the contract. This balance can be topped up or withdrawn at any moment using the SDK's `addToBalance` and `withdrawBalance` functions.
+
+This account balance system is not used by default and must be explicitly enabled by passing in the `useBalance` flag to any corresponding functions. The benefits of using the account balance system is that for browser based wallets, you can skip redirects. 
+
+A very common scenario is creating a drop with many keys at once. To avoid having to redirect the user many times (since only 100 keys can be added to a drop at once), you can call `createDrop` and pass in `returnTransactions` set to true. This will result in the transaction being returned instead of signed and sent. At this point, you can get the required deposit from the returned object and use that in `addToBalance`.
+
+At this point, the user will only be redirected once for the call to `addToBalance`. Once they returned, you can call `createDrop` in conjunction with `addKeys` with `useBalance` set to true.
 
 # Tests
 
