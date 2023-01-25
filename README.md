@@ -392,7 +392,6 @@ await initKeypom({
     }
 });
 
-
 const basePassword = "my-cool-password123";
 // Create a simple drop with 1 $NEAR and pass in a base password to create a unique password for each use of each key
 const {keys} = await createDrop({
@@ -414,6 +413,91 @@ await claim({
 ```
 
 ## Deleting Keys and Drops
+
+Often times, not all the keys in your drop will be used. What happens to the excess keys? Keypom allows you to delete keys from a drop and get fully refunded for any unclaimed assets. This is done by calling the SDK's `deleteKeys` and `deleteDrops` respectively. The difference between the two is outlined below.
+- `deleteKeys` allows you to delete a set of specific keys from a drop and get refunded for the assets. This does *not* delete the drop as a whole.
+- `deleteDrops` allows you to delete a set of drops and all the keys contained within them. It does this by recursively calling `deleteKeys` for each drop until they're empty and then deleting the drop itself.
+
+The parameters for both functions are outlined below:
+
+### Delete Keys
+
+- `account?` ([Account](https://github.com/near/near-api-js/blob/master/packages/near-api-js/src/account.ts)) - Valid NEAR account object that if passed in, will be used to sign the txn instead of the funder account.
+- `wallet?` ([BrowserWalletBehaviour | Wallet](https://github.com/near/wallet-selector/blob/main/packages/core/src/lib/wallet/wallet.types.ts)) - If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object.
+- `publicKeys` (string[] | string) - Specify a set of public keys to delete. If deleting a single publicKey, the string can be passed in without wrapping it in an array.
+- `dropId` (string) - Which drop ID do the keys belong to?
+- `withdrawBalance?` (boolean) - Whether or not to withdraw any remaining balance on the Keypom contract.
+
+An example of deleting keys can be seen below where a simple drop with 5 keys is created and one key is deleted.
+
+```js
+// Initialize the SDK for the given network and NEAR connection
+await initKeypom({
+    network: "testnet",
+    funder: {
+        accountId: "benji_demo.testnet",
+        secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+    }
+});
+
+// Create the simple drop with 5 random keys
+const {keys, dropId} = await createDrop({
+    numKeys: 5,
+    depositPerUseNEAR: 1,
+});
+
+await deleteKeys({
+    dropId,
+    publicKeys: keys.publicKeys[0] // Can be wrapped in an array as well
+})
+```
+
+### Delete Drops
+
+- `account?` ([Account](https://github.com/near/near-api-js/blob/master/packages/near-api-js/src/account.ts)) - Valid NEAR account object that if passed in, will be used to sign the txn instead of the funder account.
+- `wallet?` ([BrowserWalletBehaviour | Wallet](https://github.com/near/wallet-selector/blob/main/packages/core/src/lib/wallet/wallet.types.ts)) - If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object.
+- `drops?` ([ProtocolReturnedDrop](https://github.com/keypom/keypom-js/blob/main/src/lib/types/protocol.ts#L29-L60)[]) - If the set of drop information for the drops you want to delete (from `getDropInformation` or `getDrops`) is already known to the client, it can be passed in instead of the drop IDs to reduce computation.
+- `dropIds?` (string[]) - Specify a set of drop IDs to delete.
+- `withdrawBalance?` (boolean) - Whether or not to withdraw any remaining balance on the Keypom contract.
+
+An example of deleting drops can be seen below where 5 simple drops are created and then they're all deleted in one call to `deleteDrops`.
+
+```js
+// Initialize the SDK for the given network and NEAR connection
+await initKeypom({
+    network: "testnet",
+    funder: {
+        accountId: "benji_demo.testnet",
+        secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+    }
+});
+
+// loop to create 5 simple drops each with 5 more keys than the next
+for(var i = 0; i < 5; i++) {
+    // create 10 keys with no entropy (all random)
+    const {publicKeys} = await generateKeys({
+        numKeys: 5 * (i+1) // First drop will have 5, then 10, then 15 etc..
+    });
+
+    // Create the simple 
+    await createDrop({
+        publicKeys,
+        depositPerUseNEAR: 1,
+    });
+}
+
+let drops = await getDrops({accountId: "benji_demo.testnet"});
+
+await deleteDrops({
+    drops
+})
+
+// Get the number of drops the account has after deletion (should be zero)
+const numDrops = await getDropSupply({
+    accountId: "benjiman.testnet"
+});
+console.log('numDrops: ', numDrops)
+```
 
 ## Helper Functions
 
