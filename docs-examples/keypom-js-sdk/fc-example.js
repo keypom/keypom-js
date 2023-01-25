@@ -1,6 +1,5 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const keypom = require("../../lib");
-const { initKeypom, createDrop } = keypom
+const { initKeypom, createDrop } = require("keypom-js");
 
 async function fcDropKeypom(){
 	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
@@ -9,7 +8,7 @@ async function fcDropKeypom(){
 	    network: "testnet", 
 	    funder: {
 	        accountId: "keypom-docs-demo.testnet", 
-	        secretKey: "ed25519:66rWCwr7RTRpcLvpzCapSejmTBNbuWTDupv9T8H6YuYkgtcHeVKm3CgbPHTyD8VmidpfG7i3xnComzfnt4o5JfkU"
+	        secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
 	    }
 	});
 

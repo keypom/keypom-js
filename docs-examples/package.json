@@ -1,0 +1,39 @@
+{
+  "name": "keypom-js",
+  "version": "0.0.14",
+  "description": "Keypom JS SDK",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "yarn build && yarn ava",
+    "ava": "ava test/ws.test.js -vs --timeout=5m",
+    "build": "npx tsc",
+    "publish": "npx tsc && npm publish",
+    "fc-keypom": "node docs-examples/keypom-js-sdk/fc-example.js",
+    "ft-keypom": "node docs-examples/keypom-js-sdk/ft-example.js",
+    "nft-keypom": "node docs-examples/keypom-js-sdk/nft-example.js",
+    "simple-keypom": "node docs-examples/keypom-js-sdk/simple-example.js",
+    "fc-near": "node docs-examples/near-api-js/fc-near-example.js",
+    "ft-near": "node docs-examples/near-api-js/ft-near-example.js",
+    "nft-near": "node docs-examples/near-api-js/nft-near-example.js",
+    "simple-near": "node docs-examples/near-api-js/simple-near-example.js",
+    "testing-import" : "node near-api-js/testing.js"
+
+  },
+  "author": "mattlockyer",
+  "license": "MIT",
+  "dependencies": {
+    "@near-wallet-selector/core": "^7.1.0",
+    "ava": "^4.3.3",
+    "bn.js": "^5.2.1",
+    "dotenv": "^16.0.3",
+    "near-api-js": "^0.44.2",
+    "near-seed-phrase": "^0.2.0",
+    "typescript": "^4.8.4",
+    "keypom-js": "^1.1.7-rc.1"
+  },
+  "ava": {
+    "require": [
+      "dotenv/config"
+    ]
+  }
+}

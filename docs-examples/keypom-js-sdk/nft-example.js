@@ -1,6 +1,5 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const keypom = require("../../lib");
-const { initKeypom, createDrop } = keypom
+const { initKeypom, createDrop } = require("keypom-js");
 
 async function nftDropKeypom(){
 	// Initiate connection to NEAR testnet blockchain
@@ -44,7 +43,7 @@ async function nftDropKeypom(){
 		near: near,
 		funder: {
 	        accountId: "keypom-docs-demo.testnet", 
-	        secretKey: "ed25519:4QdPsdKrnyjmadJn7THkEYeH6QwVNkY1dTvaVFK16HH55hNr6UewfeYVvypgXgTT1GHGior8Yj3x4neGndGWhviy"
+	        secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
 		}
 	});
 	// Create drop with nft data
