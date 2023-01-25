@@ -1,4 +1,3 @@
-const { initiateNearConnection, getFtCosts, estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } = require("../utils/general");
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const path = require("path");
@@ -45,7 +44,7 @@ async function simpleDropNear(){
 			}, 
 			"300000000000000",
 			// Attached deposit of 1 $NEAR
-			parseNearAmount("1"),
+			parseNearAmount("1")
 		);
 	} catch(e) {
 		console.log('error creating drop: ', e);

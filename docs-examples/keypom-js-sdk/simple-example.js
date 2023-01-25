@@ -1,5 +1,4 @@
 const keypom = require("../../lib");
-const { updateFunder } = require("../../lib/lib/keypom");
 const { initKeypom, createDrop } = keypom
 
 async function simpleDropKeypom(){
