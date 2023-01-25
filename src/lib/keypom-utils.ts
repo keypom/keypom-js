@@ -188,39 +188,6 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
     }
 }
 
-/**
- * Query for a user's current balance on the Keypom contract
- * 
- * @param {string} accountId The account ID of the user to retrieve the balance for.
- * 
- * @returns {string} The user's current balance
- * 
- * @example
- * Query for a user's current balance on the Keypom contract:
- * ```js
- * // Initialize the SDK on testnet. No funder is passed in since we're only doing view calls.
- * await initKeypom({
- * network: "testnet",
- * });
- * 
- * // Query for the drop information for a specific drop
- * const dropInfo = await getDropInformation({
- * dropId: "1669840629120",
- * withKeys: true
- * })
- * 
- * console.log('dropInfo: ', dropInfo)
- * ```
- * @group User Balance Functions
-*/
-export const getUserBalance = async ({
-    accountId
-}: {accountId: string}): Promise<string> => {
-    const { contractId, viewAccount } = getEnv()
-    assert(viewAccount, 'initKeypom must be called before view functions can be called.');
-    return viewAccount.viewFunction2({ contractId, methodName: 'get_user_balance', args: { account_id: accountId }})
-}
-
 export const keypomView = async ({ methodName, args }) => {
     const {
 		viewAccount, contractId,
