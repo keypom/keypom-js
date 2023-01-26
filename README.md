@@ -1,8 +1,3 @@
-<p align="center">
-  <img src="static/claim-linkdrop-asset.png" alt="Logo" styles="width: 35%; height: 35%" />
-  <br />
-</p>
-
 <div align="center">
   <h1>
   Keypom JavaScript SDK
@@ -69,7 +64,7 @@ To build the complete TypeDocs locally, run the following command:
 yarn build-docs && cd doc && python -m http.server 4200
 ```
 
-Alternatively, you can visit the official Keypom docs which host the type docs found [here](TODO).
+Alternatively, you can visit the official Keypom docs which host the type docs found [here](https://docs.keypom.xyz/).
 
 # Getting Started
 
@@ -636,8 +631,6 @@ Please try to create bug reports that are:
 - _Specific._ Include as much detail as possible: which version, what environment, etc.
 - _Unique._ Do not duplicate existing opened issues.
 - _Scoped to a Single Bug._ One bug per report.
-
-Please adhere to this project's [code of conduct](docs/CODE_OF_CONDUCT.md).
 
 You can use [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli) to check for common markdown style inconsistency.
 
