@@ -60,7 +60,7 @@ async function nftDropKeypom(){
 	    depositPerUseNEAR: "1",
 	    nftData: {
 		    // NFT Contract Id that the tokens will come from
-			contractId: "nft.examples.testnet",
+		contractId: "nft.examples.testnet",
 		    // Who will be sending the NFTs to the Keypom contract
 		    senderId: "keypom-docs-demo.testnet",
 		    // List of tokenIDs
