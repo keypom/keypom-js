@@ -23,32 +23,30 @@
 <summary>Table of Contents</summary>
 
 - [About](#about)
-  - [Introduction](#introduction)
-  - [Comparable Solutions](#comparable-solutions)
-- [Our Solution](#our-solution)
-  - [Drop Customization](#shared-drop-customization)
-  - [Simple Drops](#simple-drops)
-  - [NFT Drops](#non-fungible-token-drops)
-  - [FT Drops](#fungible-token-drops)
-  - [Function Call Drops](#function-call-drops)
-  - [Password Protected Keys](#password-protected-keys)
-  - [dApp Free Trials for Users](#dapp-free-trials-for-users)
+- [Getting Started](#getting-started)
+  - [Initializing the SDK](#initializing-the-sdk)
+  - [View Functions](#view-functions)
+  - [Creating Drops](#creating-drops)
+    - [Simple Drop With 10 Random Keys](#creating-a-simple-drop-with-10-random-keys)
+    - [Simple Drop With Deterministic Keys](#creating-a-simple-drop-with-5-deterministically-generated-keys)
+    - [Simple Drop With Pre-Created Keys](#creating-a-simple-drop-with-pre-created-keys)
+    - [Password Protected Keys](#creating-a-simple-drop-with-a-password-protected-key)
+  - [Claiming Linkdrops](#claiming-linkdrops)
+    - [Claiming To Existing Account](#claiming-a-linkdrop-to-an-Existing-Account)
+    - [Claiming To a New Account](#Claiming-a-Linkdrop-and-Onboarding-a-New-User)
+    - [Claiming Password Protected Drops](#Claiming-a-Password-Protected-Linkdrop)
+  - [Deleting Keys and Drops](#Deleting-Keys-and-Drops)
+    - [Deleting Keys](#Delete-Keys)
+    - [Deleting Drops](#Delete-Drops)
+  - [Account Balances for Smooth UX](#Account-Balances-for-Smooth-UX)
+  - [Utility Functions](#Utility-Functions)
+- [Tests](#tests)
+  - [Running the Tests](#Running-the-Tests)
 - [Costs](#costs)
   - [Per Drop](#per-drop)
   - [Per Key](#per-key)
-  - [Deleting Keys and Drops](#deleting-keys-and-drops)
-  - [Automatic Refunds](#automatic-refunds-when-keys-are-used)
-  - [Account Balances](#account-balances-for-smooth-ux)
 - [How Linkdrops Work](#how-linkdrops-work)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Deploy Scripts](#deploy-scripts)  
-- [Query Information From Keypom](#query-information-from-keypom)
-  - [Key Specific](#key-specific)
-  - [Drop Specific](#drop-specific)    
-- [Running Tests](#running-the-keypom-tests)
 - [Contributing](#contributing)
-- [Acknowledgements](#acknowledgements)
 
 </details>
 
@@ -517,11 +515,50 @@ A very common scenario is creating a drop with many keys at once. To avoid havin
 
 At this point, the user will only be redirected once for the call to `addToBalance`. Once they returned, you can call `createDrop` in conjunction with `addKeys` with `useBalance` set to true.
 
+## Utility Functions
+
+There are several functions and variables that have been exported in order to make developing easier. Below are a few notable functions:
+- `nearAPI` (variable) - Contains a suite of functionalities coming from `near-api-js`. This includes, but is not limited to the KeyPair object, formatting functions, different keystores etc.
+- `updateFunder()` - Allows you to update the funder account for the SDK. This is useful if you want to use a different account to sign transactions.
+- `useKeypom()` - Returns all the environment variables that are used by the SDK. This includes the funder object, Keypom contract, keystore, NEAR connection etc.
+- `hashPassword()` - Generate a sha256 hash of a passed in string. This also supports hex encoded strings.
+- `formatNearAmount()` - Converts a human readable NEAR amount (i.e 1.5 $NEAR) to yoctoNEAR.
+- `parseNearAmount()` - Converts a yoctoNEAR amount to a human readable NEAR amount (i.e 1500000000000000000000000 yoctoNEAR -> 1.5 $NEAR).
+- `generateKeys()` - Generate a desired number of keypairs. These can be created with or without entropy.
+
 # Tests
+
+The SDK comes equipped with a number of tests. These can be used as reference for different scenarios that arise with Keypom. To run the tests, you'll need to have a few prerequisites.
+
+## Running the Tests
+
+First, you'll need a valid NEAR account's secret key and account ID. These need to exported as environment variables as the tests will be running on testnet and the transactions need to be signed. Export the following environment variables:
+
+```bash
+export TEST_ACCOUNT_ID="YOUR_ACCOUNT_ID"
+export TEST_ACCOUNT_PRVKEY="YOUR_SECRET_KEY"
+```
+
+Once completed, install the dependencies:
+
+```bash
+npm install
+```
+
+At this point, everything is in order so that the tests can be run. The following command can be used to begin running the tests:
+
+```bash
+npm run test
+```
+
+If all went well, the following should be outputted once all the tests have run:
+
+```bash
+```
 
 # Costs
 
-It is important to note that the Keypom contract is 100% **FEE FREE** and will remain that way for the *forseeable future*. This contract is a public good and is meant to inspire change in the NEAR ecosystem.
+It is important to note that the Keypom contracts are 100% **FEE FREE** and will remain that way for the *forseeable future*. These contracts are a public good and are meant to inspire change in the NEAR ecosystem.
 
 With that being said, there are several mandatory costs that must be taken into account when using Keypom. These costs are broken down into two categories: per key and per drop.
 

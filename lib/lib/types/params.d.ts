@@ -17,7 +17,7 @@ export interface CreateOrAddReturn {
     /** The required deposit that should be attached to the transaction. */
     requiredDeposit?: string;
     /** Any keys that were automatically generated. */
-    keys?: Maybe<GeneratedKeyPairs>;
+    keys?: GeneratedKeyPairs;
     /** The drop ID for the drop that is being interacted with. */
     dropId: string;
 }
