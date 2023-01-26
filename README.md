@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/claim-linkdrop-asset.png" alt="Logo" style="width: 35%; height: 35%">
+  <img src="static/claim-linkdrop-asset.png" alt="Logo" styles="width: 35%; height: 35%" />
   <br />
 </p>
 
@@ -53,9 +53,6 @@
 ---
 
 # About
-
-<tr>
-<td>
 
 > To view our debut talk at NEARCON 2022, click [here](https://www.youtube.com/watch?v=J-BOnfhHV50).
 > To read more about the Keypom Protocol, refer to the [official GitHub repository](https://github.com/keypom/keypom#about)
@@ -628,8 +625,6 @@ For some background as to how linkdrops works on NEAR:
 - Wallet will then use the `privKey1` which has access to call `claim` and `create_account_and_claim` in order to call `create_account_and_claim` on the contract.
     - It will pass in `pubKey2` which will be used to create a full access key for the new account.
 - The contract will create the new account and transfer the funds to it alongside any NFT or fungible tokens pre-loaded.
-
-</p>
 
 # Contributing
 
