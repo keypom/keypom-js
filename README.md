@@ -554,6 +554,15 @@ npm run test
 If all went well, the following should be outputted once all the tests have run:
 
 ```bash
+  ✔ delete 1 key from simple drop (3.7s)
+requiredDeposit:  1856805594168075000000050
+Receipt: uN5cwkUFXB2gY4LE8vfuCGvA8BcqaTVgoExKQGu2Cct
+	Log [v1-3.keypom.testnet]: User balance incremented by 1.8568055. Old: 0 new: 1.8568055
+  ✔ Create drop and return requiredDeposit so it can be added to balance (10.5s)
+  ✔ invalid args being passed in
+  ─
+
+  18 tests passed
 ```
 
 # Costs
