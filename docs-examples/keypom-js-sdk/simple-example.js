@@ -20,13 +20,13 @@ async function simpleDropKeypom(){
 	});
 	pubKeys = keys.publicKeys
 
-    var dropInfo = {};
+    	var dropInfo = {};
 	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
-    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
-    for(var i = 0; i < keys.keyPairs.length; i++) {
-		let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+    	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    	for(var i = 0; i < keys.keyPairs.length; i++) {
+	let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
-	}
+		}
 	// Write file of all pk's and their respective linkdrops
 	console.log('Public Keys and Linkdrops: ', dropInfo)
 }

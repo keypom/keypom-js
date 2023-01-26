@@ -46,8 +46,8 @@ async function nftDropKeypom(){
 		near: near,
 		network: network,
 		funder: {
-	        accountId: "keypom-docs-demo.testnet", 
-	        secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
+	        	accountId: "keypom-docs-demo.testnet", 
+	        	secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
 		}
 	});
 
@@ -69,11 +69,11 @@ async function nftDropKeypom(){
 	});
 	pubKeys = keys.publicKeys
 
-    var dropInfo = {};
+    	var dropInfo = {};
 	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
-    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
-    for(var i = 0; i < keys.keyPairs.length; i++) {
-		let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+   		// Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    	for(var i = 0; i < keys.keyPairs.length; i++) {
+	let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops
