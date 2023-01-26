@@ -153,7 +153,7 @@ To read more about the Keypom Protocol, refer to the <a href="https://github.com
 <li><code>depositPerUseNEAR?</code> (number) - Specify how much $NEAR should be contained in each link. Unit in $NEAR (i.e <code>1</code> = 1 $NEAR)</li>
 <li><code>depositPerUseYocto?</code> (string) - Specify how much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR)</li>
 <li><code>dropId?</code> (string) - Specify a custom drop ID rather than using one from the SDK. If no drop ID is passed in, an ID equal to <code>Date.now()</code> will be used.</li>
-<li><code>config?</code> (<a href="">DropConfig</a>) - Allows specific drop behaviors to be configured such as the number of uses each key / link will have.</li>
+<li><code>config?</code> (<a href="https://github.com/keypom/keypom-js/blob/ben/readme/src/lib/types/drops.ts#L61-L99">DropConfig</a>) - Allows specific drop behaviors to be configured such as the number of uses each key / link will have.</li>
 <li><code>metadata?</code> (string) - Specify a string of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON.</li>
 <li><code>simpleData?</code> (<a href="https://github.com/keypom/keypom-js/blob/main/src/lib/types/drops.ts#L61-L99">SimpleData</a>) - For creating a simple drop, this contains necessary configurable information about the drop.</li>
 <li><code>ftData?</code> (<a href="https://github.com/keypom/keypom-js/blob/main/src/lib/types/ft.ts#L1-L23">FTData</a>) - For creating a fungible token drop, this contains necessary configurable information about the drop.</li>
