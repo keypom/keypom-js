@@ -1,5 +1,8 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { initKeypom, createDrop } = require("keypom-js");
+const { KeyPair, keyStores, connect } = require("near-api-js");
+const path = require("path");
+const homedir = require("os").homedir();
 const { BN } = require("bn.js");
 
 async function ftDropKeypom(){
@@ -40,6 +43,7 @@ async function ftDropKeypom(){
 	// Initiate Keypom, while passing in the existing NEAR testnet connection so it does not create a new one
 	await initKeypom({
 		near: near,
+		network: network,
 		funder: {
 	        accountId: "keypom-docs-demo.testnet", 
 	        secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
@@ -51,7 +55,7 @@ async function ftDropKeypom(){
 	// If any information is not valid, the SDK will panic and the drop will NOT be created.
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	console.log(parseNearAmount("1"))
-	await createDrop({
+	const { keys } = await createDrop({
 	    numKeys: 1,
 	    depositPerUseNEAR: 1,
 	    ftData: {
@@ -62,6 +66,17 @@ async function ftDropKeypom(){
 			amount: "1"
 		},
 	});
+	pubKeys = keys.publicKeys
+
+    var dropInfo = {};
+	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    for(var i = 0; i < keys.keyPairs.length; i++) {
+		let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+	    dropInfo[pubKeys[i]] = linkdropUrl;
+	}
+	// Write file of all pk's and their respective linkdrops
+	console.log('Public Keys and Linkdrops: ', dropInfo)
 	// Note that Keypom createDrop will auto-register you onto the contract if you are not yet registered.
 }
 

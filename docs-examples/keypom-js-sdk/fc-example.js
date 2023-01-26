@@ -15,7 +15,7 @@ async function fcDropKeypom(){
 	// Note that the SDK does error checks to ensure all the information passed in will succeed when creating a drop.
 	// If any information is not valid, the SDK will panic and the drop will NOT be created.
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
-	await createDrop({
+	const {keys} = await createDrop({
 	    numKeys: 1,
 	    depositPerUseNEAR: "1",
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
@@ -42,5 +42,16 @@ async function fcDropKeypom(){
 			]
 		},
 	});
+	pubKeys = keys.publicKeys
+
+    var dropInfo = {};
+	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    for(var i = 0; i < keys.keyPairs.length; i++) {
+		let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+	    dropInfo[pubKeys[i]] = linkdropUrl;
+	}
+	// Write file of all pk's and their respective linkdrops
+	console.log('Public Keys and Linkdrops: ', dropInfo)
 }
 fcDropKeypom()
