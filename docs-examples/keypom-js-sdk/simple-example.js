@@ -47,7 +47,7 @@ async function simpleDropKeypom(){
     	for(var i = 0; i < keys.keyPairs.length; i++) {
 	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
-		}
+	}
 	// Write file of all pk's and their respective linkdrops
 	console.log('Public Keys and Linkdrops: ', dropInfo)
 }
