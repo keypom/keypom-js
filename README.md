@@ -494,6 +494,7 @@ await deleteDrops({
 const numDrops = await getDropSupply({
     accountId: "benjiman.testnet"
 });
+
 console.log('numDrops: ', numDrops)
 ```
 
