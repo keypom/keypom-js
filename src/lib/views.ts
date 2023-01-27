@@ -1,4 +1,5 @@
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types'
+import { KeyPair } from 'near-api-js'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
@@ -213,15 +214,17 @@ export const getKeyInformationBatch = async ({
 }
 
 /**
- * Get information about a specific drop given its drop ID.
+ * Get information about a specific drop by passing in either a drop ID, public key, or secret key.
  * 
- * @param {string} dropId The drop ID for the specific drop that you want to get information about.
+ * @param {string=} dropId (OPTIONAL) The drop ID for the specific drop that you want to get information about.
+ * @param {string=} publicKey (OPTIONAL) A valid public key that is part of a drop.
+ * @param {string=} secretKey (OPTIONAL) The secret key corresponding to a valid public key that is part of a drop.
  * @param {boolean=} withKeys (OPTIONAL) Whether or not to include key information for the first 50 keys in each drop.
  * 
  * @returns {Drop} Drop information which may or may not have a keys field of type `KeyInfo` depending on if withKeys is specified as true.
  * 
  * @example 
- * Create a simple drop and retrieve information about it::
+ * Create a simple drop and retrieve information about it:
  * ```js
  * // Initialize the SDK on testnet.
  * await initKeypom({
@@ -246,28 +249,71 @@ export const getKeyInformationBatch = async ({
  * 
  * console.log('dropInfo: ', dropInfo)
  * ```
+ * 
+ * @example 
+ * Create a simple drop and get the drop information based on a public key and then the secret key:
+ * ```js
+ * // Initialize the SDK on testnet.
+ * await initKeypom({
+ *     network: "testnet",
+ *     funder: {
+ *         accountId: "benji_demo.testnet",
+ *         secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
+ *     }
+ * });
+ * 
+ * // Create a drop with 1 key automatically created. That key will be completely random since there is no entropy.
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ * 
+ * // Query for the drop information and also return the key information as well
+ * let dropInfo = await getDropInformation({
+ * 	   publicKey: keys.publicKeys[0],
+ *     withKeys: true
+ * })
+ * 
+ * console.log('dropInfo via public key: ', dropInfo)
+ * 
+ * // Query for the drop information and also return the key information as well
+ * dropInfo = await getDropInformation({
+ * 	   secretKey: keys.secretKeys[0],
+ *     withKeys: true
+ * })
+ * 
+ * console.log('dropInfo via secret key: ', dropInfo)
+ * ```
  * @group View Functions
 */
-export const getDropInformation = async ({ dropId, withKeys = false } : {dropId: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
+export const getDropInformation = async ({ dropId, secretKey, publicKey, withKeys = false } : {dropId?: string, secretKey?: string, publicKey?: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
 		viewAccount, contractId,
 	} = getEnv()
 
 	assert(viewAccount, 'initKeypom must be called before view functions can be called.');
+	// Assert that either a dropId or a secretKey is passed in
+	assert(dropId || secretKey || publicKey, 'Must pass in either a dropId, publicKey or a secretKey to getDropInformation');
+
+	if (secretKey) {
+		var keyPair = await KeyPair.fromString(secretKey);
+		publicKey = keyPair.getPublicKey().toString()
+	}
 
 	const dropInfo = await viewAccount.viewFunction2({
 		contractId,
 		methodName: 'get_drop_information',
 		args: {
 			drop_id: dropId,
+			key: publicKey,
 		},
 	})
-
+	
 	if (withKeys) {
 		dropInfo.keys = await keypomView({
 			methodName: 'get_keys_for_drop',
 			args: {
-				drop_id: dropId,
+				drop_id: dropInfo.drop_id,
 				from_index: '0',
 				limit: KEY_LIMIT
 			}
