@@ -540,7 +540,7 @@ export const getDrops = async ({
 }
 
 /**
- * Return the total supply of token IDs for a given NFT drop,
+ * Return the total supply of token IDs for a given NFT drop.
  * 
  * @param {string} dropId The drop ID that the tokens belong to.
  * 

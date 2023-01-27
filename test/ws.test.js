@@ -547,11 +547,11 @@ test('Create drop and return requiredDeposit so it can be added to balance', asy
 	})
 	console.log('requiredDeposit: ', requiredDeposit);
 
+	await withdrawBalance({});
 	await addToBalance({
 		absoluteAmount: requiredDeposit.toString(),
 	});
-
-	const curBal = await getUserBalance({accountId: "benji_demo.testnet"});
+	const curBal = await getUserBalance({accountId});
 
 	t.is(curBal.toString(), requiredDeposit.toString());
 });
