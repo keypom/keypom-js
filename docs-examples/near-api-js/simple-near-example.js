@@ -43,8 +43,8 @@ async function simpleDropNear(){
 				deposit_per_use: parseNearAmount('1'),
 			}, 
 			"300000000000000",
-			// Attached deposit of 1 $NEAR
-			parseNearAmount("1")
+			// Generous attached deposit of 1.5 $NEAR
+			parseNearAmount("1.5")
 		);
 	} catch(e) {
 		console.log('error creating drop: ', e);
