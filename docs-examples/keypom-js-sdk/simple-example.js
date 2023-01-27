@@ -36,7 +36,7 @@ async function simpleDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const {keys} = await createDrop({
 	    account: fundingAccount,
-	numKeys: 1,
+	    numKeys: 1,
 	    depositPerUseNEAR: "1",
 	});
 	pubKeys = keys.publicKeys
