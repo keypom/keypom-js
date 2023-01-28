@@ -42,8 +42,8 @@ async function ftDropKeypom(){
 
 	// Initiate Keypom, while passing in the existing NEAR testnet connection so it does not create a new one
 	await initKeypom({
-		near: near,
-		network: network,
+	    near: near,
+	    network: network,
 	});
 
 	// Creates the FT drop based on data from config file. Keys are automatically generated within the function based on `NUM_KEYS`. Since there is no entropy, all keys are completely random.
