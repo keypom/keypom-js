@@ -51,8 +51,8 @@ async function ftDropKeypom(){
 	// If any information is not valid, the SDK will panic and the drop will NOT be created.
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const { keys } = await createDrop({
-		account: fundingAccount,
-		numKeys: 1,
+	    account: fundingAccount,
+	    numKeys: 1,
 	    depositPerUseNEAR: 1,
 	    ftData: {
 	    	contractId: "ft.keypom.testnet",
