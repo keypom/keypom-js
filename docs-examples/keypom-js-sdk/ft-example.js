@@ -44,10 +44,6 @@ async function ftDropKeypom(){
 	await initKeypom({
 		near: near,
 		network: network,
-		funder: {
-	        	accountId: "keypom-docs-demo.testnet", 
-	        	secretKey: "ed25519:2T48Hax5vGA7Hh8h5QcWDAJvmG7aXVFMp95aSubHTLjaLE7tWpgD7Ha2LYbbchxY4KHMpZWTvv2eWxmHiX2orNbD"
-		}
 	});
 
 	// Creates the FT drop based on data from config file. Keys are automatically generated within the function based on `NUM_KEYS`. Since there is no entropy, all keys are completely random.
@@ -55,15 +51,16 @@ async function ftDropKeypom(){
 	// If any information is not valid, the SDK will panic and the drop will NOT be created.
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const { keys } = await createDrop({
-	    numKeys: 1,
+		account: fundingAccount,
+		numKeys: 1,
 	    depositPerUseNEAR: 1,
 	    ftData: {
-			contractId: "ft.keypom.testnet",
-			senderId: "keypom-docs-demo.testnet",
-			// This balance per use is balance of FTs per use. 
-			// parseNearAmount is used for conveience to convert to 10^24
-			amount: "1"
-		},
+	    	contractId: "ft.keypom.testnet",
+	    	senderId: "keypom-docs-demo.testnet",
+	    	// This balance per use is balance of FTs per use. 
+	    	// parseNearAmount is used for conveience to convert to 10^24
+	    	amount: "1"
+	    },
 	});
 	pubKeys = keys.publicKeys
 
@@ -71,7 +68,7 @@ async function ftDropKeypom(){
 	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keys.keyPairs.length; i++) {
-	let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops
