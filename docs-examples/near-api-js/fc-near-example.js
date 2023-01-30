@@ -55,10 +55,10 @@ async function fcDropNear(){
 	                		        token_id: "near-api-token-002",
 	                		        receiver_id: "keypom-docs-demo.testnet",
 	                		        metadata: {
-				    			        title: "My Keypom NFT",
-				    			        description: "Keypom is lit fam",
-				    			        media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
-				    			    }
+				    		        title: "My Keypom NFT",
+				    		        description: "Keypom is lit fam",
+				    		        media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
+				    		    }
 				    	    }),
 				    	    // Attached deposit of 1 $NEAR for when the receiver makes this function call
 				    	    attached_deposit: parseNearAmount("1"),
