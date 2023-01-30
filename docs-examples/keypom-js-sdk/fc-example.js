@@ -60,7 +60,7 @@ async function fcDropKeypom(){
 		    	attachedDeposit: parseNearAmount("1")
 		    }]
 		]
-		},
+	},
 	});
 	pubKeys = keys.publicKeys
 
