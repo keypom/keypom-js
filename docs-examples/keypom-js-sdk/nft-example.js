@@ -13,12 +13,12 @@ async function nftDropKeypom(){
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
-		networkId: network,
-		keyStore: keyStore,
-		nodeUrl: `https://rpc.${network}.near.org`,
-		walletUrl: `https://wallet.${network}.near.org`,
-		helperUrl: `https://helper.${network}.near.org`,
-		explorerUrl: `https://explorer.${network}.near.org`,
+	    networkId: network,
+	    keyStore: keyStore,
+	    nodeUrl: `https://rpc.${network}.near.org`,
+	    walletUrl: `https://wallet.${network}.near.org`,
+	    helperUrl: `https://helper.${network}.near.org`,
+	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
 	let near = await connect(nearConfig);
@@ -44,8 +44,8 @@ async function nftDropKeypom(){
 
 	// Initiate Keypom using existing NEAR testnet connection
 	await initKeypom({
-		near: near,
-		network: network,
+	    near: near,
+	    network: network,
 	});
 
 	// Create drop with nft data
@@ -54,7 +54,7 @@ async function nftDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const { keys } = await createDrop({
 	    account: fundingAccount,
-		numKeys: 1,
+	    numKeys: 1,
 	    depositPerUseNEAR: "1",
 	    nftData: {
 		    // NFT Contract Id that the tokens will come from

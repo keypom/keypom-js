@@ -12,12 +12,12 @@ async function nftDropNear(){
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 	
 	let nearConfig = {
-		networkId: network,
-		keyStore: keyStore,
-		nodeUrl: `https://rpc.${network}.near.org`,
-		walletUrl: `https://wallet.${network}.near.org`,
-		helperUrl: `https://helper.${network}.near.org`,
-		explorerUrl: `https://explorer.${network}.near.org`,
+	    networkId: network,
+	    keyStore: keyStore,
+	    nodeUrl: `https://rpc.${network}.near.org`,
+	    walletUrl: `https://wallet.${network}.near.org`,
+	    helperUrl: `https://helper.${network}.near.org`,
+	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 	
 	let near = await connect(nearConfig);
