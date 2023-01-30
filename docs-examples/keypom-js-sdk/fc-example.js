@@ -13,12 +13,12 @@ async function fcDropKeypom(){
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
-		networkId: network,
-		keyStore: keyStore,
-		nodeUrl: `https://rpc.${network}.near.org`,
-		walletUrl: `https://wallet.${network}.near.org`,
-		helperUrl: `https://helper.${network}.near.org`,
-		explorerUrl: `https://explorer.${network}.near.org`,
+	    networkId: network,
+	    keyStore: keyStore,
+	    nodeUrl: `https://rpc.${network}.near.org`,
+	    walletUrl: `https://wallet.${network}.near.org`,
+	    helperUrl: `https://helper.${network}.near.org`,
+	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
 	let near = await connect(nearConfig);
@@ -27,8 +27,8 @@ async function fcDropKeypom(){
 	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 	// Here we are connecting to the testnet network
 	await initKeypom({
-		near: near,
-		network: "testnet"
+	    near: near,
+	    network: "testnet"
 	});
 
 	// Note that the SDK does error checks to ensure all the information passed in will succeed when creating a drop.
@@ -36,7 +36,7 @@ async function fcDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const {keys} = await createDrop({
 	    account: fundingAccount,
-		numKeys: 1,
+	    numKeys: 1,
 	    depositPerUseNEAR: "1",
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
 	    fcData: {
