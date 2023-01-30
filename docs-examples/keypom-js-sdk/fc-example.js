@@ -40,26 +40,26 @@ async function fcDropKeypom(){
 	    depositPerUseNEAR: "1",
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
 	    fcData: {
-			// 2D array of function calls. In this case, there is 1 function call to make for a key use
-			// By default, if only one array of methods is present, this array of function calls will be used for all key uses
-		    methods: [
-				// Array of functions for Key use 1. 
-			    [{
-			    	receiverId: "nft.examples.testnet",
-			    	methodName: "nft_mint",
-			    	args: JSON.stringify({
-		        	    token_id: "keypom-sdk-token-02",
-		        	    receiver_id: "keypom-docs-demo.testnet",
-		        	    metadata: {
-			    	        title: "My Keypom NFT",
-			    	        description: "Keypom is lit fam",
-			    	        media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
-			    	    }
-			    	}),
-			    	// Attached deposit of 1 $NEAR for when the receiver makes this function call
-			    	attachedDeposit: parseNearAmount("1")
-			    }]
-			]
+		// 2D array of function calls. In this case, there is 1 function call to make for a key use
+		// By default, if only one array of methods is present, this array of function calls will be used for all key uses
+		methods: [
+			// Array of functions for Key use 1. 
+		    [{
+		    	receiverId: "nft.examples.testnet",
+		    	methodName: "nft_mint",
+		    	args: JSON.stringify({
+		    	    token_id: "keypom-sdk-token-02",
+		    	    receiver_id: "keypom-docs-demo.testnet",
+		    	    metadata: {
+		    	        title: "My Keypom NFT",
+		    	        description: "Keypom is lit fam",
+		    	        media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
+		    	    }
+		    	}),
+		    	// Attached deposit of 1 $NEAR for when the receiver makes this function call
+		    	attachedDeposit: parseNearAmount("1")
+		    }]
+		]
 		},
 	});
 	pubKeys = keys.publicKeys
