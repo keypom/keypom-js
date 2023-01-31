@@ -741,7 +741,7 @@ const getNoneFcsAndDepositRequired = (fcData: FCData | undefined, usesPerKey: nu
             attachedDeposit = attachedDeposit.add(new BN(methodData![i].attachedDeposit));
         }
 
-        depositRequiredForFcDrops = depositRequiredForFcDrops.add(attachedDeposit).mul(usesPerKey);
+        depositRequiredForFcDrops = depositRequiredForFcDrops.add(new BN(attachedDeposit)).mul(new BN(usesPerKey));
 
         return {
             numNoneFcs,
