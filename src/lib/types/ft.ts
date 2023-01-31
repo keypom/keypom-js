@@ -7,9 +7,9 @@ export interface FTData {
      */
 	contractId: string;
 	/**
-     * Which account ID will be sending the fungible tokens to the Keypom contract in order to register key uses?
+     * By default, anyone can fund your drop with FTs. This field allows you to set a specific account ID that will be locked into sending the FTs.
      */
-	senderId: string;
+	senderId?: string;
 	/**
      * Human readable format for the amount of tokens to transfer everytime the FT key is used.
 	 * Example: transferring one wNEAR should be passed in as "1" and NOT "1000000000000000000000000"

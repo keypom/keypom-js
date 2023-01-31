@@ -147,8 +147,8 @@ export interface ProtocolReturnedSimpleData {
 export interface ProtocolReturnedNFTData {
     /** The account ID that the NFT contract is deployed to. This contract is where all the NFTs for the specific drop must come from. */
     contract_id: string;
-    /** The account ID that will be sending any NFTs to the Keypom contract for the specific drop. Most times, this is simply the funder / drop owner. */
-    sender_id: string;
+    /** By default, anyone can fund your drop with NFTs. This field allows you to set a specific account ID that will be locked into sending the NFTs. */
+    sender_id?: string;
 }
 /**
  * FT Data returned from the Protocol. This interface is exactly the same as the `FTData`, except all the fields are
@@ -160,9 +160,9 @@ export interface ProtocolReturnedFTData {
      */
     contract_id: string;
     /**
-     * Which account ID will be sending the fungible tokens to the Keypom contract in order to register key uses?
+     * By default, anyone can fund your drop with FTs. This field allows you to set a specific account ID that will be locked into sending the FTs.
      */
-    sender_id: string;
+    sender_id?: string;
     /**
      * Amount of tokens to transfer but considering the decimal amount.
      * Example: transferring one wNEAR should be passed in as "1000000000000000000000000" and NOT "1"
