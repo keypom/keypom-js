@@ -18,6 +18,7 @@
 <summary>Table of Contents</summary>
 
 - [About](#about)
+- [Installation](#installation)
 - [Getting Started](#getting-started)
   - [Initializing the SDK](#initializing-the-sdk)
   - [View Functions](#view-functions)
@@ -65,6 +66,27 @@ yarn build-docs && cd doc && python -m http.server 4200
 ```
 
 Alternatively, you can visit the official Keypom docs which host the type docs found [here](https://docs.keypom.xyz/).
+
+# Installation
+
+To install the Keypom SDK, simply run the following command:
+
+```bash
+npm install keypom-js
+# or
+yarn add keypom-js
+# or
+pnpm add keypom-js
+```
+
+This should add the following dependency to your `package.json` where the version number will be the latest SDK release.
+
+```js
+"dependencies": {
+    "keypom-js": "*.*.*"
+},
+```
+
 
 # Getting Started
 
@@ -494,6 +516,7 @@ await deleteDrops({
 const numDrops = await getDropSupply({
     accountId: "benjiman.testnet"
 });
+
 console.log('numDrops: ', numDrops)
 ```
 
