@@ -85,7 +85,7 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
         if (usesPerKey == 1) {
             assert(numMethodData == 1, "Cannot have more Method Data than the number of uses per key");
         }
-        else if (usesPerKey > 1) {
+        else if (numMethodData > 1) {
             assert(numMethodData == usesPerKey, "Number of FCs must match number of uses per key if more than 1 is specified");
         }
 
