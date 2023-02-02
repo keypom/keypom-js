@@ -73,6 +73,7 @@ async function ftDropKeypom(){
 	}
 	// Write file of all pk's and their respective linkdrops
 	console.log('Public Keys and Linkdrops: ', dropInfo)
+	console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
 	// Note that Keypom createDrop will auto-register you onto the contract if you are not yet registered.
 }
 

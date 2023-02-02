@@ -73,5 +73,16 @@ async function fcDropNear(){
 	} catch(e) {
 		console.log('error creating drop: ', e);
 	}
+
+	var dropInfo = {};
+	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+    	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    	for(var i = 0; i < keyPairs.length; i++) {
+	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey[i]}`;
+	    dropInfo[pubKeys[i]] = linkdropUrl;
+	}
+	// Write file of all pk's and their respective linkdrops
+	console.log('Public Keys and Linkdrops: ', dropInfo)
+	console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
 }
 fcDropNear()

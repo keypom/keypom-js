@@ -50,6 +50,8 @@ async function simpleDropKeypom(){
 	}
 	// Write file of all pk's and their respective linkdrops
 	console.log('Public Keys and Linkdrops: ', dropInfo)
+	console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
+
 }
 
 simpleDropKeypom()
