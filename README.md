@@ -8,6 +8,8 @@
 <div align="center">
 <br />
 
+Check out our official Keypom [Documentation](https://docs.keypom.xyz/) for tutorials, concepts and more!.
+
 [![made by BenKurrek](https://img.shields.io/badge/made%20by-BenKurrek-ff1414.svg?style=flat-square)](https://github.com/BenKurrek)
 [![made by mattlockyer](https://img.shields.io/badge/made%20by-MattLockyer-ff1414.svg?style=flat-square)](https://github.com/mattlockyer)
 
