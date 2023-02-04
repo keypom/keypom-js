@@ -1,6 +1,6 @@
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 /**
  * Deposit some amount of $NEAR or yoctoNEAR$ into the Keypom contract. This amount can then be used to create drops or add keys without
  * Having to explicitly attach a deposit everytime. It can be thought of like a bank account.
