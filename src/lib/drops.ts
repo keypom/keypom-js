@@ -345,10 +345,7 @@ export const createDrop = async ({
 					}
 					return ret
 				}) : undefined
-			),
-			config: fcData.config ? {
-				attached_gas: fcData.config?.attachedGas
-			} : undefined
+			)
 		}) : undefined,
 		simple: simpleData?.lazyRegister ? ({
 			lazy_register: simpleData.lazyRegister,
