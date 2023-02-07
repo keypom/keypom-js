@@ -18,7 +18,7 @@ import {
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
 import { NFTData } from './types/nft';
-import { ProtocolReturnedDrop, ProtocolReturnedDropConfig } from './types/protocol';
+import { ProtocolReturnedDrop, ProtocolReturnedDropConfig, ProtocolReturnedMethod } from './types/protocol';
 import { SimpleData } from './types/simple';
 import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
@@ -330,14 +330,17 @@ export const createDrop = async ({
 			methods: fcData.methods.map((useMethods) => 
 				useMethods ? 
 				useMethods.map((method) => {
-					const ret: any = {}
-					ret.receiver_id = method.receiverId;
-					ret.method_name = method.methodName;
-					ret.args = method.args;
-					ret.attached_deposit = method.attachedDeposit;
-					ret.account_id_field = method.accountIdField;
-					ret.drop_id_field = method.dropIdField;
-					ret.key_id_field = method.keyIdField;
+					let ret: ProtocolReturnedMethod = {
+						receiver_id: method.receiverId,
+						method_name: method.methodName,
+						args: method.args,
+						attached_deposit: method.attachedDeposit,
+						account_id_field: method.accountIdField,
+						drop_id_field: method.dropIdField,
+						key_id_field: method.keyIdField,
+						funder_id_field: method.funderIdField,
+						user_args_rule: method.userArgsRule
+					}
 					return ret
 				}) : undefined
 			),

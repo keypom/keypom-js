@@ -250,18 +250,32 @@ export interface ProtocolReturnedMethod {
 	/**
 	 * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the function.
 	 * As an example, if the methodName was `nft_mint` and it expected a field `receiver_id` to be passed in, indicating who should receive the token, then the `accountIdField` would be `receiver_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
 	*/
 	account_id_field?: string;
 	/**
 	 * Specifies what field Keypom should auto-inject the drops ID into when calling the function.
 	 * As an example, if an NFT contract expected the Keypom drop ID to be passed in as the field `keypom_drop_id` in order to gate access to who can mint NFTs, then the `dropIdField` would be `keypom_drop_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
 	*/
 	drop_id_field?: string;
 	/**
 	 * Specifies what field Keypom should auto-inject the key's ID into when calling the function.
 	 * As an example, if an NFT contract wanted to gate only users with an odd key ID to be able to mint an NFT and their parameter was called `keypom_key_id`, then the `keyIdField` would be `keypom_key_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
 	*/
 	key_id_field?: string;
+    /**
+	 * Specifies what field Keypom should auto-inject the funder's account ID into when calling the function.
+	 * As an example, if an NFT contract wanted to gate only users with an odd key ID to be able to mint an NFT and their parameter was called `keypom_key_id`, then the `keyIdField` would be `keypom_key_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
+	*/
+    funder_id_field?: string;
+    /**  
+	 * What permissions does the user have when providing custom arguments to the function call?
+	 * By default, the user cannot provide any custom arguments
+	*/
+    user_args_rule?: "AllUser" | "FunderPreferred" | "UserPreferred";
 }
 
 /** 
