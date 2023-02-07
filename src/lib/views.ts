@@ -680,6 +680,7 @@ export const getUserBalance = async ({
  * 
  * @param {string=} secretKey (OPTIONAL) The secret key of the key to retrieve the method data for. If no secret key is passed in, the public key must be passed in.
  * @param {string=} publicKey (OPTIONAL) The public key of the key to retrieve the method data for. If no public key is passed in, the secret key must be passed in.
+ * @param {number=} keyUse (OPTIONAL) Pass in a specific key use (*NOT* zero indexed) to retrieve the method data for. If no key use is passed in, the method data for the current key use will be returned.
  * 
  * @returns {Promise<Maybe<Array<ProtocolReturnedMethod>>>} The current method data for the key
  * 
@@ -724,6 +725,13 @@ export const getUserBalance = async ({
  * console.log('curMethodData (first): ', curMethodData)
  * t.is(curMethodData, null);
  * 
+ * 	curMethodData = await getCurMethodData({secretKey, keyUse: 1});
+ *	t.is(curMethodData, null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 2});
+ *	t.true(curMethodData != null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 3});
+ *	t.is(curMethodData, null);
+ * 
  * await claim({secretKey, accountId: 'foobar'})
  * curMethodData = await getCurMethodData({secretKey});
  * t.true(curMethodData != null);
@@ -737,10 +745,12 @@ export const getUserBalance = async ({
  */
 export const getCurMethodData = async ({
 	secretKey,
-	publicKey
+	publicKey,
+	keyUse
 }: {
 	secretKey?: string, 
-	publicKey?: string
+	publicKey?: string,
+	keyUse?: number
 }): Promise<Maybe<Array<ProtocolReturnedMethod>>> => {
 	const keyInfo = await getKeyInformation({publicKey, secretKey});
 	const dropInfo = await getDropInformation({publicKey, secretKey});
@@ -749,6 +759,11 @@ export const getCurMethodData = async ({
 	let methodDataArray = dropInfo.fc!.methods
 	let startingIdx = methodDataArray.length > 1 ? (dropInfo.config?.uses_per_key || 1) - keyInfo.remaining_uses : 0;
 
+	if (keyUse) {
+		assert(keyUse > 0 && keyUse <= methodDataArray.length, 'Invalid key use passed in - out of bounds');
+		startingIdx = keyUse - 1;
+	}
+	
 	return methodDataArray[startingIdx];
 }
 
@@ -762,11 +777,19 @@ export const getCurMethodData = async ({
  * 
  * @example
  * ```js	
- * const canAddKeys = await canUserAddKeys({
- * 		dropId: '1669840629120',
- * 		accountId: 'foobar'
+ * await createDrop({
+ * 	numKeys: 0,
+ * 	depositPerUseNEAR: 0,
+ * 	config: {
+ * 		sale: {
+ * 			maxNumKeys: 2,
+ * 			pricePerKeyNEAR: 1
+ * 		}
+ * 	}
  * });
- * console.log('canAddKeys: ', canAddKeys)
+ * 
+ * const canAddKeys = await canUserAddKeys({accountId: "foobar.testnet"});
+ * t.is(canAddKeys, true);
  * ```
  * 
  * @group View Functions
@@ -775,6 +798,8 @@ export const canUserAddKeys = async ({
 	dropId,
     accountId
 }: {dropId: string, accountId: string}): Promise<boolean> => {
+	assert(dropId && accountId, 'Must pass in a drop ID and account ID');
+	
 	const canAddKeys: boolean = await keypomView({
 		methodName: 'can_user_add_keys', 
 		args: { 

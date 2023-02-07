@@ -44,7 +44,8 @@ let officialKeypomContracts = {
 	},
 	testnet: {
 		"v1.keypom.testnet": true,
-		"v1-3.keypom.testnet": true
+		"v1-3.keypom.testnet": true,
+		"dev-1675792594983-73336699552344": true
 	}
 }
 
@@ -55,7 +56,8 @@ export const supportedKeypomContracts = {
 	},
 	testnet: {
 		"v1-3.keypom.testnet": true,
-		"v1-4.keypom.testnet": true
+		"v1-4.keypom.testnet": true,
+		"dev-1675792594983-73336699552344": true
 	}
 }
 

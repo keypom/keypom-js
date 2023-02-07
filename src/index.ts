@@ -45,6 +45,7 @@ export {
 	updateFunder
 } from "./lib/keypom";
 export * from "./lib/views";
+export * from "./lib/sales";
 export * from "./lib/types/drops";
 export * from "./lib/types/fc";
 export * from "./lib/types/ft";
