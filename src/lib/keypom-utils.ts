@@ -11,8 +11,9 @@ import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
-import { FTData } from "./types/ft";
+import { FTData, FungibleTokenMetadata } from "./types/ft";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
+import { NonFungibleTokenObject } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
@@ -48,6 +49,113 @@ export const key2str = (v) => typeof v === 'string' ? v : v.pk
 
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
 
+/**
+ * Get the public key from a given secret key.
+ * 
+ * @param {string} secretKey - The secret key you wish to get the public key from
+ * 
+ * @returns {Promise<string>} - The public key
+ * 
+ * @example
+ * ```js
+ * const pubKey = await getPubFromSecret("ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1");
+ * console.log(pubKey);
+ * ```
+ * @group Utility
+ */
+export const getPubFromSecret = async (secretKey: string): Promise<string> => {
+    var keyPair = await KeyPair.fromString(secretKey);
+    return keyPair.getPublicKey().toString()
+};
+
+/**
+ * Check whether or not a given account ID exists on the network.
+ * 
+ * @param {string} accountId - The account ID you wish to check
+ * 
+ * @returns {Promise<boolean>} - A boolean indicating whether or not the account exists
+ * 
+ * @example
+ * ```js
+ * const accountExists = await accountExists("benji.near");
+ * console.log(accountExists); // true
+ * ```
+ * @group Utility
+ */
+export const accountExists = async (accountId): Promise<boolean> => {
+    const {connection} = getEnv();
+
+    try {
+        const account = new nearAPI.Account(connection!, accountId);
+        await account.state();
+        return true;
+    } catch(e) {
+        if (!/no such file|does not exist/.test((e as any).toString())) {
+            throw e;
+        }
+        return false;
+    }
+};
+
+/**
+ * Get the NFT Object (metadata, owner, approval IDs etc.) for a given token ID on a given contract.
+ * 
+ * @param {string} contractId - The contract ID of the NFT contract
+ * @param {string} tokenId - The token ID of the NFT you wish to get the metadata for
+ * 
+ * @returns {Promise<NonFungibleTokenObject>} - The NFT Object
+ * 
+ * @example
+ * ```js
+ * const nft = await getNFTMetadata({
+ *     contractId: "nft.keypom.testnet",
+ *     tokenId: "1"
+ * });
+ * console.log(nft);
+ * ```
+ * @group Utility
+ */
+export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string, tokenId: string}): Promise<NonFungibleTokenObject> => {
+    const { near, viewCall } = getEnv();
+
+    const res: NonFungibleTokenObject = await viewCall({
+        contractId,
+        methodName: 'nft_token',
+        args: {
+            token_id: tokenId
+        }
+    })
+
+    return res;
+};
+
+/**
+ * Get the FT Metadata for a given fungible token contract. This is used to display important information such as the icon for the token, decimal format etc.
+ * 
+ * @param {string} contractId - The contract ID of the FT contract
+ * 
+ * @returns {Promise<FungibleTokenMetadata>} - The FT Metadata
+ * 
+ * @example
+ * ```js
+ * const ft = await getFTMetadata({
+ *    contractId: "ft.keypom.testnet"
+ * });
+ * console.log(ft);
+ * ```
+ * @group Utility
+ */
+export const getFTMetadata = async ({contractId}: {contractId: string}): Promise<FungibleTokenMetadata> => {
+    const { near, viewCall } = getEnv();
+
+    const res: FungibleTokenMetadata = await viewCall({
+        contractId,
+        methodName: 'ft_metadata',
+        args: {}
+    })
+
+    return res;
+};
 
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
@@ -190,12 +298,10 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
 
 export const keypomView = async ({ methodName, args }) => {
     const {
-		viewAccount, contractId,
+		viewCall, contractId,
 	} = getEnv()
 
-    assert(viewAccount, 'initKeypom must be called before view functions can be called.');
-
-    return viewAccount!.viewFunction2({
+    return viewCall({
 		contractId,
 		methodName,
 		args
@@ -327,13 +433,12 @@ export const ftTransferCall = async ({
 	/** If true, the transaction will be returned instead of being signed and sent. */
     returnTransaction?: boolean,
 }): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
-    const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
+    const { getAccount, near, receiverId: keypomContractId, viewCall } = getEnv();
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 
     if (amount) {
-        const metadata = await viewAccount.viewFunction2({
+        const metadata = await viewCall({
             contractId,
             methodName: 'ft_metadata',
         })
@@ -415,9 +520,7 @@ export const nftTransferCall = async ({
 	/** If true, the transaction will be returned instead of being signed and sent. */
 	returnTransactions?: boolean,
 }): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
-
     const { getAccount, near, receiverId } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 

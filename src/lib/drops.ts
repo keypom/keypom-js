@@ -18,7 +18,7 @@ import {
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
 import { NFTData } from './types/nft';
-import { ProtocolReturnedDrop } from './types/protocol';
+import { ProtocolReturnedDrop, ProtocolReturnedDropConfig, ProtocolReturnedMethod } from './types/protocol';
 import { SimpleData } from './types/simple';
 import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
@@ -215,11 +215,10 @@ export const createDrop = async ({
 	successUrl?: string
 }): Promise<CreateOrAddReturn> => {
 	const {
-		near, viewAccount, networkId,
+		near, viewCall, networkId,
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
 
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
@@ -236,16 +235,25 @@ export const createDrop = async ({
 
 	await assertDropIdUnique(dropId);
 
-	const finalConfig = {
+	const finalConfig: ProtocolReturnedDropConfig = {
 		uses_per_key: config?.usesPerKey || 1,
-		root_account_id: config?.dropRoot,
+		time: config?.time,
 		usage: {
 			auto_delete_drop: config?.usage?.autoDeleteDrop || false,
 			auto_withdraw: config?.usage?.autoWithdraw || true,
 			permissions: config?.usage?.permissions,
 			refund_deposit: config?.usage?.refundDeposit,
 		},
-		time: config?.time,
+		sale: config?.sale ? {
+			max_num_keys: config?.sale?.maxNumKeys,
+			price_per_key: config?.sale?.pricePerKeyYocto || config?.sale?.pricePerKeyNEAR ? parseNearAmount(config?.sale?.pricePerKeyNEAR?.toString())! : undefined,
+			allowlist: config?.sale?.allowlist,
+			blocklist: config?.sale?.blocklist,
+			auto_withdraw_funds: config?.sale?.autoWithdrawFunds,
+			start: config?.sale?.start,
+			end: config?.sale?.end
+		} : undefined,
+		root_account_id: config?.dropRoot,
 	}
 
 	assertValidDropConfig(finalConfig);
@@ -292,7 +300,7 @@ export const createDrop = async ({
 		var ftBalancePerUse = ftData?.absoluteAmount || "0"
 		
 		if (ftData.amount) {
-			const metadata = await viewAccount.viewFunction2({
+			const metadata = viewCall({
 				contractId: ftData.contractId,
 				methodName: 'ft_metadata',
 			})
@@ -300,7 +308,7 @@ export const createDrop = async ({
 		}
 	}
 
-	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key);
+	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key || 1);
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -324,14 +332,17 @@ export const createDrop = async ({
 			methods: fcData.methods.map((useMethods) => 
 				useMethods ? 
 				useMethods.map((method) => {
-					const ret: any = {}
-					ret.receiver_id = method.receiverId;
-					ret.method_name = method.methodName;
-					ret.args = method.args;
-					ret.attached_deposit = method.attachedDeposit;
-					ret.account_id_field = method.accountIdField;
-					ret.drop_id_field = method.dropIdField;
-					ret.key_id_field = method.keyIdField;
+					let ret: ProtocolReturnedMethod = {
+						receiver_id: method.receiverId,
+						method_name: method.methodName,
+						args: method.args,
+						attached_deposit: method.attachedDeposit,
+						account_id_field: method.accountIdField,
+						drop_id_field: method.dropIdField,
+						key_id_field: method.keyIdField,
+						funder_id_field: method.funderIdField,
+						user_args_rule: method.userArgsRule
+					}
 					return ret
 				}) : undefined
 			)
@@ -353,7 +364,7 @@ export const createDrop = async ({
 		near: near!,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
-		usesPerKey: finalConfig.uses_per_key,
+		usesPerKey: finalConfig.uses_per_key || 1,
 		attachedGas: parseInt(attachedGas!),
 		storage: storageCalculated,
 		ftData,

@@ -74,6 +74,13 @@ export interface EnvVars {
     getAccount?: any;
     /** @internal */
     execute?: any;
+    /** Object containing the supported Keypom contracts for both mainnet and testnet */
+    supportedKeypomContracts?: {
+        "mainnet": {};
+        "testnet": {};
+    };
+    /** Function that allows you to invoke a view method. This takes in a `receiverId`, `methodName`, and `args`. */
+    viewCall?: any;
 }
 /**
  * Information returned from `getContractSourceMetadata` about the deployed Keypom contract. This is part of [NEP-330](https://nomicon.io/Standards/SourceMetadata) and

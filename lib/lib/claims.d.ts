@@ -1,3 +1,4 @@
+import { Maybe } from "./keypom";
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
  *
@@ -97,7 +98,7 @@
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, password, }: {
+export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey, password, fcArgs }: {
     /** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */
     secretKey: string;
     /** The account ID of an existing account that will be used to claim the drop. */
@@ -108,4 +109,6 @@ export declare const claim: ({ secretKey, accountId, newAccountId, newPublicKey,
     newPublicKey?: string | undefined;
     /** If a password is required to use the key, it can be passed in */
     password?: string | undefined;
+    /** For FC drops, if `user_args_rule` is set by the funder, when claiming, custom arguments can be passed into the function. The number of args in the array need to match the number of methods being executed. */
+    fcArgs?: Maybe<string>[] | undefined;
 }) => Promise<any>;

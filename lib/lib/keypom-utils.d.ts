@@ -6,13 +6,85 @@ import { Account, Near } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
-import { FTData } from "./types/ft";
+import { FTData, FungibleTokenMetadata } from "./types/ft";
 import { GeneratedKeyPairs } from "./types/general";
+import { NonFungibleTokenObject } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
 declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const key2str: (v: any) => any;
+/**
+ * Get the public key from a given secret key.
+ *
+ * @param {string} secretKey - The secret key you wish to get the public key from
+ *
+ * @returns {Promise<string>} - The public key
+ *
+ * @example
+ * ```js
+ * const pubKey = await getPubFromSecret("ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1");
+ * console.log(pubKey);
+ * ```
+ * @group Utility
+ */
+export declare const getPubFromSecret: (secretKey: string) => Promise<string>;
+/**
+ * Check whether or not a given account ID exists on the network.
+ *
+ * @param {string} accountId - The account ID you wish to check
+ *
+ * @returns {Promise<boolean>} - A boolean indicating whether or not the account exists
+ *
+ * @example
+ * ```js
+ * const accountExists = await accountExists("benji.near");
+ * console.log(accountExists); // true
+ * ```
+ * @group Utility
+ */
+export declare const accountExists: (accountId: any) => Promise<boolean>;
+/**
+ * Get the NFT Object (metadata, owner, approval IDs etc.) for a given token ID on a given contract.
+ *
+ * @param {string} contractId - The contract ID of the NFT contract
+ * @param {string} tokenId - The token ID of the NFT you wish to get the metadata for
+ *
+ * @returns {Promise<NonFungibleTokenObject>} - The NFT Object
+ *
+ * @example
+ * ```js
+ * const nft = await getNFTMetadata({
+ *     contractId: "nft.keypom.testnet",
+ *     tokenId: "1"
+ * });
+ * console.log(nft);
+ * ```
+ * @group Utility
+ */
+export declare const getNFTMetadata: ({ contractId, tokenId }: {
+    contractId: string;
+    tokenId: string;
+}) => Promise<NonFungibleTokenObject>;
+/**
+ * Get the FT Metadata for a given fungible token contract. This is used to display important information such as the icon for the token, decimal format etc.
+ *
+ * @param {string} contractId - The contract ID of the FT contract
+ *
+ * @returns {Promise<FungibleTokenMetadata>} - The FT Metadata
+ *
+ * @example
+ * ```js
+ * const ft = await getFTMetadata({
+ *    contractId: "ft.keypom.testnet"
+ * });
+ * console.log(ft);
+ * ```
+ * @group Utility
+ */
+export declare const getFTMetadata: ({ contractId }: {
+    contractId: string;
+}) => Promise<FungibleTokenMetadata>;
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
  *

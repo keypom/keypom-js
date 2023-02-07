@@ -2,18 +2,19 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { KeyPair } from 'near-api-js'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
-import { getEnv } from "./keypom"
-import { keypomView } from "./keypom-utils"
+import { getEnv, Maybe } from "./keypom"
+import { getPubFromSecret, keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
-import { ProtocolReturnedDrop } from "./types/protocol"
+import { ProtocolReturnedDrop, ProtocolReturnedKeyInfo, ProtocolReturnedMethod } from "./types/protocol"
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
- * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
+ * Returns the balance associated a with given public key. If only the secret key is known, this can be passed in instead. This is used by the NEAR wallet to display the amount of the linkdrop
  * 
- * @param {string} publicKey The public key that contains a balance
+ * @param {string=} publicKey The public key that contains a balance
+ * @param {string=} secretKey The secret key corresponding to the public key
  * 
  * @returns {Promise<string>} The amount of yoctoNEAR that is contained within the key
  * 
@@ -46,7 +47,14 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
 */
 export const getKeyBalance = async ({
 	publicKey,
-}: { publicKey: string }): Promise<string> => {
+	secretKey
+}: { publicKey?: string, secretKey?: string }): Promise<string> => {
+	// Assert that either a secretKey or public key is passed in
+	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
+	if (secretKey) {
+		publicKey = await getPubFromSecret(secretKey);
+	}
+
 	return keypomView({
 		methodName: 'get_key_balance',
 		args: {
@@ -113,7 +121,7 @@ export const getKeyTotalSupply = async (): Promise<number> => {
 export const getKeys = async ({
     start,
     limit
-}: {start?: string | number, limit?: number }): Promise<Array<KeyInfo>> => {
+}: {start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys',
 		args: {
@@ -126,7 +134,8 @@ export const getKeys = async ({
 /**
  * Returns the KeyInfo corresponding to a specific public key
  * 
- * @param {string} publicKey the public key to get information for.
+ * @param {string=} publicKey the public key to get information for.
+ * @param {string=} secretKey The secret key corresponding to the public key
  * 
  * @returns {Promise<KeyInfo>} Key information struct for that specific key.
  * 
@@ -158,8 +167,15 @@ export const getKeys = async ({
  * @group View Functions
 */
 export const getKeyInformation = async ({
-    publicKey
-}: {publicKey: string }): Promise<KeyInfo> => {
+    publicKey,
+	secretKey
+}: {publicKey?: string, secretKey?: string }): Promise<ProtocolReturnedKeyInfo> => {
+	// Assert that either a secretKey or public key is passed in
+	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
+	if (secretKey) {
+		publicKey = await getPubFromSecret(secretKey);
+	}
+
 	return keypomView({
 		methodName: 'get_key_information',
 		args: {
@@ -171,7 +187,8 @@ export const getKeyInformation = async ({
 /**
  * Returns a vector of KeyInfo corresponding to a set of public keys passed in.
  * 
- * @param {string[]} publicKeys Array of public keys to get information about
+ * @param {string[]=} publicKeys Array of public keys to get information about
+ * @param {string[]=} secretKeys Array of the secret keys corresponding to the public keys
  * 
  * @returns {Promise<Array<KeyInfo>>} Array of Key information structs for the keys passed in
  * 
@@ -203,8 +220,16 @@ export const getKeyInformation = async ({
  * @group View Functions
 */
 export const getKeyInformationBatch = async ({
-    publicKeys
-}: {publicKeys: string[] }): Promise<Array<KeyInfo>> => {
+    publicKeys,
+	secretKeys
+}: {publicKeys?: string[], secretKeys?: string[] }): Promise<Array<ProtocolReturnedKeyInfo>> => {
+	// Assert that either secretKeys or public keys are passed in
+	assert(secretKeys || publicKeys, 'Must pass in either publicKeys or secretKeys');
+	if (secretKeys) {
+		// Map the secret keys into public keys by calling getPubFromSecret
+		publicKeys = await Promise.all(secretKeys.map(async (secretKey) => {return await getPubFromSecret(secretKey)}));
+	}
+	
 	return keypomView({
 		methodName: 'get_key_information_batch',
 		args: {
@@ -288,19 +313,17 @@ export const getKeyInformationBatch = async ({
 */
 export const getDropInformation = async ({ dropId, secretKey, publicKey, withKeys = false } : {dropId?: string, secretKey?: string, publicKey?: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
-		viewAccount, contractId,
+		contractId, viewCall
 	} = getEnv()
 
-	assert(viewAccount, 'initKeypom must be called before view functions can be called.');
 	// Assert that either a dropId or a secretKey is passed in
 	assert(dropId || secretKey || publicKey, 'Must pass in either a dropId, publicKey or a secretKey to getDropInformation');
 
 	if (secretKey) {
-		var keyPair = await KeyPair.fromString(secretKey);
-		publicKey = keyPair.getPublicKey().toString()
+		publicKey = await getPubFromSecret(secretKey);
 	}
 
-	const dropInfo = await viewAccount.viewFunction2({
+	const dropInfo = await viewCall({
 		contractId,
 		methodName: 'get_drop_information',
 		args: {
@@ -408,7 +431,7 @@ export const getKeysForDrop = async ({
     dropId,
     start,
     limit
-}: {dropId: string, start?: string | number, limit?: number }): Promise<Array<KeyInfo>> => {
+}: {dropId: string, start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys_for_drop',
 		args: {
@@ -649,6 +672,142 @@ export const getUserBalance = async ({
             account_id: accountId
         }
 	})
+}
+
+/**
+ * Query for the current method data for a given key. This pertains to FC drops and the current method data is either null or an array of methods that will be invoked when the key is claimed next.
+ * 
+ * @param {string=} secretKey (OPTIONAL) The secret key of the key to retrieve the method data for. If no secret key is passed in, the public key must be passed in.
+ * @param {string=} publicKey (OPTIONAL) The public key of the key to retrieve the method data for. If no public key is passed in, the secret key must be passed in.
+ * @param {number=} keyUse (OPTIONAL) Pass in a specific key use (*NOT* zero indexed) to retrieve the method data for. If no key use is passed in, the method data for the current key use will be returned.
+ * 
+ * @returns {Promise<Maybe<Array<ProtocolReturnedMethod>>>} The current method data for the key
+ * 
+ * @example
+ * ```js
+ * const fcData = {
+ * 	methods: [
+ * 		null,
+ * 		[
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "1"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			},
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "2"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			}
+ * 		],
+ * 		null
+ * 	]
+ * }
+ * 
+ * const {keys: {publicKeys, secretKeys}} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 0,
+ * 	fcData,
+ * 	config: {
+ * 		usesPerKey: 3
+ * 	}
+ * });
+ * const secretKey = secretKeys[0];
+ * 
+ * let curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (first): ', curMethodData)
+ * t.is(curMethodData, null);
+ * 
+ * 	curMethodData = await getCurMethodData({secretKey, keyUse: 1});
+ *	t.is(curMethodData, null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 2});
+ *	t.true(curMethodData != null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 3});
+ *	t.is(curMethodData, null);
+ * 
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * t.true(curMethodData != null);
+ * 
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (third): ', curMethodData)
+ * t.is(curMethodData, null);
+ * ```
+ * @group View Functions
+ */
+export const getCurMethodData = async ({
+	secretKey,
+	publicKey,
+	keyUse
+}: {
+	secretKey?: string, 
+	publicKey?: string,
+	keyUse?: number
+}): Promise<Maybe<Array<ProtocolReturnedMethod>>> => {
+	const keyInfo = await getKeyInformation({publicKey, secretKey});
+	const dropInfo = await getDropInformation({publicKey, secretKey});
+
+	assert(dropInfo.fc, 'No FC drop found');
+	let methodDataArray = dropInfo.fc!.methods
+	let startingIdx = methodDataArray.length > 1 ? (dropInfo.config?.uses_per_key || 1) - keyInfo.remaining_uses : 0;
+
+	if (keyUse) {
+		assert(keyUse > 0 && keyUse <= methodDataArray.length, 'Invalid key use passed in - out of bounds');
+		startingIdx = keyUse - 1;
+	}
+	
+	return methodDataArray[startingIdx];
+}
+
+/**
+ * Check if a given user can add keys to a drop. The only case where a user *other than the funder* could add keys is if the drop has a public sale running.
+ * 
+ * @param {string} dropId The drop ID to check if the user can add keys to
+ * @param {string} accountId The account ID of the user to check if they can add keys to the drop
+ * 
+ * @returns {Promise<boolean>} Whether or not the user can add keys to the drop
+ * 
+ * @example
+ * ```js	
+ * await createDrop({
+ * 	numKeys: 0,
+ * 	depositPerUseNEAR: 0,
+ * 	config: {
+ * 		sale: {
+ * 			maxNumKeys: 2,
+ * 			pricePerKeyNEAR: 1
+ * 		}
+ * 	}
+ * });
+ * 
+ * const canAddKeys = await canUserAddKeys({accountId: "foobar.testnet"});
+ * t.is(canAddKeys, true);
+ * ```
+ * 
+ * @group View Functions
+*/
+export const canUserAddKeys = async ({
+	dropId,
+    accountId
+}: {dropId: string, accountId: string}): Promise<boolean> => {
+	assert(dropId && accountId, 'Must pass in a drop ID and account ID');
+	
+	const canAddKeys: boolean = await keypomView({
+		methodName: 'can_user_add_keys', 
+		args: { 
+			drop_id: dropId, 
+			account_id: accountId
+		}
+	});
+
+	return canAddKeys;
 }
 
 /**

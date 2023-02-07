@@ -118,7 +118,7 @@ declare type AnyWallet = BrowserWalletBehaviour | Wallet;
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenIds, rootEntropy, basePassword, passwordProtectedUses, useBalance, returnTransactions }: {
+export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenIds, rootEntropy, basePassword, passwordProtectedUses, extraDepositNEAR, extraDepositYocto, useBalance, returnTransactions }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: nearAPI.Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
@@ -146,6 +146,10 @@ export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicK
     basePassword?: string | undefined;
     /** For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use. */
     passwordProtectedUses?: number[] | undefined;
+    /** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in human readable format (i.e `1.5` = 1.5 $NEAR) */
+    extraDepositNEAR?: number | undefined;
+    /** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in yoctoNEAR (i.e `1` = 1 $yoctoNEAR = 1e-24 $NEAR) */
+    extraDepositYocto?: string | undefined;
     /** If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw. */
     useBalance?: boolean | undefined;
     /** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
@@ -179,7 +183,7 @@ export declare const addKeys: ({ account, wallet, dropId, drop, numKeys, publicK
  * ```
  * @group Deleting State
 */
-export declare const deleteKeys: ({ account, wallet, publicKeys, dropId, withdrawBalance, }: {
+export declare const deleteKeys: ({ account, wallet, publicKeys, dropId, withdrawBalance }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: nearAPI.Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
@@ -188,7 +192,7 @@ export declare const deleteKeys: ({ account, wallet, publicKeys, dropId, withdra
     publicKeys: string[] | string;
     /** Which drop ID do the keys belong to? */
     dropId: string;
-    /**Whether or not to withdraw any remaining balance on the Keypom contract. */
+    /** Whether or not to withdraw any remaining balance on the Keypom contract. */
     withdrawBalance?: boolean | undefined;
 }) => Promise<any>;
 export {};

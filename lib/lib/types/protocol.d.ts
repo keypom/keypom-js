@@ -62,11 +62,13 @@ export interface ProtocolReturnedDropConfig {
     time?: ProtocolReturnedTimeConfig;
     /** Any information related to how access keys are used such as which methods they can call or whether an empty drop should be automatically deleted etc.*/
     usage?: ProtocolReturnedUsageConfig;
-    /** Override the global root account that all created sub-accounts will have (currently `near` or `testnet`). This allows users to drops that have a custom root.
+    sale?: ProtocolReturnedPublicSaleConfig;
+    /**
+     * Override the global root account that all created sub-accounts will have (currently `near` or `testnet`). This allows users to drops that have a custom root.
      * For example, Fayyr could specify a root of `fayyr.near` By which all sub-accounts will then be `ACCOUNT.fayyr.near`.
      * It's important to note that this root account *MUST* have a smart contract deployed that has a method `create_account`.
     */
-    drop_root?: string;
+    root_account_id?: string;
 }
 /**
  * Time Config information returned from the Protocol. This interface is exactly the same as the `TimeConfig`, except all the fields are
@@ -137,6 +139,37 @@ export interface ProtocolReturnedUsageConfig {
         funder_id_field?: string;
     };
 }
+/**
+ * Within the config, there are configurable options related to how keys can be sold and a funder can potentially make a profit.
+*/
+export interface ProtocolReturnedPublicSaleConfig {
+    /** Maximum number of keys that can be added to this drop. If None, there is no max. */
+    max_num_keys?: number;
+    /**
+     * Amount of $NEAR that the user needs to attach (if they are not the funder) on top of costs. This amount will be
+     * Automatically sent to the funder's balance. If None, the keys are free to the public.
+    */
+    price_per_key?: string;
+    /** Which accounts are allowed to add keys? If the allowlist is empty, anyone that is not in the blocklist can add keys. */
+    allowlist?: string[];
+    /** Which accounts are NOT allowed to add keys? */
+    blocklist?: string[];
+    /**
+     * Should the revenue generated be sent to the funder's account balance or
+     * automatically withdrawn and sent to their NEAR wallet?
+    */
+    auto_withdraw_funds?: boolean;
+    /**
+     * Minimum block timestamp before the public sale starts. If None, keys can be added immediately
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    start?: number;
+    /**
+     * Block timestamp dictating the end of the public sale. If None, keys can be added indefinitely
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    end?: number;
+}
 export interface ProtocolReturnedSimpleData {
     lazy_register?: boolean;
 }
@@ -193,18 +226,32 @@ export interface ProtocolReturnedMethod {
     /**
      * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the function.
      * As an example, if the methodName was `nft_mint` and it expected a field `receiver_id` to be passed in, indicating who should receive the token, then the `accountIdField` would be `receiver_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
     */
     account_id_field?: string;
     /**
      * Specifies what field Keypom should auto-inject the drops ID into when calling the function.
      * As an example, if an NFT contract expected the Keypom drop ID to be passed in as the field `keypom_drop_id` in order to gate access to who can mint NFTs, then the `dropIdField` would be `keypom_drop_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
     */
     drop_id_field?: string;
     /**
      * Specifies what field Keypom should auto-inject the key's ID into when calling the function.
      * As an example, if an NFT contract wanted to gate only users with an odd key ID to be able to mint an NFT and their parameter was called `keypom_key_id`, then the `keyIdField` would be `keypom_key_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
     */
     key_id_field?: string;
+    /**
+     * Specifies what field Keypom should auto-inject the funder's account ID into when calling the function.
+     * As an example, if an NFT contract wanted to gate only users with an odd key ID to be able to mint an NFT and their parameter was called `keypom_key_id`, then the `keyIdField` would be `keypom_key_id`.
+     * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
+    */
+    funder_id_field?: string;
+    /**
+     * What permissions does the user have when providing custom arguments to the function call?
+     * By default, the user cannot provide any custom arguments
+    */
+    user_args_rule?: "AllUser" | "FunderPreferred" | "UserPreferred";
 }
 /**
  * FC Config information returned from the Protocol. This interface is exactly the same as the `FCConfig`, except all the fields are

@@ -24,7 +24,7 @@ All parameters will start off as undefined until the Keypom SDK is initialized.<
 <ul class="tsd-hierarchy">
 <li><span class="target">EnvVars</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L48">src/lib/types/general.ts:48</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L48">src/lib/types/general.ts:48</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -47,7 +47,9 @@ All parameters will start off as undefined until the Keypom SDK is initialized.<
 <a href="EnvVars.html#near" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>near?</span></a>
 <a href="EnvVars.html#networkId" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>network<wbr/>Id?</span></a>
 <a href="EnvVars.html#receiverId" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>receiver<wbr/>Id?</span></a>
+<a href="EnvVars.html#supportedKeypomContracts" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>supported<wbr/>Keypom<wbr/>Contracts?</span></a>
 <a href="EnvVars.html#viewAccount" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>view<wbr/>Account?</span></a>
+<a href="EnvVars.html#viewCall" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>view<wbr/>Call?</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
@@ -57,102 +59,125 @@ All parameters will start off as undefined until the Keypom SDK is initialized.<
 <div class="tsd-comment tsd-typography"><p>The amount of Gas that will be attached to the <code>claim</code> and <code>create_account_and_claim</code> functions for claiming linkdrops (100 TGas).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L70">src/lib/types/general.ts:70</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L70">src/lib/types/general.ts:70</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="connection" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>connection</span><a href="#connection" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">connection<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Connection</span></div>
 <div class="tsd-comment tsd-typography"><p>The connection instance that is part of the NEAR object</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L52">src/lib/types/general.ts:52</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L52">src/lib/types/general.ts:52</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="contractAccount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>contract<wbr/>Account</span><a href="#contractAccount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">contract<wbr/>Account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Account</span></div>
 <div class="tsd-comment tsd-typography"><p>The NEAR Account object for the Keypom contract being used. This lets you know the account ID for the contract and can be used to sign transactions for claiming linkdrops.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L62">src/lib/types/general.ts:62</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L62">src/lib/types/general.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="contractId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>contract<wbr/>Id</span><a href="#contractId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">contract<wbr/>Id<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The account ID where the Keypom contract is deployed to.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L72">src/lib/types/general.ts:72</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L72">src/lib/types/general.ts:72</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="error" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagInternal">Internal</code> <span>error</span><a href="#error" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">error<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L76">src/lib/types/general.ts:76</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L76">src/lib/types/general.ts:76</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="execute" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagInternal">Internal</code> <span>execute</span><a href="#execute" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">execute<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L80">src/lib/types/general.ts:80</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L80">src/lib/types/general.ts:80</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="fundingAccount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>funding<wbr/>Account</span><a href="#fundingAccount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">funding<wbr/>Account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Account</span></div>
 <div class="tsd-comment tsd-typography"><p>The NEAR Account object for the Funder</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L58">src/lib/types/general.ts:58</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L58">src/lib/types/general.ts:58</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="fundingAccountDetails" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>funding<wbr/>Account<wbr/>Details</span><a href="#fundingAccountDetails" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">funding<wbr/>Account<wbr/>Details<span class="tsd-signature-symbol">?:</span> <a href="Funder.html" class="tsd-signature-type" data-tsd-kind="Interface">Funder</a></div>
 <div class="tsd-comment tsd-typography"><p>The details for the funder such as any <code>rootEntropy</code> or their <code>secretKey</code> etc.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L60">src/lib/types/general.ts:60</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L60">src/lib/types/general.ts:60</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="gas" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>gas</span><a href="#gas" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">gas<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The default amount of Gas that will be attached to transactions (200 TGas).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L66">src/lib/types/general.ts:66</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L66">src/lib/types/general.ts:66</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="gas300" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>gas300</span><a href="#gas300" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">gas300<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The max amount of Gas that will be attached to transactions (300 TGas).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L68">src/lib/types/general.ts:68</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L68">src/lib/types/general.ts:68</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="getAccount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagInternal">Internal</code> <span>get<wbr/>Account</span><a href="#getAccount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">get<wbr/>Account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L78">src/lib/types/general.ts:78</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L78">src/lib/types/general.ts:78</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="keyStore" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>key<wbr/>Store</span><a href="#keyStore" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">key<wbr/>Store<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">KeyStore</span></div>
 <div class="tsd-comment tsd-typography"><p>Which type of KeyStore is used when locating keys and signing transactions throughout the SDK (In Memory, Unencrypted FileStore etc.)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L54">src/lib/types/general.ts:54</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L54">src/lib/types/general.ts:54</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="near" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>near</span><a href="#near" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">near<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Near</span></div>
 <div class="tsd-comment tsd-typography"><p>The specific NEAR object that contains important information such as the KeyStore and connection. This is used to interact with the chain and can either be manually passed in or will be automatically created during <code>initKeypom</code></p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L50">src/lib/types/general.ts:50</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L50">src/lib/types/general.ts:50</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="networkId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>network<wbr/>Id</span><a href="#networkId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">network<wbr/>Id<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>What network is the SDK using (<code>testnet</code> or <code>mainnet</code>)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L56">src/lib/types/general.ts:56</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L56">src/lib/types/general.ts:56</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="receiverId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagInternal">Internal</code> <span>receiver<wbr/>Id</span><a href="#receiverId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">receiver<wbr/>Id<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L74">src/lib/types/general.ts:74</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L74">src/lib/types/general.ts:74</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="supportedKeypomContracts" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>supported<wbr/>Keypom<wbr/>Contracts</span><a href="#supportedKeypomContracts" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">supported<wbr/>Keypom<wbr/>Contracts<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span>mainnet<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">; </span><br/><span>    </span>testnet<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>Object containing the supported Keypom contracts for both mainnet and testnet</p>
+</div>
+<div class="tsd-type-declaration">
+<h4>Type declaration</h4>
+<ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5>mainnet<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h5>
+<ul class="tsd-parameters"></ul></li>
+<li class="tsd-parameter">
+<h5>testnet<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h5>
+<ul class="tsd-parameters"></ul></li></ul></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L82">src/lib/types/general.ts:82</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="viewAccount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagInternal">Internal</code> <span>view<wbr/>Account</span><a href="#viewAccount" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">view<wbr/>Account<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/4e600f9/src/lib/types/general.ts#L64">src/lib/types/general.ts:64</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L64">src/lib/types/general.ts:64</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="viewCall" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>view<wbr/>Call</span><a href="#viewCall" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">view<wbr/>Call<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div>
+<div class="tsd-comment tsd-typography"><p>Function that allows you to invoke a view method. This takes in a <code>receiverId</code>, <code>methodName</code>, and <code>args</code>.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/aa0660a/src/lib/types/general.ts#L84">src/lib/types/general.ts:84</a></li></ul></aside></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -193,7 +218,9 @@ All parameters will start off as undefined until the Keypom SDK is initialized.<
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#near" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>near?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#networkId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>network<wbr/>Id?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#receiverId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>receiver<wbr/>Id?</a></li>
-<li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#viewAccount" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>view<wbr/>Account?</a></li></ul></li></ul></nav></div></div>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#supportedKeypomContracts" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>supported<wbr/>Keypom<wbr/>Contracts?</a></li>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#viewAccount" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>view<wbr/>Account?</a></li>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="EnvVars.html#viewCall" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>view<wbr/>Call?</a></li></ul></li></ul></nav></div></div>
 <div class="container tsd-generator">
 <p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
 <div class="overlay"></div><script src="../assets/main.js"></script></body></html>

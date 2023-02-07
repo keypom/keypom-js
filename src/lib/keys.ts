@@ -14,11 +14,11 @@ import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
 	generatePerUsePasswords,
-	key2str, nftTransferCall, toCamel
+	key2str, keypomView, nftTransferCall, toCamel
 } from "./keypom-utils";
 import { ProtocolReturnedDrop } from './types/protocol';
 import { CreateOrAddReturn } from './types/params';
-import { getDropInformation, getUserBalance } from "./views";
+import { canUserAddKeys, getDropInformation, getUserBalance } from "./views";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -147,6 +147,8 @@ export const addKeys = async ({
 	rootEntropy,
 	basePassword,
 	passwordProtectedUses,
+	extraDepositNEAR,
+	extraDepositYocto,
 	useBalance = false,
 	returnTransactions = false
 }: {
@@ -177,6 +179,10 @@ export const addKeys = async ({
     basePassword?: string,
 	/** For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use. */
     passwordProtectedUses?: number[],
+	/** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in human readable format (i.e `1.5` = 1.5 $NEAR) */
+	extraDepositNEAR?: number,
+	/** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in yoctoNEAR (i.e `1` = 1 $yoctoNEAR = 1e-24 $NEAR) */
+	extraDepositYocto?: string,
 	/** If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw. */
 	useBalance?: boolean,
 	/** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
@@ -186,7 +192,6 @@ export const addKeys = async ({
 		near, gas, contractId, receiverId, getAccount, execute, fundingAccountDetails, networkId
 	} = getEnv()
 
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 
 	assert(drop || dropId, 'Either a dropId or drop object must be passed in.')
@@ -211,8 +216,9 @@ export const addKeys = async ({
 
 	const uses_per_key = config?.uses_per_key || 1;
 
-	assert(owner_id === account!.accountId, 'You are not the owner of this drop. You cannot add keys to it.')
-
+	const canAddKeys = await canUserAddKeys({ accountId: account!.accountId, dropId });
+	assert(canAddKeys == true, 'Calling account does not have permission to add keys to this drop.');
+	
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
 		var keys;
@@ -264,6 +270,13 @@ export const addKeys = async ({
 		fcData: camelFCData,
 		ftData: camelFTData
 	})
+
+	// If there is any extra deposit needed, add it to the required deposit
+	extraDepositYocto = extraDepositYocto ? new BN(extraDepositYocto) : new BN("0");
+	if (extraDepositNEAR) {
+		extraDepositYocto = new BN(parseNearAmount(extraDepositNEAR.toString()));
+	}
+	requiredDeposit = new BN(requiredDeposit).add(extraDepositYocto).toString();
 
 	var hasBalance = false;
 	if(useBalance) {
@@ -359,7 +372,7 @@ export const deleteKeys = async ({
 	wallet,
 	publicKeys,
 	dropId,
-	withdrawBalance = false,
+	withdrawBalance = false
 }: {
 	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
 	account?: Account,
@@ -369,7 +382,7 @@ export const deleteKeys = async ({
 	publicKeys: string[] | string,
 	/** Which drop ID do the keys belong to? */
 	dropId: string,
-	/**Whether or not to withdraw any remaining balance on the Keypom contract. */
+	/** Whether or not to withdraw any remaining balance on the Keypom contract. */
 	withdrawBalance?: boolean
 }) => {
 
@@ -382,6 +395,7 @@ export const deleteKeys = async ({
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
+	
 	assert(owner_id == account!.accountId, 'Only the owner of the drop can delete keys.')
 
 	const actions: any[] = []

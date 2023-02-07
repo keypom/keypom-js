@@ -1,7 +1,7 @@
 const test = require('ava');
 const BN = require('bn.js');
 const nearAPI = require("near-api-js");
-const { getUserBalance } = require('../lib');
+const { getUserBalance, getCurMethodData, canUserAddKeys, addToSaleAllowlist, removeFromSaleAllowlist, addToSaleBlocklist, removeFromSaleBlocklist, updateSale } = require('../lib');
 const {
 	Near,
 	KeyPair,
@@ -107,6 +107,63 @@ test('init', async (t) => {
 	console.log('fundingAccount', keypomFundingAccount)
 
 	t.true(true)
+});
+
+test('check FC data index', async (t) => {
+	const fcData = {
+		methods: [
+			null,
+			[
+				{
+					methodName: "nft_token",
+					receiverId: "nft.examples.testnet",
+					args: JSON.stringify({
+						token_id: "1"
+					}),
+					attachedDeposit: "0"
+				},
+				{
+					methodName: "nft_token",
+					receiverId: "nft.examples.testnet",
+					args: JSON.stringify({
+						token_id: "2"
+					}),
+					attachedDeposit: "0"
+				}
+			],
+			null
+		]
+	}
+
+	const {keys: {publicKeys, secretKeys}} = await createDrop({
+		numKeys: 1,
+		depositPerUseNEAR: 0,
+		fcData,
+		config: {
+			usesPerKey: 3
+		}
+	});
+	const secretKey = secretKeys[0];
+
+	let curMethodData = await getCurMethodData({secretKey});
+	console.log('curMethodData (first): ', curMethodData)
+	t.is(curMethodData, null);
+
+	curMethodData = await getCurMethodData({secretKey, keyUse: 1});
+	t.is(curMethodData, null);
+	curMethodData = await getCurMethodData({secretKey, keyUse: 2});
+	t.true(curMethodData != null);
+	curMethodData = await getCurMethodData({secretKey, keyUse: 3});
+	t.is(curMethodData, null);
+
+	await claim({secretKey, accountId: 'foobar'})
+	curMethodData = await getCurMethodData({secretKey});
+	t.true(curMethodData != null);
+
+	await claim({secretKey, accountId: 'foobar'})
+	curMethodData = await getCurMethodData({secretKey});
+	console.log('curMethodData (third): ', curMethodData)
+	t.is(curMethodData, null);
 });
 
 test('delete drops', async (t) => {

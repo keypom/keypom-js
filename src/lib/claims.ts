@@ -4,7 +4,8 @@ const {
 	KeyPair,
 } = nearAPI;
 
-import { getEnv } from "./keypom";
+import { getEnv, Maybe } from "./keypom";
+import { getCurMethodData, getDropInformation, getKeyInformation } from "./views";
 
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
@@ -111,6 +112,7 @@ export const claim = async ({
 	newAccountId,
 	newPublicKey, 
 	password,
+	fcArgs
 }: {
 	/** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */
 	secretKey: string,
@@ -121,19 +123,30 @@ export const claim = async ({
 	/** If creating a new account, a public key must be passed in to be used as the full access key for the newly created account. */
 	newPublicKey?: string, 
 	/** If a password is required to use the key, it can be passed in */
-	password?: string
+	password?: string,
+	/** For FC drops, if `user_args_rule` is set by the funder, when claiming, custom arguments can be passed into the function. The number of args in the array need to match the number of methods being executed. */
+	fcArgs?: Array<Maybe<string>>
 }) => {
 	const {
 		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
 	} = getEnv()
 
-	assert(near && networkId && keyStore, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	const keyPair = KeyPair.fromString(secretKey)
 	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
 	assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
 
+	const dropInfo = await getDropInformation({secretKey});
+	const keyInfo = await getKeyInformation({secretKey});
+	
+	if (fcArgs) {
+		assert(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
+
+		const curMethodData = await getCurMethodData({secretKey});
+		assert((curMethodData || []).length === fcArgs.length, 'The number of fcArgs must match the number of methods being executed.');
+	}
+	
 	const transactions: any[] = [{
 		receiverId,
 		actions: [{

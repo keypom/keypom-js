@@ -1,5 +1,5 @@
 export { addToBalance, withdrawBalance } from "./lib/balances";
-export { generateKeys, estimateRequiredDeposit, getStorageBase, ftTransferCall, nftTransferCall, hashPassword, exportedNearAPI as nearAPI, } from "./lib/keypom-utils";
+export { generateKeys, estimateRequiredDeposit, getStorageBase, ftTransferCall, nftTransferCall, hashPassword, accountExists, getNFTMetadata, getFTMetadata, exportedNearAPI as nearAPI } from "./lib/keypom-utils";
 export declare const 
 /** @group Utility */
 parseNearAmount: typeof import("near-api-js/lib/utils/format").parseNearAmount, 
@@ -13,6 +13,7 @@ export {
 /** @group Utility */
 execute, initKeypom, getEnv, updateKeypomContractId, updateFunder } from "./lib/keypom";
 export * from "./lib/views";
+export * from "./lib/sales";
 export * from "./lib/types/drops";
 export * from "./lib/types/fc";
 export * from "./lib/types/ft";
