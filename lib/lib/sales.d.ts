@@ -164,22 +164,17 @@ export declare const removeFromSaleBlocklist: ({ account, wallet, dropId, accoun
  *		config: {
  *			sale: {
  *				maxNumKeys: 2,
- *				pricePerKeyNEAR: 1,
- *				blocklist: ["foobar.testnet"]
+ *				pricePerKeyNEAR: 1
  *			}
  *		}
  *	});
  *
- *	let canAddKeys = await canUserAddKeys({dropId, accountId: "foobar.testnet"});
- *	t.is(canAddKeys, false);
- *
- *	canAddKeys = await canUserAddKeys({dropId, accountId: "not_in_blocklist.testnet"});
- *	t.is(canAddKeys, true);
- *
- *	await removeFromSaleBlocklist({dropId, accountIds: ["foobar.testnet"]});
- *	canAddKeys = await canUserAddKeys({dropId, accountId: "foobar.testnet"});
- *	t.is(canAddKeys, true);
+ *	await updateSale({
+ *		dropId,
+ *		pricePerKeyNEAR: 2
+ *	})
  *  ```
+ *
  * @group Public Sale Functions
  */
 export declare const updateSale: ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pricePerKeyYocto, autoWithdrawFunds, start, end }: {

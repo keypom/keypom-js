@@ -84,7 +84,6 @@ export const getPubFromSecret = async (secretKey: string): Promise<string> => {
  */
 export const accountExists = async (accountId): Promise<boolean> => {
     const {connection} = getEnv();
-    assert(connection, "No connection found. Please call `init` first.");
 
     try {
         const account = new nearAPI.Account(connection!, accountId);
@@ -118,7 +117,6 @@ export const accountExists = async (accountId): Promise<boolean> => {
  */
 export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string, tokenId: string}): Promise<NonFungibleTokenObject> => {
     const { near, viewCall } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 
     const res: NonFungibleTokenObject = await viewCall({
         contractId,
@@ -149,7 +147,6 @@ export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string,
  */
 export const getFTMetadata = async ({contractId}: {contractId: string}): Promise<FungibleTokenMetadata> => {
     const { near, viewCall } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 
     const res: FungibleTokenMetadata = await viewCall({
         contractId,
@@ -304,8 +301,6 @@ export const keypomView = async ({ methodName, args }) => {
 		viewCall, contractId,
 	} = getEnv()
 
-    assert(viewCall, 'initKeypom must be called before view functions can be called.');
-
     return viewCall({
 		contractId,
 		methodName,
@@ -439,7 +434,6 @@ export const ftTransferCall = async ({
     returnTransaction?: boolean,
 }): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
     const { getAccount, near, receiverId: keypomContractId, viewCall } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 
@@ -526,9 +520,7 @@ export const nftTransferCall = async ({
 	/** If true, the transaction will be returned instead of being signed and sent. */
 	returnTransactions?: boolean,
 }): Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]> => {
-
     const { getAccount, near, receiverId } = getEnv();
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 

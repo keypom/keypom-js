@@ -131,7 +131,6 @@ export const claim = async ({
 		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
 	} = getEnv()
 
-	assert(near && networkId && keyStore, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	const keyPair = KeyPair.fromString(secretKey)
 	await keyStore!.setKey(networkId!, contractId!, keyPair)
 

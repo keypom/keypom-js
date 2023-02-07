@@ -52,7 +52,6 @@ export const addToSaleAllowlist = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-    assert(receiverId, 'Please call initKeypom before calling this function.');
     assert(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to add to the sale allowlist.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
 	account = await getAccount({ account, wallet });
@@ -134,7 +133,6 @@ export const removeFromSaleAllowlist = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-    assert(receiverId, 'Please call initKeypom before calling this function.');
     assert(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to remove from the sale allowlist.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
 	account = await getAccount({ account, wallet });
@@ -208,7 +206,6 @@ export const addToSaleBlocklist = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-    assert(receiverId, 'Please call initKeypom before calling this function.');
     assert(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to add to the sale blocklist.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
 	account = await getAccount({ account, wallet });
@@ -286,7 +283,6 @@ export const addToSaleBlocklist = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-    assert(receiverId, 'Please call initKeypom before calling this function.');
     assert(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to remove from the sale blocklist.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
 	account = await getAccount({ account, wallet });
@@ -385,7 +381,6 @@ export const addToSaleBlocklist = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-    assert(receiverId, 'Please call initKeypom before calling this function.');
     assert(dropId && (maxNumKeys || pricePerKeyNEAR || pricePerKeyYocto || autoWithdrawFunds || start || end), 'Must pass in a drop ID and at least one of the other sale parameters to update');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
 	account = await getAccount({ account, wallet });

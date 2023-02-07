@@ -56,7 +56,6 @@ export const addToBalance = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-	assert(receiverId, 'Please call initKeypom before calling this function.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 
@@ -120,7 +119,6 @@ export const withdrawBalance = async ({
 		receiverId, execute, getAccount
 	} = getEnv()
 
-	assert(receiverId, 'Please call initKeypom before calling this function.');
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 

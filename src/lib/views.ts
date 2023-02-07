@@ -316,7 +316,6 @@ export const getDropInformation = async ({ dropId, secretKey, publicKey, withKey
 		contractId, viewCall
 	} = getEnv()
 
-	assert(viewCall, 'initKeypom must be called before view functions can be called.');
 	// Assert that either a dropId or a secretKey is passed in
 	assert(dropId || secretKey || publicKey, 'Must pass in either a dropId, publicKey or a secretKey to getDropInformation');
 

@@ -192,7 +192,6 @@ export const addKeys = async ({
 		near, gas, contractId, receiverId, getAccount, execute, fundingAccountDetails, networkId
 	} = getEnv()
 
-	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 
 	assert(drop || dropId, 'Either a dropId or drop object must be passed in.')
