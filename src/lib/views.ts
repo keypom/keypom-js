@@ -2,11 +2,11 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import { KeyPair } from 'near-api-js'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
-import { getEnv } from "./keypom"
+import { getEnv, Maybe } from "./keypom"
 import { getPubFromSecret, keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
-import { ProtocolReturnedDrop } from "./types/protocol"
+import { ProtocolReturnedDrop, ProtocolReturnedKeyInfo, ProtocolReturnedMethod } from "./types/protocol"
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -121,7 +121,7 @@ export const getKeyTotalSupply = async (): Promise<number> => {
 export const getKeys = async ({
     start,
     limit
-}: {start?: string | number, limit?: number }): Promise<Array<KeyInfo>> => {
+}: {start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys',
 		args: {
@@ -169,7 +169,7 @@ export const getKeys = async ({
 export const getKeyInformation = async ({
     publicKey,
 	secretKey
-}: {publicKey?: string, secretKey?: string }): Promise<KeyInfo> => {
+}: {publicKey?: string, secretKey?: string }): Promise<ProtocolReturnedKeyInfo> => {
 	// Assert that either a secretKey or public key is passed in
 	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
 	if (secretKey) {
@@ -222,7 +222,7 @@ export const getKeyInformation = async ({
 export const getKeyInformationBatch = async ({
     publicKeys,
 	secretKeys
-}: {publicKeys?: string[], secretKeys?: string[] }): Promise<Array<KeyInfo>> => {
+}: {publicKeys?: string[], secretKeys?: string[] }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	// Assert that either secretKeys or public keys are passed in
 	assert(secretKeys || publicKeys, 'Must pass in either publicKeys or secretKeys');
 	if (secretKeys) {
@@ -432,7 +432,7 @@ export const getKeysForDrop = async ({
     dropId,
     start,
     limit
-}: {dropId: string, start?: string | number, limit?: number }): Promise<Array<KeyInfo>> => {
+}: {dropId: string, start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys_for_drop',
 		args: {
@@ -673,6 +673,82 @@ export const getUserBalance = async ({
             account_id: accountId
         }
 	})
+}
+
+/**
+ * Query for the current method data for a given key. This pertains to FC drops and the current method data is either null or an array of methods that will be invoked when the key is claimed next.
+ * 
+ * @param {string=} secretKey (OPTIONAL) The secret key of the key to retrieve the method data for. If no secret key is passed in, the public key must be passed in.
+ * @param {string=} publicKey (OPTIONAL) The public key of the key to retrieve the method data for. If no public key is passed in, the secret key must be passed in.
+ * 
+ * @returns {Promise<Maybe<Array<ProtocolReturnedMethod>>>} The current method data for the key
+ * 
+ * @example
+ * ```js
+ * const fcData = {
+ * 	methods: [
+ * 		null,
+ * 		[
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "1"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			},
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "2"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			}
+ * 		],
+ * 		null
+ * 	]
+ * }
+ * 
+ * const {keys: {publicKeys, secretKeys}} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 0,
+ * 	fcData,
+ * 	config: {
+ * 		usesPerKey: 3
+ * 	}
+ * });
+ * const secretKey = secretKeys[0];
+ * 
+ * let curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (first): ', curMethodData)
+ * t.is(curMethodData, null);
+ * 
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * t.true(curMethodData != null);
+ * 
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (third): ', curMethodData)
+ * t.is(curMethodData, null);
+ * ```
+ */
+export const getCurMethodData = async ({
+	secretKey,
+	publicKey
+}: {
+	secretKey?: string, 
+	publicKey?: string
+}): Promise<Maybe<Array<ProtocolReturnedMethod>>> => {
+	const keyInfo = await getKeyInformation({publicKey, secretKey});
+	const dropInfo = await getDropInformation({publicKey, secretKey});
+
+	assert(dropInfo.fc, 'No FC drop found');
+	let methodDataArray = dropInfo.fc!.methods
+	let startingIdx = methodDataArray.length > 1 ? (dropInfo.config?.uses_per_key || 1) - keyInfo.remaining_uses : 0;
+
+	return methodDataArray[startingIdx];
 }
 
 /**
