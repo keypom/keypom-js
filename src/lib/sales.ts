@@ -1,4 +1,4 @@
-import { parseNearAmount } from "near-api-js/lib/utils/format";
+import { formatNearAmount, parseNearAmount } from "near-api-js/lib/utils/format";
 import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 
@@ -303,6 +303,109 @@ export const addToSaleBlocklist = async ({
 			args: {
                 drop_id: dropId,
                 account_ids: accountIds
+            },
+			gas: '100000000000000'
+		}
+	})
+
+	const transactions: any[] = [{
+		receiverId,
+		actions,
+	}]
+
+	return execute({ transactions, account, wallet })
+}
+
+/**
+ * Remove a list of account IDs from a drop's sale blocklist. The sale object must exist in the drop's config for this to go through.
+ * 
+ * @example
+ * ```js
+ *	const {dropId} = await createDrop({
+ *		numKeys: 0,
+ *		depositPerUseNEAR: 0.1,
+ *		config: {
+ *			sale: {
+ *				maxNumKeys: 2,
+ *				pricePerKeyNEAR: 1
+ *			}
+ *		}
+ *	});
+ *
+ *	await updateSale({
+ *		dropId,
+ *		pricePerKeyNEAR: 2
+ *	})
+ *  ```
+ * 
+ * @group Public Sale Functions
+ */
+ export const updateSale = async ({
+	account,
+	wallet,
+    dropId,
+	maxNumKeys,
+	pricePerKeyNEAR,
+	pricePerKeyYocto,
+	autoWithdrawFunds,
+	start,
+	end
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+    /** The drop ID for the drop */
+    dropId: string,
+    /** Maximum number of keys that can be added to this drop. If None, there is no max. */
+    maxNumKeys?: number,
+    /** 
+     * Amount of $NEAR that the user needs to attach (if they are not the funder) on top of costs. This amount will be
+     * Automatically sent to the funder's balance. If None, the keys are free to the public.
+    */
+    pricePerKeyNEAR?: number,
+    pricePerKeyYocto?: string,
+    /** 
+     * Should the revenue generated be sent to the funder's account balance or
+     * automatically withdrawn and sent to their NEAR wallet? 
+    */
+    autoWithdrawFunds?: boolean,
+    /**
+     * Minimum block timestamp before the public sale starts. If None, keys can be added immediately
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    start?: number,
+    /**
+     * Block timestamp dictating the end of the public sale. If None, keys can be added indefinitely
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    end?: number,
+}) => {
+	const {
+		receiverId, execute, getAccount
+	} = getEnv()
+
+    assert(receiverId, 'Please call initKeypom before calling this function.');
+    assert(dropId && (maxNumKeys || pricePerKeyNEAR || pricePerKeyYocto || autoWithdrawFunds || start || end), 'Must pass in a drop ID and at least one of the other sale parameters to update');
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.');
+	account = await getAccount({ account, wallet });
+
+    const dropInfo = await getDropInformation({dropId});
+    assert(account!.accountId == dropInfo.owner_id, "Only the owner of the drop can update the sale.");
+    assert(dropInfo.config?.sale, "The drop config must have a sale in order to be updated.");
+    
+	const actions: any[] = []
+	actions.push({
+		type: 'FunctionCall',
+		params: {
+			methodName: 'update_sale',
+			args: {
+                drop_id: dropId,
+        		max_num_keys: maxNumKeys,
+        		price_per_key: pricePerKeyYocto || pricePerKeyNEAR ? parseNearAmount(pricePerKeyNEAR!.toString()) : undefined,
+        		auto_withdraw_funds: autoWithdrawFunds,
+        		start,
+        		end,
             },
 			gas: '100000000000000'
 		}

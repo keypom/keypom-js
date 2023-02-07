@@ -169,7 +169,7 @@ export interface ProtocolReturnedPublicSaleConfig {
      * Automatically sent to the funder's balance. If None, the keys are free to the public.
     */
     price_per_key?: string,
-    /** Which accounts are allowed to add keys? */
+    /** Which accounts are allowed to add keys? If the allowlist is empty, anyone that is not in the blocklist can add keys. */
     allowlist?: string[],
     /** Which accounts are NOT allowed to add keys? */
     blocklist?: string[],

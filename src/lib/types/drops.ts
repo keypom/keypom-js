@@ -166,7 +166,7 @@ export interface PublicSaleConfig {
     */
     pricePerKeyNEAR?: number,
     pricePerKeyYocto?: string,
-    /** Which accounts are allowed to add keys? */
+    /** Which accounts are allowed to add keys? If the allowlist is empty, anyone that is not in the blocklist can add keys. */
     allowlist?: string[],
     /** Which accounts are NOT allowed to add keys? */
     blocklist?: string[],
