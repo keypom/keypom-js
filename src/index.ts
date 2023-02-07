@@ -9,7 +9,10 @@ export {
 	ftTransferCall,
 	nftTransferCall,
 	hashPassword,
-	exportedNearAPI as nearAPI,
+	accountExists,
+	getNFTMetadata,
+	getFTMetadata,
+	exportedNearAPI as nearAPI
 } from "./lib/keypom-utils";
 import { exportedNearAPI } from "./lib/keypom-utils";
 export const {

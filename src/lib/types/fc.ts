@@ -41,6 +41,11 @@ export interface Method {
 	 * As an example, if an NFT contract wanted to gate only users that had a key coming from a specific funder's drops, it could expect a field called `keypom_funder_id` and the `funderIdField` would be `keypom_funder_id`.
 	*/
 	funderIdField?: string,
+	/**  
+	 * What permissions does the user have when providing custom arguments to the function call?
+	 * By default, the user cannot provide any custom arguments
+	*/
+	userArgsRule?: "AllUser" | "FunderPreferred" | "UserPreferred"
 }
 
 /** 

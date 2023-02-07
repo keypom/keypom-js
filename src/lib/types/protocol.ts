@@ -73,11 +73,14 @@ export interface ProtocolReturnedDropConfig {
 	/** Any information related to how access keys are used such as which methods they can call or whether an empty drop should be automatically deleted etc.*/
 	usage?: ProtocolReturnedUsageConfig,
 
-	/** Override the global root account that all created sub-accounts will have (currently `near` or `testnet`). This allows users to drops that have a custom root.
+    sale?: ProtocolReturnedPublicSaleConfig,
+
+	/** 
+     * Override the global root account that all created sub-accounts will have (currently `near` or `testnet`). This allows users to drops that have a custom root.
      * For example, Fayyr could specify a root of `fayyr.near` By which all sub-accounts will then be `ACCOUNT.fayyr.near`. 
      * It's important to note that this root account *MUST* have a smart contract deployed that has a method `create_account`.
     */
-	drop_root?: string,
+	root_account_id?: string,
 }
 
 /** 
@@ -153,6 +156,38 @@ export interface ProtocolReturnedUsageConfig {
         */
         funder_id_field?: string,
     },
+}
+
+/** 
+ * Within the config, there are configurable options related to how keys can be sold and a funder can potentially make a profit.
+*/
+export interface ProtocolReturnedPublicSaleConfig {
+    /** Maximum number of keys that can be added to this drop. If None, there is no max. */
+    max_num_keys?: number,
+    /** 
+     * Amount of $NEAR that the user needs to attach (if they are not the funder) on top of costs. This amount will be
+     * Automatically sent to the funder's balance. If None, the keys are free to the public.
+    */
+    price_per_key?: string,
+    /** Which accounts are allowed to add keys? */
+    allowlist?: string[],
+    /** Which accounts are NOT allowed to add keys? */
+    blocklist?: string[],
+    /** 
+     * Should the revenue generated be sent to the funder's account balance or
+     * automatically withdrawn and sent to their NEAR wallet? 
+    */
+    auto_withdraw_funds?: boolean,
+    /**
+     * Minimum block timestamp before the public sale starts. If None, keys can be added immediately
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    start?: number,
+    /**
+     * Block timestamp dictating the end of the public sale. If None, keys can be added indefinitely
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    end?: number,
 }
 
 export interface ProtocolReturnedSimpleData {

@@ -14,7 +14,7 @@ import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
 	generatePerUsePasswords,
-	key2str, nftTransferCall, toCamel
+	key2str, keypomView, nftTransferCall, toCamel
 } from "./keypom-utils";
 import { ProtocolReturnedDrop } from './types/protocol';
 import { CreateOrAddReturn } from './types/params';
@@ -360,6 +360,8 @@ export const deleteKeys = async ({
 	publicKeys,
 	dropId,
 	withdrawBalance = false,
+	extraDepositNEAR,
+	extraDepositYocto
 }: {
 	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
 	account?: Account,
@@ -369,8 +371,12 @@ export const deleteKeys = async ({
 	publicKeys: string[] | string,
 	/** Which drop ID do the keys belong to? */
 	dropId: string,
-	/**Whether or not to withdraw any remaining balance on the Keypom contract. */
-	withdrawBalance?: boolean
+	/** Whether or not to withdraw any remaining balance on the Keypom contract. */
+	withdrawBalance?: boolean,
+	/** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in human readable format (i.e `1.5` = 1.5 $NEAR) */
+	extraDepositNEAR?: number,
+	/** For Public Sales, drops might require an additional fee for adding keys. This specifies the amount of $NEAR in yoctoNEAR (i.e `1` = 1 $yoctoNEAR = 1e-24 $NEAR) */
+	extraDepositYocto?: string
 }) => {
 
 	const {
@@ -382,6 +388,7 @@ export const deleteKeys = async ({
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
+	const canAddKeys = await keypomView({methodName: 'can_user_add_keys', args: { drop_id, account_id: account!.accountId}});
 	assert(owner_id == account!.accountId, 'Only the owner of the drop can delete keys.')
 
 	const actions: any[] = []

@@ -77,7 +77,9 @@ export interface EnvVars {
 	/** @internal */
 	getAccount?: any
 	/** @internal */
-	execute?: any
+	execute?: any,
+	/** Object containing the supported Keypom contracts for both mainnet and testnet */
+	supportedKeypomContracts: {"mainnet": {}, "testnet": {}}
 }
 
 /** 

@@ -71,6 +71,9 @@ export interface DropConfig {
 	/** Any information related to how access keys are used such as which methods they can call or whether an empty drop should be automatically deleted etc.*/
 	usage?: UsageConfig,
 
+    /** Any information related to primary market sales for access keys added to this drop.*/
+    sale?: PublicSaleConfig,
+
 	/** Override the global root account that all created sub-accounts will have (currently `near` or `testnet`). This allows users to drops that have a custom root.
      * For example, Fayyr could specify a root of `fayyr.near` By which all sub-accounts will then be `ACCOUNT.fayyr.near`. 
      * It's important to note that this root account *MUST* have a smart contract deployed that has a method `create_account`.
@@ -149,6 +152,39 @@ export interface UsageConfig {
      * In the case where `autoDeleteDrop` is set to true and the drop is the owner's last, should their balance be automatically withdrawn? If this isn't specified, it defaults to false.
      */
     autoWithdraw?: boolean
+}
+
+/** 
+ * Within the config, there are configurable options related to how keys can be sold and a funder can potentially make a profit.
+*/
+export interface PublicSaleConfig {
+    /** Maximum number of keys that can be added to this drop. If None, there is no max. */
+    maxNumKeys?: number,
+    /** 
+     * Amount of $NEAR that the user needs to attach (if they are not the funder) on top of costs. This amount will be
+     * Automatically sent to the funder's balance. If None, the keys are free to the public.
+    */
+    pricePerKeyNEAR?: number,
+    pricePerKeyYocto?: string,
+    /** Which accounts are allowed to add keys? */
+    allowlist?: string[],
+    /** Which accounts are NOT allowed to add keys? */
+    blocklist?: string[],
+    /** 
+     * Should the revenue generated be sent to the funder's account balance or
+     * automatically withdrawn and sent to their NEAR wallet? 
+    */
+    autoWithdrawFunds?: boolean,
+    /**
+     * Minimum block timestamp before the public sale starts. If None, keys can be added immediately
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    start?: number,
+    /**
+     * Block timestamp dictating the end of the public sale. If None, keys can be added indefinitely
+     * Measured in number of non-leap-nanoseconds since January 1, 1970 0:00:00 UTC.
+    */
+    end?: number,
 }
 
 

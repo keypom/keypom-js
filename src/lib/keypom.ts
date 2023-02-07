@@ -83,7 +83,7 @@ export const getEnv = (): EnvVars  => {
 	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
 	return {
 		near, connection, keyStore, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
-		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute,
+		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute, supportedKeypomContracts
 	}
 }
 

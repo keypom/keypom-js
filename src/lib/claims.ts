@@ -5,6 +5,7 @@ const {
 } = nearAPI;
 
 import { getEnv } from "./keypom";
+import { getDropInformation } from "./views";
 
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.

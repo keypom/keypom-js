@@ -18,7 +18,7 @@ import {
 	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
 import { NFTData } from './types/nft';
-import { ProtocolReturnedDrop } from './types/protocol';
+import { ProtocolReturnedDrop, ProtocolReturnedDropConfig } from './types/protocol';
 import { SimpleData } from './types/simple';
 import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
@@ -236,16 +236,25 @@ export const createDrop = async ({
 
 	await assertDropIdUnique(dropId);
 
-	const finalConfig = {
+	const finalConfig: ProtocolReturnedDropConfig = {
 		uses_per_key: config?.usesPerKey || 1,
-		root_account_id: config?.dropRoot,
+		time: config?.time,
 		usage: {
 			auto_delete_drop: config?.usage?.autoDeleteDrop || false,
 			auto_withdraw: config?.usage?.autoWithdraw || true,
 			permissions: config?.usage?.permissions,
 			refund_deposit: config?.usage?.refundDeposit,
 		},
-		time: config?.time,
+		sale: config?.sale ? {
+			max_num_keys: config?.sale?.maxNumKeys,
+			price_per_key: config?.sale?.pricePerKeyYocto || config?.sale?.pricePerKeyNEAR ? parseNearAmount(config?.sale?.pricePerKeyNEAR?.toString())! : undefined,
+			allowlist: config?.sale?.allowlist,
+			blocklist: config?.sale?.blocklist,
+			auto_withdraw_funds: config?.sale?.autoWithdrawFunds,
+			start: config?.sale?.start,
+			end: config?.sale?.end
+		} : undefined,
+		root_account_id: config?.dropRoot,
 	}
 
 	assertValidDropConfig(finalConfig);
@@ -300,7 +309,7 @@ export const createDrop = async ({
 		}
 	}
 
-	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key);
+	assertValidFCData(fcData, depositPerUseYocto, finalConfig.uses_per_key || 1);
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -331,7 +340,10 @@ export const createDrop = async ({
 					ret.key_id_field = method.keyIdField;
 					return ret
 				}) : undefined
-			)
+			),
+			config: fcData.config ? {
+				attached_gas: fcData.config?.attachedGas
+			} : undefined
 		}) : undefined,
 		simple: simpleData?.lazyRegister ? ({
 			lazy_register: simpleData.lazyRegister,
@@ -350,7 +362,7 @@ export const createDrop = async ({
 		near: near!,
 		depositPerUse: depositPerUseYocto,
 		numKeys,
-		usesPerKey: finalConfig.uses_per_key,
+		usesPerKey: finalConfig.uses_per_key || 1,
 		attachedGas: parseInt(attachedGas!),
 		storage: storageCalculated,
 		ftData,

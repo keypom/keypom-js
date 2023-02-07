@@ -3,6 +3,7 @@ import { FCData } from "./types/fc";
 import BN from 'bn.js';
 import { getEnv } from "./keypom";
 import { Funder } from "./types/general";
+import { ProtocolReturnedDropConfig } from "./types/protocol";
 
 export function isValidAccountObj(o: Account | undefined): o is Account {
     if (o) {
@@ -26,26 +27,11 @@ export const assert = (exp, m) => {
     }
 }
 
-export const assertValidDropConfig = (config: {
-    uses_per_key?: number,
-    time?: {
-        start?: number,
-        end?: number,
-        throttle?: number,
-        interval?: number,
-    },
-    usage?: {
-        permission?: string,
-        refund_deposit?: boolean,
-        auto_delete_drop?: boolean,
-        auto_withdraw?: boolean
-    },
-    root_account_id?: string,
-}) => {
+export const assertValidDropConfig = (config?: ProtocolReturnedDropConfig) => {
     assert((config?.uses_per_key || 1) != 0, "Cannot have 0 uses per key for a drop config");
 
-    if (config?.usage?.permission) {
-        assert(config.usage.permission == "create_account_and_claim" || config.usage.permission == "claim", "Invalid permission type for usage. Must be 'create_account_and_claim' or 'claim'");
+    if (config?.usage?.permissions) {
+        assert(config.usage.permissions == "create_account_and_claim" || config.usage.permissions == "claim", "Invalid permission type for usage. Must be 'create_account_and_claim' or 'claim'");
     }
 
     if (config?.time) {
