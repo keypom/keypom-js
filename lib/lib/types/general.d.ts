@@ -1,7 +1,7 @@
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { KeyPair } from 'near-api-js/lib/utils';
-export type NearKeyPair = KeyPair;
+export declare type NearKeyPair = KeyPair;
 /**
  * For each generated KeyPair (either through `createDrop`, `addKeys` or `generateKeys`), the public and private keys are returned.
  * In addition, the actual KeyPair objects are returned as well.

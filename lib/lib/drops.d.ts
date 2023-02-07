@@ -8,7 +8,7 @@ import { ProtocolReturnedDrop } from './types/protocol';
 import { SimpleData } from './types/simple';
 import { CreateOrAddReturn } from './types/params';
 import { DropConfig } from './types/drops';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're

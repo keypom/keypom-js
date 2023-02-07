@@ -10,7 +10,7 @@ import { FTData, FungibleTokenMetadata } from "./types/ft";
 import { GeneratedKeyPairs } from "./types/general";
 import { NonFungibleTokenObject } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const key2str: (v: any) => any;

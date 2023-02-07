@@ -326,6 +326,9 @@ export const createDrop = async ({
 			sender_id: nftData.senderId,
 		}) : undefined,
 		fc: fcData?.methods ? ({
+			config: fcData.config ? ({
+				attached_gas: fcData.config?.attachedGas,
+			}) : undefined,
 			methods: fcData.methods.map((useMethods) => 
 				useMethods ? 
 				useMethods.map((method) => {

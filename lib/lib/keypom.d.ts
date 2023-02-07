@@ -11,7 +11,7 @@ export declare const supportedKeypomContracts: {
         "v1-4.keypom.testnet": boolean;
     };
 };
-export type Maybe<T> = T | undefined;
+export declare type Maybe<T> = T | undefined;
 declare let near: Maybe<Near>;
 /**
  *
