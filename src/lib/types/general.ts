@@ -79,7 +79,8 @@ export interface EnvVars {
 	/** @internal */
 	execute?: any,
 	/** Object containing the supported Keypom contracts for both mainnet and testnet */
-	supportedKeypomContracts: {"mainnet": {}, "testnet": {}},
+	supportedKeypomContracts?: {"mainnet": {}, "testnet": {}},
+	/** Function that allows you to invoke a view method. This takes in a `receiverId`, `methodName`, and `args`. */
 	viewCall?: any
 	
 }

@@ -134,7 +134,8 @@ export const getKeys = async ({
 /**
  * Returns the KeyInfo corresponding to a specific public key
  * 
- * @param {string} publicKey the public key to get information for.
+ * @param {string=} publicKey the public key to get information for.
+ * @param {string=} secretKey The secret key corresponding to the public key
  * 
  * @returns {Promise<KeyInfo>} Key information struct for that specific key.
  * 
@@ -166,8 +167,15 @@ export const getKeys = async ({
  * @group View Functions
 */
 export const getKeyInformation = async ({
-    publicKey
-}: {publicKey: string }): Promise<KeyInfo> => {
+    publicKey,
+	secretKey
+}: {publicKey?: string, secretKey?: string }): Promise<KeyInfo> => {
+	// Assert that either a secretKey or public key is passed in
+	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
+	if (secretKey) {
+		publicKey = await getPubFromSecret(secretKey);
+	}
+
 	return keypomView({
 		methodName: 'get_key_information',
 		args: {
@@ -179,7 +187,8 @@ export const getKeyInformation = async ({
 /**
  * Returns a vector of KeyInfo corresponding to a set of public keys passed in.
  * 
- * @param {string[]} publicKeys Array of public keys to get information about
+ * @param {string[]=} publicKeys Array of public keys to get information about
+ * @param {string[]=} secretKeys Array of the secret keys corresponding to the public keys
  * 
  * @returns {Promise<Array<KeyInfo>>} Array of Key information structs for the keys passed in
  * 
@@ -211,8 +220,16 @@ export const getKeyInformation = async ({
  * @group View Functions
 */
 export const getKeyInformationBatch = async ({
-    publicKeys
-}: {publicKeys: string[] }): Promise<Array<KeyInfo>> => {
+    publicKeys,
+	secretKeys
+}: {publicKeys?: string[], secretKeys?: string[] }): Promise<Array<KeyInfo>> => {
+	// Assert that either secretKeys or public keys are passed in
+	assert(secretKeys || publicKeys, 'Must pass in either publicKeys or secretKeys');
+	if (secretKeys) {
+		// Map the secret keys into public keys by calling getPubFromSecret
+		publicKeys = await Promise.all(secretKeys.map(async (secretKey) => {return await getPubFromSecret(secretKey)}));
+	}
+	
 	return keypomView({
 		methodName: 'get_key_information_batch',
 		args: {
