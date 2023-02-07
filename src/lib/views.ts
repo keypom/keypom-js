@@ -733,6 +733,7 @@ export const getUserBalance = async ({
  * console.log('curMethodData (third): ', curMethodData)
  * t.is(curMethodData, null);
  * ```
+ * @group View Functions
  */
 export const getCurMethodData = async ({
 	secretKey,
@@ -749,6 +750,40 @@ export const getCurMethodData = async ({
 	let startingIdx = methodDataArray.length > 1 ? (dropInfo.config?.uses_per_key || 1) - keyInfo.remaining_uses : 0;
 
 	return methodDataArray[startingIdx];
+}
+
+/**
+ * Check if a given user can add keys to a drop. The only case where a user *other than the funder* could add keys is if the drop has a public sale running.
+ * 
+ * @param {string} dropId The drop ID to check if the user can add keys to
+ * @param {string} accountId The account ID of the user to check if they can add keys to the drop
+ * 
+ * @returns {Promise<boolean>} Whether or not the user can add keys to the drop
+ * 
+ * @example
+ * ```js	
+ * const canAddKeys = await canUserAddKeys({
+ * 		dropId: '1669840629120',
+ * 		accountId: 'foobar'
+ * });
+ * console.log('canAddKeys: ', canAddKeys)
+ * ```
+ * 
+ * @group View Functions
+*/
+export const canUserAddKeys = async ({
+	dropId,
+    accountId
+}: {dropId: string, accountId: string}): Promise<boolean> => {
+	const canAddKeys: boolean = await keypomView({
+		methodName: 'can_user_add_keys', 
+		args: { 
+			drop_id: dropId, 
+			account_id: accountId
+		}
+	});
+
+	return canAddKeys;
 }
 
 /**

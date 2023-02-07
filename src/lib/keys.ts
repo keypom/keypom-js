@@ -18,7 +18,7 @@ import {
 } from "./keypom-utils";
 import { ProtocolReturnedDrop } from './types/protocol';
 import { CreateOrAddReturn } from './types/params';
-import { getDropInformation, getUserBalance } from "./views";
+import { canUserAddKeys, getDropInformation, getUserBalance } from "./views";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -217,8 +217,9 @@ export const addKeys = async ({
 
 	const uses_per_key = config?.uses_per_key || 1;
 
-	assert(owner_id === account!.accountId, 'You are not the owner of this drop. You cannot add keys to it.')
-
+	const canAddKeys = await canUserAddKeys({ accountId: account!.accountId, dropId });
+	assert(canAddKeys == true, 'Calling account does not have permission to add keys to this drop.');
+	
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
 		var keys;
@@ -396,7 +397,6 @@ export const deleteKeys = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 	
-	const canAddKeys = await keypomView({methodName: 'can_user_add_keys', args: { drop_id, account_id: account!.accountId}});
 	assert(owner_id == account!.accountId, 'Only the owner of the drop can delete keys.')
 
 	const actions: any[] = []
