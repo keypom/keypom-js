@@ -68,7 +68,7 @@ async function nftDropKeypom(){
 	pubKeys = keys.publicKeys
 
     	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+	const {contractId: KEYPOM_CONTRACT} = getEnv()
    		// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keys.keyPairs.length; i++) {
 	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;

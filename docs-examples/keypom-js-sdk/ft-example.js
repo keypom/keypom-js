@@ -57,15 +57,16 @@ async function ftDropKeypom(){
 	    ftData: {
 	    	contractId: "ft.keypom.testnet",
 	    	senderId: "keypom-docs-demo.testnet",
-	    	// This balance per use is balance of FTs per use. 
-	    	// parseNearAmount is used for conveience to convert to 10^24
+	    	// This balance per use is balance of human readable FTs per use. 
 	    	amount: "1"
+			// Alternatively, you could use absoluteAmount, which is dependant on the decimals value of the FT
+			// ex. if decimals of an ft = 8, then 1 FT token would be absoluteAmount = 100000000
 	    },
 	});
 	pubKeys = keys.publicKeys
 
     	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+	const {contractId: KEYPOM_CONTRACT} = getEnv()
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keys.keyPairs.length; i++) {
 	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
