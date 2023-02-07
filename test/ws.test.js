@@ -1,7 +1,7 @@
 const test = require('ava');
 const BN = require('bn.js');
 const nearAPI = require("near-api-js");
-const { getUserBalance, getCurMethodData } = require('../lib');
+const { getUserBalance, getCurMethodData, canUserAddKeys, addToSaleAllowlist, removeFromSaleAllowlist, addToSaleBlocklist, removeFromSaleBlocklist, updateSale } = require('../lib');
 const {
 	Near,
 	KeyPair,
@@ -147,6 +147,13 @@ test('check FC data index', async (t) => {
 
 	let curMethodData = await getCurMethodData({secretKey});
 	console.log('curMethodData (first): ', curMethodData)
+	t.is(curMethodData, null);
+
+	curMethodData = await getCurMethodData({secretKey, keyUse: 1});
+	t.is(curMethodData, null);
+	curMethodData = await getCurMethodData({secretKey, keyUse: 2});
+	t.true(curMethodData != null);
+	curMethodData = await getCurMethodData({secretKey, keyUse: 3});
 	t.is(curMethodData, null);
 
 	await claim({secretKey, accountId: 'foobar'})

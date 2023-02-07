@@ -1,10 +1,11 @@
-import { KeyInfo } from "./types/drops";
+import { Maybe } from "./keypom";
 import { ContractSourceMetadata } from "./types/general";
-import { ProtocolReturnedDrop } from "./types/protocol";
+import { ProtocolReturnedDrop, ProtocolReturnedKeyInfo, ProtocolReturnedMethod } from "./types/protocol";
 /**
- * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
+ * Returns the balance associated a with given public key. If only the secret key is known, this can be passed in instead. This is used by the NEAR wallet to display the amount of the linkdrop
  *
- * @param {string} publicKey The public key that contains a balance
+ * @param {string=} publicKey The public key that contains a balance
+ * @param {string=} secretKey The secret key corresponding to the public key
  *
  * @returns {Promise<string>} The amount of yoctoNEAR that is contained within the key
  *
@@ -35,8 +36,9 @@ import { ProtocolReturnedDrop } from "./types/protocol";
  * ```
  * @group View Functions
 */
-export declare const getKeyBalance: ({ publicKey, }: {
-    publicKey: string;
+export declare const getKeyBalance: ({ publicKey, secretKey }: {
+    publicKey?: string | undefined;
+    secretKey?: string | undefined;
 }) => Promise<string>;
 /**
  * Query for the total supply of keys currently on the Keypom contract
@@ -90,11 +92,12 @@ export declare const getKeyTotalSupply: () => Promise<number>;
 export declare const getKeys: ({ start, limit }: {
     start?: string | number | undefined;
     limit?: number | undefined;
-}) => Promise<Array<KeyInfo>>;
+}) => Promise<Array<ProtocolReturnedKeyInfo>>;
 /**
  * Returns the KeyInfo corresponding to a specific public key
  *
- * @param {string} publicKey the public key to get information for.
+ * @param {string=} publicKey the public key to get information for.
+ * @param {string=} secretKey The secret key corresponding to the public key
  *
  * @returns {Promise<KeyInfo>} Key information struct for that specific key.
  *
@@ -125,13 +128,15 @@ export declare const getKeys: ({ start, limit }: {
  * ```
  * @group View Functions
 */
-export declare const getKeyInformation: ({ publicKey }: {
-    publicKey: string;
-}) => Promise<KeyInfo>;
+export declare const getKeyInformation: ({ publicKey, secretKey }: {
+    publicKey?: string | undefined;
+    secretKey?: string | undefined;
+}) => Promise<ProtocolReturnedKeyInfo>;
 /**
  * Returns a vector of KeyInfo corresponding to a set of public keys passed in.
  *
- * @param {string[]} publicKeys Array of public keys to get information about
+ * @param {string[]=} publicKeys Array of public keys to get information about
+ * @param {string[]=} secretKeys Array of the secret keys corresponding to the public keys
  *
  * @returns {Promise<Array<KeyInfo>>} Array of Key information structs for the keys passed in
  *
@@ -162,9 +167,10 @@ export declare const getKeyInformation: ({ publicKey }: {
  * ```
  * @group View Functions
 */
-export declare const getKeyInformationBatch: ({ publicKeys }: {
-    publicKeys: string[];
-}) => Promise<Array<KeyInfo>>;
+export declare const getKeyInformationBatch: ({ publicKeys, secretKeys }: {
+    publicKeys?: string[] | undefined;
+    secretKeys?: string[] | undefined;
+}) => Promise<Array<ProtocolReturnedKeyInfo>>;
 /**
  * Get information about a specific drop by passing in either a drop ID, public key, or secret key.
  *
@@ -321,7 +327,7 @@ export declare const getKeysForDrop: ({ dropId, start, limit }: {
     dropId: string;
     start?: string | number | undefined;
     limit?: number | undefined;
-}) => Promise<Array<KeyInfo>>;
+}) => Promise<Array<ProtocolReturnedKeyInfo>>;
 /**
  * Returns the total supply of active drops for a given account ID
  *
@@ -486,6 +492,110 @@ export declare const getNftTokenIDsForDrop: ({ dropId, start, limit }: {
 export declare const getUserBalance: ({ accountId }: {
     accountId: string;
 }) => Promise<string>;
+/**
+ * Query for the current method data for a given key. This pertains to FC drops and the current method data is either null or an array of methods that will be invoked when the key is claimed next.
+ *
+ * @param {string=} secretKey (OPTIONAL) The secret key of the key to retrieve the method data for. If no secret key is passed in, the public key must be passed in.
+ * @param {string=} publicKey (OPTIONAL) The public key of the key to retrieve the method data for. If no public key is passed in, the secret key must be passed in.
+ * @param {number=} keyUse (OPTIONAL) Pass in a specific key use (*NOT* zero indexed) to retrieve the method data for. If no key use is passed in, the method data for the current key use will be returned.
+ *
+ * @returns {Promise<Maybe<Array<ProtocolReturnedMethod>>>} The current method data for the key
+ *
+ * @example
+ * ```js
+ * const fcData = {
+ * 	methods: [
+ * 		null,
+ * 		[
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "1"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			},
+ * 			{
+ * 				methodName: "nft_token",
+ * 				receiverId: "nft.examples.testnet",
+ * 				args: JSON.stringify({
+ * 					token_id: "2"
+ * 				}),
+ * 				attachedDeposit: "0"
+ * 			}
+ * 		],
+ * 		null
+ * 	]
+ * }
+ *
+ * const {keys: {publicKeys, secretKeys}} = await createDrop({
+ * 	numKeys: 1,
+ * 	depositPerUseNEAR: 0,
+ * 	fcData,
+ * 	config: {
+ * 		usesPerKey: 3
+ * 	}
+ * });
+ * const secretKey = secretKeys[0];
+ *
+ * let curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (first): ', curMethodData)
+ * t.is(curMethodData, null);
+ *
+ * 	curMethodData = await getCurMethodData({secretKey, keyUse: 1});
+ *	t.is(curMethodData, null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 2});
+ *	t.true(curMethodData != null);
+ *	curMethodData = await getCurMethodData({secretKey, keyUse: 3});
+ *	t.is(curMethodData, null);
+ *
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * t.true(curMethodData != null);
+ *
+ * await claim({secretKey, accountId: 'foobar'})
+ * curMethodData = await getCurMethodData({secretKey});
+ * console.log('curMethodData (third): ', curMethodData)
+ * t.is(curMethodData, null);
+ * ```
+ * @group View Functions
+ */
+export declare const getCurMethodData: ({ secretKey, publicKey, keyUse }: {
+    secretKey?: string | undefined;
+    publicKey?: string | undefined;
+    keyUse?: number | undefined;
+}) => Promise<Maybe<Array<ProtocolReturnedMethod>>>;
+/**
+ * Check if a given user can add keys to a drop. The only case where a user *other than the funder* could add keys is if the drop has a public sale running.
+ *
+ * @param {string} dropId The drop ID to check if the user can add keys to
+ * @param {string} accountId The account ID of the user to check if they can add keys to the drop
+ *
+ * @returns {Promise<boolean>} Whether or not the user can add keys to the drop
+ *
+ * @example
+ * ```js
+ * await createDrop({
+ * 	numKeys: 0,
+ * 	depositPerUseNEAR: 0,
+ * 	config: {
+ * 		sale: {
+ * 			maxNumKeys: 2,
+ * 			pricePerKeyNEAR: 1
+ * 		}
+ * 	}
+ * });
+ *
+ * const canAddKeys = await canUserAddKeys({accountId: "foobar.testnet"});
+ * t.is(canAddKeys, true);
+ * ```
+ *
+ * @group View Functions
+*/
+export declare const canUserAddKeys: ({ dropId, accountId }: {
+    dropId: string;
+    accountId: string;
+}) => Promise<boolean>;
 /**
  * Returns the source metadata for the Keypom contract that the SDK has been initialized on. This includes valuable information
  * such as which specific version the contract is on and link to exactly which GitHub commit is deployed.

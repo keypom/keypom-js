@@ -9,6 +9,7 @@ export declare const supportedKeypomContracts: {
     testnet: {
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
+        "dev-1675792594983-73336699552344": boolean;
     };
 };
 export type Maybe<T> = T | undefined;
