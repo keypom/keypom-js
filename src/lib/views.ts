@@ -3,7 +3,7 @@ import { KeyPair } from 'near-api-js'
 import { assert } from "./checks"
 import { KEY_LIMIT } from "./drops"
 import { getEnv } from "./keypom"
-import { keypomView } from "./keypom-utils"
+import { getPubFromSecret, keypomView } from "./keypom-utils"
 import { KeyInfo } from "./types/drops"
 import { ContractSourceMetadata } from "./types/general"
 import { ProtocolReturnedDrop } from "./types/protocol"
@@ -11,9 +11,10 @@ import { ProtocolReturnedDrop } from "./types/protocol"
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 /**
- * Returns the balance associated with given key. This is used by the NEAR wallet to display the amount of the linkdrop
+ * Returns the balance associated a with given public key. If only the secret key is known, this can be passed in instead. This is used by the NEAR wallet to display the amount of the linkdrop
  * 
- * @param {string} publicKey The public key that contains a balance
+ * @param {string=} publicKey The public key that contains a balance
+ * @param {string=} secretKey The secret key corresponding to the public key
  * 
  * @returns {Promise<string>} The amount of yoctoNEAR that is contained within the key
  * 
@@ -46,7 +47,14 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
 */
 export const getKeyBalance = async ({
 	publicKey,
-}: { publicKey: string }): Promise<string> => {
+	secretKey
+}: { publicKey?: string, secretKey?: string }): Promise<string> => {
+	// Assert that either a secretKey or public key is passed in
+	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
+	if (secretKey) {
+		publicKey = await getPubFromSecret(secretKey);
+	}
+
 	return keypomView({
 		methodName: 'get_key_balance',
 		args: {
@@ -288,19 +296,18 @@ export const getKeyInformationBatch = async ({
 */
 export const getDropInformation = async ({ dropId, secretKey, publicKey, withKeys = false } : {dropId?: string, secretKey?: string, publicKey?: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
 	const {
-		viewAccount, contractId,
+		contractId, viewCall
 	} = getEnv()
 
-	assert(viewAccount, 'initKeypom must be called before view functions can be called.');
+	assert(viewCall, 'initKeypom must be called before view functions can be called.');
 	// Assert that either a dropId or a secretKey is passed in
 	assert(dropId || secretKey || publicKey, 'Must pass in either a dropId, publicKey or a secretKey to getDropInformation');
 
 	if (secretKey) {
-		var keyPair = await KeyPair.fromString(secretKey);
-		publicKey = keyPair.getPublicKey().toString()
+		publicKey = await getPubFromSecret(secretKey);
 	}
 
-	const dropInfo = await viewAccount.viewFunction2({
+	const dropInfo = await viewCall({
 		contractId,
 		methodName: 'get_drop_information',
 		args: {

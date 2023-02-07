@@ -215,7 +215,7 @@ export const createDrop = async ({
 	successUrl?: string
 }): Promise<CreateOrAddReturn> => {
 	const {
-		near, viewAccount, networkId,
+		near, viewCall, networkId,
 		gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails
 	} = getEnv()
 
@@ -301,7 +301,7 @@ export const createDrop = async ({
 		var ftBalancePerUse = ftData?.absoluteAmount || "0"
 		
 		if (ftData.amount) {
-			const metadata = await viewAccount.viewFunction2({
+			const metadata = viewCall({
 				contractId: ftData.contractId,
 				methodName: 'ft_metadata',
 			})

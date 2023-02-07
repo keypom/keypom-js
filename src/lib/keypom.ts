@@ -73,6 +73,7 @@ let fundingAccount: Maybe<Account> = undefined;
 let fundingAccountDetails: Maybe<Funder> = undefined;
 let contractAccount: Maybe<Account> = undefined;
 let viewAccount: any = undefined;
+let viewCall: any = undefined;
 
 /**
  * 
@@ -81,9 +82,10 @@ let viewAccount: any = undefined;
  */
 export const getEnv = (): EnvVars  => {
 	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
+
 	return {
 		near, connection, keyStore, networkId, fundingAccount, contractAccount, viewAccount, fundingAccountDetails,
-		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute, supportedKeypomContracts
+		gas, gas300, attachedGas, contractId, receiverId, getAccount, execute, supportedKeypomContracts, viewCall
 	}
 }
 
@@ -217,7 +219,7 @@ export const initKeypom = async ({
 	}
 
 	viewAccount = new Account(connection, networks[networkId!].viewAccountId)
-	viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args)
+	viewCall = viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args);
 
 	contractAccount = new Account(connection, contractId)
 

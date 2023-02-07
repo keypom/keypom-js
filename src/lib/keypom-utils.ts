@@ -50,6 +50,25 @@ export const key2str = (v) => typeof v === 'string' ? v : v.pk
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
 
 /**
+ * Get the public key from a given secret key.
+ * 
+ * @param {string} secretKey - The secret key you wish to get the public key from
+ * 
+ * @returns {Promise<string>} - The public key
+ * 
+ * @example
+ * ```js
+ * const pubKey = await getPubFromSecret("ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1");
+ * console.log(pubKey);
+ * ```
+ * @group Utility
+ */
+export const getPubFromSecret = async (secretKey: string): Promise<string> => {
+    var keyPair = await KeyPair.fromString(secretKey);
+    return keyPair.getPublicKey().toString()
+};
+
+/**
  * Check whether or not a given account ID exists on the network.
  * 
  * @param {string} accountId - The account ID you wish to check
@@ -98,10 +117,10 @@ export const accountExists = async (accountId): Promise<boolean> => {
  * @group Utility
  */
 export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string, tokenId: string}): Promise<NonFungibleTokenObject> => {
-    const { near, viewAccount } = getEnv();
+    const { near, viewCall } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 
-    const res: NonFungibleTokenObject = await viewAccount!.viewFunction2({
+    const res: NonFungibleTokenObject = await viewCall({
         contractId,
         methodName: 'nft_token',
         args: {
@@ -129,10 +148,10 @@ export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string,
  * @group Utility
  */
 export const getFTMetadata = async ({contractId}: {contractId: string}): Promise<FungibleTokenMetadata> => {
-    const { near, viewAccount } = getEnv();
+    const { near, viewCall } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 
-    const res: FungibleTokenMetadata = await viewAccount!.viewFunction2({
+    const res: FungibleTokenMetadata = await viewCall({
         contractId,
         methodName: 'ft_metadata',
         args: {}
@@ -282,12 +301,12 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
 
 export const keypomView = async ({ methodName, args }) => {
     const {
-		viewAccount, contractId,
+		viewCall, contractId,
 	} = getEnv()
 
-    assert(viewAccount, 'initKeypom must be called before view functions can be called.');
+    assert(viewCall, 'initKeypom must be called before view functions can be called.');
 
-    return viewAccount!.viewFunction2({
+    return viewCall({
 		contractId,
 		methodName,
 		args
@@ -419,13 +438,13 @@ export const ftTransferCall = async ({
 	/** If true, the transaction will be returned instead of being signed and sent. */
     returnTransaction?: boolean,
 }): Promise<Promise<void | FinalExecutionOutcome[]> | Transaction> => {
-    const { getAccount, near, receiverId: keypomContractId, viewAccount } = getEnv();
+    const { getAccount, near, receiverId: keypomContractId, viewCall } = getEnv();
 	assert(near != undefined, 'Keypom SDK is not initialized. Please call `initKeypom`.')
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 
     if (amount) {
-        const metadata = await viewAccount.viewFunction2({
+        const metadata = await viewCall({
             contractId,
             methodName: 'ft_metadata',
         })

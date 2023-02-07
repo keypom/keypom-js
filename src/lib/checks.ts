@@ -83,11 +83,11 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
 
 export const assertDropIdUnique = async (dropId: string) => {
     const {
-		viewAccount, contractId
+		viewCall, contractId
 	} = getEnv()
 
     try {
-        const dropInfo = await viewAccount.viewFunction2({
+        const dropInfo = await viewCall({
             contractId,
             methodName: 'get_drop_information',
             args: {
