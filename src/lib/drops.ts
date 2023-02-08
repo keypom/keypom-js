@@ -221,7 +221,7 @@ export const createDrop = async ({
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -499,7 +499,7 @@ export const deleteDrops = async ({
 		gas300, receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
 	
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });

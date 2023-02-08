@@ -196,7 +196,7 @@ export const addKeys = async ({
 
 	assert(drop || dropId, 'Either a dropId or drop object must be passed in.')
 	assert(numKeys || publicKeys?.length, "Either pass in publicKeys or set numKeys to a positive non-zero value.")
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId!] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
 
 	account = await getAccount({ account, wallet });
 	
@@ -216,8 +216,13 @@ export const addKeys = async ({
 
 	const uses_per_key = config?.uses_per_key || 1;
 
-	const canAddKeys = await canUserAddKeys({ accountId: account!.accountId, dropId });
-	assert(canAddKeys == true, 'Calling account does not have permission to add keys to this drop.');
+	// If the contract is v1-3 or lower, just check if owner is the same as the calling account. If it's v1-4 or higher, check if the calling account has the permission to add keys.
+	if (!contractId!.includes("v1-4.keypom")) {
+		assert(owner_id === account!.accountId, 'Calling account is not the owner of this drop.');
+	} else {
+		const canAddKeys = await canUserAddKeys({ accountId: account!.accountId, dropId });
+		assert(canAddKeys == true, 'Calling account does not have permission to add keys to this drop.');
+	}
 	
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
@@ -389,7 +394,7 @@ export const deleteKeys = async ({
 	const {
 		receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
 
 	const { owner_id, drop_id, registered_uses, ft, nft } = await getDropInformation({ dropId })
 	
