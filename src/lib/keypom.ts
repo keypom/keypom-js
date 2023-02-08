@@ -37,14 +37,16 @@ const networks = {
 	}
 }
 
-let officialKeypomContracts = {
+export const officialKeypomContracts = {
 	mainnet: {
 		"v1.keypom.near": true,
-		"v1-3.keypom.near": true
+		"v1-3.keypom.near": true,
+		"v1-4.keypom.near": true
 	},
 	testnet: {
 		"v1.keypom.testnet": true,
-		"v1-3.keypom.testnet": true
+		"v1-3.keypom.testnet": true,
+		"v1-4.keypom.testnet": true
 	}
 }
 
@@ -59,7 +61,19 @@ export const supportedKeypomContracts = {
 	}
 }
 
-let contractBase = 'v1-3.keypom'
+export const supportedLinkdropClaimPages = {
+	mainnet: {
+		"mynearwallet": "https://app.mynearwallet.com/linkdrop",
+		"wallet.near.org": "https://wallet.near.org/linkdrop",
+
+	},
+	testnet: {
+		"mynearwallet": "https://app.testnet.mynearwallet.com/linkdrop",
+		"wallet.near.org": "https://wallet.testnet.near.org/linkdrop"
+	}
+}
+
+let contractBase = 'v1-4.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
 

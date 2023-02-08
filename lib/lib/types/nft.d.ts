@@ -16,13 +16,13 @@ export interface NFTData {
 /**
  * General structure of a Non-Fungible Token object as per official NEP-171 standard (https://github.com/near/NEPs/blob/master/neps/nep-0171.md).
  */
-export interface NonFungibleTokenObject {
+export interface ProtocolReturnedNonFungibleTokenObject {
     /** String ID for the token */
     token_id: string;
     /** Account ID of the owner */
     owner_id: string;
     /** Metadata for the token */
-    metadata?: NonFungibleTokenMetadata;
+    metadata?: ProtocolReturnedNonFungibleTokenMetadata;
     /** Map of account IDs to approval IDs as per official NEP-178 standard (https://github.com/near/NEPs/blob/master/neps/nep-0178.md). */
     approved_account_ids?: Map<string, number>;
     /** A mapping of NEAR accounts to the amount each should be paid out as per official NEP-199 standard (https://github.com/near/NEPs/blob/master/neps/nep-0199.md). */
@@ -31,7 +31,7 @@ export interface NonFungibleTokenObject {
 /**
  * General structure of Non-Fungible Token Metadata as per official NEP-177 standard (https://github.com/near/NEPs/blob/master/neps/nep-0177.md).
  */
-export interface NonFungibleTokenMetadata {
+export interface ProtocolReturnedNonFungibleTokenMetadata {
     /** ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055" */
     title?: string;
     /** free-form description */
@@ -56,4 +56,33 @@ export interface NonFungibleTokenMetadata {
     reference?: string;
     /** Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included. */
     reference_hash?: string;
+}
+/**
+ * General structure of Non-Fungible Token Metadata (in camelCase) as per official NEP-177 standard (https://github.com/near/NEPs/blob/master/neps/nep-0177.md).
+ */
+export interface NonFungibleTokenMetadata {
+    /** ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055" */
+    title?: string;
+    /** free-form description */
+    description?: string;
+    /** URL to associated media, preferably to decentralized, content-addressed storage */
+    media?: string;
+    /** Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included. */
+    mediaHash?: string;
+    /** number of copies of this set of metadata in existence when token was minted. */
+    copies?: number;
+    /** When token was issued or minted, Unix epoch in milliseconds */
+    issuedAt?: number;
+    /** When token expires, Unix epoch in milliseconds */
+    expiresAt?: number;
+    /** When token starts being valid, Unix epoch in milliseconds */
+    startsAt?: number;
+    /** When token was last updated, Unix epoch in milliseconds */
+    updatedAt?: number;
+    /** anything extra the NFT wants to store on-chain. Can be stringified JSON. */
+    extra?: string;
+    /** URL to an off-chain JSON file with more info. */
+    reference?: string;
+    /** Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included. */
+    referenceHash?: string;
 }

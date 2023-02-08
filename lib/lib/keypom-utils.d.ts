@@ -8,9 +8,9 @@ import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
 import { FTData, FungibleTokenMetadata } from "./types/ft";
 import { GeneratedKeyPairs } from "./types/general";
-import { NonFungibleTokenObject } from "./types/nft";
+import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const exportedNearAPI: typeof nearAPI;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const key2str: (v: any) => any;
@@ -50,7 +50,7 @@ export declare const accountExists: (accountId: any) => Promise<boolean>;
  * @param {string} contractId - The contract ID of the NFT contract
  * @param {string} tokenId - The token ID of the NFT you wish to get the metadata for
  *
- * @returns {Promise<NonFungibleTokenObject>} - The NFT Object
+ * @returns {Promise<ProtocolReturnedNonFungibleTokenObject>} - The NFT Object
  *
  * @example
  * ```js
@@ -65,7 +65,7 @@ export declare const accountExists: (accountId: any) => Promise<boolean>;
 export declare const getNFTMetadata: ({ contractId, tokenId }: {
     contractId: string;
     tokenId: string;
-}) => Promise<NonFungibleTokenObject>;
+}) => Promise<ProtocolReturnedNonFungibleTokenObject>;
 /**
  * Get the FT Metadata for a given fungible token contract. This is used to display important information such as the icon for the token, decimal format etc.
  *
@@ -85,6 +85,97 @@ export declare const getNFTMetadata: ({ contractId, tokenId }: {
 export declare const getFTMetadata: ({ contractId }: {
     contractId: string;
 }) => Promise<FungibleTokenMetadata>;
+/**
+ * Creates a new NFT series on the official Keypom Series contracts. This is for lazy minting NFTs as part of an FC drop.
+ *
+ * @example
+ * Send 3 NFTs using the funder account (not passing in any accounts into the call):
+ * ```js
+ *	await initKeypom({
+ *		// near,
+ *		network: 'testnet',
+ *		funder: {
+ *			accountId,
+ *			secretKey,
+ *		}
+ *	})
+ *
+ *	const {keys, dropId} = await createDrop({
+ *		numKeys: 1,
+ *		config: {
+ *			usesPerKey: 100
+ *		},
+ *		metadata: "My Cool Drop Title!",
+ *		depositPerUseNEAR: 0.5,
+ *		fcData: {
+ *			methods: [[
+ *				{
+ *					receiverId: `nft-v2.keypom.testnet`,
+ *					methodName: "nft_mint",
+ *					args: "",
+ *					dropIdField: "mint_id",
+ *					accountIdField: "receiver_id",
+ *					attachedDeposit: parseNearAmount("0.1")
+ *				}
+ *			]]
+ *		}
+ *	})
+ *
+ *	const res = await createNFTSeries({
+ *		dropId,
+ *		metadata: {
+ *			title: "Moon NFT!",
+ *			description: "A cool NFT for the best dog in the world.",
+ *			media: "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq",
+ *			copies: 500
+ *		}
+ *	});
+ *	console.log('res: ', res)
+ *
+ *	const URLs = formatLinkdropUrl({
+ *		baseUrl: "localhost:3000/claim",
+ *		secretKeys: keys.secretKeys
+ *	})
+ *	console.log('URLs: ', URLs)
+ * ```
+ * @group Utility
+*/
+export declare const createNFTSeries: ({ account, wallet, dropId, metadata, royalty }: {
+    /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+    account?: nearAPI.Account | undefined;
+    /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+    wallet?: AnyWallet | undefined;
+    /** The drop ID for the drop that should have a series associated with it. */
+    dropId: string;
+    /** The metadata that all minted NFTs will have. */
+    metadata: NonFungibleTokenMetadata;
+    /** Any royalties associated with the series (as per official NEP-199 standard: https://github.com/near/NEPs/blob/master/neps/nep-0199.md) */
+    royalty?: Map<string, number> | undefined;
+}) => Promise<void | FinalExecutionOutcome[]>;
+/**
+ * Constructs a valid linkdrop URL for a given claim page or custom base URL.
+ *
+ * @param {string} secretKeys - An array of secret keys that should be embedded in the linkdrop URLs.
+ * @param {string=} claimPage - A valid reference to the claim page. See the exported `supportedLinkdropClaimPages` variable for a list of supported claim pages. If not provided, a custom base URL must be provided.
+ * @param {string=} networkId - The network ID you wish to linkdrop on. If not provided, the current network that the SDK is connected to will be used.
+ * @param {string=} contractId - The contract ID where the secret key belongs to. If not provided, the current contract ID that the SDK is connected to will be used.
+ * @param {string=} baseUrl - A custom URL to use as the base for the linkdrop.
+ *
+ * @returns {string[]} - An array of the linkdrop URLs
+ *
+ * @example
+ * ```js
+ * const linkdropUrl = formatLinkdropUrl({
+ *
+ * @group Utility
+ */
+export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, secretKeys, baseUrl }: {
+    claimPage?: string | undefined;
+    networkId?: string | undefined;
+    contractId?: string | undefined;
+    secretKeys: string[];
+    baseUrl?: string | undefined;
+}) => string[];
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
  *

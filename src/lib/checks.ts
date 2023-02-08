@@ -1,7 +1,7 @@
 import { Account, Near } from "near-api-js";
 import { FCData } from "./types/fc";
 import BN from 'bn.js';
-import { getEnv } from "./keypom";
+import { getEnv, officialKeypomContracts } from "./keypom";
 import { Funder } from "./types/general";
 import { ProtocolReturnedDropConfig } from "./types/protocol";
 
@@ -60,6 +60,8 @@ export const assertValidDropConfig = (config?: ProtocolReturnedDropConfig) => {
 }
 
 export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: string, usesPerKey: number) => {
+    const { networkId } = getEnv();
+
     if (fcData?.config?.attachedGas) {
         assert(depositPerUse == "0", "Cannot specify gas to attach and have a balance in the linkdrop")
         assert(new BN(fcData.config.attachedGas).lte(new BN("80000000000000")), "Cannot have 0 attached gas");
@@ -77,6 +79,23 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
 
         if (usesPerKey > 1 && numMethodData == 1) {
             assert(fcData.methods[0] != undefined, "cannot have a single none function call");
+        }
+
+        for (let i = 0; i < numMethodData; i++) {
+            const methodsPerUse = fcData.methods[i];
+            // Loop through each method in the methods per use
+            if (methodsPerUse) {
+                for (let j = 0; j < methodsPerUse.length; j++) {
+                    const methodData = methodsPerUse[j];
+                    if (methodData) {
+                        assert(methodData.methodName != undefined, "Must specify a method name");
+                        assert(methodData.args != undefined, "Must specify arguments for method");
+                        assert(typeof methodData.args == "string", "Arguments must be a string. If you want to pass a JSON object, stringify it first.");
+                        assert(methodData.receiverId != undefined, "Must specify arguments for method");
+                        assert(officialKeypomContracts[networkId!][methodData.receiverId] == undefined, "Cannot have a keypom contract as the receiver");
+                    }
+                }
+            }
         }
     }
 }
