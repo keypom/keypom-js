@@ -5,7 +5,7 @@ import { Maybe } from '../keypom';
 import { PasswordPerUse } from './drops';
 import { GeneratedKeyPairs } from './general';
 import { ProtocolReturnedDropConfig, ProtocolReturnedFCData, ProtocolReturnedFTData, ProtocolReturnedNFTData, ProtocolReturnedSimpleData } from './protocol';
-export declare type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
+export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 /**
  * Information returned when creating a drop or adding keys via `createDrop` and `addKeys` respectively.
  */

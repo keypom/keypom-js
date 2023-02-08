@@ -12,6 +12,9 @@ export {
 	accountExists,
 	getNFTMetadata,
 	getFTMetadata,
+	getPubFromSecret,
+	createNFTSeries,
+	formatLinkdropUrl,
 	exportedNearAPI as nearAPI
 } from "./lib/keypom-utils";
 import { exportedNearAPI } from "./lib/keypom-utils";

@@ -304,7 +304,7 @@ export const createDrop = async ({
 				contractId: ftData.contractId,
 				methodName: 'ft_metadata',
 			})
-			ftBalancePerUse = parseFTAmount(ftData.amount, metadata.decimals);
+			ftBalancePerUse = parseFTAmount(ftData.amount.toString(), metadata.decimals);
 		}
 	}
 

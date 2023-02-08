@@ -8,12 +8,12 @@ import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { assert, isValidAccountObj } from "./checks";
-import { getEnv } from "./keypom";
+import { getEnv, supportedLinkdropClaimPages } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
 import { FTData, FungibleTokenMetadata } from "./types/ft";
 import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
-import { NonFungibleTokenObject } from "./types/nft";
+import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
@@ -103,7 +103,7 @@ export const accountExists = async (accountId): Promise<boolean> => {
  * @param {string} contractId - The contract ID of the NFT contract
  * @param {string} tokenId - The token ID of the NFT you wish to get the metadata for
  * 
- * @returns {Promise<NonFungibleTokenObject>} - The NFT Object
+ * @returns {Promise<ProtocolReturnedNonFungibleTokenObject>} - The NFT Object
  * 
  * @example
  * ```js
@@ -115,10 +115,10 @@ export const accountExists = async (accountId): Promise<boolean> => {
  * ```
  * @group Utility
  */
-export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string, tokenId: string}): Promise<NonFungibleTokenObject> => {
+export const getNFTMetadata = async ({contractId, tokenId}: {contractId: string, tokenId: string}): Promise<ProtocolReturnedNonFungibleTokenObject> => {
     const { near, viewCall } = getEnv();
 
-    const res: NonFungibleTokenObject = await viewCall({
+    const res: ProtocolReturnedNonFungibleTokenObject = await viewCall({
         contractId,
         methodName: 'nft_token',
         args: {
@@ -156,6 +156,167 @@ export const getFTMetadata = async ({contractId}: {contractId: string}): Promise
 
     return res;
 };
+
+/**
+ * Creates a new NFT series on the official Keypom Series contracts. This is for lazy minting NFTs as part of an FC drop.
+ * 
+ * @example
+ * Send 3 NFTs using the funder account (not passing in any accounts into the call):
+ * ```js
+ *	await initKeypom({
+ *		// near,
+ *		network: 'testnet',
+ *		funder: {
+ *			accountId,
+ *			secretKey,
+ *		}
+ *	})
+ *
+ *	const {keys, dropId} = await createDrop({
+ *		numKeys: 1,
+ *		config: {
+ *			usesPerKey: 100
+ *		},
+ *		metadata: "My Cool Drop Title!",
+ *		depositPerUseNEAR: 0.5,
+ *		fcData: {
+ *			methods: [[
+ *				{
+ *					receiverId: `nft-v2.keypom.testnet`,
+ *					methodName: "nft_mint",
+ *					args: "",
+ *					dropIdField: "mint_id",
+ *					accountIdField: "receiver_id",
+ *					attachedDeposit: parseNearAmount("0.1")
+ *				}
+ *			]]
+ *		}
+ *	})
+ *
+ *	const res = await createNFTSeries({
+ *		dropId,
+ *		metadata: {
+ *			title: "Moon NFT!",
+ *			description: "A cool NFT for the best dog in the world.",
+ *			media: "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq",
+ *			copies: 500
+ *		}
+ *	});
+ *	console.log('res: ', res)
+ *
+ *	const URLs = formatLinkdropUrl({
+ *		baseUrl: "localhost:3000/claim",
+ *		secretKeys: keys.secretKeys
+ *	})
+ *	console.log('URLs: ', URLs)
+ * ```
+ * @group Utility
+*/
+export const createNFTSeries = async ({
+    account,
+    wallet,
+    dropId,
+    metadata,
+    royalty
+}: {
+	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
+	account?: Account,
+	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
+	wallet?: AnyWallet,
+	/** The drop ID for the drop that should have a series associated with it. */
+    dropId: string,
+	/** The metadata that all minted NFTs will have. */
+    metadata: NonFungibleTokenMetadata,
+	/** Any royalties associated with the series (as per official NEP-199 standard: https://github.com/near/NEPs/blob/master/neps/nep-0199.md) */
+    royalty?: Map<string, number>,
+}): Promise<void | FinalExecutionOutcome[]> => {
+    const { getAccount, networkId } = getEnv();
+	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
+	account = await getAccount({ account, wallet })
+
+    const actualMetadata: ProtocolReturnedNonFungibleTokenMetadata = {
+        title: metadata.title,
+        description: metadata.description,
+        media: metadata.media,
+        media_hash: metadata.mediaHash,
+        copies: metadata.copies,
+        issued_at: metadata.issuedAt,
+        expires_at: metadata.expiresAt,
+        starts_at: metadata.startsAt,
+        updated_at: metadata.updatedAt,
+        extra: metadata.extra,
+        reference: metadata.reference,
+        reference_hash: metadata.referenceHash,
+    }
+
+    const nftSeriesAccount = networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near"
+
+    const tx: Transaction = {
+        receiverId: nftSeriesAccount,
+        signerId: account!.accountId,
+        actions: [{
+            type: 'FunctionCall',
+            params: {
+                methodName: 'create_series',
+                args: {
+                    mint_id: parseInt(dropId),
+                    metadata: actualMetadata,
+                    royalty
+                },
+                gas: '50000000000000',
+                deposit: parseNearAmount("0.1")!,
+            }
+        }]
+    }
+
+    return execute({ account: account!, transactions: [tx]}) as Promise<void | FinalExecutionOutcome[]>
+}
+
+/**
+ * Constructs a valid linkdrop URL for a given claim page or custom base URL.
+ * 
+ * @param {string} secretKeys - An array of secret keys that should be embedded in the linkdrop URLs.
+ * @param {string=} claimPage - A valid reference to the claim page. See the exported `supportedLinkdropClaimPages` variable for a list of supported claim pages. If not provided, a custom base URL must be provided.
+ * @param {string=} networkId - The network ID you wish to linkdrop on. If not provided, the current network that the SDK is connected to will be used. 
+ * @param {string=} contractId - The contract ID where the secret key belongs to. If not provided, the current contract ID that the SDK is connected to will be used. 
+ * @param {string=} baseUrl - A custom URL to use as the base for the linkdrop.
+ * 
+ * @returns {string[]} - An array of the linkdrop URLs
+ * 
+ * @example
+ * ```js
+ * const linkdropUrl = formatLinkdropUrl({
+ * 
+ * @group Utility
+ */
+export const formatLinkdropUrl = ({
+    claimPage, 
+    networkId, 
+    contractId, 
+    secretKeys, 
+    baseUrl
+}: {
+    claimPage?: string, 
+    networkId?: string,
+    contractId?: string,
+    secretKeys: string[],
+    baseUrl?: string
+}): string[] => {
+    const { networkId: envNetworkId, contractId: envContractId } = getEnv();
+    networkId = networkId || envNetworkId;
+    contractId = contractId || envContractId;
+    
+    assert(baseUrl || supportedLinkdropClaimPages[networkId!].hasOwnProperty(claimPage), `Either a custom base URL or a supported claim page must be passed in.`);
+    baseUrl = baseUrl || supportedLinkdropClaimPages[networkId!][claimPage!];
+
+    let returnedURLs: Array<string> = [];
+    // loop through all secret keys
+    secretKeys.forEach((secretKey) => {
+        returnedURLs.push(`${baseUrl}/${contractId}/${secretKey}`);
+    });
+
+    return returnedURLs;
+}
 
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
@@ -766,10 +927,12 @@ export const estimateRequiredDeposit = async ({
     ftData?: FTData,
 }): Promise<string>  => {
     const numKeysBN: BN = new BN(numKeys.toString())
+    const usesPerKeyBN: BN = new BN(usesPerKey.toString())
     
     let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
+    // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())            
 
-    let actualAllowance = estimatePessimisticAllowance(attachedGas);
+    let actualAllowance = estimatePessimisticAllowance(attachedGas).mul(usesPerKeyBN);
     // console.log('actualAllowance: ', actualAllowance.toString())
 
     let totalAllowance: BN  = actualAllowance.mul(numKeysBN);
