@@ -221,7 +221,7 @@ export const createDrop = async ({
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 
 	/// parse args
 	if (depositPerUseNEAR) {
@@ -499,7 +499,7 @@ export const deleteDrops = async ({
 		gas300, receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
 	
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract to: v1-3.keypom.near or v1-3.keypom.testnet");
+	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 	
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
@@ -518,14 +518,14 @@ export const deleteDrops = async ({
 	const responses = await Promise.all(drops!.map(async ({
 		owner_id,
 		drop_id,
-		keys,
 		registered_uses,
 		ft,
 		nft,
 	}) => {
 		assert(owner_id == account!.accountId, 'Only the owner of the drop can delete drops.');
 
-		let keySupply = keys?.length || 0
+		let keySupply;
+		let keys;
 
 		const updateKeys = async () => {
 			let keyPromises = [
@@ -539,18 +539,16 @@ export const deleteDrops = async ({
 				})()
 			]
 	
-			if (!keys) {
-				keyPromises.push((async() => {
-					keys = await keypomView({
-						methodName: 'get_keys_for_drop',
-						args: {
-							drop_id: drop_id.toString(),
-							from_index: '0',
-							limit: KEY_LIMIT,
-						}
-					})
-				})())
-			}
+			keyPromises.push((async() => {
+				keys = await keypomView({
+					methodName: 'get_keys_for_drop',
+					args: {
+						drop_id: drop_id.toString(),
+						from_index: '0',
+						limit: KEY_LIMIT,
+					}
+				})
+			})())
 			
 			await Promise.all(keyPromises)
 		}
