@@ -16,12 +16,11 @@ function App() {
 
   useEffect(() => {
     //setting contract id, priv key and link state variables.
-    const cu = window.location.href.slice(22, -89);
-    setContractId(cu)
-    const cp = window.location.href.slice(42)
-    setprivKey(cp)
-    const cd = window.location.href
-    setLink(cd)
+    const contractTemp = window.location.href.slice(22, -89);
+    setContractId(contractTemp)
+    const privKeyTemp = window.location.href.slice(42)
+    setprivKey(privKeyTemp)
+    setLink(`https://wallet.testnet.near.org/linkdrop/${contractTemp}/${privKeyTemp}`)
   }, [])
 
   // rendering stuff
@@ -33,8 +32,6 @@ function App() {
         transform: 'translate(-50%, -50%)'
       }}>
         <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey}/>
-        {/* <p>current contract id = {contractId}</p>
-        <p>current private key = {privKey}</p> */}
       </div>
     );
   }
@@ -47,8 +44,6 @@ function App() {
       }}>
         <QrCode link={link} />
         <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey}/>
-        {/* <p>current contract id = {contractId}</p>
-        <p>current private key = {privKey}</p> */}
       </div>
       
     );
