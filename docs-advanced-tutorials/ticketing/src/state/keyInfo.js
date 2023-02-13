@@ -39,8 +39,10 @@ const KeyInfo = ({ contractId, privKey }) => {
         async function getUsesRemaining(pubKey){
             console.log(pubKey)
             console.log(typeof pubKey)
-            console.log("ditto")
+            
             const resKeyInfo = await getKeyInformation({publicKey: pubKey})
+            console.log(resKeyInfo)
+            
             const resDropInfo = await getDropInformation({secretKey: privKey})
             console.log(resDropInfo)
             setCurUse(resKeyInfo.cur_key_use)
