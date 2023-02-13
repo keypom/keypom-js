@@ -6,10 +6,9 @@ import { useState, useEffect } from "react";
 const { keyStores, connect } = nearAPI;
 
 
-const KeyInfo = ({ contractId, privKey }) => {
-    const [pubKey, setPubkey] = useState("");
-    const [curUse, setCurUse] = useState("");
-
+const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) => {
+    
+    // Functions that only run when KeyInfo is mounted; only need to connect to NEAR and initKeypom once
     useEffect(() => {
         async function connectNear(){
             const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
@@ -28,6 +27,13 @@ const KeyInfo = ({ contractId, privKey }) => {
                 network: NETWORK_ID
             });
         }
+        connectNear()
+    }, [])
+
+    // These functions will run anytime the component is re-rendered 
+    // Need to find a way to get component to re-render periodically
+    useEffect(() => {
+        
 
         async function getPubkey(privKey){
             console.log(privKey)
@@ -39,7 +45,7 @@ const KeyInfo = ({ contractId, privKey }) => {
         async function getUsesRemaining(pubKey){
             console.log(pubKey)
             console.log(typeof pubKey)
-            
+
             const resKeyInfo = await getKeyInformation({publicKey: pubKey})
             console.log(resKeyInfo)
             
@@ -48,10 +54,10 @@ const KeyInfo = ({ contractId, privKey }) => {
             setCurUse(resKeyInfo.cur_key_use)
 
         }
-        connectNear()
+        console.log("aaa")
         getPubkey(privKey)
         getUsesRemaining(pubKey)
-    }, [privKey, pubKey]);
+    });
 
 
     return (
