@@ -3,6 +3,8 @@ import KeyInfo from "./keyInfo";
 // import "./styles.css";
 import React from "react";
 import { useState, useEffect } from "react";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Scanner } from "../components/scanner";
 
 
 function App() {
@@ -25,25 +27,34 @@ function App() {
 
   // rendering stuff
   if(curUse%2){
+    // odd uses, should show qr code 
     console.log("scenario 1")
     return (
       <div className="section container" style={{
         position: 'absolute', left: '50%', top: '50%',
         transform: 'translate(-50%, -50%)'
       }}>
-        <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey}/>
+          <Routes>
+            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path="/v1-4.keypom.testnet/4aJGvd5za9nTWJcZBVAgEyaaU6kymPSyoXhtJLfNNx5XA1aWSXxDAqBnrPDBcm7PT5hCwk8L3nDExBYWKoB7HEix" element={<><QrCode link={link} /><KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /></>}/>
+          </Routes>
       </div>
     );
   }
   else{
+    // even uses, should not show qr code
     console.log("scenario 2")
     return (
       <div className="section container" style={{
         position: 'absolute', left: '50%', top: '50%',
         transform: 'translate(-50%, -50%)'
       }}>
-        <QrCode link={link} />
-        <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey}/>
+          <Routes>
+            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path="/v1-4.keypom.testnet/4aJGvd5za9nTWJcZBVAgEyaaU6kymPSyoXhtJLfNNx5XA1aWSXxDAqBnrPDBcm7PT5hCwk8L3nDExBYWKoB7HEix" element={<><KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /></>}/>
+          </Routes>
+        
+        
       </div>
       
     );

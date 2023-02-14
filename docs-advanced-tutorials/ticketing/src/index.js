@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './state/App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from "react-router-dom";
 import { Buffer } from "buffer"; global.Buffer = Buffer;
 
 // CREATED WITH V1-4, 1000 uses simple drop no pw
@@ -14,7 +15,9 @@ import { Buffer } from "buffer"; global.Buffer = Buffer;
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>,
   </React.StrictMode>
 );
 
