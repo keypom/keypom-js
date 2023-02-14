@@ -13,6 +13,8 @@ export const Scanner = () => {
   const [splitRes, setSplitRes] = useState([]);
   const [resPrivKey, setResPrivkey] = useState("")
   const [click, setClick] = useState(false);
+  const [password, setPassword] = useState("NULL")
+
   const { ref } = useZxing({
     onResult(result) {
       setResult(result.getText());
@@ -41,6 +43,9 @@ export const Scanner = () => {
           });
       }
       connectNear()
+      var PASSWORD = "NULL"
+      PASSWORD = prompt("enter password for drop")
+      setPassword(PASSWORD)
   }, [])
 
   useEffect(() => {
@@ -48,12 +53,12 @@ export const Scanner = () => {
         async function scannerClaim(){
             await claim({
                 secretKey: resPrivKey,
-                accountId: "minqi.testnet"
+                accountId: "minqi.testnet",
+                password: password
             })
             setClick(false)
         }
         scannerClaim()
-        
     }
   }, [click])
 
@@ -64,14 +69,17 @@ export const Scanner = () => {
     <>
       <video ref={ref} />
       <p>
-        <span>Last result: </span>
+        {/* <span>Last result: </span>
         <span>{result}</span>
-        <br></br>
+        <br></br> */}
         <span>Contract to Claim On: </span>
         <span>{splitRes[4]}</span>
         <br></br>
         <span>Private Key to Claim: </span>
         <span>{splitRes[5]}</span>
+        <br></br>
+        <span>Drop Password: </span>
+        <span>{password}</span>
       </p>
       <button onClick={()=>setClick(true)}>Click here to claim</button>
     </>
