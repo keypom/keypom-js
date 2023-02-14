@@ -1,6 +1,6 @@
 import React from "react";
 import { useZxing } from "react-zxing";
-import { initKeypom, claim } from "keypom-js";
+import { initKeypom, claim, hashPassword, getPubFromSecret, getKeyInformation } from "keypom-js";
 import * as nearAPI from "near-api-js";
 import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
@@ -43,18 +43,27 @@ export const Scanner = () => {
           });
       }
       connectNear()
-      var PASSWORD = "NULL"
-      PASSWORD = prompt("enter password for drop")
+      let PASSWORD = "NULL"
+      PASSWORD = prompt("enter base password for drop")
       setPassword(PASSWORD)
   }, [])
 
   useEffect(() => {
     if(click){
         async function scannerClaim(){
+            // Get current key use
+            let publicKey = await getPubFromSecret(resPrivKey)
+            let resKeyInfo = await getKeyInformation({publicKey: publicKey})
+            let resCurUse = resKeyInfo.cur_key_use 
+
+            // Create password using base + pubkey + key use as string
+            let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
+
+            // Claim with created password
             await claim({
                 secretKey: resPrivKey,
                 accountId: "minqi.testnet",
-                password: password
+                password: passwordForClaim
             })
             setClick(false)
         }
