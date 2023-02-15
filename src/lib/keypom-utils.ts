@@ -433,9 +433,12 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy, autoMetaN
     var publicKeys: string[] = []
     var secretKeys: string[] = []
 
-    if (!metaEntropy && autoMetaNonceStart !== undefined) {
+    if (metaEntropy === undefined && autoMetaNonceStart !== undefined) {
         metaEntropy = Array(numKeys).fill(0).map((_, i) => (autoMetaNonceStart + i).toString())
     }
+
+    console.log(metaEntropy)
+
     for (let i = 0; i < numKeys; i++) {
         if (rootEntropy) {
             const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy[i]}` : rootEntropy;
