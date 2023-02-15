@@ -11,6 +11,7 @@
 }
 body {
   color: hsl(var(--font-color));
+  background-color: #626262;
 }
 img {
   max-width: 100%;
@@ -19,18 +20,67 @@ img {
 }
 .section {
   padding: 2em 0;
-  display: flex;
+  /* display: flex; */
   min-height: 100vh;
   align-items: center;
+  
 }
+.content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
 .container {
   margin-inline: auto;
   max-width: 75rem;
   width: 85%;
+  /* top: 50%;
+  left: 50%;
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%); */
 }
 .input__group {
-  display: flex;
+  /* display: flex; */
   margin-top: 2em;
+}
+.img_center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(8px);
 }
 input {
   width: 100%;
@@ -40,15 +90,19 @@ input {
   margin-bottom: 2em;
   margin-top: 0.75em;
 }
-button {
-  border: unset;
-  background: hsl(231, 77%, 90%);
-  padding: 1em 0.75em;
-  color: hsl(var(--font-color));
-  cursor: pointer;
-  text-transform: uppercase;
-  font-weight: bold;
+.button {
+  padding:0.6em 2em;
+  border-radius: 8px;
+  color:#fff;
+  background-color:#2e7d32;
+  font-size:1.1em;
+  border:0;
+  cursor:pointer;
+  margin:1em;
+  transition: all 0.5s;
 }
+
+
 @media screen and (min-width: 768px) {
   .section {
     padding: 0;
@@ -57,7 +111,7 @@ button {
     margin: 0;
   }
   .qrcode__container {
-    display: flex;
+    /* display: flex; */
     align-items: center;
   }
   .input__group {

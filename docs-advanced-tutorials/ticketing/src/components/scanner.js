@@ -5,6 +5,7 @@ import * as nearAPI from "near-api-js";
 import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png" 
+import "../styles.css";
 const { keyStores, connect } = nearAPI;
 
 
@@ -96,6 +97,7 @@ export const Scanner = () => {
               await timeout(2000)
               var emptyRes = new Array(splitRes.length)
               setSplitRes(emptyRes)
+              setResPrivkey("")
               var arr = [1, false, false];
               setMasterState(arr)
 
@@ -105,11 +107,9 @@ export const Scanner = () => {
               console.log(`key use before claim: ${resCurUse}`)
               console.log(`key use after claim: ${newKeyInfo.cur_key_use}`)
             }
-            
-
-            setClick(false)
         }
         scannerClaim()
+        setClick(false)
         
         //indicate claimed
 
@@ -119,15 +119,14 @@ export const Scanner = () => {
   if(masterState[0] === 1){
     return (
       <>
-        <video ref={ref} />
-        <p>
-          <span>Drop Password: </span>
-          <span>{password}</span>
+        <div class="content">
+          <video ref={ref} />
+          <h2>Scan a linkdrop QR code to claim</h2>
           {/* <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-        </p>
-        {/* <img src={logo} alt="green check" width="50" height="60"></img> */}
+          {/* <img src={logo} alt="green check" width="50" height="60"></img> */}
+        </div>
       </>
     );
   }
@@ -135,22 +134,23 @@ export const Scanner = () => {
   else if(masterState[0] === 2){
     return (
       <>
-        <video ref={ref} />
-        <p>
-          <span>Drop Password: </span>
-          <span>{password}</span>
+        <div class="content">
+          <video ref={ref} />
+          <h2>Click button to claim</h2>
+          <h4>Note this should take a few seconds</h4>
           <br></br>
-          <span>Contract to Claim On: </span>
-          <span>{splitRes[4]}</span>
+          <div>Contract to Claim On: </div>
+          <div>{splitRes[4]}</div>
           <br></br>
-          <span>Private Key to Claim: </span>
-          <span>{splitRes[5]}</span>
+          <div>Private Key to Claim: </div>
+          <div>{splitRes[5]}</div>
           {/* <br></br>
           <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-        </p>
-        <button onClick={()=>setClick(true)}>Click here to claim</button>
+
+          <button onClick={()=>setClick(true)} class="button"><span>Click here to claim</span></button>
+        </div>
       </>
     );
   }
@@ -158,22 +158,21 @@ export const Scanner = () => {
   else if(masterState[0] === 3){
     return (
       <>
-        <video ref={ref} />
-        <p>
-          <span>Contract Claimed On: </span>
-          <span>{splitRes[4]}</span>
+        <div class="content">
+          <video ref={ref} />
+          <h2>Claimed!</h2>
           <br></br>
-          <span>Private Key Claimed: </span>
-          <span>{splitRes[5]}</span>
+          <div>Contract Claimed On: </div>
+          <div>{splitRes[4]}</div>
           <br></br>
-          <span>Drop Password: </span>
-          <span>{password}</span>
+          <div>Private Key Claimed: </div>
+          <div>{splitRes[5]}</div>
           {/* <br></br>
           <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-        </p>
-        <img src={logo} alt="green check" width="50" height="60"></img>
+          <img src={logo} alt="green check" width="50" height="60" class="img_center"></img>
+        </div>
       </>
     );
   }

@@ -32,10 +32,7 @@ function App() {
     console.log("scenario 1, QR code")
     const homepath = `${contractId}/${privKey}`
     return (
-      <div className="section container" style={{
-        position: 'absolute', left: '50%', top: '50%',
-        transform: 'translate(-50%, -50%)'
-      }}>
+      <div class="content">
           <Routes>
             <Route path="/scanner" element={ <Scanner/> } />
             <Route path={homepath} element={
@@ -52,10 +49,7 @@ function App() {
     console.log("scenario 2, no QR code")
     const homepath = `${contractId}/${privKey}`
     return (
-      <div className="section container" style={{
-        position: 'absolute', left: '50%', top: '50%',
-        transform: 'translate(-50%, -50%)'
-      }}>
+      <div class="content">
           <Routes>
             <Route path="/scanner" element={ <Scanner/> } />
             <Route path={homepath} element={
