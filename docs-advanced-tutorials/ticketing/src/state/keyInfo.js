@@ -59,15 +59,20 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
         getUsesRemaining(pubKey)
     });
 
-
-    return (
-      <div>
-        <div>Contract ID: {contractId}</div>
-        <div>Private Key: {privKey}</div>
-        <div>Public Key: {pubKey}</div>
-        <div>Current Key Use: {curUse}</div>
-      </div>
-    )
+    if(curUse%2){
+        return (
+            <div>
+              {/* <div>Contract ID: {contractId}</div> */}
+              {/* <div>Private Key: {privKey}</div> */}
+              <div>Public Key: {pubKey}</div>
+              <div>Current Key Use: {curUse}</div>
+            </div>
+          )
+    }
+    else{
+        return
+    }
+   
 }
 
 export default KeyInfo

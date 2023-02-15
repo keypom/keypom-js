@@ -119,7 +119,7 @@ export const Scanner = () => {
   if(masterState[0] === 1){
     return (
       <>
-        <div class="content">
+        <div className="content">
           <video ref={ref} />
           <h2>Scan a linkdrop QR code to claim</h2>
           {/* <br></br>
@@ -134,7 +134,7 @@ export const Scanner = () => {
   else if(masterState[0] === 2){
     return (
       <>
-        <div class="content">
+        <div className="content">
           <video ref={ref} />
           <h2>Click button to claim</h2>
           <h4>Note this should take a few seconds</h4>
@@ -149,7 +149,7 @@ export const Scanner = () => {
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
 
-          <button onClick={()=>setClick(true)} class="button"><span>Click here to claim</span></button>
+          <button onClick={()=>setClick(true)} className="button"><span>Click here to claim</span></button>
         </div>
       </>
     );
@@ -158,7 +158,7 @@ export const Scanner = () => {
   else if(masterState[0] === 3){
     return (
       <>
-        <div class="content">
+        <div className="content">
           <video ref={ref} />
           <h2>Claimed!</h2>
           <br></br>
@@ -171,7 +171,7 @@ export const Scanner = () => {
           <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-          <img src={logo} alt="green check" width="50" height="60" class="img_center"></img>
+          <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );

@@ -5,6 +5,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Scanner } from "../components/scanner";
+import "../styles.css";
 
 
 function App() {
@@ -27,17 +28,22 @@ function App() {
   }, [])
 
   // rendering stuff
+  console.log(curUse)
   if(curUse%2){
     // odd uses, should show qr code 
     console.log("scenario 1, QR code")
     const homepath = `${contractId}/${privKey}`
     return (
-      <div class="content">
+      <div className="content">
           <Routes>
             <Route path="/scanner" element={ <Scanner/> } />
             <Route path={homepath} element={
             <>
+              <h1>🎟️This is your ticket🔑</h1>
+              <h4>Screenshot and show me at the door</h4>
+              <br></br>
               <QrCode link={link} />
+              <br></br>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
           </Routes>
@@ -49,11 +55,13 @@ function App() {
     console.log("scenario 2, no QR code")
     const homepath = `${contractId}/${privKey}`
     return (
-      <div class="content">
+      <div className="content">
           <Routes>
             <Route path="/scanner" element={ <Scanner/> } />
             <Route path={homepath} element={
             <>
+              <h1>You're all set! Enjoy the event</h1>
+              <a href="http://near.org"><button className="onboard_button">Continue Onboarding to NEAR</button></a>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
           </Routes>
