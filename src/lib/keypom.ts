@@ -17,6 +17,11 @@ import { EnvVars, Funder } from "./types/general";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
+type KeypomWallet = {
+	accountId: string,
+	signAndSendTransactions: any;
+}
+
 const gas = '200000000000000'
 const gas300 = '300000000000000'
 const attachedGas = '100000000000000'
@@ -106,8 +111,15 @@ export const getEnv = (): EnvVars  => {
 /** @group Utility */
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = async ({ account, wallet }: {account: Account, wallet: AnyWallet}) : Promise<Account | AnyWallet> => {
-	let returnedAccount = account || await wallet || fundingAccount;
+const getAccount = async ({ account, wallet }: {account: Account, wallet: any}) : Promise<Account | KeypomWallet> => {
+
+	if (wallet) {
+		wallet = await wallet
+		assert(wallet.signAndSendTransactions, 'Incorrect wallet type');
+		wallet.accountId = (await wallet.getAccounts())[0].accountId
+	}
+
+	let returnedAccount = account || wallet || fundingAccount;
 
 	// If neither a wallet object, account object, or funding account is provided, throw an error
 	assert(returnedAccount, 'No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')

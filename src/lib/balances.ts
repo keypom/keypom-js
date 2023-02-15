@@ -32,8 +32,9 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const addToBalance = async ({
 	account,
 	wallet,
-	amount,
-    absoluteAmount
+	amountNear,
+    amountYocto,
+	successUrl,
 }: {
 	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
 	account?: Account,
@@ -44,13 +45,15 @@ export const addToBalance = async ({
 	 * @example
 	 * Transferring one $NEAR should be passed in as "1000000000000000000000000" and NOT "1" 
 	*/
-	absoluteAmount?: string
+	amountYocto?: string
 	/**
 	 * Human readable format for the amount of tokens to add.
 	 * @example
 	 * Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
 	 */
-	amount?: string,
+	amountNear?: string,
+	/** When signing with a wallet, a success URl can be included that the user will be redirected to once the transaction has been successfully signed. */
+	successUrl?: string
 }) => {
 	const {
 		receiverId, execute, getAccount
@@ -59,9 +62,9 @@ export const addToBalance = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 
-    let deposit = absoluteAmount || '0';
-    if (amount) {
-        deposit = parseNearAmount(amount.toString()) || "0";
+    let deposit = amountYocto || '0';
+    if (amountNear) {
+        deposit = parseNearAmount(amountNear.toString()) || "0";
     }
 
 	const actions: any[] = []
@@ -80,7 +83,7 @@ export const addToBalance = async ({
 		actions,
 	}]
 
-	return execute({ transactions, account, wallet })
+	return execute({ transactions, account, wallet, successUrl })
 }
 
 /**
