@@ -6,12 +6,16 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from "react-router-dom";
 import { Buffer } from "buffer"; global.Buffer = Buffer;
 
+// CREATED WITH V1-4 30 uses with pw and every 2nd minting nft
+//ed25519:4Yc94z2jETj2c4iMRuAexRZsYadYtXBoHsmUuN9XUtwj
+// https://testnet.mynearwallet.com/linkdrop/v1-4.keypom.testnet/t5PWmHyFh5bKFpycSzEApJ4GMjofGZM3pvYpzkNkm6Wa1cDMaotfbYQ67Jwjtrqp9hu8aa1j32Zf9BJEzK1CMLM
+
 // CREATED WITH V1-4, 1000 uses simple drop no pw
 // Public Keys and Linkdrops:  {
 // 'ed25519:GUeRZniVhEA4DRfikBoiZFZyEdzja3jo3jFLvyLeRd32'
 //'https://wallet.testnet.near.org/linkdrop/v1-4.keypom.testnet/4aJGvd5za9nTWJcZBVAgEyaaU6kymPSyoXhtJLfNNx5XA1aWSXxDAqBnrPDBcm7PT5hCwk8L3nDExBYWKoB7HEix'
 
-
+               
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>

@@ -14,7 +14,7 @@ export const Scanner = () => {
   const [result, setResult] = useState("");
   const [splitRes, setSplitRes] = useState([]);
   const [resPrivKey, setResPrivkey] = useState("")
-  const [click, setClick] = useState(false);
+  // const [click, setClick] = useState(false);
   const [password, setPassword] = useState("NULL")
 
   var arr = [1, false, false];
@@ -64,92 +64,86 @@ export const Scanner = () => {
 
   // Claiming the drop using password
   useEffect(() => {
-    if(click){
-        function timeout(delay) {
-            return new Promise( res => setTimeout(res, delay) );
-        }
+      function timeout(delay) {
+          return new Promise( res => setTimeout(res, delay) );
+      }
 
-        async function scannerClaim(){
-            // Get current key use
-            let publicKey = await getPubFromSecret(resPrivKey)
-            let resKeyInfo = await getKeyInformation({publicKey: publicKey})
-            let resCurUse = resKeyInfo.cur_key_use 
+      async function scannerClaim(){
+          // Get current key use
+          let publicKey = await getPubFromSecret(resPrivKey)
+          let resKeyInfo = await getKeyInformation({publicKey: publicKey})
+          let resCurUse = resKeyInfo.cur_key_use 
+          // Create password using base + pubkey + key use as string
+          let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
 
-            // Create password using base + pubkey + key use as string
-            let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
+          // Claim with created password
+          await claim({
+              secretKey: resPrivKey,
+              accountId: "minqi.testnet",
+              password: passwordForClaim
+          })
 
-            // Claim with created password
-            await claim({
-                secretKey: resPrivKey,
-                accountId: "minqi.testnet",
-                password: passwordForClaim
-            })
-
-            // check if claim succeeded and then indicate claimed
-            var newKeyInfo = await getKeyInformation({publicKey: publicKey})
-            if(newKeyInfo.cur_key_use - resCurUse === 1){
-              var tempState = [...masterState]
-              tempState[1] = true
-              tempState[0] = 3
-              setMasterState([...tempState])
-
-              // Wait 2s, then flip go back to stage 1
-              await timeout(2000)
-              var emptyRes = new Array(splitRes.length)
-              setSplitRes(emptyRes)
-              setResPrivkey("")
-              var arr = [1, false, false];
-              setMasterState(arr)
-
-            }
-            else{
-              console.log("claim did not work")
-              console.log(`key use before claim: ${resCurUse}`)
-              console.log(`key use after claim: ${newKeyInfo.cur_key_use}`)
-            }
-        }
-        scannerClaim()
-        setClick(false)
-        
-        //indicate claimed
-
+          // check if claim succeeded and then indicate claimed
+          var newKeyInfo = await getKeyInformation({publicKey: publicKey})
+          if(newKeyInfo.cur_key_use - resCurUse === 1){
+            var tempState = [...masterState]
+            tempState[1] = true
+            tempState[0] = 3
+            setMasterState([...tempState])
+            // Wait 2s, then flip go back to stage 1
+            await timeout(2000)
+            var emptyRes = new Array(splitRes.length)
+            setSplitRes(emptyRes)
+            setResPrivkey("")
+            var arr = [1, false, false];
+            setMasterState(arr)
+          }
+          else{
+            console.log("claim did not work")
+            console.log(`key use before claim: ${resCurUse}`)
+            console.log(`key use after claim: ${newKeyInfo.cur_key_use}`)
+          }
     }
-  }, [click])
+
+    // only claim if there is data present
+    if(masterState[2] === true){
+      scannerClaim()
+    }
+
+  }, [masterState[2]])
   // Not scanned, just received pw
   if(masterState[0] === 1){
     return (
       <>
         <div className="content">
-          <video ref={ref} />
+        <div style={{border:"0.5rem solid black"}}><video ref={ref} /></div>
           <h2>Scan a linkdrop QR code to claim</h2>
           {/* <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-          {/* <img src={logo} alt="green check" width="50" height="60"></img> */}
         </div>
       </>
     );
   }
-  // Scanned, waiting to claim on user input
+  // Claiming, waiting to finish claim
   else if(masterState[0] === 2){
     return (
       <>
         <div className="content">
-          <video ref={ref} />
-          <h2>Click button to claim</h2>
+          <div style={{border:"0.5rem solid yellow"}}><video ref={ref} /></div>
+          <h2>Claiming</h2>
           <h4>Note this should take a few seconds</h4>
-          <br></br>
+          {/* <br></br>
           <div>Contract to Claim On: </div>
           <div>{splitRes[4]}</div>
           <br></br>
           <div>Private Key to Claim: </div>
-          <div>{splitRes[5]}</div>
+          <div>{splitRes[5]}</div> */}
           {/* <br></br>
-          <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
 
-          <button onClick={()=>setClick(true)} className="button"><span>Click here to claim</span></button>
+          {/* <button onClick={()=>setClick(true)} className="button"><span>Click here to claim</span></button> */}
         </div>
       </>
     );
@@ -159,16 +153,15 @@ export const Scanner = () => {
     return (
       <>
         <div className="content">
-          <video ref={ref} />
+          <div style={{border:"0.5rem solid green"}}><video ref={ref} /></div>
           <h2>Claimed!</h2>
-          <br></br>
+          {/* <br></br>
           <div>Contract Claimed On: </div>
           <div>{splitRes[4]}</div>
           <br></br>
           <div>Private Key Claimed: </div>
-          <div>{splitRes[5]}</div>
+          <div>{splitRes[5]}</div> */}
           {/* <br></br>
-          <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
           <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>

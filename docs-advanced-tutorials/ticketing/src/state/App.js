@@ -4,8 +4,12 @@ import KeyInfo from "./keyInfo";
 import React from "react";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import * as nearAPI from "near-api-js";
+import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { Scanner } from "../components/scanner";
 import "../styles.css";
+import { initKeypom, formatLinkdropUrl } from "keypom-js";
+const { keyStores, connect } = nearAPI;
 
 
 function App() {
@@ -19,13 +23,46 @@ function App() {
 
 
   useEffect(() => {
+    function makeLink(privateKey){
+      var tempLink = formatLinkdropUrl({
+        baseUrl: "https://testnet.mynearwallet.com/linkdrop",
+        secretKeys: [privateKey]
+      })
+      setLink(tempLink)
+    }
+
+    async function connectNear(privateKey){
+      const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
+      const connectionConfig = {
+         networkId: NETWORK_ID,
+       keyStore: myKeyStore,
+       nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
+        walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
+        helperUrl: `https://helper.${NETWORK_ID}.near.org`,
+        explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
+      };
+      const nearConnection = await connect(connectionConfig);
+
+      await initKeypom({
+          near: nearConnection,
+          network: NETWORK_ID
+      });
+
+      makeLink(privateKey)
+    }
     //setting contract id, priv key and link state variables.
     const splitResultTemp = window.location.href.split("/");
     setSplitRes(splitResultTemp)
     setContractId(splitResultTemp[3])
     setprivKey(splitResultTemp[4])
-    setLink(`https://wallet.testnet.near.org/linkdrop/${splitResultTemp[3]}/${splitResultTemp[4]}`)
+    connectNear(splitResultTemp[4])
   }, [])
+//'https://wallet.testnet.near.org/linkdrop/v1-4.keypom.testnet/4aJGvd5za9nTWJcZBVAgEyaaU6kymPSyoXhtJLfNNx5XA1aWSXxDAqBnrPDBcm7PT5hCwk8L3nDExBYWKoB7HEix'
+
+  // make hasInternet state var and toggle it everytime in scenario 2
+  // use hasInternet as a flag to call a useEffect to create link
+
+  // put link creation in useEffect  
 
   // rendering stuff
   console.log(curUse)
@@ -61,7 +98,7 @@ function App() {
             <Route path={homepath} element={
             <>
               <h1>You're all set! Enjoy the event</h1>
-              <a href="http://near.org"><button className="onboard_button">Continue Onboarding to NEAR</button></a>
+              <a href={link} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Continue Onboarding to NEAR</button></a>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
           </Routes>
