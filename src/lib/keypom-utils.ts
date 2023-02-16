@@ -410,7 +410,7 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * ```
  * @group Utility
  */
-export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
+export const generateKeys = async ({numKeys, rootEntropy, metaEntropy, autoMetaNonceStart}: {
 	/** The number of keys to generate. */
 	numKeys: number;
 	/** A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random. */
@@ -418,6 +418,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
 	/** An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply 
  pass in the string itself directly (not within an array). */
 	metaEntropy?: string[] | string;
+    autoMetaNonceStart?: number;
 }): Promise<GeneratedKeyPairs> => {
     // If the metaEntropy provided is not an array (simply the string for 1 key), we convert it to an array of size 1 so that we can use the same logic for both cases
     if (metaEntropy && !Array.isArray(metaEntropy)) {
@@ -431,6 +432,13 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy}: {
     var keyPairs: NearKeyPair[] = []
     var publicKeys: string[] = []
     var secretKeys: string[] = []
+
+    if (metaEntropy === undefined && autoMetaNonceStart !== undefined) {
+        metaEntropy = Array(numKeys).fill(0).map((_, i) => (autoMetaNonceStart + i).toString())
+    }
+
+    console.log(metaEntropy)
+
     for (let i = 0; i < numKeys; i++) {
         if (rootEntropy) {
             const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy[i]}` : rootEntropy;

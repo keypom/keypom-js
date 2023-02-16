@@ -264,7 +264,7 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * ```
  * @group Utility
  */
-export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
+export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy, autoMetaNonceStart }: {
     /** The number of keys to generate. */
     numKeys: number;
     /** A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random. */
@@ -272,6 +272,7 @@ export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
     /** An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply
  pass in the string itself directly (not within an array). */
     metaEntropy?: string | string[] | undefined;
+    autoMetaNonceStart?: number | undefined;
 }) => Promise<GeneratedKeyPairs>;
 export declare const keypomView: ({ methodName, args }: {
     methodName: any;
