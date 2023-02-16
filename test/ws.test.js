@@ -378,7 +378,7 @@ test('NFT drops', async (t) => {
 	const media = nftMedias[Math.floor(Math.random() * nftMedias.length)];
 
 	const res = await keypom.createNFTSeries({
-		dropId,
+		lastDropId,
 		metadata: {
 			title,
 			description,
@@ -512,7 +512,7 @@ test('Ticket drops', async (t) => {
 	const media = nftMedias[Math.floor(Math.random() * nftMedias.length)];
 
 	const res = await keypom.createNFTSeries({
-		dropId,
+		lastDropId,
 		metadata: {
 			title,
 			description,
