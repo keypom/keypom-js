@@ -66,8 +66,8 @@ function App() {
 
   // rendering stuff
   console.log(curUse)
-  if(curUse%2){
-    // odd uses, should show qr code 
+  if(curUse == 1){
+    // use 1, should show qr code 
     console.log("scenario 1, QR code")
     const homepath = `${contractId}/${privKey}`
     return (
@@ -87,8 +87,8 @@ function App() {
       </div>
     );
   }
-  else{
-    // even uses, should not show qr code
+  else if(curUse==2){
+    //use 2 direct to claim
     console.log("scenario 2, no QR code")
     const homepath = `${contractId}/${privKey}`
     return (
@@ -99,6 +99,32 @@ function App() {
             <>
               <h1>You're all set! Enjoy the event</h1>
               <a href={link} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Continue Onboarding to NEAR</button></a>
+              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
+            </>}/>
+          </Routes>
+        
+        
+      </div>
+      
+    );
+  }
+  else{
+    //no man's land, for trouble shooting
+    console.log("Key uses greater than 2 or less than 1")
+    console.log(privKey)
+    const homepath = `${contractId}/${privKey}`
+    return (
+      <div className="content">
+          <Routes>
+            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={homepath} element={
+            <>
+              <h1>Current uses: {curUse}</h1>
+              <div>If Current Uses greater than 2, use another key.</div>
+              <div>If Current Uses greater 0, the public key was depleted and deleted.</div>
+              <br></br>
+              <h4>Current Public Key</h4>
+              <div>{pubKey}</div>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
           </Routes>

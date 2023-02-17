@@ -39,14 +39,15 @@ async function createTickDrop(){
     // Create drop with 30 key uses
     let {keys, dropId} = await createDrop({
         account: fundingAccount,
-        numKeys: 1,
+        numKeys: 10,
         config: {
-            usesPerKey: 30
+            usesPerKey: 2
         },
         metadata: "My Cool Drop Title!",
         depositPerUseNEAR: "0.1",
         basePassword: "event-password",
-        passwordProtectedUses: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29],
+        // passwordProtectedUses: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29],
+        passwordProtectedUses: [1],
         fcData: {
             methods: [
                 // REPLICATE THIS 10 TIMES
@@ -61,169 +62,167 @@ async function createTickDrop(){
                         attachedDeposit: parseNearAmount("0.1")
                     }
                 ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
+                
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
+                    // null,
+                    // [
+                    //     {
+                    //         receiverId: `nft-v2.keypom.testnet`,
+                    //         methodName: "nft_mint",
+                    //         args: "",
+                    //         dropIdField: "mint_id",
+                    //         accountIdField: "receiver_id",
+                    //         attachedDeposit: parseNearAmount("0.1")
+                    //     }
+                    // ],
 
-            ]
-        }
+            ]   
+        }   
     })
     
     let pubKeys = keys.publicKeys
-
-    console.log("1")
-    
     const res = await createNFTSeries({
         account: fundingAccount,
         dropId,
@@ -234,8 +233,6 @@ async function createTickDrop(){
             copies: 30
         }
     });
-
-    console.log("2")
 
     var dropInfo = {};
 	const KEYPOM_CONTRACT = "v1-4.keypom.testnet"
