@@ -45,6 +45,11 @@ export interface Method {
 	 * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
 	*/
 	funderIdField?: string,
+	/** 
+     * If set to true, the claiming account ID will be the receiver ID of the method call.
+     * This receiver must be a valid account and non-malicious (cannot be set to the keypom contract) 
+    **/ 
+	receiverToClaimer?: boolean;
 	/**  
 	 * What permissions does the user have when providing custom arguments to the function call?
 	 * By default, the user cannot provide any custom arguments

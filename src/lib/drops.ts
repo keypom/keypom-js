@@ -341,6 +341,7 @@ export const createDrop = async ({
 						drop_id_field: method.dropIdField,
 						key_id_field: method.keyIdField,
 						funder_id_field: method.funderIdField,
+						receiver_to_claimer: method.receiverToClaimer,
 						user_args_rule: method.userArgsRule
 					}
 					return ret
