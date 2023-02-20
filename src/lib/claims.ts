@@ -135,16 +135,23 @@ export const claim = async ({
 	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
-	assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
-
-	const dropInfo = await getDropInformation({secretKey});
-	const keyInfo = await getKeyInformation({secretKey});
 	
+	const dropInfo = await getDropInformation({secretKey});
+	
+	let checkAccounts = true;
 	if (fcArgs) {
 		assert(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
-
+		
 		const curMethodData = await getCurMethodData({secretKey});
+		if (curMethodData == null) {
+			checkAccounts = false;
+		}
+		
 		assert((curMethodData || []).length === fcArgs.length, 'The number of fcArgs must match the number of methods being executed.');
+	}
+
+	if (checkAccounts) {
+		assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
 	}
 	
 	const transactions: any[] = [{
