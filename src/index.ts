@@ -1,3 +1,5 @@
+export type { KeypomWallet } from "./lib/selector/core/wallet";
+export { setupKeypom } from "./lib/selector/core/setup";
 export {
 	addToBalance,
 	withdrawBalance
@@ -32,6 +34,10 @@ export {
 	createDrop,
 	deleteDrops,
 } from "./lib/drops";
+export {
+	createTrialAccountDrop,
+	claimTrialAccountDrop
+} from "./lib/trial-accounts";
 export {
 	addKeys,
 	deleteKeys

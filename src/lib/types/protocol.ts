@@ -247,6 +247,11 @@ export interface ProtocolReturnedMethod {
 	 * How much yoctoNEAR should be attached to the call.
 	*/
 	attached_deposit: string;
+    /**
+	 * How much gas to attach to this method call. If none, all the gas is split between the parallel method calls in a given claim.
+	 * If this is specified, the key can ONLY be used to call `claim` and no `deposit_per_use` can be specified. This leads the key to act like a method calling proxy instead of a linkdrop.
+	 */
+    attached_gas?: string,
 	/**
 	 * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the function.
 	 * As an example, if the methodName was `nft_mint` and it expected a field `receiver_id` to be passed in, indicating who should receive the token, then the `accountIdField` would be `receiver_id`.
@@ -271,23 +276,16 @@ export interface ProtocolReturnedMethod {
      * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
 	*/
     funder_id_field?: string;
+    /** 
+     * If set to true, the claiming account ID will be the receiver ID of the method call.
+     * This receiver must be a valid account and non-malicious (cannot be set to the keypom contract) 
+    **/ 
+    receiver_to_claimer?: boolean;
     /**  
 	 * What permissions does the user have when providing custom arguments to the function call?
 	 * By default, the user cannot provide any custom arguments
 	*/
     user_args_rule?: "AllUser" | "FunderPreferred" | "UserPreferred";
-}
-
-/** 
- * FC Config information returned from the Protocol. This interface is exactly the same as the `FCConfig`, except all the fields are
- * snake cased instead of camel cased due to what the Protocol returns.
-*/
-export interface ProtocolReturnedFCConfig {
-	/**
-	 * How much Gas should be attached to the function call. If this is specified, the key can *ONLY* be used to call `claim` and cannot be used to create a new account.
-	 * The amount of Gas cannot exceed 90 TGas.
-	 */
-	attached_gas?: string;
 }
 
 /** 
@@ -300,8 +298,4 @@ export interface ProtocolReturnedFCData {
 	 * If a given key use does not have an undefined set of methods, when it is used, all the methods in the set will be called.
 	*/
 	methods: Array<Maybe<Array<ProtocolReturnedMethod>>>
-	/** 
-	 * Specific configurations for the Function-Call drop.
-	*/
-	config?: ProtocolReturnedFCConfig
 }
