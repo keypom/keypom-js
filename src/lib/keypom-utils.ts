@@ -64,7 +64,7 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * @group Utility
  */
 export const getPubFromSecret = async (secretKey: string): Promise<string> => {
-    var keyPair = await KeyPair.fromString(secretKey);
+    var keyPair = KeyPair.fromString(secretKey);
     return keyPair.getPublicKey().toString()
 };
 
@@ -348,7 +348,8 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * @param {string=} rootEntropy (OPTIONAL) - A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random.
  * @param {string=} metaEntropy (OPTIONAL) - An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply 
  pass in the string itself directly (not within an array).
- * 
+ * @param {number=} autoMetaNonceStart (OPTIONAL) - Specify a starting index whereby the meta entropy will automatically increment by 1 for each key generated. This is to avoid having to pass in an array of meta entropy that simply increments by 1 each time.
+ * This is very useful as auto key generation uses the drop ID, base password and key nonce. The drop ID and base password would be a constant and make up the root entropy and then the key nonce increments by 1 for each key generated.
  * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  * 
  * @example
@@ -370,16 +371,14 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * Generating 1 keypair based on entropy:
  * ```js
  * // Generate 1 key with the given entropy
- * let keys = await generateKeys({
+ * let {publicKeys, secretKeys} = await generateKeys({
  *     numKeys: 1,
- *     entropy: {
- *         rootKey: "my-global-password",
- *         meta: "user-password-123",
- *     } // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
+ *     rootEntropy: "my-global-password",
+ *     metaEntropy: "user-password-123" // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
  * })
  * 
- * let pubKey = keys.publicKeys[0];
- * let secretKey = keys.secretKeys[0];
+ * let pubKey = publicKeys[0];
+ * let secretKey = secretKeys[0];
  * 
  * console.log('Public Key: ', pubKey);
  * console.log('Secret Key: ', secretKey)
@@ -391,18 +390,26 @@ export const hashPassword = async (str: string, fromHex = false): Promise<string
  * // Generate 2 keys each with their own unique entropy
  * let keys = await generateKeys({
  *     numKeys: 2,
- *     entropy: [
- *         {
- *             rootKey: "my-global-password",
- *             meta: "first-password",
- *             nonce: 1
- *         },
- *         {
- *             rootKey: "my-global-password",
- *             meta: "second-password",
- *             nonce: 2
- *         }
- *     ]
+ *     rootEntropy: "my-global-password",
+ *     metaEntropy: [
+ *        `first-password:0`,
+ *        `second-password:1`
+ *    ]
+ * })
+ * 
+ * console.log('Pub Keys ', keys.publicKeys);
+ * console.log('Secret Keys ', keys.secretKeys);
+ * ```
+ *  * @example 
+ * Generate 50 keys exactly how the auto key generation would in createDrop and addKeys:
+ * ```js
+ * const dropId = '1676913490360';
+ * const basePassword = "my-password";
+ * // Generate 50 keys each with their own unique entropy
+ * let keys = await generateKeys({
+ *     numKeys: 50,
+ *     rootEntropy: `${basePassword}-${dropId}`,
+ *     autoMetaNonceStart: 0
  * })
  * 
  * console.log('Pub Keys ', keys.publicKeys);
@@ -437,8 +444,6 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy, autoMetaN
         metaEntropy = Array(numKeys).fill(0).map((_, i) => (autoMetaNonceStart + i).toString())
     }
 
-    console.log(metaEntropy)
-
     for (let i = 0; i < numKeys; i++) {
         if (rootEntropy) {
             const stringToHash = metaEntropy ? `${rootEntropy}_${metaEntropy[i]}` : rootEntropy;
@@ -450,7 +455,7 @@ export const generateKeys = async ({numKeys, rootEntropy, metaEntropy, autoMetaN
             publicKeys.push(publicKey)
             secretKeys.push(secretKey)
         } else {
-            var keyPair = await KeyPair.fromRandom('ed25519');
+            var keyPair = KeyPair.fromRandom('ed25519');
             keyPairs.push(keyPair);
             publicKeys.push(keyPair.getPublicKey().toString())
             // @ts-ignore - not sure why it's saying secret key isn't property of keypair

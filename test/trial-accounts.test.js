@@ -25,9 +25,10 @@ const {
 	generateKeys,
 	withdrawBalance,
 	addToBalance,
-    createTrialAccountDrop
+    createTrialAccountDrop,
+    claimTrialAccountDrop
 } = keypom
-const { readFileSync } = require('fs')
+const { readFileSync } = require('fs');
 
 /// testing contracts
 const FT_CONTRACT_ID = 'ft.keypom.testnet'
@@ -111,13 +112,8 @@ test('init', async (t) => {
 	t.true(true)
 });
 
-test('check FC data index', async (t) => {
-    const { publicKeys: newPublicKeys, secretKeys: newSecretKeys } = await generateKeys({ numKeys: 1 })
-	trialPublicKey = newPublicKeys[0]
-	trialSecretKey = newSecretKeys[0]
-	const newAccountId = `${Date.now().toString()}.linkdrop-beta.keypom.testnet`
-
-    const {dropId, keys: {secretKeys, publicKeys}} = await createTrialAccountDrop({
+test('Generate Trial Account', async (t) => {        
+    const {keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} = await createTrialAccountDrop({
         contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
         trialFundsNEAR: 0.5,
         callableContracts: ['dev-1676298343226-57701595703433'],
@@ -128,29 +124,24 @@ test('check FC data index', async (t) => {
             dropRoot: "linkdrop-beta.keypom.testnet"
         }
     })
-
-	let userFcArgs = {
-		"INSERT_NEW_ACCOUNT": newAccountId,
-        "INSERT_TRIAL_PUBLIC_KEY": trialPublicKey
-	}
-
-	const res = await claim({
-		accountId: newAccountId,
-		secretKey: secretKeys[0],
-		fcArgs: [JSON.stringify(userFcArgs), null]
-	})
+    
+    const newAccountId = `${Date.now().toString()}.linkdrop-beta.keypom.testnet`
+	await claimTrialAccountDrop({
+        secretKey: trialSecretKeys[0],
+        desiredAccountId: newAccountId,
+    })
 
     console.log(`
 	
 	${JSON.stringify({
 		account_id: newAccountId,
-		public_key: trialPublicKey,
-		private_key: trialSecretKey
+		public_key: trialPublicKeys[0],
+		private_key: trialSecretKeys[0]
 	})}
 
 	`)
 
-	console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKey}`)
+	console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
 
 
 	t.true(true);

@@ -6,34 +6,47 @@ import { DropConfig } from './types/drops';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
- * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're
- * automatically generated, they can be based off a set of entropy. For NFT and FT drops, assets can automatically be sent to Keypom to register keys as part of the payload.
- * The deposit is estimated based on parameters that are passed in and the transaction can be returned instead of signed and sent to the network. This can allow you to get the
- * required deposit from the return value and use that to fund the account's Keypom balance to avoid multiple transactions being signed in the case of a drop with many keys.
+ * Creates a new trial account drop which can be used to instantly sign users into decentralized applications that support the Keypom wallet selector plugin.
+ *
+ * The trial account is locked into certain behaviors depending on what is passed into `createTrialAccountDrop`. These behaviors include callable contracts, methods on
+ * those contracts, the maximum amount of $NEAR that can be spent on each contract as well as an exit condition. Once the trial account has run out of funds, the only way to
+ * retain any assets from the trial or continue using the account ID, is to repay the specific account ID for the amount of $NEAR specified.
  *
  * @return {Promise<CreateOrAddReturn>} Object containing: the drop ID, the responses of the execution, as well as any auto generated keys (if any).
  *
  * @example
- * Create a basic simple drop containing 10 keys each with 1 $NEAR. Each key is completely random:
+ * Creating a trial account with any callable methods, an amount of 0.5 $NEAR and 5 keys.
  * ```js
- * // Initialize the SDK for the given network and NEAR connection. No entropy passed in so any auto generated keys will
- * // be completely random unless otherwise overwritten.
- * await initKeypom({
- * 	network: "testnet",
- * 	funder: {
- * 		accountId: "benji_demo.testnet",
- * 		secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
- * 	}
- * });
+ * const {keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} = await createTrialAccountDrop({
+ *     contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
+ *     trialFundsNEAR: 0.5,
+ *     callableContracts: ['dev-1676298343226-57701595703433'],
+ *     callableMethods: ['*'],
+ *     amounts: ['0.5'],
+ *     numKeys: 5,
+ *     config: {
+ *         dropRoot: "linkdrop-beta.keypom.testnet"
+ *     }
+ * })
  *
- * // Create a drop with 10 completely random keys. The return value `keys` contains information about the generated keys
- * const {keys} = await createDrop({
- * 	numKeys: 10,
- * 	depositPerUseNEAR: 1,
- * });
+ * const newAccountId = `${Date.now().toString()}.linkdrop-beta.keypom.testnet`
+ * await claimTrialAccountDrop({
+ *     secretKey: trialSecretKeys[0],
+ *     desiredAccountId: newAccountId,
+ * })
  *
- * console.log('public keys: ', keys.publicKeys);
- * console.log('private keys: ', keys.secretKeys);
+ * console.log(`
+ *
+ * ${JSON.stringify({
+ *     account_id: newAccountId,
+ *     public_key: trialPublicKeys[0],
+ *     private_key: trialSecretKeys[0]
+ * })}
+ *
+ * `)
+ *
+ * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
+ *
  * ```
  * @group Creating, And Claiming Drops
 */
@@ -82,4 +95,49 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
     /** When signing with a wallet, a success URl can be included that the user will be redirected to once the transaction has been successfully signed. */
     successUrl?: string | undefined;
 }) => Promise<CreateOrAddReturn>;
+/**
+ * Claim a Keypom trial account drop which will create a new account, deploy and initialize the trial account contract, and setup the account with initial conditions as specified in the drop.
+ *
+ * @example
+ * Creating a trial account with any callable methods, an amount of 0.5 $NEAR and 5 keys.
+ * ```js
+ * const {keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} = await createTrialAccountDrop({
+ *     contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
+ *     trialFundsNEAR: 0.5,
+ *     callableContracts: ['dev-1676298343226-57701595703433'],
+ *     callableMethods: ['*'],
+ *     amounts: ['0.5'],
+ *     numKeys: 5,
+ *     config: {
+ *         dropRoot: "linkdrop-beta.keypom.testnet"
+ *     }
+ * })
+ *
+ * const newAccountId = `${Date.now().toString()}.linkdrop-beta.keypom.testnet`
+ * await claimTrialAccountDrop({
+ *     secretKey: trialSecretKeys[0],
+ *     desiredAccountId: newAccountId,
+ * })
+ *
+ * console.log(`
+ *
+ * ${JSON.stringify({
+ *     account_id: newAccountId,
+ *     public_key: trialPublicKeys[0],
+ *     private_key: trialSecretKeys[0]
+ * })}
+ *
+ * `)
+ *
+ * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
+ *
+ * ```
+ * @group Creating, And Claiming Drops
+*/
+export declare const claimTrialAccountDrop: ({ secretKey, desiredAccountId, }: {
+    /** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */
+    secretKey: string;
+    /** The account ID that will be created for the trial */
+    desiredAccountId: string;
+}) => Promise<any>;
 export {};

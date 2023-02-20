@@ -35,7 +35,8 @@ export {
 	deleteDrops,
 } from "./lib/drops";
 export {
-	createTrialAccountDrop
+	createTrialAccountDrop,
+	claimTrialAccountDrop
 } from "./lib/trial-accounts";
 export {
 	addKeys,

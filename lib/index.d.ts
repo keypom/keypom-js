@@ -9,7 +9,7 @@ parseNearAmount: typeof import("near-api-js/lib/utils/format").parseNearAmount,
 formatNearAmount: typeof import("near-api-js/lib/utils/format").formatNearAmount;
 export { useKeypom, KeypomContextProvider, } from './components/KeypomContext';
 export { createDrop, deleteDrops, } from "./lib/drops";
-export { createTrialAccountDrop } from "./lib/trial-accounts";
+export { createTrialAccountDrop, claimTrialAccountDrop } from "./lib/trial-accounts";
 export { addKeys, deleteKeys } from "./lib/keys";
 export { claim, } from "./lib/claims";
 export { 
