@@ -1,3 +1,5 @@
+export type { KeypomWallet } from "./lib/selector/core/wallet";
+export { setupKeypom } from "./lib/selector/core/setup";
 export {
 	addToBalance,
 	withdrawBalance

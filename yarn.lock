@@ -820,6 +820,21 @@ jsonc-parser@^3.2.0:
   resolved "https://registry.npmjs.org/jsonc-parser/-/jsonc-parser-3.2.0.tgz"
   integrity sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==
 
+keypom-js@^1.3.2-rc.1:
+  version "1.3.2-rc.1"
+  resolved "https://registry.yarnpkg.com/keypom-js/-/keypom-js-1.3.2-rc.1.tgz#d6013c01235ca74c32f1f8fa2c0b675fb3372046"
+  integrity sha512-w0xyH+UxbKs0+oRaw1LkgXcknp1XHNeQRrEfYiVtCzhbsBp04CVJsgaOkOSZTlh0oteaeJ3I9PRB93BVs/o5OA==
+  dependencies:
+    "@near-wallet-selector/core" "^7.5.0"
+    "@types/react" "^18.0.26"
+    ava "^4.3.3"
+    bn.js "^5.2.1"
+    dotenv "^16.0.3"
+    near-api-js "^0.44.2"
+    near-seed-phrase "^0.2.0"
+    react "^18.2.0"
+    typescript "^4.8.4"
+
 load-json-file@^7.0.0:
   version "7.0.1"
   resolved "https://registry.npmjs.org/load-json-file/-/load-json-file-7.0.1.tgz"
@@ -1128,6 +1143,14 @@ randombytes@^2.0.1:
   dependencies:
     safe-buffer "^5.1.0"
 
+react-dom@18.2.0:
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
+  integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
+  dependencies:
+    loose-envify "^1.1.0"
+    scheduler "^0.23.0"
+
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
@@ -1206,6 +1229,13 @@ safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.2, safe-buffer@^5.2.0, 
   version "5.2.1"
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
+
+scheduler@^0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.23.0.tgz#ba8041afc3d30eb206a487b6b384002e4e61fdfe"
+  integrity sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==
+  dependencies:
+    loose-envify "^1.1.0"
 
 semver@^7.3.2:
   version "7.3.8"

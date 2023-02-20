@@ -248,6 +248,11 @@ export interface ProtocolReturnedMethod {
     */
     funder_id_field?: string;
     /**
+     * If set to true, the claiming account ID will be the receiver ID of the method call.
+     * This receiver must be a valid account and non-malicious (cannot be set to the keypom contract)
+    **/
+    receiver_to_claimer?: boolean;
+    /**
      * What permissions does the user have when providing custom arguments to the function call?
      * By default, the user cannot provide any custom arguments
     */

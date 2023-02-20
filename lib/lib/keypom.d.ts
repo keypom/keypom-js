@@ -11,6 +11,7 @@ export declare const officialKeypomContracts: {
         "v1.keypom.testnet": boolean;
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
+        "dev-1676742592813-14933979180879": boolean;
     };
 };
 export declare const supportedKeypomContracts: {
@@ -21,6 +22,7 @@ export declare const supportedKeypomContracts: {
     testnet: {
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
+        "dev-1676742592813-14933979180879": boolean;
     };
 };
 export declare const supportedLinkdropClaimPages: {
