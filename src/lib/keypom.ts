@@ -46,25 +46,25 @@ export const officialKeypomContracts = {
 	mainnet: {
 		"v1.keypom.near": true,
 		"v1-3.keypom.near": true,
-		"v1-4.keypom.near": true
+		"v1-4.keypom.near": true,
+		"v2.keypom.near": true,
 	},
 	testnet: {
 		"v1.keypom.testnet": true,
 		"v1-3.keypom.testnet": true,
 		"v1-4.keypom.testnet": true,
-		"dev-1676742592813-14933979180879": true
+		"v2.keypom.testnet": true,
 	}
 }
 
 export const supportedKeypomContracts = {
 	mainnet: {
-		"v1-3.keypom.near": true,
-		"v1-4.keypom.near": true
+		"v1-4.keypom.near": true,
+		"v2.keypom.near": true
 	},
 	testnet: {
-		"v1-3.keypom.testnet": true,
 		"v1-4.keypom.testnet": true,
-		"dev-1676742592813-14933979180879": true
+		"v2.keypom.testnet": true,
 	}
 }
 
@@ -80,7 +80,7 @@ export const supportedLinkdropClaimPages = {
 	}
 }
 
-let contractBase = 'v1-4.keypom'
+let contractBase = 'v2.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
 

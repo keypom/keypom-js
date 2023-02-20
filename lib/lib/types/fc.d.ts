@@ -21,6 +21,11 @@ export interface Method {
     */
     attachedDeposit: string;
     /**
+     * How much gas to attach to this method call. If none, all the gas is split between the parallel method calls in a given claim.
+     * If this is specified, the key can ONLY be used to call `claim` and no `deposit_per_use` can be specified. This leads the key to act like a method calling proxy instead of a linkdrop.
+     */
+    attachedGas?: string;
+    /**
      * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the function.
      * As an example, if the methodName was `nft_mint` and it expected a field `receiver_id` to be passed in, indicating who should receive the token, then the `accountIdField` would be `receiver_id`.
      * To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify "metadata.field"
@@ -56,16 +61,6 @@ export interface Method {
     userArgsRule?: "AllUser" | "FunderPreferred" | "UserPreferred";
 }
 /**
- * Specific configurations for a Function-Call drop.
-*/
-export interface FCConfig {
-    /**
-     * How much Gas should be attached to the function call. If this is specified, the key can *ONLY* be used to call `claim` and cannot be used to create a new account.
-     * The amount of Gas cannot exceed 90 TGas.
-     */
-    attachedGas?: string;
-}
-/**
  * Information pertaining to all Function-Call drops. This should be passed in if the drop will be a Function-Call drop.
 */
 export interface FCData {
@@ -74,8 +69,4 @@ export interface FCData {
      * If a given key use does not have an undefined set of methods, when it is used, all the methods in the set will be called.
     */
     methods: Array<Maybe<Array<Method>>>;
-    /**
-     * Specific configurations for the Function-Call drop.
-    */
-    config?: FCConfig;
 }

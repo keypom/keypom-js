@@ -4,13 +4,16 @@
   "description": "Keypom JS SDK",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "yarn build && yarn ava",
-    "ava": "ava test/ws.test.js -vs --timeout=5m",
+    "test": "yarn test:main && yarn test:trial-accounts",
+    "test:main": "yarn build && yarn ava:main",
+    "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
+    "ava:main": "ava test/ws.test.js -vs --timeout=5m",
+    "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
     "build": "npx tsc",
     "publish": "npx tsc && npm publish",
     "build-docs": "npx typedoc --options typedoc.json"
   },
-  "author": "mattlockyer",
+  "author": "benkurrek, mattlockyer",
   "license": "MIT",
   "dependencies": {
     "@near-wallet-selector/core": "^7.5.0",

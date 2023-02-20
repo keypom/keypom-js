@@ -6,23 +6,23 @@ export declare const officialKeypomContracts: {
         "v1.keypom.near": boolean;
         "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
+        "v2.keypom.near": boolean;
     };
     testnet: {
         "v1.keypom.testnet": boolean;
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
-        "dev-1676742592813-14933979180879": boolean;
+        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedKeypomContracts: {
     mainnet: {
-        "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
+        "v2.keypom.near": boolean;
     };
     testnet: {
-        "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
-        "dev-1676742592813-14933979180879": boolean;
+        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedLinkdropClaimPages: {
@@ -44,7 +44,7 @@ declare let near: Maybe<Near>;
  */
 export declare const getEnv: () => EnvVars;
 /** @group Utility */
-export declare const execute: (args: any) => Promise<void | nearAPI.providers.FinalExecutionOutcome[] | (void | nearAPI.providers.FinalExecutionOutcome)[]>;
+export declare const execute: (args: any) => Promise<void | (void | nearAPI.providers.FinalExecutionOutcome)[] | nearAPI.providers.FinalExecutionOutcome[]>;
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.

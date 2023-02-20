@@ -24,7 +24,7 @@ Each individual key use can have an array of Methods that can be called.</p>
 <ul class="tsd-hierarchy">
 <li><span class="target">Method</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L7">src/lib/types/fc.ts:7</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L7">src/lib/types/fc.ts:7</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -35,6 +35,7 @@ Each individual key use can have an array of Methods that can be called.</p>
 <div class="tsd-index-list"><a href="Method.html#accountIdField" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-1024-path"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)" id="icon-1024-text"></path></svg><span>account<wbr/>Id<wbr/>Field?</span></a>
 <a href="Method.html#args" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>args</span></a>
 <a href="Method.html#attachedDeposit" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>attached<wbr/>Deposit</span></a>
+<a href="Method.html#attachedGas" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>attached<wbr/>Gas?</span></a>
 <a href="Method.html#dropIdField" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>drop<wbr/>Id<wbr/>Field?</span></a>
 <a href="Method.html#funderIdField" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>funder<wbr/>Id<wbr/>Field?</span></a>
 <a href="Method.html#keyIdField" class="tsd-index-link tsd-kind-property tsd-parent-kind-interface"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>key<wbr/>Id<wbr/>Field?</span></a>
@@ -53,21 +54,29 @@ As an example, if the methodName was <code>nft_mint</code> and it expected a fie
 To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify &quot;metadata.field&quot;</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L29">src/lib/types/fc.ts:29</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L34">src/lib/types/fc.ts:34</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="args" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>args</span><a href="#args" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>What arguments should be passed to the method. This should be in stringified JSON.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L19">src/lib/types/fc.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L19">src/lib/types/fc.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="attachedDeposit" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>attached<wbr/>Deposit</span><a href="#attachedDeposit" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">attached<wbr/>Deposit<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>How much yoctoNEAR should be attached to the call.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L23">src/lib/types/fc.ts:23</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L23">src/lib/types/fc.ts:23</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="attachedGas" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>attached<wbr/>Gas</span><a href="#attachedGas" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<div class="tsd-signature">attached<wbr/>Gas<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>How much gas to attach to this method call. If none, all the gas is split between the parallel method calls in a given claim.
+If this is specified, the key can ONLY be used to call <code>claim</code> and no <code>deposit_per_use</code> can be specified. This leads the key to act like a method calling proxy instead of a linkdrop.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L28">src/lib/types/fc.ts:28</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="dropIdField" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>drop<wbr/>Id<wbr/>Field</span><a href="#dropIdField" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">drop<wbr/>Id<wbr/>Field<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -76,7 +85,7 @@ As an example, if an NFT contract expected the Keypom drop ID to be passed in as
 To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify &quot;metadata.field&quot;</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L35">src/lib/types/fc.ts:35</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L40">src/lib/types/fc.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="funderIdField" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>funder<wbr/>Id<wbr/>Field</span><a href="#funderIdField" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">funder<wbr/>Id<wbr/>Field<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -85,7 +94,7 @@ As an example, if an NFT contract wanted to gate only users that had a key comin
 To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify &quot;metadata.field&quot;</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L47">src/lib/types/fc.ts:47</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L52">src/lib/types/fc.ts:52</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="keyIdField" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>key<wbr/>Id<wbr/>Field</span><a href="#keyIdField" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">key<wbr/>Id<wbr/>Field<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -94,21 +103,21 @@ As an example, if an NFT contract wanted to gate only users with an odd key ID t
 To insert into nested objects, use periods to separate. For example, to insert into args.metadata.field, you would specify &quot;metadata.field&quot;</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L41">src/lib/types/fc.ts:41</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L46">src/lib/types/fc.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="methodName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>method<wbr/>Name</span><a href="#methodName" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">method<wbr/>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The method that should be invoked on the <code>receiverId</code>&#39;s contract.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L15">src/lib/types/fc.ts:15</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L15">src/lib/types/fc.ts:15</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="receiverId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>receiver<wbr/>Id</span><a href="#receiverId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">receiver<wbr/>Id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The account ID that the contract is deployed to that the method will be called on.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L11">src/lib/types/fc.ts:11</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L11">src/lib/types/fc.ts:11</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="receiverToClaimer" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>receiver<wbr/>To<wbr/>Claimer</span><a href="#receiverToClaimer" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">receiver<wbr/>To<wbr/>Claimer<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -116,7 +125,7 @@ To insert into nested objects, use periods to separate. For example, to insert i
 This receiver must be a valid account and non-malicious (cannot be set to the keypom contract)</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L52">src/lib/types/fc.ts:52</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L57">src/lib/types/fc.ts:57</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface"><a id="userArgsRule" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>user<wbr/>Args<wbr/>Rule</span><a href="#userArgsRule" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">user<wbr/>Args<wbr/>Rule<span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">&quot;AllUser&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;FunderPreferred&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;UserPreferred&quot;</span></div>
@@ -124,7 +133,7 @@ This receiver must be a valid account and non-malicious (cannot be set to the ke
 By default, the user cannot provide any custom arguments</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/bdf83e1/src/lib/types/fc.ts#L57">src/lib/types/fc.ts:57</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/keypom/keypom-js/blob/a668f32/src/lib/types/fc.ts#L62">src/lib/types/fc.ts:62</a></li></ul></aside></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
@@ -153,6 +162,7 @@ By default, the user cannot provide any custom arguments</p>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#accountIdField" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>account<wbr/>Id<wbr/>Field?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#args" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>args</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#attachedDeposit" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>attached<wbr/>Deposit</a></li>
+<li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#attachedGas" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>attached<wbr/>Gas?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#dropIdField" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>drop<wbr/>Id<wbr/>Field?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#funderIdField" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>funder<wbr/>Id<wbr/>Field?</a></li>
 <li class="tsd-kind-property tsd-parent-kind-interface"><a href="Method.html#keyIdField" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg>key<wbr/>Id<wbr/>Field?</a></li>

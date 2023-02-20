@@ -5,7 +5,6 @@ const {
 		format: { parseNearAmount, formatNearAmount },
 	},
 } = nearAPI;
-const { readFileSync } = require('fs')
 import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
@@ -63,6 +62,7 @@ export const KEY_LIMIT = 50;
 export const createTrialAccountDrop = async ({
 	account,
 	wallet,
+    contractBytes,
     trialFundsNEAR,
     trialFundsYocto,
     callableContracts,
@@ -85,6 +85,8 @@ export const createTrialAccountDrop = async ({
 	account?: Account,
 	/** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
 	wallet?: AnyWallet,
+    /** Bytes of the trial account smart contract */
+    contractBytes: number[],
     /** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in $NEAR (i.e `1` = 1 $NEAR) */
 	trialFundsNEAR?: Number,
 	/** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
@@ -139,16 +141,16 @@ export const createTrialAccountDrop = async ({
 	await assertDropIdUnique(dropId);
 
 	const finalConfig: ProtocolReturnedDropConfig = {
-		uses_per_key: config?.usesPerKey || 1,
+        uses_per_key: config?.usesPerKey || 1,
 		time: config?.time,
 		usage: {
-			auto_delete_drop: config?.usage?.autoDeleteDrop || false,
+            auto_delete_drop: config?.usage?.autoDeleteDrop || false,
 			auto_withdraw: config?.usage?.autoWithdraw || true,
 			permissions: config?.usage?.permissions,
 			refund_deposit: config?.usage?.refundDeposit,
 		},
 		sale: config?.sale ? {
-			max_num_keys: config?.sale?.maxNumKeys,
+            max_num_keys: config?.sale?.maxNumKeys,
 			price_per_key: config?.sale?.pricePerKeyYocto || config?.sale?.pricePerKeyNEAR ? parseNearAmount(config?.sale?.pricePerKeyNEAR?.toString())! : undefined,
 			allowlist: config?.sale?.allowlist,
 			blocklist: config?.sale?.blocklist,
@@ -200,6 +202,7 @@ export const createTrialAccountDrop = async ({
 	if (!repayAmountYocto) repayAmountYocto = '0';
 
     const attachedDeposit = new BN(trialFundsYocto).add(new BN(parseNearAmount("0.3"))).toString();
+    const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -210,14 +213,14 @@ export const createTrialAccountDrop = async ({
 		fc: {
 			methods: [[
                 {
-                    receiver_id: finalConfig.root_account_id || networkId == "testnet" ? "testnet" : "mainnet",
+                    receiver_id: rootReceiverId,
                     method_name: 'create_account_advanced',
                     //@ts-ignore
                     attached_deposit: attachedDeposit,
                     args: JSON.stringify({
                         new_account_id: "INSERT_NEW_ACCOUNT",
                         options: {
-                            contract_bytes: [...readFileSync('../ext-wasm/trial-accounts.wasm')],
+                            contract_bytes: contractBytes,
                             limited_access_keys: [{
                                 public_key: "INSERT_TRIAL_PUBLIC_KEY",
                                 allowance: trialFundsYocto,
@@ -240,7 +243,7 @@ export const createTrialAccountDrop = async ({
                         funder: repayTo || account!.accountId,
                         repay: repayAmountYocto,
                     })),
-                    user_args_rule: "UserPreferred",
+                    //user_args_rule: "UserPreferred",
                     receiver_to_claimer: true
                 }
             ]]
@@ -249,14 +252,14 @@ export const createTrialAccountDrop = async ({
 
     const fcData: FCData = {
         methods: [[{
-            receiverId: finalConfig.root_account_id || networkId == "testnet" ? "testnet" : "mainnet",
+            receiverId: rootReceiverId,
             methodName: 'create_account_advanced',
             //@ts-ignore
             attachedDeposit,
             args: JSON.stringify({
                 new_account_id: "INSERT_NEW_ACCOUNT",
                 options: {
-                    contract_bytes: [...readFileSync('../ext-wasm/trial-accounts.wasm')],
+                    contract_bytes: contractBytes,
                     limited_access_keys: [{
                         public_key: "INSERT_TRIAL_PUBLIC_KEY",
                         allowance: trialFundsYocto,
