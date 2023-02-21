@@ -6,31 +6,31 @@ const homedir = require("os").homedir();
 
 async function createTickDrop(){
     // Initiate connection to the NEAR blockchain.
-	const network = "testnet"
-	const CREDENTIALS_DIR = ".near-credentials";
-	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
-	
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+    const network = "testnet"
+    const CREDENTIALS_DIR = ".near-credentials";
+    const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-	let nearConfig = {
-	    networkId: network,
-	    keyStore: keyStore,
-	    nodeUrl: `https://rpc.${network}.near.org`,
-	    walletUrl: `https://wallet.${network}.near.org`,
-	    helperUrl: `https://helper.${network}.near.org`,
-	    explorerUrl: `https://explorer.${network}.near.org`,
-	};
+    let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account('minqi.testnet');
+    let nearConfig = {
+        networkId: network,
+        keyStore: keyStore,
+        nodeUrl: `https://rpc.${network}.near.org`,
+        walletUrl: `https://wallet.${network}.near.org`,
+        helperUrl: `https://helper.${network}.near.org`,
+        explorerUrl: `https://explorer.${network}.near.org`,
+    };  
 
-	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
-	// Here we are connecting to the testnet network
-	await initKeypom({
-	    near: near,
-	    network: "testnet"
-	});
+    let near = await connect(nearConfig);
+    const fundingAccount = await near.account('minqi.testnet'); 
+    // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
+    // Here we are connecting to the testnet network
 
+    await initKeypom({
+        near: near,
+        network: "testnet"
+    }); 
+    
     // Create drop with 10 keys and 2 key uses each
     let {keys, dropId} = await createDrop({
         account: fundingAccount,
@@ -59,7 +59,7 @@ async function createTickDrop(){
             ]   
         }   
     })
-    
+
     let pubKeys = keys.publicKeys
     const res = await createNFTSeries({
         account: fundingAccount,
