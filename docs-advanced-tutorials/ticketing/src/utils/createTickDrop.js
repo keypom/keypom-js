@@ -31,12 +31,7 @@ async function createTickDrop(){
 	    network: "testnet"
 	});
 
-    // await addToBalance({
-    //     account: fundingAccount,
-    //     amount: "15"
-    // });
-
-    // Create drop with 30 key uses
+    // Create drop with 10 keys and 2 key uses each
     let {keys, dropId} = await createDrop({
         account: fundingAccount,
         numKeys: 10,
