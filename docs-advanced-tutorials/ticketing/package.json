@@ -1,7 +1,7 @@
 {
   "name": "keypom-ticketing",
   "version": "0.1.0",
-  "homepage": "http://localhost:3000/v1-4.keypom.testnet/rtQ9LyqNcbGGJknZeZDk7w37dApUk1GnHCVRb7d5AaqxuytMUf6bh6HQsE3C2uWCakFaa2Z4QJipkFs6WwZafB5",
+  "homepage": "http://localhost:3000/v2.keypom.testnet/6DzXXf4mbCYgZiojP73js28wm6rhtWnnPduAiT5jzWQhCXaM7owvZLJKbsgYA8fZYvikHnxYXDH1zii9c1fzJPk",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
@@ -10,7 +10,7 @@
     "buffer": "^6.0.3",
     "crypto": "npm:crypto-browserify",
     "crypto-browserify": "^3.12.0",
-    "keypom-js": "^1.3.1-rc.1",
+    "keypom-js": "^1.4.0-rc.1",
     "npm-check-updates": "^16.6.5",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
@@ -23,7 +23,10 @@
     "webpack": "^5.75.0"
   },
   "browser": {
-    "crypto": false
+    "crypto": false,
+    "fs": false,
+    "path": false,
+    "util": false
   },
   "scripts": {
     "start": "react-scripts start",

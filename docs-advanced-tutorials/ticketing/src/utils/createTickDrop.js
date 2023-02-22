@@ -1,4 +1,4 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance } = require("keypom-js");
+const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
 const path = require("path");

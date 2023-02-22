@@ -5,6 +5,7 @@ import * as nearAPI from "near-api-js";
 import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png" 
+import xLogo from "../static/img/red-x.png"
 import "../styles.css";
 const { keyStores, connect } = nearAPI;
 
@@ -98,7 +99,19 @@ export const Scanner = () => {
             var arr = [1, false, false];
             setMasterState(arr)
           }
-          else{
+          else if(newKeyInfo.cur_key_use === resCurUse ){
+            var tempState = [...masterState]
+            tempState[1] = true
+            tempState[0] = 4
+            setMasterState([...tempState])
+            // Wait 2s, then flip go back to stage 1
+            await timeout(2000)
+            var emptyRes = new Array(splitRes.length)
+            setSplitRes(emptyRes)
+            setResPrivkey("")
+            var arr = [1, false, false];
+            setMasterState(arr)
+            // set to a 4th state and then return to 1
             console.log("claim did not work")
             console.log(`key use before claim: ${resCurUse}`)
             console.log(`key use after claim: ${newKeyInfo.cur_key_use}`)
@@ -118,6 +131,7 @@ export const Scanner = () => {
         <div className="content">
         <div style={{border:"0.5rem solid black"}}><video ref={ref} /></div>
           <h2>Scan a linkdrop QR code to claim</h2>
+          <h4>To re-enter password, refresh the page</h4>
           {/* <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
@@ -165,6 +179,29 @@ export const Scanner = () => {
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
           <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
+        </div>
+      </>
+    );
+  }
+  // failed to claim
+  else if(masterState[0] === 4){
+    return (
+      <>
+        <div className="content">
+          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+          <h2>Could Not Be Claimed!</h2>
+          <h3>Ensure Password is Correct</h3>
+          <h4>To re-enter password, refresh the page</h4>
+          {/* <br></br>
+          <div>Contract Claimed On: </div>
+          <div>{splitRes[4]}</div>
+          <br></br>
+          <div>Private Key Claimed: </div>
+          <div>{splitRes[5]}</div> */}
+          {/* <br></br>
+          <span>Current State: </span>
+          <span>{masterState[0]}</span>     */}
+          <img src={xLogo} alt="green check" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );

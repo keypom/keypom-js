@@ -7436,10 +7436,10 @@
     "array-includes" "^3.1.5"
     "object.assign" "^4.1.3"
 
-"keypom-js@^1.3.1-rc.1":
-  "integrity" "sha512-zgjqgpDSZ9cHzObc+0HZeU0Jr5ub5aV3hL/Ql/UDvwm6QrqX4w/ToT3ob1vnLE6p3ZwmN2yuusX6bDiLEC7VlQ=="
-  "resolved" "https://registry.npmjs.org/keypom-js/-/keypom-js-1.3.1-rc.1.tgz"
-  "version" "1.3.1-rc.1"
+"keypom-js@^1.4.0-rc.1":
+  "integrity" "sha512-d4zoMxJWp4TQbwjNDUMet7fGnVEuZVFmk62kRh7L22NKvWZy/EZ6xQzIIxQN/ZdeL8E2lhF0/OHKYO5wFfvxww=="
+  "resolved" "https://registry.npmjs.org/keypom-js/-/keypom-js-1.4.0-rc.1.tgz"
+  "version" "1.4.0-rc.1"
   dependencies:
     "@near-wallet-selector/core" "^7.5.0"
     "@types/react" "^18.0.26"
@@ -7449,6 +7449,7 @@
     "near-api-js" "^0.44.2"
     "near-seed-phrase" "^0.2.0"
     "react" "^18.2.0"
+    "react-dom" "18.2.0"
     "typescript" "^4.8.4"
 
 "keyv@^4.5.2":
@@ -9629,7 +9630,7 @@
     "strip-ansi" "^6.0.1"
     "text-table" "^0.2.0"
 
-"react-dom@^16.8.0  || ^17.0.0 || ^18.0.0", "react-dom@^18.0.0", "react-dom@^18.2.0", "react-dom@>=16.8":
+"react-dom@^16.8.0  || ^17.0.0 || ^18.0.0", "react-dom@^18.0.0", "react-dom@^18.2.0", "react-dom@>=16.8", "react-dom@18.2.0":
   "integrity" "sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g=="
   "resolved" "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"
   "version" "18.2.0"
