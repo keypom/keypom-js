@@ -7,6 +7,7 @@
     "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation",
     "test:main": "yarn build && yarn ava:main",
     "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
+    "test:drop-creation": "yarn build && yarn ava:drop-creation",
     "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
     "ava:main": "ava test/ws.test.js -vs --timeout=5m",
     "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",

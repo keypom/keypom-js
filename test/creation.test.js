@@ -187,7 +187,7 @@ test('NFT drop', async (t) => {
         allSecretKeys = allSecretKeys.concat(secretKeys);
     }
 
-    await createNFTSeries({
+    await keypom.createNFTSeries({
         dropId,
         metadata: {
             title: nftTitle,
@@ -226,6 +226,9 @@ test('Ticket drops', async (t) => {
             dropName,
             wallets
         }),
+        config: {
+            usesPerKey: 3
+        },
         depositPerUseNEAR,
         fcData: {
             methods: [
@@ -266,7 +269,7 @@ test('Ticket drops', async (t) => {
         allSecretKeys = allSecretKeys.concat(secretKeys);
     }
 
-    await createNFTSeries({
+    await keypom.createNFTSeries({
         dropId,
         metadata: {
             title: nftTitle,
