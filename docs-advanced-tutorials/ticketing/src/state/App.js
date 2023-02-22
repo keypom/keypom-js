@@ -121,7 +121,7 @@ function App() {
             <>
               <h1>Current uses: {curUse}</h1>
               <div>If Current Uses greater than 2, use another key.</div>
-              <div>If Current Uses greater 0, the public key was depleted and deleted.</div>
+              <div>If Current Uses is 0, the public key was depleted and deleted.</div>
               <br></br>
               <h4>Current Public Key</h4>
               <div>{pubKey}</div>

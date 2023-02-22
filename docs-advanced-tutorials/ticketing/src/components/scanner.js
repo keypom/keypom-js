@@ -18,9 +18,9 @@ export const Scanner = () => {
   // const [click, setClick] = useState(false);
   const [password, setPassword] = useState("NULL")
 
-  var arr = [1, false, false];
+  var arr = [1, false];
   const [masterState, setMasterState] = useState(arr)
-  // [stage, claimed bool, data bool]
+  // [stage, data bool]
 
   // Scanner and getting results of scan
   const { ref } = useZxing({
@@ -31,7 +31,7 @@ export const Scanner = () => {
 
       //indicate new data
       var tempState = [...masterState]
-      tempState[2] = true
+      tempState[1] = true
       tempState[0] = 2
       setMasterState([...tempState])
     },
@@ -88,7 +88,6 @@ export const Scanner = () => {
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
           if(newKeyInfo.cur_key_use - resCurUse === 1){
             var tempState = [...masterState]
-            tempState[1] = true
             tempState[0] = 3
             setMasterState([...tempState])
             // Wait 2s, then flip go back to stage 1
@@ -96,12 +95,11 @@ export const Scanner = () => {
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
             setResPrivkey("")
-            var arr = [1, false, false];
+            var arr = [1, false];
             setMasterState(arr)
           }
           else if(newKeyInfo.cur_key_use === resCurUse ){
             var tempState = [...masterState]
-            tempState[1] = true
             tempState[0] = 4
             setMasterState([...tempState])
             // Wait 2s, then flip go back to stage 1
@@ -109,7 +107,7 @@ export const Scanner = () => {
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
             setResPrivkey("")
-            var arr = [1, false, false];
+            var arr = [1, false];
             setMasterState(arr)
             // set to a 4th state and then return to 1
             console.log("claim did not work")
@@ -119,11 +117,11 @@ export const Scanner = () => {
     }
 
     // only claim if there is data present
-    if(masterState[2] === true){
+    if(masterState[1] === true){
       scannerClaim()
     }
 
-  }, [masterState[2]])
+  }, [masterState[1]])
   // Not scanned, just received pw
   if(masterState[0] === 1){
     return (
