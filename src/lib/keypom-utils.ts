@@ -264,7 +264,7 @@ export const createNFTSeries = async ({
                     royalty
                 },
                 gas: '50000000000000',
-                deposit: parseNearAmount("0.1")!,
+                deposit: parseNearAmount("0.25")!,
             }
         }]
     }
@@ -273,20 +273,88 @@ export const createNFTSeries = async ({
 }
 
 /**
- * Constructs a valid linkdrop URL for a given claim page or custom base URL.
+ * Constructs a valid linkdrop URL for a given claim page or custom URL. To view the list of supported claim pages, see the exported `supportedLinkdropClaimPages` variable.
  * 
- * @param {string} secretKeys - An array of secret keys that should be embedded in the linkdrop URLs.
+ * @param {string | string[]} secretKeys - Either a single secret key or an array of secret keys that should be embedded in the linkdrop URLs.
  * @param {string=} claimPage - A valid reference to the claim page. See the exported `supportedLinkdropClaimPages` variable for a list of supported claim pages. If not provided, a custom base URL must be provided.
  * @param {string=} networkId - The network ID you wish to linkdrop on. If not provided, the current network that the SDK is connected to will be used. 
  * @param {string=} contractId - The contract ID where the secret key belongs to. If not provided, the current contract ID that the SDK is connected to will be used. 
- * @param {string=} baseUrl - A custom URL to use as the base for the linkdrop.
+ * @param {string=} customURL - A custom URL containing a `SECRET_KEY` string and `CONTRACT_ID` string for where to insert the secret key and contract ID. For example, a base URL of `foo.com/CONTRACT_ID#SECRET_KEY` with a contract `v2.keypom.near` and secret key `5CBLiJK21EQoB...` would result in `foo.com/v2.keypom.near#5CBLiJK21EQoB...`.
  * 
  * @returns {string[]} - An array of the linkdrop URLs
  * 
  * @example
+ * Use the keypom claim page:
  * ```js
- * const linkdropUrl = formatLinkdropUrl({
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
  * 
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ * 
+ * const linkdropUrl = formatLinkdropUrl({
+ *     claimPage: "keypom", 
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ * 
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with ONLY the secret key
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ * 
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ * 
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo", 
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ * 
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with both the secret key and contract ID
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ * 
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ * 
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo/CONTRACT_ID", 
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ * 
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
  * @group Utility
  */
 export const formatLinkdropUrl = ({
@@ -294,25 +362,37 @@ export const formatLinkdropUrl = ({
     networkId, 
     contractId, 
     secretKeys, 
-    baseUrl
+    customURL
 }: {
     claimPage?: string, 
     networkId?: string,
     contractId?: string,
-    secretKeys: string[],
-    baseUrl?: string
+    secretKeys: string[] | string,
+    customURL?: string
 }): string[] => {
     const { networkId: envNetworkId, contractId: envContractId } = getEnv();
     networkId = networkId || envNetworkId;
     contractId = contractId || envContractId;
     
-    assert(baseUrl || supportedLinkdropClaimPages[networkId!].hasOwnProperty(claimPage), `Either a custom base URL or a supported claim page must be passed in.`);
-    baseUrl = baseUrl || supportedLinkdropClaimPages[networkId!][claimPage!];
+    assert(secretKeys, "Secret keys must be passed in as either an array or a single string");
+    assert(customURL || supportedLinkdropClaimPages[networkId!].hasOwnProperty(claimPage), `Either a custom base URL or a supported claim page must be passed in.`);
+    customURL = customURL || supportedLinkdropClaimPages[networkId!][claimPage!];
 
+    // If the secret key is a single string, convert it to an array
+    if (typeof secretKeys === 'string') {
+        secretKeys = [secretKeys];
+    }
+
+    // insert the contractId and secret key into the base URL based on the CONTRACT_ID and SECRET_KEY field
     let returnedURLs: Array<string> = [];
     // loop through all secret keys
     secretKeys.forEach((secretKey) => {
-        returnedURLs.push(`${baseUrl}/${contractId}/${secretKey}`);
+        // insert the secret key into the base URL
+        let url = customURL!.replace('SECRET_KEY', secretKey);
+        // insert the contract ID into the base URL
+        url = url.replace('CONTRACT_ID', contractId!);
+        // add the URL to the array of URLs
+        returnedURLs.push(url);
     });
 
     return returnedURLs;
