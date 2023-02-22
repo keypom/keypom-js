@@ -70,13 +70,13 @@ export const supportedKeypomContracts = {
 
 export const supportedLinkdropClaimPages = {
 	mainnet: {
-		"mynearwallet": "https://app.mynearwallet.com/linkdrop",
-		"wallet.near.org": "https://wallet.near.org/linkdrop",
+		"mynearwallet": `https://app.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY`,
+		"keypom": "https://keypom.xyz/claim/CONTRACT_ID#SECRET_KEY"
 
 	},
 	testnet: {
-		"mynearwallet": "https://app.testnet.mynearwallet.com/linkdrop",
-		"wallet.near.org": "https://wallet.testnet.near.org/linkdrop"
+		"mynearwallet": "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+		"keypom": "https://testnet.keypom.xyz/claim/CONTRACT_ID#SECRET_KEY"
 	}
 }
 

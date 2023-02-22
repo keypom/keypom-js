@@ -28,11 +28,11 @@ export declare const supportedKeypomContracts: {
 export declare const supportedLinkdropClaimPages: {
     mainnet: {
         mynearwallet: string;
-        "wallet.near.org": string;
+        keypom: string;
     };
     testnet: {
         mynearwallet: string;
-        "wallet.near.org": string;
+        keypom: string;
     };
 };
 export type Maybe<T> = T | undefined;

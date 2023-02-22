@@ -51,7 +51,8 @@ export {
 	initKeypom,
 	getEnv,
 	updateKeypomContractId,
-	updateFunder
+	updateFunder,
+	supportedLinkdropClaimPages
 } from "./lib/keypom";
 export * from "./lib/views";
 export * from "./lib/sales";

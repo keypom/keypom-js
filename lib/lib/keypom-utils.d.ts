@@ -153,28 +153,96 @@ export declare const createNFTSeries: ({ account, wallet, dropId, metadata, roya
     royalty?: Map<string, number> | undefined;
 }) => Promise<void | FinalExecutionOutcome[]>;
 /**
- * Constructs a valid linkdrop URL for a given claim page or custom base URL.
+ * Constructs a valid linkdrop URL for a given claim page or custom URL. To view the list of supported claim pages, see the exported `supportedLinkdropClaimPages` variable.
  *
- * @param {string} secretKeys - An array of secret keys that should be embedded in the linkdrop URLs.
+ * @param {string | string[]} secretKeys - Either a single secret key or an array of secret keys that should be embedded in the linkdrop URLs.
  * @param {string=} claimPage - A valid reference to the claim page. See the exported `supportedLinkdropClaimPages` variable for a list of supported claim pages. If not provided, a custom base URL must be provided.
  * @param {string=} networkId - The network ID you wish to linkdrop on. If not provided, the current network that the SDK is connected to will be used.
  * @param {string=} contractId - The contract ID where the secret key belongs to. If not provided, the current contract ID that the SDK is connected to will be used.
- * @param {string=} baseUrl - A custom URL to use as the base for the linkdrop.
+ * @param {string=} customURL - A custom URL containing a `SECRET_KEY` string and `CONTRACT_ID` string for where to insert the secret key and contract ID. For example, a base URL of `foo.com/CONTRACT_ID#SECRET_KEY` with a contract `v2.keypom.near` and secret key `5CBLiJK21EQoB...` would result in `foo.com/v2.keypom.near#5CBLiJK21EQoB...`.
  *
  * @returns {string[]} - An array of the linkdrop URLs
  *
  * @example
+ * Use the keypom claim page:
  * ```js
- * const linkdropUrl = formatLinkdropUrl({
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
  *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     claimPage: "keypom",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with ONLY the secret key
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with both the secret key and contract ID
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo/CONTRACT_ID",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
  * @group Utility
  */
-export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, secretKeys, baseUrl }: {
+export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, secretKeys, customURL }: {
     claimPage?: string | undefined;
     networkId?: string | undefined;
     contractId?: string | undefined;
-    secretKeys: string[];
-    baseUrl?: string | undefined;
+    secretKeys: string[] | string;
+    customURL?: string | undefined;
 }) => string[];
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.

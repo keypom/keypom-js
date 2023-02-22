@@ -14,7 +14,7 @@ export { addKeys, deleteKeys } from "./lib/keys";
 export { claim, } from "./lib/claims";
 export { 
 /** @group Utility */
-execute, initKeypom, getEnv, updateKeypomContractId, updateFunder } from "./lib/keypom";
+execute, initKeypom, getEnv, updateKeypomContractId, updateFunder, supportedLinkdropClaimPages } from "./lib/keypom";
 export * from "./lib/views";
 export * from "./lib/sales";
 export * from "./lib/types/drops";
