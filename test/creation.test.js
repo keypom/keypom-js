@@ -127,7 +127,7 @@ test('token drop', async (t) => {
     const {contractId} = getEnv();
 
     let URLs = keypom.formatLinkdropUrl({
-        claimPage: "keypom",
+        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
         contractId,
         secretKeys: allSecretKeys
     })
@@ -199,7 +199,7 @@ test('NFT drop', async (t) => {
     const {contractId} = getEnv();
 
     let URLs = keypom.formatLinkdropUrl({
-        claimPage: "keypom",
+        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
         contractId,
         secretKeys: allSecretKeys
     })
@@ -281,7 +281,7 @@ test('Ticket drops', async (t) => {
     const {contractId} = getEnv();
 
     let URLs = keypom.formatLinkdropUrl({
-        claimPage: "keypom",
+        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
         contractId,
         secretKeys: allSecretKeys
     })
