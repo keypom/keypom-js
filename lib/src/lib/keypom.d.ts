@@ -6,33 +6,31 @@ export declare const officialKeypomContracts: {
         "v1.keypom.near": boolean;
         "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
-        "v2.keypom.near": boolean;
     };
     testnet: {
         "v1.keypom.testnet": boolean;
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
-        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedKeypomContracts: {
     mainnet: {
+        "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
-        "v2.keypom.near": boolean;
     };
     testnet: {
+        "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
-        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedLinkdropClaimPages: {
     mainnet: {
         mynearwallet: string;
-        keypom: string;
+        "wallet.near.org": string;
     };
     testnet: {
         mynearwallet: string;
-        keypom: string;
+        "wallet.near.org": string;
     };
 };
 export type Maybe<T> = T | undefined;
@@ -44,7 +42,7 @@ declare let near: Maybe<Near>;
  */
 export declare const getEnv: () => EnvVars;
 /** @group Utility */
-export declare const execute: (args: any) => Promise<void | (void | nearAPI.providers.FinalExecutionOutcome)[] | nearAPI.providers.FinalExecutionOutcome[]>;
+export declare const execute: (args: any) => Promise<void | nearAPI.providers.FinalExecutionOutcome[] | (void | nearAPI.providers.FinalExecutionOutcome)[]>;
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.
@@ -113,19 +111,19 @@ export declare const execute: (args: any) => Promise<void | (void | nearAPI.prov
 */
 export declare const initKeypom: ({ near: _near, network, funder, keypomContractId, }: {
     /** The NEAR connection instance to use. If not passed in, it will create a new one. */
-    near?: nearAPI.Near | undefined;
+    near?: Near;
     /** The network to connect to either `mainnet` or `testnet`. */
     network: string;
     /**
      * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
      * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
      */
-    funder?: Funder | undefined;
+    funder?: Funder;
     /**
      * Instead of using the most up-to-date, default Keypom contract, you can specify a specific account ID to use. If an older version is specified, some features of the SDK might not be usable.
      */
-    keypomContractId?: string | undefined;
-}) => Promise<null>;
+    keypomContractId?: string;
+}) => Promise<any>;
 /**
  * Once the SDK is initialized, this function allows the current funder account to be updated. Having a funder is only necessary if you wish to sign transactions on the Keypom Protocol.
  *
@@ -164,7 +162,7 @@ export declare const initKeypom: ({ near: _near, network, funder, keypomContract
 */
 export declare const updateFunder: ({ funder }: {
     funder: Funder;
-}) => Promise<null>;
+}) => Promise<any>;
 /**
  * This allows the desired Keypom contract ID to be set. By default, the most up-to-date Keypom contract for the given network is set during initKeypom.
  *
@@ -198,5 +196,5 @@ export declare const updateFunder: ({ funder }: {
 */
 export declare const updateKeypomContractId: ({ keypomContractId }: {
     keypomContractId: string;
-}) => Promise<null>;
+}) => Promise<any>;
 export {};

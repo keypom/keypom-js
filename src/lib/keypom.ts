@@ -6,7 +6,7 @@ const {
 
 import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
 import { Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account, Connection, Near } from "near-api-js";
+import { Account, Connection, Near, InMemorySigner } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
 import { assert, isValidFunderObject, isValidNearObject } from "./checks";
@@ -224,9 +224,10 @@ export const initKeypom = async ({
 	} else {
 		const networkConfig = typeof network === 'string' ? networks[network] : network
 		keyStore = process?.versions?.node ? new InMemoryKeyStore() : new BrowserLocalStorageKeyStore()
+		
 		near = new Near({
 			...networkConfig,
-			deps: { keyStore },
+			keyStore,
 		});
 	}
 	
