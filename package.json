@@ -25,11 +25,9 @@
     "ava": "^4.3.3",
     "bn.js": "^5.2.1",
     "dotenv": "^16.0.3",
-    "near-api-js": "^0.44.2",
+    "near-api-js": "^0.45.1",
     "near-seed-phrase": "^0.2.0",
-    "react": "^18.2.0",
-    "typescript": "^4.8.4",
-    "react-dom": "18.2.0"
+    "typescript": "^4.8.4"
   },
   "ava": {
     "require": [

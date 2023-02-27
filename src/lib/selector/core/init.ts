@@ -58,9 +58,9 @@ export const initKeypomWallet: SelectorInit = async (config) => {
 			return await keypomWallet.signAndSendTransaction(params);
 		},
 
-		async signAndSendTransactions({ transactions }) {
-			logger.log("Keypom:signAndSendTransactions", { transactions });
-			return await keypomWallet.signAndSendTransactions(transactions);
+		async signAndSendTransactions(params) {
+			console.log('params top level: ', params)
+			return await keypomWallet.signAndSendTransactions(params);
 		},
 	};
 };	

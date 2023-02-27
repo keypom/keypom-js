@@ -18,18 +18,21 @@ interface KeypomSetupParams {
 	iconUrl?: string;
 	deprecated?: boolean;
 	desiredUrl?: string;
+	keyStore?: any;
 }
 
 export function setupKeypom({
 	iconUrl = icon,
 	deprecated = false,
 	desiredUrl,
-	networkId
+	networkId,
+	keyStore
 }: KeypomSetupParams): WalletModuleFactory<KeypomWalletType> {
 	return async () => {
 		const keypomWallet = new KeypomWallet({
 			networkId,
-			desiredUrl
+			desiredUrl,
+			keyStore
 		})
 
 		let signInSuccess = true;
