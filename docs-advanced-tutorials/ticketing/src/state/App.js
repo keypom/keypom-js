@@ -98,7 +98,26 @@ function App() {
             <Route path={homepath} element={
             <>
               <h1>You're all set! Enjoy the event</h1>
-              <a href={link} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Continue Onboarding to NEAR</button></a>
+              <a href={link} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Claim you POAP</button></a>
+              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
+            </>}/>
+          </Routes>
+        
+        
+      </div>
+      
+    );
+  }
+  else if(curUse==0){
+    const homepath = `${contractId}/${privKey}`
+    return (
+      <div className="content">
+          <Routes>
+            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={homepath} element={
+            <>
+              <h1>Now that you have a wallet...</h1>
+              <a href={"https://near.org/learn/#anker_near"} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Continue your journey into NEAR</button></a>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
           </Routes>
