@@ -82,5 +82,15 @@ async function createTickDrop(){
     console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
 }
 
+
+
 createTickDrop()
+// main(){
+//     createTickDrop()
+//     test(private)
+//     test(private)
+//     test(bogus key)
+//     test(wrong pw)
+    
+// }
 

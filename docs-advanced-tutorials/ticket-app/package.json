@@ -1,0 +1,24 @@
+{
+  "name": "ticket-app",
+  "version": "1.0.0",
+  "license": "(MIT AND Apache-2.0)",
+  "scripts": {
+    "start": "cd frontend && npm run start",
+    "deploy": "cd contract && ./deploy.sh",
+    "build": "npm run build:contract && npm run build:web",
+    "build:web": "cd frontend && npm run build",
+    "build:contract": "cd contract && ./build.sh",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "cd contract && cargo test",
+    "test:integration": "cd integration-tests && npm test -- -- \"./contract/target/wasm32-unknown-unknown/release/hello_near.wasm\"",
+    "postinstall": "cd frontend && npm install && cd .. && cd integration-tests && npm install && cd .. && echo rs contract"
+  },
+  "devDependencies": {
+    "near-cli": "^3.3.0"
+  },
+  "dependencies": {
+    "keypom-js": "^1.4.0-rc.3",
+    "qrcode.react": "^3.1.0",
+    "react-zxing": "^1.1.3"
+  }
+}
