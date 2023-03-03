@@ -1,4 +1,4 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv } = require("keypom-js");
+const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
 const path = require("path");
@@ -80,9 +80,88 @@ async function createTickDrop(){
     // Write file of all pk's and their respective linkdrops
     console.log('Public Keys and Linkdrops: ', dropInfo)
     console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
+    return keys
 }
 
+async function main(){
+    // CREATE DROP
+    let keys = await createTickDrop();
+    console.log(`Keys: ${keys}`)
+    let myPrivatekey = keys.secretKeys[0];
+    let myPublicKey = keys.publicKeys[0];
+    console.log(`Private Key: ${myPrivatekey}`)
+    console.log(`Public Key: ${myPublicKey}`)
 
+    // INCORRECT PASSWORD
+    let keyInfo = await getKeyInformation({publicKey: myPublicKey})
+    let curUse = keyInfo.cur_key_use 
+    console.log(`Key use before claiming with wrong password: ${curUse}`)
+    console.log("Claiming with wrong password...")
+    await claim({
+        secretKey: myPrivatekey,
+        accountId: "minqi.testnet",
+        password: "wrong-password"
+    })
+    keyInfo = await getKeyInformation({publicKey: myPublicKey})
+    curUse = keyInfo.cur_key_use 
+    console.log(`Key use after claiming with wrong password and before claiming with correct password: ${curUse}`)
 
-createTickDrop()
+    // CORRECT PASSWORD
+    let password = "event-password"
+    let claimPassword = await hashPassword(password + myPublicKey + curUse.toString())
+    console.log("claiming with correct password...")
+    await claim({
+        secretKey: myPrivatekey,
+        accountId: "minqi.testnet",
+        password: claimPassword
+    })
+    keyInfo = await getKeyInformation({publicKey: myPublicKey})
+    curUse = keyInfo.cur_key_use 
+    console.log(`Key use after claiming with correct password: ${curUse}`)
+
+    // SECOND CLAIM, NO PW NEEDED
+    console.log("Second claim with no password")
+    await claim({
+        secretKey: myPrivatekey,
+        accountId: "minqi.testnet",
+    })
+    // getting key info here should fail as key has been depleted and deleted
+    try{
+        keyInfo = await getKeyInformation({publicKey: myPublicKey})
+        curUse = keyInfo.cur_key_use 
+        console.log(`Key use after second claim without password: ${curUse}`)
+    }
+    catch(err){
+        console.log("Key has been depleted and deleted")
+    }
+
+    // Depleted key
+    console.log("Claim with depleted key")
+    try{
+        await claim({
+            secretKey: myPrivatekey,
+            accountId: "minqi.testnet",
+        })
+        console.log("claimed successfully, this should not be happening")
+    }
+    catch(err){
+        console.log("Claim failed, as expected")
+    }
+
+    // Bogus key
+    console.log("Claim with fake key")
+    try{
+        await claim({
+            secretKey: "fake-key",
+            accountId: "minqi.testnet",
+        })
+        console.log("claimed successfully, this should not be happening")
+    }
+    catch(err){
+        console.log("Claim failed, as expected")
+    }
+
+}
+
+main()
 
