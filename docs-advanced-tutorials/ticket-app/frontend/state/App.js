@@ -107,7 +107,6 @@ function App() {
   else if(curUse==0 && splitRes[3]==''){
     // Event Landing Page
     const homepath = `${contractId}/${privKey}`
-    console.log(splitRes)
     return (
       <div className="content">
         <h1>Welcome to the Keypom Party!</h1>
@@ -125,7 +124,6 @@ function App() {
   }
   else if(curUse==0){
     // Key has been depleted, show resources for NEAR
-    console.log(splitRes)
     const homepath = `${contractId}/${privKey}`
     return (
       <div className="content">

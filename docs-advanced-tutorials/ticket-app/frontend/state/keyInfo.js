@@ -34,25 +34,16 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
     // Need to find a way to get component to re-render periodically
     useEffect(() => {
         async function getPubkey(privKey){
-            console.log(privKey)
             const publicKey = await getPubFromSecret(privKey)
             setPubkey(publicKey)
-            console.log(pubKey)
         }
 
         async function getUsesRemaining(pubKey){
-            console.log(pubKey)
-            console.log(typeof pubKey)
-
             const resKeyInfo = await getKeyInformation({publicKey: pubKey})
-            console.log(resKeyInfo)
-            
             const resDropInfo = await getDropInformation({secretKey: privKey})
-            console.log(resDropInfo)
             setCurUse(resKeyInfo.cur_key_use)
 
         }
-        console.log("aaa")
         getPubkey(privKey)
         getUsesRemaining(pubKey)
     });

@@ -70,24 +70,18 @@ export const Scanner = () => {
       }
 
       async function scannerClaim(){
-          console.log("literally skipping your breakpoint lol")
           // Get current key use
-          console.log("skipped it, go fuck yourself")
           let publicKey = await getPubFromSecret(resPrivKey)
           let resKeyInfo = await getKeyInformation({publicKey: publicKey})
           let resCurUse = resKeyInfo.cur_key_use 
-          console.log(resCurUse)
           // Create password using base + pubkey + key use as string
           let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
-          console.log("pre-claim")
-          console.log({ resPrivKey })
           // Claim with created password
           await claim({
               secretKey: resPrivKey,
               accountId: "minqi.testnet",
               password: passwordForClaim
           })
-          console.log("post-claim")
 
           // check if claim succeeded and then indicate claimed
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
@@ -102,7 +96,6 @@ export const Scanner = () => {
             setResPrivkey("")
             var arr = [1, false];
             setMasterState(arr)
-            console.log("claiming here")
           }
           else if(newKeyInfo.cur_key_use === resCurUse ){
             var tempState = [...masterState]
