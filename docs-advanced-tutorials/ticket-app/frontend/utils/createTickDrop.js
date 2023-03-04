@@ -1,4 +1,4 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword } = require("keypom-js");
+const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
 const path = require("path");
@@ -74,7 +74,10 @@ async function createTickDrop(){
     const {contractId: KEYPOM_CONTRACT} = getEnv()
     // Creating list of pk's and linkdrops; copied from orignal simple-create.js
     for(var i = 0; i < keys.keyPairs.length; i++) {
-        let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`;
+        let linkdropUrl = formatLinkdropUrl({
+            customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+            secretKeys: keys.secretKeys[i]
+          })
         dropInfo[pubKeys[i]] = linkdropUrl;
     }   
     // Write file of all pk's and their respective linkdrops

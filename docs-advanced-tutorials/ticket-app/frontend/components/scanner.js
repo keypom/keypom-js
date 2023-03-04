@@ -70,19 +70,55 @@ export const Scanner = () => {
       }
 
       async function scannerClaim(){
-          // Get current key use
-          let publicKey = await getPubFromSecret(resPrivKey)
-          let resKeyInfo = await getKeyInformation({publicKey: publicKey})
-          let resCurUse = resKeyInfo.cur_key_use 
-          // Create password using base + pubkey + key use as string
-          let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
-          // Claim with created password
-          await claim({
-              secretKey: resPrivKey,
-              accountId: "minqi.testnet",
-              password: passwordForClaim
-          })
+          try{
+            // Get current key use
+            let publicKey = await getPubFromSecret(resPrivKey)
+            let resKeyInfo = await getKeyInformation({publicKey: publicKey})
+            if(resKeyInfo == null){
+              throw new Error(`Key info could not be determined`)
+            }
+            let resCurUse = resKeyInfo.cur_key_use 
+          }
+          catch(err){
+            // Key has been deleted OR key was never part of drop
+            // set to a 5th state and then return to 1
+            var tempState = [...masterState]
+            tempState[0] = 6
+            setMasterState([...tempState])
+            // Wait 2s, then flip go back to stage 1
+            await timeout(3000)
+            var emptyRes = new Array(splitRes.length)
+            setSplitRes(emptyRes)
+            setResPrivkey("")
+            var arr = [1, false];
+            setMasterState(arr)
+            return
+          }
 
+          //only claim if first key use, do not allow scanner to claim multiple times
+          if(resCurUse == 1){
+            // Create password using base + pubkey + key use as string
+            let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
+            // Claim with created password
+            await claim({
+                secretKey: resPrivKey,
+                accountId: "minqi.testnet",
+                password: passwordForClaim
+            })
+          }
+          else{
+            // set to a 5th state and then return to 1
+            var tempState = [...masterState]
+            tempState[0] = 5
+            setMasterState([...tempState])
+            // Wait 2s, then flip go back to stage 1
+            await timeout(3000)
+            var emptyRes = new Array(splitRes.length)
+            setSplitRes(emptyRes)
+            setResPrivkey("")
+            var arr = [1, false];
+            setMasterState(arr)
+          }
           // check if claim succeeded and then indicate claimed
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
           if(newKeyInfo.cur_key_use - resCurUse === 1){
@@ -90,7 +126,7 @@ export const Scanner = () => {
             tempState[0] = 3
             setMasterState([...tempState])
             // Wait 2s, then flip go back to stage 1
-            await timeout(2000)
+            await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
             setResPrivkey("")
@@ -98,6 +134,7 @@ export const Scanner = () => {
             setMasterState(arr)
           }
           else if(newKeyInfo.cur_key_use === resCurUse ){
+            // set to a 4th state and then return to 1
             var tempState = [...masterState]
             tempState[0] = 4
             setMasterState([...tempState])
@@ -108,10 +145,6 @@ export const Scanner = () => {
             setResPrivkey("")
             var arr = [1, false];
             setMasterState(arr)
-            // set to a 4th state and then return to 1
-            console.log("claim did not work")
-            console.log(`key use before claim: ${resCurUse}`)
-            console.log(`key use after claim: ${newKeyInfo.cur_key_use}`)
           }
       }
 
@@ -198,7 +231,51 @@ export const Scanner = () => {
           {/* <br></br>
           <span>Current State: </span>
           <span>{masterState[0]}</span>     */}
-          <img src={xLogo} alt="green check" width="50" height="60" className="img_center"></img>
+          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+        </div>
+      </>
+    );
+  }
+  else if(masterState[0] === 5){
+    return (
+      <>
+        <div className="content">
+          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+          <h2>Could Not Be Claimed!</h2>
+          <h3>Ticket has already been scanned</h3>
+          <h4>Attendee may proceed to event and claim POAP</h4>
+          {/* <br></br>
+          <div>Contract Claimed On: </div>
+          <div>{splitRes[4]}</div>
+          <br></br>
+          <div>Private Key Claimed: </div>
+          <div>{splitRes[5]}</div> */}
+          {/* <br></br>
+          <span>Current State: </span>
+          <span>{masterState[0]}</span>     */}
+          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+        </div>
+      </>
+    );
+  }
+  else if(masterState[0] === 6){
+    return (
+      <>
+        <div className="content">
+          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+          <h2>Could Not Be Claimed!</h2>
+          <h3>The attendee's access key has been depleted and deleted</h3>
+          <h4>Attendee may re-enter event</h4>
+          {/* <br></br>
+          <div>Contract Claimed On: </div>
+          <div>{splitRes[4]}</div>
+          <br></br>
+          <div>Private Key Claimed: </div>
+          <div>{splitRes[5]}</div> */}
+          {/* <br></br>
+          <span>Current State: </span>
+          <span>{masterState[0]}</span>     */}
+          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );
