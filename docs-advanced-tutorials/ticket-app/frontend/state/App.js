@@ -28,7 +28,6 @@ function App() {
         customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
         secretKeys: privateKey
       })
-
       setLink(tempLink)
     }
 
@@ -55,14 +54,10 @@ function App() {
     setSplitRes(splitResultTemp)
     setContractId(splitResultTemp[3])
     setprivKey(splitResultTemp[4])
+    console.log("connectNear")
     connectNear(splitResultTemp[4])
-  }, [])
-//'https://wallet.testnet.near.org/linkdrop/v1-4.keypom.testnet/4aJGvd5za9nTWJcZBVAgEyaaU6kymPSyoXhtJLfNNx5XA1aWSXxDAqBnrPDBcm7PT5hCwk8L3nDExBYWKoB7HEix'
+  },[])
 
-  // make hasInternet state var and toggle it everytime in scenario 2
-  // use hasInternet as a flag to call a useEffect to create link
-
-  // put link creation in useEffect  
 
   // rendering stuff
   console.log(curUse)
@@ -116,10 +111,7 @@ function App() {
             {/* if a private key exists, route elements will be valid and then call keyinfo, updating curUse  */}
             <Route path={homepath} element={  <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /> }></Route>
           </Routes>
-        
-        
       </div>
-      
     );
   }
   else if(curUse==0){
