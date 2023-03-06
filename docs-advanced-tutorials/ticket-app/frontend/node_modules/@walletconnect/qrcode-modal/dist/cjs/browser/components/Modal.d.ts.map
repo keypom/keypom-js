@@ -1,0 +1,1 @@
+{"version":3,"file":"Modal.d.ts","sourceRoot":"","sources":["../../../../src/browser/components/Modal.tsx"],"names":[],"mappings":";AAWA,OAAO,EAAE,kBAAkB,EAAE,OAAO,EAAE,MAAM,aAAa,CAAC;AAG1D,UAAU,UAAU;IAClB,IAAI,EAAE,OAAO,CAAC;IACd,GAAG,EAAE,MAAM,CAAC;IACZ,OAAO,EAAE,GAAG,CAAC;IACb,kBAAkB,CAAC,EAAE,kBAAkB,CAAC;CACzC;AAED,iBAAS,KAAK,CAAC,KAAK,EAAE,UAAU,eAkC/B;AAED,eAAe,KAAK,CAAC"}

@@ -1,0 +1,5 @@
+@ledgerhq/logs:build: cache hit, replaying output add91b4fd1ee214f
+@ledgerhq/logs:build: 
+@ledgerhq/logs:build: > @ledgerhq/logs@6.10.1 build /home/runner/work/ledger-live/ledger-live/libs/ledgerjs/packages/logs
+@ledgerhq/logs:build: > tsc && tsc -m ES6 --outDir lib-es
+@ledgerhq/logs:build: 
