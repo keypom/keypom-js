@@ -3,6 +3,7 @@ const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
 const path = require("path");
 const homedir = require("os").homedir();
+var assert = require('assert');
 
 async function createTickDrop(){
     // Initiate connection to the NEAR blockchain.
@@ -96,8 +97,7 @@ async function main(){
 
     // Incorrect Password
     let keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    let curUse = keyInfo.cur_key_use 
-    console.log(`Key use before claiming with wrong password: ${curUse}`)
+    console.log(`Key use before claiming with wrong password: ${keyInfo.cur_key_use}`)
     console.log("Claiming with wrong password...")
     await claim({
         secretKey: myPrivatekey,
@@ -105,12 +105,12 @@ async function main(){
         password: "wrong-password"
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    curUse = keyInfo.cur_key_use 
-    console.log(`Key use after claiming with wrong password and before claiming with correct password: ${curUse}`)
+    assert(keyInfo.cur_key_use == 1, `Key has claimed with an incorrect password. Current Key Use: ${keyInfo.cur_key_use}`)
+    console.log(`Key use after claiming with wrong password and before claiming with correct password: ${keyInfo.cur_key_use}`)
 
     // Correct password
     let password = "event-password"
-    let claimPassword = await hashPassword(password + myPublicKey + curUse.toString())
+    let claimPassword = await hashPassword(password + myPublicKey + keyInfo.cur_key_use.toString())
     console.log("claiming with correct password...")
     await claim({
         secretKey: myPrivatekey,
@@ -118,8 +118,8 @@ async function main(){
         password: claimPassword
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    curUse = keyInfo.cur_key_use 
-    console.log(`Key use after claiming with correct password: ${curUse}`)
+    assert(keyInfo.cur_key_use == 2, `Claim Failed. Current Key Use: ${keyInfo.cur_key_use}`)
+    console.log(`Key use after claiming with correct password: ${keyInfo.cur_key_use}`)
 
     // Second claim, no password needed
     console.log("Second claim with no password")
@@ -130,11 +130,10 @@ async function main(){
     // Getting key info here should fail as key has been depleted and deleted
     try{
         keyInfo = await getKeyInformation({publicKey: myPublicKey})
-        curUse = keyInfo.cur_key_use 
-        console.log(`Key use is: ${curUse}, this should not be happening`)
+        console.log(`Key use is: ${keyInfo.cur_key_use}, this should not be happening`)
     }
     catch(err){
-        console.log("Key has been depleted and deleted")
+        console.log("Second claim successful. Key has been depleted and deleted")
     }
 
     // Depleted key
