@@ -45,10 +45,10 @@ async function simpleDropKeypom(){
 	const {contractId: KEYPOM_CONTRACT} = getEnv()
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keys.keyPairs.length; i++) {
-			let linkdropUrl = formatLinkdropUrl({
-				customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
-				secretKeys: keys.secretKeys[i]
-			  })
+		let linkdropUrl = formatLinkdropUrl({
+			customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+			secretKeys: keys.secretKeys[i]
+		  })
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops
