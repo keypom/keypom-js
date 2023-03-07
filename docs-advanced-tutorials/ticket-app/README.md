@@ -1,53 +1,50 @@
 near-blank-project
 ==================
 
-This app was initialized with [create-near-app]
+This [React] app was initialized with [create-near-app]
 
 
 Quick Start
 ===========
 
-If you haven't installed dependencies during setup:
+To run this project locally:
 
-    npm install
+1. Prerequisites: Make sure you've installed [Node.js] ≥ 12
+2. Install dependencies: `yarn install`
+3. Run the local development server: `yarn dev` (see `package.json` for a
+   full list of `scripts` you can run with `yarn`)
 
+Now you'll have a local development environment backed by the NEAR TestNet!
 
-Build and deploy your contract to TestNet with a temporary dev account:
-
-    npm run deploy
-
-Test your contract:
-
-    npm test
-
-If you have a frontend, run `npm start`. This will run a dev server.
+Go ahead and play with the app and the code. As you make code changes, the app will automatically reload.
 
 
 Exploring The Code
 ==================
 
-1. The smart-contract code lives in the `/contract` folder. See the README there for
-   more info. In blockchain apps the smart contract is the "backend" of your app.
+1. The "backend" code lives in the `/contract` folder. See the README there for
+   more info.
 2. The frontend code lives in the `/frontend` folder. `/frontend/index.html` is a great
-   place to start exploring. Note that it loads in `/frontend/index.js`,
-   this is your entrypoint to learn how the frontend connects to the NEAR blockchain.
-3. Test your contract: `npm test`, this will run the tests in `integration-tests` directory.
+   place to start exploring. Note that it loads in `/frontend/assets/js/index.js`, where you
+   can learn how the frontend connects to the NEAR blockchain.
+3. Tests: there are different kinds of tests for the frontend and the smart
+   contract. See `contract/README` for info about how it's tested. The frontend
+   code gets tested with [jest]. You can run both of these at once with `yarn
+   run test`.
 
 
 Deploy
 ======
 
-Every smart contract in NEAR has its [own associated account][NEAR accounts]. 
-When you run `npm run deploy`, your smart contract gets deployed to the live NEAR TestNet with a temporary dev account.
-When you're ready to make it permanent, here's how:
+Every smart contract in NEAR has its [own associated account][NEAR accounts]. When you run `yarn dev`, your smart contract gets deployed to the live NEAR TestNet with a throwaway account. When you're ready to make it permanent, here's how.
 
 
 Step 0: Install near-cli (optional)
 -------------------------------------
 
-[near-cli] is a command line interface (CLI) for interacting with the NEAR blockchain. It was installed to the local `node_modules` folder when you ran `npm install`, but for best ergonomics you may want to install it globally:
+[near-cli] is a command line interface (CLI) for interacting with the NEAR blockchain. It was installed to the local `node_modules` folder when you ran `yarn install`, but for best ergonomics you may want to install it globally:
 
-    npm install --global near-cli
+    yarn install --global near-cli
 
 Or, if you'd rather use the locally-installed version, you can prefix all `near` commands with `npx`
 
@@ -67,22 +64,26 @@ Each account on NEAR can have at most one contract deployed to it. If you've alr
 
       near create-account near-blank-project.YOUR-NAME.testnet --masterAccount YOUR-NAME.testnet
 
-Step 2: deploy the contract
----------------------------
 
-Use the CLI to deploy the contract to TestNet with your account ID.
-Replace `PATH_TO_WASM_FILE` with the `wasm` that was generated in `contract` build directory.
-
-    near deploy --accountId near-blank-project.YOUR-NAME.testnet --wasmFile PATH_TO_WASM_FILE
-
-
-Step 3: set contract name in your frontend code
------------------------------------------------
+Step 2: set contract name in code
+---------------------------------
 
 Modify the line in `src/config.js` that sets the account name of the contract. Set it to the account id you used above.
 
     const CONTRACT_NAME = process.env.CONTRACT_NAME || 'near-blank-project.YOUR-NAME.testnet'
 
+
+Step 3: deploy!
+---------------
+
+One command:
+
+    yarn deploy
+
+As you can see in `package.json`, this does two things:
+
+1. builds & deploys smart contract to NEAR TestNet
+2. builds & deploys frontend code to GitHub using [gh-pages]. This will only work if the project already has a repository set up on GitHub. Feel free to modify the `deploy` script in `package.json` to deploy elsewhere.
 
 
 Troubleshooting
@@ -91,10 +92,11 @@ Troubleshooting
 On Windows, if you're seeing an error containing `EPERM` it may be related to spaces in your path. Please see [this issue](https://github.com/zkat/npx/issues/209) for more details.
 
 
+  [React]: https://reactjs.org/
   [create-near-app]: https://github.com/near/create-near-app
   [Node.js]: https://nodejs.org/en/download/package-manager/
   [jest]: https://jestjs.io/
-  [NEAR accounts]: https://docs.near.org/concepts/basics/account
+  [NEAR accounts]: https://docs.near.org/docs/concepts/account
   [NEAR Wallet]: https://wallet.testnet.near.org/
   [near-cli]: https://github.com/near/near-cli
   [gh-pages]: https://github.com/tschaub/gh-pages

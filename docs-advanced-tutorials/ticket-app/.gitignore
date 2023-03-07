@@ -10,7 +10,7 @@ node_modules
 /dist
 
 # keys
-/templates/react/neardev
+/neardev
 
 # testing
 /coverage

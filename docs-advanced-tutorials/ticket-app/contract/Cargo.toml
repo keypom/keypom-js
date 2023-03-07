@@ -1,11 +1,11 @@
 [package]
-name = "hello_near"
+name = "greeter"
 version = "1.0.0"
 authors = ["Near Inc <hello@near.org>"]
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 near-sdk = "4.0.0"
