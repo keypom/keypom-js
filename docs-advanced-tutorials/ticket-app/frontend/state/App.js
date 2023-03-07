@@ -58,7 +58,6 @@ function App() {
   const [curUse, setCurUse] = useState(0);
   const [link, setLink] = useState(tempLink)
 
-
   // rendering stuff
   if(curUse == 1){
     // use 1, should show qr code 
@@ -98,7 +97,7 @@ function App() {
       </div>
     );
   }
-  else if(curUse==0 && splitRes[3]==''){
+  else if(curUse==0 && splitRes[3]==''|| curUse==0 && splitRes[3]==undefined){
     // Event Landing Page
     const homepath = `${contractId}/${privKey}`
     return (

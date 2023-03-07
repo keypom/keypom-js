@@ -72,12 +72,12 @@ export const Scanner = () => {
       async function scannerClaim(){
           try{
             // Get current key use
-            let publicKey = await getPubFromSecret(resPrivKey)
-            let resKeyInfo = await getKeyInformation({publicKey: publicKey})
+            var publicKey = await getPubFromSecret(resPrivKey)
+            var resKeyInfo = await getKeyInformation({publicKey: publicKey})
             if(resKeyInfo == null){
               throw new Error(`Key info could not be determined`)
             }
-            let resCurUse = resKeyInfo.cur_key_use 
+            var resCurUse = resKeyInfo.cur_key_use 
           }
           catch(err){
             // Key has been deleted OR key was never part of drop
