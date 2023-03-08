@@ -1,7 +1,7 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
-import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores";
+import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
@@ -22,7 +22,8 @@ export class KeypomWallet implements KeypomWalletProtocol {
   
     public constructor({
       networkId = "mainnet",
-      desiredUrl = "/keypom-trial/"
+      desiredUrl = "/keypom-trial/",
+      keyStore = new BrowserLocalStorageKeyStore(),
     }) {
         console.log('Keypom constructor called.');
         // Check that the desired URL starts and ends with `/`
@@ -31,7 +32,6 @@ export class KeypomWallet implements KeypomWalletProtocol {
         }
 
         this.networkId = networkId
-        const keyStore = new BrowserLocalStorageKeyStore()
         
         this.near = new Near({
             ...networks[networkId],
@@ -241,7 +241,13 @@ export class KeypomWallet implements KeypomWalletProtocol {
 
         console.log("auto signing in!");
         // Auto sign in (mess with local storage)
-        autoSignIn(this.accountId, this.secretKey);
+        try {
+            console.log("i am about to auto sign in")
+            autoSignIn(this.accountId, this.secretKey);
+            console.log("auto sign in success!");
+        } catch(e) {
+            console.log('auto sign in error: ', e);
+        }
  
         const accountObj = new Account(this.connection, this.accountId!);
         return [accountObj];
@@ -271,14 +277,27 @@ export class KeypomWallet implements KeypomWalletProtocol {
     }
   
     public async signAndSendTransactions(params) {
-        console.log('sign and send txns params: ', params)
+        console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;
+        console.log('transactions: ', transactions)
         
         const args = genArgs({ transactions })
         console.log('args: ', args)
 
         const account = await this.near.account(this.accountId!);
+
+        let incomingGas;
+        try {
+            incomingGas = (args as any).transactions[0].actions[0].params[`|kP|gas`].split(`|kS|`)[0].toString();
+        } catch(e) {
+            console.log('e: ', e)
+            incomingGas = `200000000000000`;
+        }
+
+        console.log('incomingGas: ', incomingGas)
+        const gasToAttach = new BN('15000000000000').add(new BN(incomingGas)).toString();
+        console.log('gasToAttach: ', gasToAttach)
 
         const transformedTransactions = await this.transformTransactions([{
             receiverId: account.accountId,
@@ -287,10 +306,11 @@ export class KeypomWallet implements KeypomWalletProtocol {
                 params: {
                     methodName: 'execute',
                     args,
-                    gas: '100000000000000',
+                    gas: gasToAttach,
                 }
             }]
         }])
+        console.log("debugging")
         console.log('transformedTransactions: ', transformedTransactions)
 
         const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));

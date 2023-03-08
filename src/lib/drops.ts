@@ -243,6 +243,12 @@ export const createDrop = async ({
 			auto_withdraw: config?.usage?.autoWithdraw || true,
 			permissions: config?.usage?.permissions,
 			refund_deposit: config?.usage?.refundDeposit,
+			account_creation_fields: {
+				account_id_field: config?.usage?.accountCreationFields?.accountIdField,
+				drop_id_field: config?.usage?.accountCreationFields?.dropIdField,
+				key_id_field: config?.usage?.accountCreationFields?.keyIdField,
+				funder_id_field: config?.usage?.accountCreationFields?.funderIdField
+			}
 		},
 		sale: config?.sale ? {
 			max_num_keys: config?.sale?.maxNumKeys,

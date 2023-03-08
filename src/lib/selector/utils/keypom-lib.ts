@@ -92,15 +92,26 @@ export const claimTrialAccount = async (keypomContractId, keyPair, nodeUrl) => {
 }
 
 export const autoSignIn = (accountId, secretKey) => {
+	console.log("1");
 	localStorage.setItem(`near-api-js:keystore:${accountId}:testnet`, `ed25519:${secretKey}`)
 	
 	// Contract
+	console.log("2");
 	localStorage.setItem('near-wallet-selector:contract', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
+	console.log("3");
 	localStorage.setItem('near-wallet-selector:contract:pending', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
 
+	console.log("4");
 	// Selected Wallet
 	localStorage.setItem('near-wallet-selector:selectedWalletId', "\"keypom\"")
+	console.log("5");
 	localStorage.setItem('near-wallet-selector:selectedWalletId:pending', "\"keypom\"")
+	console.log("6");
+	
+	// Print the entire local storage
+	for (var i = 0; i < localStorage.length; i++){
+		console.log(localStorage.key(i) + "=[" + localStorage.getItem(localStorage.key(i)!) + "]");
+	}
 	
 	// let recentWallets = localStorage.get('near-wallet-selector:recentlySignedInWallets');
 
@@ -137,6 +148,10 @@ export const createAction = (action) => {
 	  }
 	  case "FunctionCall": {
 		const { methodName, args, gas, deposit } = action.params;
+		console.log('deposit: ', deposit)
+		console.log('gas: ', gas)
+		console.log('args: ', args)
+		console.log('methodName: ', methodName)
   
 		return nearTransactions.functionCall(
 		  methodName,
