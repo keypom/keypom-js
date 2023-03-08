@@ -1,6 +1,7 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { Account } from "near-api-js";
+import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { KeypomWalletProtocol } from "./types";
 export declare class KeypomWallet implements KeypomWalletProtocol {
     readonly networkId: string;
@@ -11,9 +12,10 @@ export declare class KeypomWallet implements KeypomWalletProtocol {
     private secretKey?;
     private publicKey?;
     private keyPair?;
-    constructor({ networkId, desiredUrl }: {
+    constructor({ networkId, desiredUrl, keyStore, }: {
         networkId?: string | undefined;
         desiredUrl?: string | undefined;
+        keyStore?: BrowserLocalStorageKeyStore | undefined;
     });
     transformTransactions: (txns: any) => Promise<any[]>;
     parseUrl: () => {

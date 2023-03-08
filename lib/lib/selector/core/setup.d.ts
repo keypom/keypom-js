@@ -12,5 +12,6 @@ interface KeypomSetupParams {
     iconUrl?: string;
     deprecated?: boolean;
     desiredUrl?: string;
+    keyStore?: any;
 }
-export declare function setupKeypom({ iconUrl, deprecated, desiredUrl, networkId }: KeypomSetupParams): WalletModuleFactory<KeypomWalletType>;
+export declare function setupKeypom({ iconUrl, deprecated, desiredUrl, networkId, keyStore }: KeypomSetupParams): WalletModuleFactory<KeypomWalletType>;
