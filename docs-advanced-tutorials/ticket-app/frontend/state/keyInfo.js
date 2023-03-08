@@ -40,7 +40,6 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
 
         async function getUsesRemaining(pubKey){
             const resKeyInfo = await getKeyInformation({publicKey: pubKey})
-            const resDropInfo = await getDropInformation({secretKey: privKey})
             setCurUse(resKeyInfo.cur_key_use)
 
         }
