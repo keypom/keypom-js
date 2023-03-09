@@ -1,11 +1,8 @@
 import { NetworkId, WalletModuleFactory } from "@near-wallet-selector/core";
 
-import icon from "./icon";
 import { initKeypomWallet } from "./init";
 import { KeypomWalletType } from "./types";
 import { KeypomWallet } from "./wallet";
-
-export { icon };
 
 declare global {
 	interface Window {
@@ -19,20 +16,23 @@ interface KeypomSetupParams {
 	deprecated?: boolean;
 	desiredUrl?: string;
 	keyStore?: any;
+	delimiter?: string;
 }
 
 export function setupKeypom({
-	iconUrl = icon,
+	iconUrl = "",
 	deprecated = false,
 	desiredUrl,
 	networkId,
-	keyStore
+	keyStore,
+	delimiter
 }: KeypomSetupParams): WalletModuleFactory<KeypomWalletType> {
 	return async () => {
 		const keypomWallet = new KeypomWallet({
 			networkId,
 			desiredUrl,
-			keyStore
+			keyStore,
+			delimiter
 		})
 
 		let signInSuccess = true;

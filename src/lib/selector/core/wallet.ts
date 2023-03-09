@@ -1,4 +1,5 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { Logger } from "@near-wallet-selector/core/lib/services";
 import BN from "bn.js";
 import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
@@ -13,23 +14,21 @@ export class KeypomWallet implements KeypomWalletProtocol {
     private readonly near: Near;
     private readonly connection: Connection;
     private readonly desiredUrl: string;
+    private readonly delimiter: string;
 
     private accountId?: string;
     private secretKey?: string;
     
     private publicKey?: PublicKey;
     private keyPair?: KeyPair;
-  
+    
     public constructor({
       networkId = "mainnet",
-      desiredUrl = "/keypom-trial/",
-      keyStore = new BrowserLocalStorageKeyStore(),
+      desiredUrl = "/keypom-trial#",
+      delimiter = "/",
+      keyStore = new BrowserLocalStorageKeyStore()
     }) {
         console.log('Keypom constructor called.');
-        // Check that the desired URL starts and ends with `/`
-        if (!desiredUrl.startsWith("/") && !desiredUrl.endsWith("/")) {
-            throw new Error("desiredUrl must start and end with `/`");
-        }
 
         this.networkId = networkId
         
@@ -39,6 +38,7 @@ export class KeypomWallet implements KeypomWalletProtocol {
         });
         this.connection = this.near.connection
         this.desiredUrl = desiredUrl
+        this.delimiter = delimiter
         console.log("finished constructor");
     }
 
@@ -80,12 +80,12 @@ export class KeypomWallet implements KeypomWalletProtocol {
         /// TODO validation
         const split = window.location.href.split(this.desiredUrl);
     
-        if (split.length < 2) {
+        if (split.length != 2) {
             return;
         }
         
         const trialInfo = split[1];
-        const 	[trialAccountId, trialSecretKey] = trialInfo.split('#')
+        const 	[trialAccountId, trialSecretKey] = trialInfo.split(this.delimiter)
         console.log('trialAccountId: ', trialAccountId)
         console.log('trialSecretKey: ', trialSecretKey)
     
