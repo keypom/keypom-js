@@ -35,10 +35,10 @@ async function connectNear(privateKey){
 }
 
 async function setup(){
-  //setting contract id, priv key and link state variables.
-  const splitResultTemp = window.location.href.split("/");
-  tempContractId = splitResultTemp[3]
-  tempPrivKey = splitResultTemp[4]
+  // Setting contract id, priv key and link state variables.
+  splitResTemp = window.location.href.split("/");
+  tempContractId = splitResTemp[3]
+  tempPrivKey = splitResTemp[4]
   tempLink = await connectNear(tempPrivKey)
   console.log(tempLink)
 }
@@ -46,6 +46,7 @@ async function setup(){
 let tempContractId = ""
 let tempPrivKey = ""
 let tempLink = ""
+let splitResTemp = ""
 setup()
 
 
@@ -53,14 +54,15 @@ function App() {
   //state variables
   const [contractId, setContractId] = useState(tempContractId)
   const [privKey, setprivKey] = useState(tempPrivKey)
-  const [splitRes, setSplitRes] = useState([])
+  const [splitRes, setSplitRes] = useState(splitResTemp)
   const [pubKey, setPubkey] = useState("");
   const [curUse, setCurUse] = useState(0);
   const [link, setLink] = useState(tempLink)
+  console.log(splitRes)
 
   // rendering stuff
   if(curUse == 1){
-    // use 1, should show qr code 
+    // QR code
     console.log("scenario 1, QR code")
     const homepath = `${contractId}/${privKey}`
     return (
@@ -81,7 +83,7 @@ function App() {
     );
   }
   else if(curUse==2){
-    //use 2 direct to claim
+    // Direct user to claim POAP
     const homepath = `${contractId}/${privKey}`
     return (
       <div className="content">
@@ -100,13 +102,13 @@ function App() {
   else if(curUse==0 && splitRes[3]==''|| curUse==0 && splitRes[3]==undefined){
     // Event Landing Page
     const homepath = `${contractId}/${privKey}`
+    console.log(splitRes[3])
     return (
       <div className="content">
         <h1>Welcome to the Keypom Party!</h1>
           <div>Drinks are on the house tonight!</div>
           <Routes>
             <Route path="/scanner" element={ <Scanner/> } />
-            {/* if a private key exists, route elements will be valid and then call keyinfo, updating curUse  */}
             <Route path={homepath} element={  <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /> }></Route>
           </Routes>
       </div>

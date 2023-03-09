@@ -31,7 +31,6 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
     }, [])
 
     // These functions will run anytime the component is re-rendered 
-    // Need to find a way to get component to re-render periodically
     useEffect(() => {
         async function getPubkey(privKey){
             const publicKey = await getPubFromSecret(privKey)
@@ -50,8 +49,6 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
     if(curUse==1){
         return (
             <div>
-              {/* <div>Contract ID: {contractId}</div> */}
-              {/* <div>Private Key: {privKey}</div> */}
               <div>Public Key: {pubKey}</div>
               <div>Current Key Use: {curUse}</div>
             </div>

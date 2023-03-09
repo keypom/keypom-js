@@ -81,11 +81,11 @@ export const Scanner = () => {
           }
           catch(err){
             // Key has been deleted OR key was never part of drop
-            // set to a 5th state and then return to 1
+            // Set to a 6th state and then return to 1
             var tempState = [...masterState]
             tempState[0] = 6
             setMasterState([...tempState])
-            // Wait 2s, then flip go back to stage 1
+            // Wait 3s, then flip go back to stage 1
             await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
@@ -95,7 +95,7 @@ export const Scanner = () => {
             return
           }
 
-          //only claim if first key use, do not allow scanner to claim multiple times
+          // Only claim if first key use, do not allow scanner to claim multiple times
           if(resCurUse == 1){
             // Create password using base + pubkey + key use as string
             let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
@@ -107,11 +107,11 @@ export const Scanner = () => {
             })
           }
           else{
-            // set to a 5th state and then return to 1
+            // Set to a 5th state and then return to 1
             var tempState = [...masterState]
             tempState[0] = 5
             setMasterState([...tempState])
-            // Wait 2s, then flip go back to stage 1
+            // Wait 3s, then flip go back to stage 1
             await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
@@ -119,13 +119,13 @@ export const Scanner = () => {
             var arr = [1, false];
             setMasterState(arr)
           }
-          // check if claim succeeded and then indicate claimed
+          // Check if claim succeeded and then indicate claimed
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
           if(newKeyInfo.cur_key_use - resCurUse === 1){
             var tempState = [...masterState]
             tempState[0] = 3
             setMasterState([...tempState])
-            // Wait 2s, then flip go back to stage 1
+            // Wait 3s, then flip go back to stage 1
             await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
@@ -138,8 +138,8 @@ export const Scanner = () => {
             var tempState = [...masterState]
             tempState[0] = 4
             setMasterState([...tempState])
-            // Wait 2s, then flip go back to stage 1
-            await timeout(2000)
+            // Wait 3s, then flip go back to stage 1
+            await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
             setResPrivkey("")
@@ -148,13 +148,13 @@ export const Scanner = () => {
           }
       }
 
-      // only claim if there is data present
+      // Only claim if there is data present
       if(masterState[1] === true){
         scannerClaim()
       }
 
   }, [masterState[1]])
-  // Not scanned, just received pw
+  // Scanner open, waiting to read data
   if(masterState[0] === 1){
     return (
       <>
@@ -162,9 +162,6 @@ export const Scanner = () => {
         <div style={{border:"0.5rem solid black"}}><video ref={ref} /></div>
           <h2>Scan a linkdrop QR code to claim</h2>
           <h4>To re-enter password, refresh the page</h4>
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
         </div>
       </>
     );
@@ -177,17 +174,6 @@ export const Scanner = () => {
           <div style={{border:"0.5rem solid yellow"}}><video ref={ref} /></div>
           <h2>Claiming</h2>
           <h4>Note this should take a few seconds</h4>
-          {/* <br></br>
-          <div>Contract to Claim On: </div>
-          <div>{splitRes[4]}</div>
-          <br></br>
-          <div>Private Key to Claim: </div>
-          <div>{splitRes[5]}</div> */}
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
-
-          {/* <button onClick={()=>setClick(true)} className="button"><span>Click here to claim</span></button> */}
         </div>
       </>
     );
@@ -199,21 +185,12 @@ export const Scanner = () => {
         <div className="content">
           <div style={{border:"0.5rem solid green"}}><video ref={ref} /></div>
           <h2>Claimed!</h2>
-          {/* <br></br>
-          <div>Contract Claimed On: </div>
-          <div>{splitRes[4]}</div>
-          <br></br>
-          <div>Private Key Claimed: </div>
-          <div>{splitRes[5]}</div> */}
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
           <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );
   }
-  // failed to claim
+  // Failed to claim
   else if(masterState[0] === 4){
     return (
       <>
@@ -222,42 +199,25 @@ export const Scanner = () => {
           <h2>Could Not Be Claimed!</h2>
           <h3>Ensure Password is Correct</h3>
           <h4>To re-enter password, refresh the page</h4>
-          {/* <br></br>
-          <div>Contract Claimed On: </div>
-          <div>{splitRes[4]}</div>
-          <br></br>
-          <div>Private Key Claimed: </div>
-          <div>{splitRes[5]}</div> */}
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
           <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );
   }
+  // Ticket was already scanned
   else if(masterState[0] === 5){
     return (
       <>
         <div className="content">
-          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
-          <h2>Could Not Be Claimed!</h2>
-          <h3>Ticket has already been scanned</h3>
-          <h4>Attendee may proceed to event and claim POAP</h4>
-          {/* <br></br>
-          <div>Contract Claimed On: </div>
-          <div>{splitRes[4]}</div>
-          <br></br>
-          <div>Private Key Claimed: </div>
-          <div>{splitRes[5]}</div> */}
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
-          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+          <div style={{border:"0.5rem solid blue"}}><video ref={ref} /></div>
+          <h2>Ticket has already been scanned</h2>
+          <h3>Attendee may proceed to event and claim POAP</h3>
+          <img src={logo} alt="red x" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );
   }
+  // Ticket's key has been depleted and deleted
   else if(masterState[0] === 6){
     return (
       <>
@@ -266,15 +226,6 @@ export const Scanner = () => {
           <h2>Could Not Be Claimed!</h2>
           <h3>The attendee's access key has been depleted and deleted</h3>
           <h4>Attendee may re-enter event</h4>
-          {/* <br></br>
-          <div>Contract Claimed On: </div>
-          <div>{splitRes[4]}</div>
-          <br></br>
-          <div>Private Key Claimed: </div>
-          <div>{splitRes[5]}</div> */}
-          {/* <br></br>
-          <span>Current State: </span>
-          <span>{masterState[0]}</span>     */}
           <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
         </div>
       </>
