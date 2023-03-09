@@ -15,7 +15,6 @@ export const Scanner = () => {
   const [result, setResult] = useState("");
   const [splitRes, setSplitRes] = useState([]);
   const [resPrivKey, setResPrivkey] = useState("")
-  // const [click, setClick] = useState(false);
   const [password, setPassword] = useState("NULL")
 
   var arr = [1, false];
