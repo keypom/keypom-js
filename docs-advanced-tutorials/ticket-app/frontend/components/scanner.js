@@ -158,7 +158,7 @@ export const Scanner = () => {
     return (
       <>
         <div className="content">
-        <div style={{border:"0.5rem solid black"}}><video ref={ref} /></div>
+        <div style={{border:"0.5rem solid white"}}><video ref={ref} /></div>
           <h2>Scan a linkdrop QR code to claim</h2>
           <h4>To re-enter password, refresh the page</h4>
         </div>
@@ -221,11 +221,11 @@ export const Scanner = () => {
     return (
       <>
         <div className="content">
-          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+          <div style={{border:"0.5rem solid blue"}}><video ref={ref} /></div>
           <h2>Could Not Be Claimed!</h2>
           <h3>The attendee's access key has been depleted and deleted</h3>
           <h4>Attendee may re-enter event</h4>
-          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+          <img src={logo} alt="red x" width="50" height="60" className="img_center"></img>
         </div>
       </>
     );
