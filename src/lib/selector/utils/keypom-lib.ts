@@ -91,15 +91,20 @@ export const claimTrialAccount = async (keypomContractId, keyPair, nodeUrl) => {
 	return newAccountId;
 }
 
-export const autoSignIn = (accountId, secretKey) => {
+export const autoSignIn = (accountId, secretKey, contractId, methodNames) => {
+	contractId = contractId || 'testnet';
+	console.log('contractId in auto sign in: ', contractId)
+	methodNames = methodNames || [];
+	console.log('methodNames in auto sign in: ', methodNames)
+
 	console.log("1");
 	localStorage.setItem(`near-api-js:keystore:${accountId}:testnet`, `ed25519:${secretKey}`)
 	
 	// Contract
 	console.log("2");
-	localStorage.setItem('near-wallet-selector:contract', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
+	localStorage.setItem('near-wallet-selector:contract', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
 	console.log("3");
-	localStorage.setItem('near-wallet-selector:contract:pending', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
+	localStorage.setItem('near-wallet-selector:contract:pending', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
 
 	console.log("4");
 	// Selected Wallet

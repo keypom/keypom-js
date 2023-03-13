@@ -44,9 +44,9 @@ export const initKeypomWallet: SelectorInit = async (config) => {
 			);
 		  },
 		
-		async signIn() {
+		async signIn(data) {
 			logger.log("Keypom:signIn");
-			return await keypomWallet.signIn();
+			return await keypomWallet.signIn({contractId: data.contractId, methodNames: data.methodNames});
 		},
 
 		async signOut() {

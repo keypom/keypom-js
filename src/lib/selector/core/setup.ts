@@ -17,6 +17,8 @@ interface KeypomSetupParams {
 	desiredUrl?: string;
 	keyStore?: any;
 	delimiter?: string;
+	contractId?: string;
+	methodNames?: string[];
 }
 
 export function setupKeypom({
@@ -25,7 +27,9 @@ export function setupKeypom({
 	desiredUrl,
 	networkId,
 	keyStore,
-	delimiter
+	delimiter,
+	contractId,
+	methodNames
 }: KeypomSetupParams): WalletModuleFactory<KeypomWalletType> {
 	return async () => {
 		const keypomWallet = new KeypomWallet({
@@ -37,7 +41,7 @@ export function setupKeypom({
 
 		let signInSuccess = true;
 		try {
-			await keypomWallet.signIn();
+			await keypomWallet.signIn({contractId, methodNames});
 		} catch (e) {
 			signInSuccess = false;
 		}

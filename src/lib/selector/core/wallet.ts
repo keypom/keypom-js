@@ -168,8 +168,10 @@ export class KeypomWallet implements KeypomWalletProtocol {
       // TODO:  maybe?
     }
   
-    public async signIn(): Promise<Account[]> {
+    public async signIn({ contractId, methodNames }): Promise<Account[]> {
         console.log("IM SIGNING IN")
+        console.log('contractId: ', contractId)
+        console.log('methodNames: ', methodNames)
         // Keep track of whether or not the info coming from the URL is valid (account ID & secret key that exist)
         let isValidTrialInfo = false;
         const parsedData = this.parseUrl();
@@ -243,7 +245,7 @@ export class KeypomWallet implements KeypomWalletProtocol {
         // Auto sign in (mess with local storage)
         try {
             console.log("i am about to auto sign in")
-            autoSignIn(this.accountId, this.secretKey);
+            autoSignIn(this.accountId, this.secretKey, contractId, methodNames);
             console.log("auto sign in success!");
         } catch(e) {
             console.log('auto sign in error: ', e);
@@ -296,7 +298,7 @@ export class KeypomWallet implements KeypomWalletProtocol {
         }
 
         console.log('incomingGas: ', incomingGas)
-        const gasToAttach = new BN('15000000000000').add(new BN(incomingGas)).toString();
+        const gasToAttach = new BN('35000000000000').add(new BN(incomingGas)).toString();
         console.log('gasToAttach: ', gasToAttach)
 
         const transformedTransactions = await this.transformTransactions([{
