@@ -12,14 +12,27 @@ const { keyStores, connect } = nearAPI;
 
 
 export const Scanner = () => {
+  // Stage enum
+  const Stage = {
+    preClaim: "Pre-claim",
+    claiming: "Claiming",
+    successClaim: "Success",
+    failClaim: "Fail"
+  }
+
+  // Data enum
+  const Data = {
+    empty: "Empty",
+    captured: "Captured",
+  }
+
+  // State Variables
   const [result, setResult] = useState("");
   const [splitRes, setSplitRes] = useState([]);
   const [resPrivKey, setResPrivkey] = useState("")
   const [password, setPassword] = useState("NULL")
+  const [masterStatus, setMasterStatus] = useState({stage: Stage.preClaim, data: Data.empty})
 
-  var arr = [1, false];
-  const [masterState, setMasterState] = useState(arr)
-  // [stage, data bool]
 
   // Scanner and getting results of scan
   const { ref } = useZxing({
@@ -29,10 +42,11 @@ export const Scanner = () => {
       setResPrivkey(result.getText().split("/")[1])
 
       //indicate new data
-      var tempState = [...masterState]
-      tempState[1] = true
-      tempState[0] = 2
-      setMasterState([...tempState])
+      let tempMaster = {
+        stage: Stage.claiming, 
+        data: Data.captured
+      }
+      setMasterStatus(tempMaster)
     },
   });
 
@@ -40,7 +54,7 @@ export const Scanner = () => {
   // connect to NEAR, initKeypom, and get password
   useEffect(() => {
       let PASSWORD = "NULL"
-      PASSWORD = prompt("enter base password for drop")
+      PASSWORD = prompt("Enter base password for drop")
       setPassword(PASSWORD)
   }, [])
 
@@ -81,16 +95,22 @@ export const Scanner = () => {
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
           if(newKeyInfo.cur_key_use - resCurUse === 1){
             // Successful Claim
-            var tempState = [...masterState]
-            tempState[0] = 3
-            setMasterState([...tempState])
+            let tempMaster1 = {
+              stage: Stage.successClaim, 
+              data: Data.captured
+            }
+            setMasterStatus(tempMaster1)
+
             // Wait 3s, then flip go back to stage 1
             await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
             setResPrivkey("")
-            var arr = [1, false];
-            setMasterState(arr)
+            let tempMaster2 = {
+              stage: Stage.preClaim, 
+              data: Data.empty
+            }
+            setMasterStatus(tempMaster2)
           }
           else if(newKeyInfo.cur_key_use === resCurUse ){
             // Claim Failed
@@ -100,27 +120,33 @@ export const Scanner = () => {
         catch(err){
           // Claim Failed
           console.log(`Claim Failed: ${err}`)
-          var tempState = [...masterState]
-          tempState[0] = 4
-          setMasterState([...tempState])
+          let tempMaster1 = {
+            stage: Stage.failClaim, 
+            data: Data.captured
+          }
+          setMasterStatus(tempMaster1)
+
           // Wait 3s, then flip go back to stage 1
           await timeout(3000)
           var emptyRes = new Array(splitRes.length)
           setSplitRes(emptyRes)
           setResPrivkey("")
-          var arr = [1, false];
-          setMasterState(arr)
+          let tempMaster2 = {
+            stage: Stage.preClaim, 
+            data: Data.empty
+          }
+          setMasterStatus(tempMaster2)
         }
       }
       // Only claim if there is data present
-      if(masterState[1] === true){
+      if(masterStatus.data === Data.captured){
         scannerClaim()
       }
 
-  }, [masterState[1]])
+  }, [masterStatus.data])
 
   // Scanner open, waiting to read data
-  if(masterState[0] === 1){
+  if(masterStatus.stage === Stage.preClaim){
     return (
       <>
         <div className="content">
@@ -132,7 +158,7 @@ export const Scanner = () => {
     );
   }
   // Claiming, waiting to finish claim
-  else if(masterState[0] === 2){
+  else if(masterStatus.stage === Stage.claiming){
     return (
       <>
         <div className="content">
@@ -144,7 +170,7 @@ export const Scanner = () => {
     );
   }
   // claimed
-  else if(masterState[0] === 3){
+  else if(masterStatus.stage === Stage.successClaim){
     return (
       <>
         <div className="content">
@@ -156,7 +182,7 @@ export const Scanner = () => {
     );
   }
   // Failed to claim
-  else if(masterState[0] === 4){
+  else if(masterStatus.stage === Stage.failClaim){
     return (
       <>
         <div className="content">
