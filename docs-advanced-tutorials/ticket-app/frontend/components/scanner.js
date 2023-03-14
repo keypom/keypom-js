@@ -33,7 +33,6 @@ export const Scanner = () => {
   const [password, setPassword] = useState("NULL")
   const [masterStatus, setMasterStatus] = useState({stage: Stage.preClaim, data: Data.empty})
 
-
   // Scanner and getting results of scan
   const { ref } = useZxing({
     onResult(result) {
@@ -145,54 +144,58 @@ export const Scanner = () => {
 
   }, [masterStatus.data])
 
-  // Scanner open, waiting to read data
-  if(masterStatus.stage === Stage.preClaim){
-    return (
-      <>
-        <div className="content">
-        <div style={{border:"0.5rem solid white"}}><video ref={ref} /></div>
-          <h2>Scan a linkdrop QR code to claim</h2>
-          <h4>To re-enter password, refresh the page</h4>
-        </div>
-      </>
-    );
-  }
-  // Claiming, waiting to finish claim
-  else if(masterStatus.stage === Stage.claiming){
-    return (
-      <>
-        <div className="content">
-          <div style={{border:"0.5rem solid yellow"}}><video ref={ref} /></div>
-          <h2>Claiming</h2>
-          <h4>Note this should take a few seconds</h4>
-        </div>
-      </>
-    );
-  }
-  // claimed
-  else if(masterStatus.stage === Stage.successClaim){
-    return (
-      <>
-        <div className="content">
-          <div style={{border:"0.5rem solid green"}}><video ref={ref} /></div>
-          <h2>Claimed!</h2>
-          <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
-        </div>
-      </>
-    );
-  }
-  // Failed to claim
-  else if(masterStatus.stage === Stage.failClaim){
-    return (
-      <>
-        <div className="content">
-          <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
-          <h2>Could Not Be Claimed!</h2>
-          <h3>Ensure Password is Correct</h3>
-          <h4>To re-enter password, refresh the page</h4>
-          <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
-        </div>
-      </>
-    );
-  }
+  switch (masterStatus.stage) {
+    case Stage.preClaim:
+      return (
+        <>
+          <div className="content">
+          <div style={{border:"0.5rem solid white"}}><video ref={ref} /></div>
+            <h2>Scan a linkdrop QR code to claim</h2>
+            <h4>To re-enter password, refresh the page</h4>
+          </div>
+        </>
+      );
+    case Stage.claiming:
+      return (
+        <>
+          <div className="content">
+            <div style={{border:"0.5rem solid yellow"}}><video ref={ref} /></div>
+            <h2>Claiming</h2>
+            <h4>Note this should take a few seconds</h4>
+          </div>
+        </>
+      );
+    case Stage.successClaim:
+      return (
+        <>
+          <div className="content">
+            <div style={{border:"0.5rem solid green"}}><video ref={ref} /></div>
+            <h2>Claimed!</h2>
+            <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
+          </div>
+        </>
+      );
+    case Stage.failClaim:
+      return (
+        <>
+          <div className="content">
+            <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+            <h2>Could Not Be Claimed!</h2>
+            <h3>Ensure Password is Correct</h3>
+            <h4>To re-enter password, refresh the page</h4>
+            <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+          </div>
+        </>
+      );
+    default:
+      let errorMsg = `Error: masterState.stage is ${masterStatus.stage}`
+      return (
+        <>
+          <div className="content">
+            <h2>{ errorMsg }</h2>
+            <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
+          </div>
+        </>
+      );
+    }
 };
