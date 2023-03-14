@@ -22,6 +22,7 @@ async function connectNear(privateKey, contractId){
      helperUrl: `https://helper.${NETWORK_ID}.near.org`,
      explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
   };
+
   const nearConnection = await connect(connectionConfig);
   await initKeypom({
       near: nearConnection,
@@ -38,7 +39,6 @@ async function setup(){
   tempContractId = splitResTemp[3]
   tempPrivKey = splitResTemp[4]
   tempQrText = await connectNear(tempPrivKey, tempContractId)
-  console.log(tempQrText)
 }
 
 let tempContractId = ""
@@ -56,17 +56,17 @@ function App() {
   const [pubKey, setPubkey] = useState("");
   const [curUse, setCurUse] = useState(0);
   const [qrText, setQrText] = useState(tempQrText)
-  console.log(splitRes)
 
   // rendering stuff
   if(curUse == 1){
     // QR code
     console.log("scenario 1, QR code")
     const homepath = `${contractId}/${privKey}`
+    const scannerpath = `${contractId}/scanner`
     return (
       <div className="content">
           <Routes>
-            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={scannerpath} element={ <Scanner/> } />
             <Route path={homepath} element={
             <>
               <h1>🎟️This is your ticket🔑</h1>
@@ -83,6 +83,7 @@ function App() {
   else if(curUse==2){
     // Direct user to claim POAP
     const homepath = `${contractId}/${privKey}`
+    const scannerpath = `${contractId}/scanner`
     let link = formatLinkdropUrl({
       customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
       secretKeys: privKey
@@ -90,7 +91,7 @@ function App() {
     return (
       <div className="content">
           <Routes>
-            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={scannerpath} element={ <Scanner/> } />
             <Route path={homepath} element={
             <>
               <h1>You're all set! Enjoy the event</h1>
@@ -104,13 +105,14 @@ function App() {
   else if(curUse==0 && splitRes[3]==''|| curUse==0 && splitRes[3]==undefined){
     // Event Landing Page
     const homepath = `${contractId}/${privKey}`
+    const scannerpath = `${contractId}/scanner`
     console.log(splitRes[3])
     return (
       <div className="content">
         <h1>Welcome to the Keypom Party!</h1>
           <div>Drinks are on the house tonight!</div>
           <Routes>
-            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={scannerpath} element={ <Scanner/> } />
             <Route path={homepath} element={  <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /> }></Route>
           </Routes>
       </div>
@@ -119,10 +121,11 @@ function App() {
   else if(curUse==0){
     // Key has been depleted, show resources for NEAR
     const homepath = `${contractId}/${privKey}`
+    const scannerpath = `${contractId}/scanner`
     return (
       <div className="content">
           <Routes>
-            <Route path="/scanner" element={ <Scanner/> } />
+            <Route path={scannerpath} element={ <Scanner/> } />
             <Route path={homepath} element={
             <>
               <h1>Now that you have a wallet...</h1>

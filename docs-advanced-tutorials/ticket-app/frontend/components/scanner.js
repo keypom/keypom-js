@@ -39,24 +39,6 @@ export const Scanner = () => {
   // Functions that only run when scanner is mounted 
   // connect to NEAR, initKeypom, and get password
   useEffect(() => {
-      async function connectNear(){
-          const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
-          const connectionConfig = {
-             networkId: NETWORK_ID,
-             keyStore: myKeyStore,
-             nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
-              walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
-              helperUrl: `https://helper.${NETWORK_ID}.near.org`,
-              explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
-          };
-          const nearConnection = await connect(connectionConfig);
-      
-          await initKeypom({
-              near: nearConnection,
-              network: NETWORK_ID
-          });
-      }
-      connectNear()
       let PASSWORD = "NULL"
       PASSWORD = prompt("enter base password for drop")
       setPassword(PASSWORD)

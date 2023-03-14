@@ -7,29 +7,6 @@ const { keyStores, connect } = nearAPI;
 
 
 const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) => {
-    
-    // Functions that only run when KeyInfo is mounted; only need to connect to NEAR and initKeypom once
-    useEffect(() => {
-        async function connectNear(){
-            const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
-            const connectionConfig = {
-               networkId: NETWORK_ID,
-	           keyStore: myKeyStore,
-	           nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
-	            walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
-	            helperUrl: `https://helper.${NETWORK_ID}.near.org`,
-	            explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
-            };
-            const nearConnection = await connect(connectionConfig);
-
-            await initKeypom({
-                near: nearConnection,
-                network: NETWORK_ID,
-                keypomContractId: contractId
-            });
-        }
-        connectNear()
-    }, [])
 
     // These functions will run anytime the component is re-rendered 
     useEffect(() => {
