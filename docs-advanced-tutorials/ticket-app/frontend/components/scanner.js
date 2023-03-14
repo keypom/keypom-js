@@ -51,32 +51,17 @@ export const Scanner = () => {
       }
 
       async function scannerClaim(){
-          try{
-            // Get current key use
-            var publicKey = await getPubFromSecret(resPrivKey)
-            var resKeyInfo = await getKeyInformation({publicKey: publicKey})
-            if(resKeyInfo == null){
-              throw new Error(`Key info could not be determined`)
-            }
-            var resCurUse = resKeyInfo.cur_key_use 
+        try{
+          // Test 1: Check if Key exists, get curUse
+          var publicKey = await getPubFromSecret(resPrivKey)
+          var resKeyInfo = await getKeyInformation({publicKey: publicKey})
+          if(resKeyInfo == null){
+            // Key does not exist
+            throw new Error(`Key does not exist`)
           }
-          catch(err){
-            // Key has been deleted OR key was never part of drop
-            // Set to a 6th state and then return to 1
-            var tempState = [...masterState]
-            tempState[0] = 6
-            setMasterState([...tempState])
-            // Wait 3s, then flip go back to stage 1
-            await timeout(3000)
-            var emptyRes = new Array(splitRes.length)
-            setSplitRes(emptyRes)
-            setResPrivkey("")
-            var arr = [1, false];
-            setMasterState(arr)
-            return
-          }
+          var resCurUse = resKeyInfo.cur_key_use 
 
-          // Only claim if first key use, do not allow scanner to claim multiple times
+          // Test 2: Only claim if it has never been scanned
           if(resCurUse == 1){
             // Create password using base + pubkey + key use as string
             let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
@@ -88,21 +73,14 @@ export const Scanner = () => {
             })
           }
           else{
-            // Set to a 5th state and then return to 1
-            var tempState = [...masterState]
-            tempState[0] = 5
-            setMasterState([...tempState])
-            // Wait 3s, then flip go back to stage 1
-            await timeout(3000)
-            var emptyRes = new Array(splitRes.length)
-            setSplitRes(emptyRes)
-            setResPrivkey("")
-            var arr = [1, false];
-            setMasterState(arr)
+            // Ticket was already scanned
+            throw new Error(`The Key has already been scanned`)
           }
-          // Check if claim succeeded and then indicate claimed
+
+          // Test 3: Check if curUse decremented
           var newKeyInfo = await getKeyInformation({publicKey: publicKey})
           if(newKeyInfo.cur_key_use - resCurUse === 1){
+            // Successful Claim
             var tempState = [...masterState]
             tempState[0] = 3
             setMasterState([...tempState])
@@ -115,26 +93,32 @@ export const Scanner = () => {
             setMasterState(arr)
           }
           else if(newKeyInfo.cur_key_use === resCurUse ){
-            // set to a 4th state and then return to 1
-            var tempState = [...masterState]
-            tempState[0] = 4
-            setMasterState([...tempState])
-            // Wait 3s, then flip go back to stage 1
-            await timeout(3000)
-            var emptyRes = new Array(splitRes.length)
-            setSplitRes(emptyRes)
-            setResPrivkey("")
-            var arr = [1, false];
-            setMasterState(arr)
+            // Claim Failed
+            throw new Error(`Claim has failed, check password`)
           }
+        }
+        catch(err){
+          // Claim Failed
+          console.log(`Claim Failed: ${err}`)
+          var tempState = [...masterState]
+          tempState[0] = 4
+          setMasterState([...tempState])
+          // Wait 3s, then flip go back to stage 1
+          await timeout(3000)
+          var emptyRes = new Array(splitRes.length)
+          setSplitRes(emptyRes)
+          setResPrivkey("")
+          var arr = [1, false];
+          setMasterState(arr)
+        }
       }
-
       // Only claim if there is data present
       if(masterState[1] === true){
         scannerClaim()
       }
 
   }, [masterState[1]])
+
   // Scanner open, waiting to read data
   if(masterState[0] === 1){
     return (
@@ -185,32 +169,4 @@ export const Scanner = () => {
       </>
     );
   }
-  // Ticket was already scanned
-  else if(masterState[0] === 5){
-    return (
-      <>
-        <div className="content">
-          <div style={{border:"0.5rem solid blue"}}><video ref={ref} /></div>
-          <h2>Ticket has already been scanned</h2>
-          <h3>Attendee may proceed to event and claim POAP</h3>
-          <img src={logo} alt="red x" width="50" height="60" className="img_center"></img>
-        </div>
-      </>
-    );
-  }
-  // Ticket's key has been depleted and deleted
-  else if(masterState[0] === 6){
-    return (
-      <>
-        <div className="content">
-          <div style={{border:"0.5rem solid blue"}}><video ref={ref} /></div>
-          <h2>Could Not Be Claimed!</h2>
-          <h3>The attendee's access key has been depleted and deleted</h3>
-          <h4>Attendee may re-enter event</h4>
-          <img src={logo} alt="red x" width="50" height="60" className="img_center"></img>
-        </div>
-      </>
-    );
-  }
-  
 };
