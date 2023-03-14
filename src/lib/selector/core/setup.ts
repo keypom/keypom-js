@@ -1,69 +1,134 @@
-import { NetworkId, WalletModuleFactory } from "@near-wallet-selector/core";
-
-import { initKeypomWallet } from "./init";
-import { KeypomWalletType } from "./types";
+import type {
+	WalletModuleFactory,
+	WalletBehaviourFactory,
+	InstantLinkWallet,
+	NetworkId,
+  } from "@near-wallet-selector/core";
+  import type BN from "bn.js";
 import { KeypomWallet } from "./wallet";
-
-declare global {
-	interface Window {
-		near: any,
-	}
-}
-
-interface KeypomSetupParams {
+  
+  export interface KeypomParams {
 	networkId: NetworkId;
+	contractId: string;
 	iconUrl?: string;
 	deprecated?: boolean;
 	desiredUrl?: string;
-	keyStore?: any;
 	delimiter?: string;
-	contractId?: string;
-	methodNames?: string[];
-}
-
-export function setupKeypom({
-	iconUrl = "",
-	deprecated = false,
-	desiredUrl,
-	networkId,
-	keyStore,
-	delimiter,
-	contractId,
-	methodNames
-}: KeypomSetupParams): WalletModuleFactory<KeypomWalletType> {
-	return async () => {
-		const keypomWallet = new KeypomWallet({
-			networkId,
-			desiredUrl,
-			keyStore,
-			delimiter
-		})
-
-		let signInSuccess = true;
-		try {
-			await keypomWallet.signIn({contractId, methodNames});
-		} catch (e) {
-			signInSuccess = false;
-		}
-
-		// await waitFor(() => !!window.near?.isSignedIn(), { timeout: 300 }).catch(() => false);
-		return {
-			id: "keypom",
-			type: "injected",
-			metadata: {
-				name: "Keypom Account",
-				description: null,
-				iconUrl,
-				downloadUrl:
-					"https://example.com",
-				deprecated,
-				available: true,
-			},
-			init: (config) =>
-				initKeypomWallet({
-					...config,
-					keypomWallet
-				}),
-		};
+  }
+  
+  interface KeypomInitializeOptions {
+	keypomWallet: KeypomWallet;
+  }
+  
+  export type KeypomWalletInstant = InstantLinkWallet & {
+	networkId: string;
+	getContractId(): string;
+	switchAccount(id: string): Promise<void>;
+	getAccountId(): string;
+	isSignedIn: () => Promise<boolean>;
+	getAvailableBalance: () => Promise<BN>;
+  };
+  
+  const Keypom: WalletBehaviourFactory<
+	KeypomWalletInstant,
+	KeypomInitializeOptions
+  > = async ({ logger, keypomWallet }) => {
+	// return the wallet interface for wallet-selector
+	return {
+	  get networkId() {
+		return keypomWallet.networkId;
+	  },
+	  getContractId() {
+		return keypomWallet.getContractId();
+	  },
+  
+	  // async getAccount() {
+	  // 	return keypomWallet.getAccount();
+	  // },
+  
+	  async getAccounts() {
+		logger.log("Keypom:account");
+		return keypomWallet.getAccounts();
+	  },
+  
+	  async switchAccount(id: string) {
+		return await keypomWallet.switchAccount(id);
+	  },
+  
+	  getAccountId() {
+		logger.log("Keypom:getAccountId");
+		return keypomWallet.getAccountId();
+	  },
+  
+	  async isSignedIn() {
+		logger.log("Keypom:isSignedIn");
+		return await keypomWallet.isSignedIn();
+	  },
+  
+	  async getAvailableBalance() {
+		logger.log("Keypom:isSignedIn");
+		return await keypomWallet.getAvailableBalance();
+	  },
+  
+	  async verifyOwner() {
+		throw Error("KeypomWallet:verifyOwner is deprecated");
+	  },
+  
+	  async signIn() {
+		logger.log("Keypom:signIn");
+		return await keypomWallet.signIn();
+	  },
+  
+	  async signOut() {
+		logger.log("Keypom:signOut");
+		return await keypomWallet.signOut();
+	  },
+  
+	  async signAndSendTransaction(params) {
+		return await keypomWallet.signAndSendTransaction(params);
+	  },
+  
+	  async signAndSendTransactions({ transactions }) {
+		logger.log("Keypom:signAndSendTransactions", { transactions });
+		return await keypomWallet.signAndSendTransactions(transactions);
+	  },
 	};
-}
+  };
+  
+  export function setupKeypom({
+	iconUrl = "",
+	delimiter = "/",
+	deprecated = false,
+	desiredUrl = "/keypom-trial#",
+	networkId,
+	contractId,
+  }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
+	return async () => {
+	  const keypomWallet = new KeypomWallet({
+		contractId,
+		networkId,
+		desiredUrl,
+		delimiter
+	  });
+  
+	  return {
+		id: "keypom",
+		type: "instant-link",
+		metadata: {
+		  name: "Keypom Account",
+		  description: null,
+		  iconUrl,
+		  deprecated,
+		  available: true,
+		  contractId,
+		  runOnStartup: true, // check url here
+		},
+		init: async (config) =>
+		  Keypom({
+			...config,
+			keypomWallet,
+		  }),
+	  };
+	};
+  }
+  

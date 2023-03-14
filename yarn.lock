@@ -2,10 +2,8 @@
 # yarn lockfile v1
 
 
-"@near-wallet-selector/core@^7.9.0":
+"@near-wallet-selector/core@file:../wallet-selector/wallet-selector/dist/packages/core":
   version "7.9.0"
-  resolved "https://registry.yarnpkg.com/@near-wallet-selector/core/-/core-7.9.0.tgz#33dcfa589983d5aa10f0590e181e2f1e538c044d"
-  integrity sha512-VbHNdO1yRILsgjrX3Qxg5C3oJZpC3f1PjHLY0h37FXRBTIyVEycMl+8qVaBHck5j8FIOJMfyS9d6tC+TKRp7Og==
   dependencies:
     rxjs "^7.8.0"
 

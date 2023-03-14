@@ -20,7 +20,7 @@
   "author": "benkurrek, mattlockyer",
   "license": "MIT",
   "dependencies": {
-    "@near-wallet-selector/core": "^7.9.0",
+    "@near-wallet-selector/core": "file:../wallet-selector/wallet-selector/dist/packages/core",
     "@types/react": "^18.0.26",
     "ava": "^4.3.3",
     "bn.js": "^5.2.1",

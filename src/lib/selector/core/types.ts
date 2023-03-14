@@ -1,4 +1,4 @@
-import { Action, InjectedWallet, SignInParams, Transaction, VerifiedOwner, VerifyOwnerParams, WalletBehaviourFactory } from "@near-wallet-selector/core";
+import { Action, InjectedWallet, InstantLinkWallet, SignInParams, Transaction, VerifiedOwner, VerifyOwnerParams, WalletBehaviourFactory } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { Account } from "near-api-js";
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
@@ -43,10 +43,11 @@ export interface KeypomInitializeOptions {
     keypomWallet: KeypomWallet
 }
 
-export type SelectorInit = WalletBehaviourFactory<
-    KeypomWalletType,
-    KeypomInitializeOptions
->;
-
-export type KeypomWalletType = InjectedWallet &
-  Omit<Omit<KeypomWalletProtocol, "getAccounts">, "signIn">;
+export type KeypomWalletInstant = InstantLinkWallet & {
+    networkId: string;
+    getContractId(): string;
+    switchAccount(id: string): Promise<void>;
+    getAccountId(): string;
+    isSignedIn: () => Promise<boolean>;
+    getAvailableBalance: () => Promise<BN>;
+  };
