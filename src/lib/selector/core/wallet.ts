@@ -15,7 +15,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly contractId: string;
 
     private readonly near: Near;
-    private readonly connection: Connection;
+    private readonly keyStore: BrowserLocalStorageKeyStore;
     private readonly desiredUrl: string;
     private readonly delimiter: string;
 
@@ -35,12 +35,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.networkId = networkId
         this.contractId = contractId
         
-        const keyStore = new BrowserLocalStorageKeyStore();
+        this.keyStore = new BrowserLocalStorageKeyStore();
         this.near = new Near({
             ...networks[networkId],
-            deps: { keyStore },
+            deps: { keyStore: this.keyStore },
         });
-        this.connection = this.near.connection
         this.desiredUrl = desiredUrl
         this.delimiter = delimiter
         console.log("finished constructor");
@@ -61,7 +60,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     public transformTransactions = (txns) => {
         this.assertSignedIn();
 
-        const account = new Account(this.connection, this.accountId!);
+        const account = new Account(this.near.connection, this.accountId!);
         const { networkId, signer, provider } = account.connection;
         
         return Promise.all(
@@ -151,6 +150,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         this.accountId = this.accountId = this.secretKey = this.publicKey = undefined;
+        await this.keyStore.removeKey(this.networkId, this.accountId!);
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
@@ -161,7 +161,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
   
     public async getAccounts(): Promise<Account[]> {
         if (this.accountId != undefined && this.accountId != null) {
-            const accountObj = new Account(this.connection, this.accountId!);
+            const accountObj = new Account(this.near.connection, this.accountId!);
             return [accountObj];
         }
 
@@ -186,7 +186,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             let publicKey;
             
             try {
-                const accountObj = new Account(this.connection, trialAccountId);
+                const accountObj = new Account(this.near.connection, trialAccountId);
                 keyPair = KeyPair.fromString(trialSecretKey);
                 publicKey = keyPair.getPublicKey();
                 console.log('publicKey: ', publicKey.toString())
@@ -238,20 +238,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         if (!isValidTrialInfo) {
-            throw new Error("Invalid trial info");
+            console.log("no valid trial info. returning")
+            return []
         }
 
         console.log("auto signing in!");
-        // Auto sign in (mess with local storage)
-        // try {
-        //     console.log("i am about to auto sign in")
-        //     autoSignIn(this.accountId, this.secretKey, this.contractId, []);
-        //     console.log("auto sign in success!");
-        // } catch(e) {
-        //     console.log('auto sign in error: ', e);
-        // }
+        await this.keyStore.setKey(this.networkId, this.accountId!, KeyPair.fromString(this.secretKey!));
  
-        const accountObj = new Account(this.connection, this.accountId!);
+        const accountObj = new Account(this.near.connection, this.accountId!);
         return [accountObj];
     }
   
