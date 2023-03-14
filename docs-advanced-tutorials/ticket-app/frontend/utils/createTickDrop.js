@@ -76,7 +76,7 @@ async function createTickDrop(){
     // Creating list of pk's and linkdrops; copied from orignal simple-create.js
     for(var i = 0; i < keys.keyPairs.length; i++) {
         let linkdropUrl = formatLinkdropUrl({
-            customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+            customURL: "https://testnet.mynearwallet.com/linkdrop#CONTRACT_ID/SECRET_KEY",
             secretKeys: keys.secretKeys[i]
           })
         dropInfo[pubKeys[i]] = linkdropUrl;

@@ -24,7 +24,8 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
 
             await initKeypom({
                 near: nearConnection,
-                network: NETWORK_ID
+                network: NETWORK_ID,
+                keypomContractId: contractId
             });
         }
         connectNear()

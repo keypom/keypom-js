@@ -26,7 +26,7 @@ export const Scanner = () => {
     onResult(result) {
       setResult(result.getText());
       setSplitRes([...result.getText().split("/")]);
-      setResPrivkey(result.getText().split("/")[5])
+      setResPrivkey(result.getText().split("/")[1])
 
       //indicate new data
       var tempState = [...masterState]

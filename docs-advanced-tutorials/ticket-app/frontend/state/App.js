@@ -12,7 +12,7 @@ import { initKeypom, formatLinkdropUrl } from "keypom-js";
 const { keyStores, connect } = nearAPI;
 
 
-async function connectNear(privateKey){
+async function connectNear(privateKey, contractId){
   const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
   const connectionConfig = {
      networkId: NETWORK_ID,
@@ -25,13 +25,11 @@ async function connectNear(privateKey){
   const nearConnection = await connect(connectionConfig);
   await initKeypom({
       near: nearConnection,
-      network: NETWORK_ID
+      network: NETWORK_ID,
+      keypomContractId: contractId
   });
-  let resLink = formatLinkdropUrl({
-    customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
-    secretKeys: privateKey
-  })
-  return resLink
+  let resQrText = `${contractId}/${privateKey}`
+  return resQrText
 }
 
 async function setup(){
@@ -39,13 +37,13 @@ async function setup(){
   splitResTemp = window.location.href.split("/");
   tempContractId = splitResTemp[3]
   tempPrivKey = splitResTemp[4]
-  tempLink = await connectNear(tempPrivKey)
-  console.log(tempLink)
+  tempQrText = await connectNear(tempPrivKey, tempContractId)
+  console.log(tempQrText)
 }
 
 let tempContractId = ""
 let tempPrivKey = ""
-let tempLink = ""
+let tempQrText = ""
 let splitResTemp = ""
 setup()
 
@@ -57,7 +55,7 @@ function App() {
   const [splitRes, setSplitRes] = useState(splitResTemp)
   const [pubKey, setPubkey] = useState("");
   const [curUse, setCurUse] = useState(0);
-  const [link, setLink] = useState(tempLink)
+  const [qrText, setQrText] = useState(tempQrText)
   console.log(splitRes)
 
   // rendering stuff
@@ -74,7 +72,7 @@ function App() {
               <h1>🎟️This is your ticket🔑</h1>
               <h4>Screenshot and show me at the door</h4>
               <br></br>
-              <QrCode link={link} />
+              <QrCode link={qrText} />
               <br></br>
               <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
             </>}/>
@@ -85,6 +83,10 @@ function App() {
   else if(curUse==2){
     // Direct user to claim POAP
     const homepath = `${contractId}/${privKey}`
+    let link = formatLinkdropUrl({
+      customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+      secretKeys: privKey
+    });
     return (
       <div className="content">
           <Routes>
