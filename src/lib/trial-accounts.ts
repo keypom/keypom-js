@@ -399,7 +399,7 @@ export const claimTrialAccountDrop = async ({
 	desiredAccountId: string, 
 }) => {
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
+		networkId, keyStore, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)
@@ -408,6 +408,7 @@ export const claimTrialAccountDrop = async ({
 
 	const dropInfo = await getDropInformation({secretKey});
     assert(dropInfo.fc !== undefined, "drop must be a trial account drop");
+	const attachedGas = dropInfo.required_gas;
 
     let userFcArgs = {
 		"INSERT_NEW_ACCOUNT": desiredAccountId,
