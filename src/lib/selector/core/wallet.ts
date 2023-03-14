@@ -5,6 +5,7 @@ import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
+import { setupModal, WalletSelectorModal } from "../modal/src";
 import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
 import { KeypomWalletProtocol } from "./types";
@@ -21,6 +22,7 @@ export class KeypomWallet implements KeypomWalletProtocol {
     
     private publicKey?: PublicKey;
     private keyPair?: KeyPair;
+    private modal: WalletSelectorModal;
     
     public constructor({
       networkId = "mainnet",
@@ -40,6 +42,8 @@ export class KeypomWallet implements KeypomWalletProtocol {
         this.desiredUrl = desiredUrl
         this.delimiter = delimiter
         console.log("finished constructor");
+
+        this.modal = setupModal({ contractId: "foobar.testnet" });
     }
 
     public transformTransactions = (txns) => {
