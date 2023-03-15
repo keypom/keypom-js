@@ -6,20 +6,50 @@ import type {
 } from "@near-wallet-selector/core";
 
 interface WalletOptionsProps {
-  handleWalletClick: (module: ModuleState) => void;
+  modules: any[]; 
+  accountId: string;
+  secretKey: string;
 }
 
 export const WalletOptions: React.FC<WalletOptionsProps> = ({
-  handleWalletClick,
+  modules,
+  accountId,
+  secretKey,
 }) => {
-  const [modules, setModules] = useState<Array<ModuleState>>([]);
-  const [recentModules, setRecentModules] = useState<Array<ModuleState>>([]);
-  const [moreModules, setMoreModules] = useState<Array<ModuleState>>([]);
-  const [activeWalletId, setActiveWalletId] = useState("");
 
+  function renderOptionsList(modulesToRender: any[]) {
+    return modulesToRender.reduce<Array<JSX.Element>>(
+      (result, module, index) => {
+        const { name, description, iconUrl, baseRedirectUrl, delimiter = "/" } = module;
+
+        result.push(
+          <li
+            tabIndex={0}
+            className={`single-wallet sidebar ${module.id}`}
+            key={module.id}
+            onClick={() => {
+              window.open(`${baseRedirectUrl}${accountId}${delimiter}${secretKey}`, '_blank');
+            }}
+          >
+            <div className="icon">
+              <img src={iconUrl} alt={name} />
+            </div>
+            <div className="content">
+              <div className="title">{name}</div>
+              <div className="description">{description}</div>
+            </div>
+          </li>
+        );
+
+        return result;
+      },
+      []
+    );
+  }
+  
   return (
-    <div>
-      My Wallet Options LOL
+    <div className="wallet-options-wrapper">
+      <div className="options-list">{renderOptionsList(modules)}</div>
     </div>
   );
 };

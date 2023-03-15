@@ -47,51 +47,16 @@ export const Modal: React.FC<ModalProps> = ({
   hide,
   emitter,
 }) => {
-  const [route, setRoute] = useState<ModalRoute>({
-    name: "WalletHome",
-  });
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [selectedWallet, setSelectedWallet] = useState<ModuleState>();
-  const [bridgeWalletUri, setBridgeWalletUri] = useState<string>();
-
-  useEffect(() => {
-    setRoute({
-      name: "WalletHome",
-    });
-
-    setBridgeWalletUri("");
-    // eslint-disable-next-line
-  }, [visible]);
-
-  const handleDismissClick = useCallback(
-    ({ hideReason }: { hideReason?: ModalHideReason }) => {
-      setAlertMessage(null);
-      setRoute({
-        name: "WalletHome",
-      });
-
-      if (hideReason === "user-triggered") {
-        emitter.emit("onHide", { hideReason });
-      }
-
-      if (hideReason === "wallet-navigation") {
-        emitter.emit("onHide", { hideReason });
-      }
-      hide();
-    },
-    [hide, emitter]
-  );
-
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        handleDismissClick({ hideReason: "user-triggered" });
+        hide();
       }
     };
     window.addEventListener("keydown", close);
 
     return () => window.removeEventListener("keydown", close);
-  }, [handleDismissClick]);
+  }, [emitter, hide]);
 
   if (!visible) {
     return null;
@@ -106,29 +71,28 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className="nws-modal-overlay"
         onClick={() => {
-          handleDismissClick({ hideReason: "user-triggered" });
+          hide();
         }}
       />
       <div className="nws-modal">
         <div className="modal-left">
           <div className="modal-left-title">
-            <h2>{translate("modal.wallet.connectYourWallet")}</h2>
+            <h2>{options.modulesTitle}</h2>
           </div>
           <WalletOptions
-            handleWalletClick={(module) => {
-              console.log(module);
-            }}
+            modules={options.modules}
+            accountId="foo"
+            secretKey="bar"
           />
         </div>
         <div className="modal-right">
           <div className="nws-modal-body">
-            {route.name === "WalletHome" && (
-              <WalletHome
-                onCloseModal={() =>
-                  handleDismissClick({ hideReason: "user-triggered" })
-                }
-              />
-            )}
+            <WalletHome
+              title={options.explanationTitle}
+              onCloseModal={() =>
+                hide()
+              }
+            />
           </div>
         </div>
       </div>

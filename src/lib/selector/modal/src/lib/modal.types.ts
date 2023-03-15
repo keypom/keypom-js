@@ -3,8 +3,12 @@ import type { Subscription } from "@near-wallet-selector/core";
 export type Theme = "dark" | "light" | "auto";
 
 export interface ModalOptions {
-  contractId: string;
-  methodNames?: Array<string>;
+  modules: any[];
+  accountId: string;
+  secretKey: string;
+  modulesTitle: string;
+  explanationTitle: string;
+  delimiter: string;
   theme?: Theme;
   description?: string;
   onHide?: (hideReason: "user-triggered" | "wallet-navigation") => void;
