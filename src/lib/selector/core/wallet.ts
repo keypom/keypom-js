@@ -5,10 +5,9 @@ import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
-import { setupModal, KeypomTrialModal} from "../modal/src";
+import { KeypomTrialModal, setupModal } from "../modal/src";
 import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
-import { KeypomWalletProtocol } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly networkId: string;
@@ -59,11 +58,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.accountId!
     }
 
+    public showModal = () => {
+        this.modal?.show()
+    }
+
     public checkValidTrialInfo = () => {
         return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
     }
 
-    public transformTransactions = (txns) => {
+    private transformTransactions = (txns) => {
         this.assertSignedIn();
 
         const account = new Account(this.near.connection, this.accountId!);
@@ -120,7 +123,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
     }
 
-    public tryInitFromLocalStorage(data) {
+    private tryInitFromLocalStorage(data) {
         if (data?.accountId && data?.secretKey && data?.keypomContractId) {
             this.accountId = data.accountId;
             this.secretKey = data.secretKey;
@@ -134,7 +137,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return false;
     }
 
-    public assertSignedIn() {
+    private assertSignedIn() {
         if (!this.accountId) {
             throw new Error("Wallet not signed in");
         }
@@ -280,8 +283,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
   
     public async signAndSendTransactions(params) {
-        this.modal?.show();
-        return [] as FinalExecutionOutcome[];
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;

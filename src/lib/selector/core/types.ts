@@ -1,4 +1,4 @@
-import { Action, InjectedWallet, InstantLinkWallet, SignInParams, Transaction, VerifiedOwner, VerifyOwnerParams, WalletBehaviourFactory } from "@near-wallet-selector/core";
+import { Action, InjectedWallet, InstantLinkWallet, NetworkId, SignInParams, Transaction, VerifiedOwner, VerifyOwnerParams, WalletBehaviourFactory } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { Account } from "near-api-js";
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
@@ -16,32 +16,19 @@ export interface SignAndSendTransactionsParams {
     transactions: Array<Optional<Transaction, "signerId">>;
 }
 
-interface SignAndSendTransactionParams {
-    signerId?: string;
-    receiverId?: string;
-    actions: Array<Action>;
-}
-
-export interface KeypomWalletProtocol {
-    networkId: string;
-
-    signIn(params: SignInParams): Promise<Array<Account>>;
-    signOut(): Promise<void>;
-    getAccounts(): Promise<Array<Account>>;
-    verifyOwner(params: VerifyOwnerParams): Promise<VerifiedOwner | void>;
-    signAndSendTransaction(params: SignAndSendTransactionParams): Promise<FinalExecutionOutcome>;
-    signAndSendTransactions(params: SignAndSendTransactionsParams): Promise<Array<FinalExecutionOutcome>>;
-
-    //getAccounts(): Promise<Account[]>;
-    switchAccount(id: string): Promise<void>;
-    getAccountId(): string;
-    isSignedIn: () => Promise<boolean>;
-    getAvailableBalance: () => Promise<BN>;
-}
-
 export interface KeypomInitializeOptions {
     keypomWallet: KeypomWallet
 }
+
+export interface KeypomParams {
+	networkId: NetworkId;
+	contractId: string;
+	iconUrl?: string;
+	deprecated?: boolean;
+	desiredUrl?: string;
+	delimiter?: string;
+	modalOptions?: any;
+  }
 
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;
@@ -50,4 +37,5 @@ export type KeypomWalletInstant = InstantLinkWallet & {
     getAccountId(): string;
     isSignedIn: () => Promise<boolean>;
     getAvailableBalance: () => Promise<BN>;
+    showModal();
   };

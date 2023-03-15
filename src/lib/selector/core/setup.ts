@@ -5,30 +5,12 @@ import type {
 	NetworkId,
   } from "@near-wallet-selector/core";
   import type BN from "bn.js";
+import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
-  
-  export interface KeypomParams {
-	networkId: NetworkId;
-	contractId: string;
-	iconUrl?: string;
-	deprecated?: boolean;
-	desiredUrl?: string;
-	delimiter?: string;
-	modalOptions?: any;
-  }
   
   interface KeypomInitializeOptions {
 	keypomWallet: KeypomWallet;
   }
-  
-  export type KeypomWalletInstant = InstantLinkWallet & {
-	networkId: string;
-	getContractId(): string;
-	switchAccount(id: string): Promise<void>;
-	getAccountId(): string;
-	isSignedIn: () => Promise<boolean>;
-	getAvailableBalance: () => Promise<BN>;
-  };
   
   const Keypom: WalletBehaviourFactory<
 	KeypomWalletInstant,
@@ -46,6 +28,10 @@ import { KeypomWallet } from "./wallet";
 	  // async getAccount() {
 	  // 	return keypomWallet.getAccount();
 	  // },
+
+	  showModal() {
+		keypomWallet.showModal();
+	  },
   
 	  async getAccounts() {
 		logger.log("Keypom:account");
