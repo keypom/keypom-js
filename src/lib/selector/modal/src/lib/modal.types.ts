@@ -6,8 +6,12 @@ export interface ModalOptions {
   modules: any[];
   accountId: string;
   secretKey: string;
-  modulesTitle: string;
-  explanationTitle: string;
+  modulesTitle?: string;
+  mainTitle?: string;
+  mainBody?: string;
+  headerOne?: any;
+  headerTwo?: any;
+  button?: any;
   delimiter: string;
   theme?: Theme;
   description?: string;

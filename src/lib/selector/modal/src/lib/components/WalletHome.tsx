@@ -11,13 +11,17 @@ interface WalletHomeProps {
   onCloseModal: () => void;
 }
 
-type WalletHomeRoutes = "WalletInfo" | "GetWallets";
-
 export const WalletHome: React.FC<WalletHomeProps> = ({
   title = "Your Trial Has Ended",
-  body = "To continue ",
-  headerOne,
-  headerTwo,
+  body = "To continue using NEAR, secure your account with a wallet.",
+  headerOne = {
+    title: translate("modal.wallet.secureAndManage"),
+    description: translate("modal.wallet.safelyStore")
+  },
+  headerTwo = {
+    title: translate("modal.wallet.logInToAny"),
+    description: translate("modal.wallet.noNeedToCreate")
+  },
   button,
   onCloseModal,
 }) => {
@@ -101,10 +105,10 @@ export const WalletHome: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                setRoute("GetWallets");
+                window.open(button.url || 'https://keypom.xyz/', '_blank');
               }}
             >
-              Not Mobile
+              {button.text || "Next Steps"}
             </button>
           )}
         </div>
@@ -114,10 +118,10 @@ export const WalletHome: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                setRoute("GetWallets");
+                window.open(button.url || 'https://keypom.xyz/', '_blank');
               }}
             >
-              Mobile
+              {button.text || "Next Steps"}
             </button>
           </div>
         )}

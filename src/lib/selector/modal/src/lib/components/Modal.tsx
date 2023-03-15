@@ -81,14 +81,18 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
           <WalletOptions
             modules={options.modules}
-            accountId="foo"
-            secretKey="bar"
+            accountId={options.accountId}
+            secretKey={options.secretKey}
           />
         </div>
         <div className="modal-right">
           <div className="nws-modal-body">
             <WalletHome
-              title={options.explanationTitle}
+              title={options.mainTitle}
+              body={options.mainBody}
+              headerOne={options.headerOne}
+              headerTwo={options.headerTwo}
+              button={options.button}
               onCloseModal={() =>
                 hide()
               }
