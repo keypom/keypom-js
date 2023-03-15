@@ -1,33 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
-import type {
-  EventEmitterService,
-  ModuleState,
-  WalletSelector,
-} from "@near-wallet-selector/core";
+import React, { useEffect } from "react";
 
 import type {
-  ModalEvents,
-  ModalHideReason,
   ModalOptions,
-  Theme,
+  Theme
 } from "../modal.types";
-import type { ModalRoute } from "./Modal.types";
-import { WalletNetworkChanged } from "./WalletNetworkChanged";
 import { WalletOptions } from "./WalletOptions";
-import { AlertMessage } from "./AlertMessage";
-import { DerivationPath } from "./DerivationPath";
-import { WalletConnecting } from "./WalletConnecting";
-import { WalletNotInstalled } from "./WalletNotInstalled";
 
-import { WalletHome } from "./WalletHome";
-import { WalletConnected } from "./WalletConnected";
-import { translate } from "@near-wallet-selector/core";
+import { MainBody } from "./MainBody";
 
 interface ModalProps {
   options: ModalOptions;
   visible: boolean;
   hide: () => void;
-  emitter: EventEmitterService<ModalEvents>;
 }
 
 const getThemeClass = (theme?: Theme) => {
@@ -41,11 +25,10 @@ const getThemeClass = (theme?: Theme) => {
   }
 };
 
-export const Modal: React.FC<ModalProps> = ({
+export const KeypomModal: React.FC<ModalProps> = ({
   options,
   visible,
-  hide,
-  emitter,
+  hide
 }) => {
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
@@ -56,7 +39,7 @@ export const Modal: React.FC<ModalProps> = ({
     window.addEventListener("keydown", close);
 
     return () => window.removeEventListener("keydown", close);
-  }, [emitter, hide]);
+  }, [hide]);
 
   if (!visible) {
     return null;
@@ -87,7 +70,7 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
         <div className="modal-right">
           <div className="nws-modal-body">
-            <WalletHome
+            <MainBody
               title={options.mainTitle}
               body={options.mainBody}
               headerOne={options.headerOne}

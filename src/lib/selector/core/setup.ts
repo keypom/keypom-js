@@ -14,6 +14,7 @@ import { KeypomWallet } from "./wallet";
 	deprecated?: boolean;
 	desiredUrl?: string;
 	delimiter?: string;
+	modalOptions?: any;
   }
   
   interface KeypomInitializeOptions {
@@ -102,13 +103,15 @@ import { KeypomWallet } from "./wallet";
 	desiredUrl = "/keypom-trial#",
 	networkId,
 	contractId,
+	modalOptions
   }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
 	return async () => {
 	  const keypomWallet = new KeypomWallet({
 		contractId,
 		networkId,
 		desiredUrl,
-		delimiter
+		delimiter,
+		modalOptions
 	  });
 
 	  // CHECK URL / LOCAL STORAGE TO SEE IF A TRIAL ACCOUNT SHOULD BE SIGNED IN

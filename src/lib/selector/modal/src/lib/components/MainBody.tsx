@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { ModalHeader } from "./ModalHeader";
 import { translate } from "@near-wallet-selector/core";
+import React from "react";
+import { ModalHeader } from "./ModalHeader";
 
 interface WalletHomeProps {
   title?: string;
@@ -11,7 +11,7 @@ interface WalletHomeProps {
   onCloseModal: () => void;
 }
 
-export const WalletHome: React.FC<WalletHomeProps> = ({
+export const MainBody: React.FC<WalletHomeProps> = ({
   title = "Your Trial Has Ended",
   body = "To continue using NEAR, secure your account with a wallet.",
   headerOne = {

@@ -1,19 +1,16 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import type { WalletSelector } from "@near-wallet-selector/core";
 
-import type { WalletSelectorModal, ModalOptions } from "./modal.types";
-import { Modal } from "./components/Modal";
-import { EventEmitter } from "@near-wallet-selector/core";
-import type { ModalEvents } from "./modal.types";
+import { KeypomModal } from "./components/KeypomModal";
+import type { KeypomTrialModal, ModalOptions } from "./modal.types";
 
 const MODAL_ELEMENT_ID = "near-wallet-selector-modal";
 
-let modalInstance: WalletSelectorModal | null = null;
+let modalInstance: KeypomTrialModal | null = null;
 
 export const setupModal = (
   options: ModalOptions
-): WalletSelectorModal => {
+): KeypomTrialModal => {
   const el = document.createElement("div");
   el.id = MODAL_ELEMENT_ID;
   if (!document.getElementById(MODAL_ELEMENT_ID)) {
@@ -22,15 +19,13 @@ export const setupModal = (
 
   const container = document.getElementById(MODAL_ELEMENT_ID);
   const root = createRoot(container!);
-  const emitter = new EventEmitter<ModalEvents>();
 
   const render = (visible = false) => {
     root.render(
-      <Modal
+      <KeypomModal
         options={options}
         visible={visible}
         hide={() => render(false)}
-        emitter={emitter}
       />
     );
   };
@@ -42,13 +37,7 @@ export const setupModal = (
       },
       hide: () => {
         render(false);
-      },
-      on: (eventName, callback) => {
-        return emitter.on(eventName, callback);
-      },
-      off: (eventName, callback) => {
-        emitter.off(eventName, callback);
-      },
+      }
     };
   }
 

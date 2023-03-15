@@ -1,5 +1,3 @@
-import type { Subscription } from "@near-wallet-selector/core";
-
 export type Theme = "dark" | "light" | "auto";
 
 export interface ModalOptions {
@@ -18,22 +16,7 @@ export interface ModalOptions {
   onHide?: (hideReason: "user-triggered" | "wallet-navigation") => void;
 }
 
-export type ModalHideReason = "user-triggered" | "wallet-navigation";
-
-export type ModalEvents = {
-  onHide: { hideReason: ModalHideReason };
-};
-
-export interface WalletSelectorModal {
+export interface KeypomTrialModal {
   show(): void;
   hide(): void;
-  on<EventName extends keyof ModalEvents>(
-    eventName: EventName,
-    callback: (event: ModalEvents[EventName]) => void
-  ): Subscription;
-
-  off<EventName extends keyof ModalEvents>(
-    eventName: EventName,
-    callback: (event: ModalEvents[EventName]) => void
-  ): void;
 }

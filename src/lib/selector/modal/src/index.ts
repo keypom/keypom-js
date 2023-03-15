@@ -1,8 +1,7 @@
 export { setupModal } from "./lib/modal";
 
 export type {
-  WalletSelectorModal,
+  KeypomTrialModal,
   ModalOptions,
-  Theme,
-  ModalEvents,
+  Theme
 } from "./lib/modal.types";

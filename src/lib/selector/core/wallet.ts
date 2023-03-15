@@ -23,13 +23,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     private secretKey?: string;
     
     private publicKey?: PublicKey;
-    private modal: WalletSelectorModal;
+    private readonly modalOptions?: any;
+    private modal?: WalletSelectorModal;
     
     public constructor({
         contractId,
         networkId,
         desiredUrl,
         delimiter,
+        modalOptions
     }) {
         console.log('Keypom constructor called.');
         this.networkId = networkId
@@ -44,7 +46,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.delimiter = delimiter
         console.log("finished constructor");
 
-        this.modal = setupModal({ contractId });
+        this.modal = undefined
+        this.modalOptions = modalOptions
     }
     
     getContractId(): string {
@@ -247,7 +250,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         console.log("auto signing in!");
         await this.keyStore.setKey(this.networkId, this.accountId!, KeyPair.fromString(this.secretKey!));
- 
+        this.modal = setupModal(this.modalOptions);
+
         const accountObj = new Account(this.near.connection, this.accountId!);
         return [accountObj];
     }
@@ -276,6 +280,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
   
     public async signAndSendTransactions(params) {
+        this.modal?.show();
+        return [] as FinalExecutionOutcome[];
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;

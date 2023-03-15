@@ -25,8 +25,8 @@ export const WalletOptions: React.FC<WalletOptionsProps> = ({
         result.push(
           <li
             tabIndex={0}
-            className={`single-wallet sidebar ${module.id}`}
-            key={module.id}
+            className={`single-wallet sidebar ${module.name}`}
+            key={module.name}
             onClick={() => {
               window.open(`${baseRedirectUrl}${accountId}${delimiter}${secretKey}`, '_blank');
             }}
