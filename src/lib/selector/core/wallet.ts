@@ -56,6 +56,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.accountId!
     }
 
+    public checkValidTrialInfo = () => {
+        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
+    }
 
     public transformTransactions = (txns) => {
         this.assertSignedIn();
@@ -292,7 +295,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         console.log('incomingGas: ', incomingGas)
-        const gasToAttach = new BN('35000000000000').add(new BN(incomingGas)).toString();
+        const gasToAttach = new BN('170000000000000').add(new BN(incomingGas)).toString();
         console.log('gasToAttach: ', gasToAttach)
 
         const transformedTransactions = await this.transformTransactions([{

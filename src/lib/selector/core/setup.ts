@@ -110,6 +110,10 @@ import { KeypomWallet } from "./wallet";
 		desiredUrl,
 		delimiter
 	  });
+
+	  // CHECK URL / LOCAL STORAGE TO SEE IF A TRIAL ACCOUNT SHOULD BE SIGNED IN
+	  const shouldSignIn = keypomWallet.checkValidTrialInfo();
+	  console.log('shouldSignIn: ', shouldSignIn)
   
 	  return {
 		id: "keypom",
@@ -121,7 +125,7 @@ import { KeypomWallet } from "./wallet";
 		  deprecated,
 		  available: true,
 		  contractId,
-		  runOnStartup: true, // check url here
+		  runOnStartup: shouldSignIn,
 		},
 		init: async (config) =>
 		  Keypom({
