@@ -35,6 +35,6 @@ export interface MainBodyButton {
 }
 
 export interface KeypomTrialModal {
-  show(modalType): void;
+  show(modalType?: string): void;
   hide(): void;
 }

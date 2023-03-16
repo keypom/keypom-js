@@ -28,6 +28,7 @@ const genArgs = (json) => {
 		console.log('newTx: ', newTx)
 
 		tx.actions.forEach((action) => {
+			console.log('action: ', action)
 			const newAction = {}
 			console.log('newAction 1: ', newAction)
 			newAction[ACTION_HEADER] = action.type
