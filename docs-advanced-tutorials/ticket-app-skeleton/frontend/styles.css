@@ -1,0 +1,141 @@
+/* src/styles.css */
+*,
+*:before,
+*:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --font-color: 230 25% 7%;
+}
+body {
+  color: hsl(var(--font-color));
+  background-color: #626262;
+}
+img {
+  max-width: 100%;
+  display: block;
+  color:aqua
+}
+.section {
+  padding: 2em 0;
+  /* display: flex; */
+  min-height: 100vh;
+  align-items: center;
+  
+}
+.content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.container {
+  margin-inline: auto;
+  max-width: 75rem;
+  width: 85%;
+  /* top: 50%;
+  left: 50%;
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%); */
+}
+.input__group {
+  /* display: flex; */
+  margin-top: 2em;
+}
+.img_center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-right: 25px;
+}
+
+.button:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(8px);
+}
+input {
+  width: 100%;
+  padding: 1em 0.75em;
+  border: 1px solid #444343;
+  border-radius: 3px;
+  margin-bottom: 2em;
+  margin-top: 0.75em;
+}
+.button {
+  padding:0.6em 2em;
+  border-radius: 8px;
+  color:#fff;
+  background-color:#2e7d32;
+  font-size:1.1em;
+  border:0;
+  cursor:pointer;
+  margin:1em;
+  transition: all 0.5s;
+}
+.onboard_button {
+  padding:0.6em 2em;
+  border-radius: 16px;
+  color:#fff;
+  background-color:#8852a5;
+  font-size:1.1em;
+  border:0;
+  cursor:pointer;
+  margin:1em;
+  transition: all 0.5s;
+}
+.onboard_button:active {
+  background-color: #7d2eab;
+  box-shadow: 0 5px #666;
+  transform: translateY(8px);
+}
+
+
+@media screen and (min-width: 768px) {
+  .section {
+    padding: 0;
+  }
+  input {
+    margin: 0;
+  }
+  .qrcode__container {
+    /* display: flex; */
+    align-items: center;
+  }
+  .input__group {
+    margin-left: 3em;
+  }
+  input {
+    margin-bottom: 2em;
+    margin-top: 0.75em;
+    font-size: 1rem;
+  }
+}
