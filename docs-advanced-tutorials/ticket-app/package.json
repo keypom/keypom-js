@@ -1,6 +1,7 @@
 {
   "name": "greeter",
   "version": "1.0.0",
+  "homepage": ".#",
   "license": "(MIT AND Apache-2.0)",
   "scripts": {
     "build": "npm run build:contract && npm run build:web",
