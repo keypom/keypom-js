@@ -1,13 +1,14 @@
 import { translate } from "@near-wallet-selector/core";
 import React from "react";
-import { ModalHeader } from "./ModalHeader";
+import { MainBodyButton, MainBodyHeaders } from "../modal.types";
+import { CloseButton } from "./CloseButton";
 
 interface WalletHomeProps {
   title?: string;
   body?: string;
-  headerOne?: any;
-  headerTwo?: any;
-  button?: any;
+  headerOne?: MainBodyHeaders;
+  headerTwo?: MainBodyHeaders;
+  button?: MainBodyButton;
   onCloseModal: () => void;
 }
 
@@ -28,10 +29,10 @@ export const MainBody: React.FC<WalletHomeProps> = ({
   return (
     <div className="wallet-home-wrapper">
       <div className="nws-modal-header-wrapper">
-        <ModalHeader
-          title={title}
-          onCloseModal={onCloseModal}
-        />
+        <div className="nws-modal-header">
+          <h3 className='middleTitle'>{title}</h3>
+          <CloseButton onClick={onCloseModal} />
+        </div>
       </div>
       <>
         <h4>{body}</h4>

@@ -4,9 +4,10 @@ import type {
   ModuleState,
   Wallet,
 } from "@near-wallet-selector/core";
+import { PostTrialModules } from "../modal.types";
 
 interface WalletOptionsProps {
-  modules: any[]; 
+  modules: PostTrialModules[]; 
   accountId: string;
   secretKey: string;
 }
@@ -17,7 +18,7 @@ export const WalletOptions: React.FC<WalletOptionsProps> = ({
   secretKey,
 }) => {
 
-  function renderOptionsList(modulesToRender: any[]) {
+  function renderOptionsList(modulesToRender: PostTrialModules[]) {
     return modulesToRender.reduce<Array<JSX.Element>>(
       (result, module, index) => {
         const { name, description, iconUrl, baseRedirectUrl, delimiter = "/" } = module;

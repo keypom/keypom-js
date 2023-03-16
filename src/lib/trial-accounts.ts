@@ -79,8 +79,10 @@ export const createTrialAccountDrop = async ({
     trialFundsNEAR,
     trialFundsYocto,
     callableContracts,
-    amounts,
+    maxAttachableDepositPerContract,
     callableMethods,
+	trialEndFloorNEAR,
+	trialEndFloorYocto,
     repayAmountNEAR,
     repayAmountYocto,
     repayTo,
@@ -107,11 +109,15 @@ export const createTrialAccountDrop = async ({
     /** The contracts that the trial account should be able to call. */
     callableContracts: string[],
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
-    amounts: string[],
+    maxAttachableDepositPerContract: string[],
     /** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
     callableMethods: string[],
+	/** Once the account balance falls below this amount (in $NEAR), the trial is over and the exit conditions must be met. */
+	trialEndFloorNEAR: string | number,
+	/** Once the account balance falls below this amount (in yocto), the trial is over and the exit conditions must be met. */
+	trialEndFloorYocto: string,
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-    repayAmountNEAR?: Number,
+    repayAmountNEAR?: number | string,
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
     repayAmountYocto?: string,
     /** The account that should receive the repayment of the trial account. If not specified, the drop funder will be used. */
@@ -150,6 +156,9 @@ export const createTrialAccountDrop = async ({
 	// Ensure that if the dropID is passed in, it's greater than 1 billion
 	assert(parseInt(dropId || "1000000000") >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
 	if (!dropId) dropId = Date.now().toString()
+
+	// Ensure that the length of the callable methods, contracts, and max attachable deposit per contract are all the same
+	assert(callableMethods.length === callableContracts.length && callableMethods.length === maxAttachableDepositPerContract.length, 'The length of the callable methods, contracts, and max attachable deposit per contract must all be the same.')
 
 	await assertDropIdUnique(dropId);
 
@@ -214,6 +223,11 @@ export const createTrialAccountDrop = async ({
 	}
 	if (!repayAmountYocto) repayAmountYocto = '0';
 
+    if (trialEndFloorNEAR) {
+		trialEndFloorYocto = parseNearAmount(trialEndFloorNEAR.toString()) || '0'
+	}
+	if (!trialEndFloorYocto) trialEndFloorYocto = '0';
+
     const attachedDeposit = new BN(trialFundsYocto).add(new BN(parseNearAmount("0.3"))).toString();
     const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
 
@@ -250,13 +264,13 @@ export const createTrialAccountDrop = async ({
                     //@ts-ignore
                     attached_deposit: '0',
                     args: JSON.stringify(wrapParams({
-                        contracts: callableContracts,
-                        amounts,
-                        methods: callableMethods,
-                        funder: repayTo || account!.accountId,
-                        repay: repayAmountYocto,
-                    })),
-                    //user_args_rule: "UserPreferred",
+						contracts: callableContracts,
+						amounts: maxAttachableDepositPerContract,
+						methods: callableMethods,
+						funder: repayTo || account!.accountId,
+						repay: repayAmountYocto,
+						floor: trialEndFloorYocto,
+					})),
                     receiver_to_claimer: true
                 }
             ]]
@@ -289,13 +303,13 @@ export const createTrialAccountDrop = async ({
             //@ts-ignore
             attachedDeposit: '0',
             args: JSON.stringify(wrapParams({
-                contracts: callableContracts,
-                amounts,
-                methods: callableMethods,
-                funder: repayTo || account!.accountId,
-                repay: repayAmountYocto,
-            })),
-            userArgsRule: "UserPreferred",
+				contracts: callableContracts,
+				amounts: maxAttachableDepositPerContract,
+				methods: callableMethods,
+				funder: repayTo || account!.accountId,
+				repay: repayAmountYocto,
+				floor: trialEndFloorYocto,
+			})),
             receiverToClaimer: true
         }
         ]],

@@ -4,12 +4,12 @@ import type {
   ModalOptions,
   Theme
 } from "../modal.types";
-import { WalletOptions } from "./WalletOptions";
 
-import { MainBody } from "./MainBody";
+import { TrialOverModal } from "./TrialOverModal";
 
 interface ModalProps {
   options: ModalOptions;
+  modalType: string;
   visible: boolean;
   hide: () => void;
 }
@@ -27,6 +27,7 @@ const getThemeClass = (theme?: Theme) => {
 
 export const KeypomModal: React.FC<ModalProps> = ({
   options,
+  modalType,
   visible,
   hide
 }) => {
@@ -47,9 +48,8 @@ export const KeypomModal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className={`nws-modal-wrapper ${getThemeClass(options?.theme)} ${
-        visible ? "open" : ""
-      }`}
+      className={`nws-modal-wrapper ${getThemeClass(options?.theme)} ${visible ? "open" : ""
+        }`}
     >
       <div
         className="nws-modal-overlay"
@@ -57,32 +57,18 @@ export const KeypomModal: React.FC<ModalProps> = ({
           hide();
         }}
       />
-      <div className="nws-modal">
-        <div className="modal-left">
-          <div className="modal-left-title">
-            <h2>{options.modulesTitle}</h2>
-          </div>
-          <WalletOptions
-            modules={options.modules}
-            accountId={options.accountId}
-            secretKey={options.secretKey}
-          />
-        </div>
-        <div className="modal-right">
-          <div className="nws-modal-body">
-            <MainBody
-              title={options.mainTitle}
-              body={options.mainBody}
-              headerOne={options.headerOne}
-              headerTwo={options.headerTwo}
-              button={options.button}
-              onCloseModal={() =>
-                hide()
-              }
-            />
-          </div>
-        </div>
-      </div>
+      <TrialOverModal
+        modulesTitle={options.modulesTitle}
+        modules={options.modules}
+        accountId={options.accountId}
+        secretKey={options.secretKey}
+        mainTitle={options.mainTitle}
+        mainBody={options.mainBody}
+        headerOne={options.headerOne}
+        headerTwo={options.headerTwo}
+        button={options.button}
+        hide={hide}
+      />
     </div>
   );
 };
