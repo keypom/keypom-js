@@ -15,7 +15,8 @@
     "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
     "build": "npx tsc",
     "publish": "npx tsc && npm publish",
-    "build-docs": "npx typedoc --options typedoc.json"
+    "build-docs": "npx typedoc --options typedoc.json",
+    "create-trial-drop": "node ./test/create-trial-drop.js"
   },
   "author": "benkurrek, mattlockyer",
   "license": "MIT",
