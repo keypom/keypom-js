@@ -5,14 +5,17 @@ import type {
   Wallet,
 } from "@near-wallet-selector/core";
 import { PostTrialModules } from "../modal.types";
+import { MODAL_DEFAULTS } from "../modal";
 
-interface WalletOptionsProps {
-  modules: PostTrialModules[]; 
+interface ModuleListProps {
+  modulesTitle?: string;
+  modules: PostTrialModules[];
   accountId: string;
   secretKey: string;
 }
 
-export const WalletOptions: React.FC<WalletOptionsProps> = ({
+export const ModuleList: React.FC<ModuleListProps> = ({
+  modulesTitle = MODAL_DEFAULTS.trialOver.moduleList.modulesTitle,
   modules,
   accountId,
   secretKey,
@@ -47,10 +50,15 @@ export const WalletOptions: React.FC<WalletOptionsProps> = ({
       []
     );
   }
-  
+
   return (
-    <div className="wallet-options-wrapper">
-      <div className="options-list">{renderOptionsList(modules)}</div>
+    <div>
+      <div className="modal-left-title">
+        <h2>{modulesTitle}</h2>
+      </div>
+      <div className="wallet-options-wrapper">
+        <div className="options-list">{renderOptionsList(modules)}</div>
+      </div>
     </div>
   );
 };

@@ -1,28 +1,23 @@
 import { translate } from "@near-wallet-selector/core";
 import React from "react";
+import { MODAL_DEFAULTS } from "../modal";
 import { MainBodyButton, MainBodyHeaders } from "../modal.types";
 import { CloseButton } from "./CloseButton";
 
 interface WalletHomeProps {
-  title?: string;
-  body?: string;
-  headerOne?: MainBodyHeaders;
-  headerTwo?: MainBodyHeaders;
+  title: string;
+  body: string;
+  headerOne: MainBodyHeaders | null;
+  headerTwo: MainBodyHeaders | null;
   button?: MainBodyButton;
   onCloseModal: () => void;
 }
 
 export const MainBody: React.FC<WalletHomeProps> = ({
-  title = "Your Trial Has Ended",
-  body = "To continue using NEAR, secure your account with a wallet.",
-  headerOne = {
-    title: translate("modal.wallet.secureAndManage"),
-    description: translate("modal.wallet.safelyStore")
-  },
-  headerTwo = {
-    title: translate("modal.wallet.logInToAny"),
-    description: translate("modal.wallet.noNeedToCreate")
-  },
+  title,
+  body,
+  headerOne,
+  headerTwo,
   button,
   onCloseModal,
 }) => {
@@ -57,8 +52,8 @@ export const MainBody: React.FC<WalletHomeProps> = ({
                 </svg>
               </div>
               <div className="content-side">
-                <h3>{headerOne.title || translate("modal.wallet.secureAndManage")}</h3>
-                <p>{headerTwo.description || translate("modal.wallet.safelyStore")}</p>
+                <h3>{headerOne?.title || translate("modal.wallet.secureAndManage")}</h3>
+                <p>{headerTwo?.description || translate("modal.wallet.safelyStore")}</p>
               </div>
             </div>
           )}

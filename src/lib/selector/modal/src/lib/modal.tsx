@@ -1,3 +1,4 @@
+import { translate } from "@near-wallet-selector/core";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
@@ -7,10 +8,29 @@ import type { KeypomTrialModal, ModalOptions } from "./modal.types";
 const MODAL_ELEMENT_ID = "near-wallet-selector-modal";
 export const MODAL_TYPE = {
   TRIAL_OVER: "trial-over",
-  ERROR: {
-    INVALID_CONTRACT: "invalid-contract",
-    INVALID_METHOD: "invalid-method",
-    INVALID_AMOUNT: "invalid-amount",
+  ERROR: "action-error"
+}
+export const MODAL_DEFAULTS = {
+  trialOver: {
+    mainBody: {
+      title: "Your Trial Has Ended",
+      body: "To continue using NEAR, secure your account with a wallet.",
+      headerOne: {
+        title: translate("modal.wallet.secureAndManage"),
+        description: translate("modal.wallet.safelyStore")
+      },
+      headerTwo: {
+        title: translate("modal.wallet.logInToAny"),
+        description: translate("modal.wallet.noNeedToCreate")
+      },
+    },
+    moduleList: {
+      modulesTitle: "Choose a Wallet",
+    }
+  },
+  error: {
+    title: "Invalid Action",
+    body: "Your trial does not allow you to perform this action. For more information, please contact the site administrator."
   }
 }
 
