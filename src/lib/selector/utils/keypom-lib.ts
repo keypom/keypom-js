@@ -47,48 +47,44 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 }
 
-const onSubmitAccountId = async (accountId: string) => {
-	console.log("waiting 2 seconds");
-	// wait 2 seconds
-	await new Promise((resolve) => setTimeout(resolve, 2000));
-	console.log('accountId Submitted From Form: ', accountId)
-}
+export const validateTransactions = async (toValidate, accountId) => {
+	console.log('toValidate: ', toValidate)
 
-export const claimTrialAccount = async (keypomContractId, keyPair, nodeUrl) => {
-	let isTrialClaimed = false;
+	const validInfo = {
+		"guest-book.examples.keypom.testnet": {
+			maxDeposit: "0",
+			allowableMethods: ["add_message"]
+		}
+	}
 	try {
-		const dropInfo = await viewMethod({
-			contractId: keypomContractId, 
-			methodName: 'get_drop_information', 
-			args: {
-				key: keyPair.publicKey.toString()
-			},
-			nodeUrl
-		});
-		console.log('dropInfo: ', dropInfo)
+		// wait 50 milliseconds
+		await new Promise((resolve) => setTimeout(resolve, 50));
 	} catch(e: any) {
-		if (e.toString().includes("no drop ID for PK")) {
-			console.log(`trial is claimed (error: ${e})`);
-			isTrialClaimed = true;
-		} else {
-			console.log("error", e);
+		console.log('error: ', e)
+	}
+
+	// Loop through each transaction in the array
+	for (let i = 0; i < toValidate.length; i++) {
+		const transaction = toValidate[i];
+		console.log('transaction: ', transaction)
+
+		// Check if the contractId is valid
+		if (!validInfo[transaction.contractId]) {
+			return false;
+		}
+
+		// Check if the method name is valid
+		if (!validInfo[transaction.contractId].allowableMethods.includes(transaction.methodName)) {
+			return false;
+		}
+
+		// Check if the deposit is valid
+		if (transaction.deposit && new BN(transaction.deposit).gt(new BN(validInfo[transaction.contractId].maxDeposit))) {
+			return false;
 		}
 	}
 
-	let newAccountId = `test-1676383642371.linkdrop-beta.keypom.testnet`;
-	// if(!isTrialClaimed) {
-		// 	const desiredAccountId = window.prompt("Enter a desired account ID");
-		// 	console.log('desiredAccountId: ', desiredAccountId)
-		// 	newAccountId = `${desiredAccountId}.linkdrop-beta.keypom.testnet`
-	// } else {
-	// 	const desiredAccountId = window.prompt("Enter an existing account", `test-1676383642371`);
-	// 	console.log('desiredAccountId: ', desiredAccountId)
-	// 	newAccountId = `${desiredAccountId}.linkdrop-beta.keypom.testnet`
-	// }
-	
-	console.log('isTrialClaimed: ', isTrialClaimed)
-	console.log('newAccountId: ', newAccountId)
-	return newAccountId;
+	return true;
 }
 
 export const autoSignIn = (accountId, secretKey, contractId, methodNames) => {

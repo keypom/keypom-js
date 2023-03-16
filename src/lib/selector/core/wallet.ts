@@ -6,7 +6,8 @@ import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { KeypomTrialModal, setupModal } from "../modal/src";
-import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
+import { MODAL_TYPE } from "../modal/src/lib/modal";
+import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv, validateTransactions } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -288,7 +289,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         const { transactions } = params;
         console.log('transactions: ', transactions)
         
-        const args = genArgs({ transactions })
+        const {wrapped: args, toValidate} = genArgs({ transactions })
+        const res = await validateTransactions(toValidate, this.accountId!);
+        console.log('res from validate transactions: ', res);
+
+        if (res == false) {
+            this.modal?.show(MODAL_TYPE.ERROR);
+            return [] as FinalExecutionOutcome[];
+        }
+        
         console.log('args: ', args)
 
         const account = await this.near.account(this.accountId!);
