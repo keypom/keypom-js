@@ -63,8 +63,9 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  * ```
  * @group Utility
  */
-export const getPubFromSecret = async (secretKey: string): Promise<string> => {
+export const getPubFromSecret = (secretKey: string): string => {
     var keyPair = KeyPair.fromString(secretKey);
+    console.log('keyPair: ', keyPair)
     return keyPair.getPublicKey().toString()
 };
 
@@ -606,6 +607,7 @@ export const execute = async ({
 	if (wallet) {
         // wallet might be Promise<Wallet> or value, either way doesn't matter
         wallet = await wallet;
+        console.log('wallet: ', wallet)
         // might be able to sign transactions with app key
         let needsRedirect = false;
         transactions.forEach((tx) => {
@@ -616,6 +618,8 @@ export const execute = async ({
             })
         })
         
+        console.log('needsRedirect: ', needsRedirect)
+        console.log('transactions: ', transactions)
         if (needsRedirect) return await wallet.signAndSendTransactions({ transactions, callbackUrl: successUrl })
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = []
@@ -624,6 +628,7 @@ export const execute = async ({
                 actions: tx.actions,
             }))
         }
+        console.log('responses: ', responses)
         return responses
     }
 

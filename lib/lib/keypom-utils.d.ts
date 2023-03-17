@@ -28,7 +28,7 @@ export declare const key2str: (v: any) => any;
  * ```
  * @group Utility
  */
-export declare const getPubFromSecret: (secretKey: string) => Promise<string>;
+export declare const getPubFromSecret: (secretKey: string) => string;
 /**
  * Check whether or not a given account ID exists on the network.
  *

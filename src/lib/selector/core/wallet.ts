@@ -1,51 +1,77 @@
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
+import { Logger } from "@near-wallet-selector/core/lib/services";
 import BN from "bn.js";
 import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
-import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores";
+import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
-import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
+import { KeypomTrialModal, setupModal } from "../modal/src";
+import { MODAL_TYPE } from "../modal/src/lib/modal";
+import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv, validateTransactions } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
-import { KeypomWalletProtocol } from "./types";
+import { FAILED_EXECUTION_OUTCOME } from "./types";
 
-export class KeypomWallet implements KeypomWalletProtocol {
+export class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly networkId: string;
+    readonly contractId: string;
+
     private readonly near: Near;
-    private readonly connection: Connection;
+    private readonly keyStore: BrowserLocalStorageKeyStore;
     private readonly desiredUrl: string;
+    private readonly delimiter: string;
 
     private accountId?: string;
     private secretKey?: string;
     
     private publicKey?: PublicKey;
-    private keyPair?: KeyPair;
-  
+    private readonly modalOptions?: any;
+    private modal?: KeypomTrialModal;
+    
     public constructor({
-      networkId = "mainnet",
-      desiredUrl = "/keypom-trial/"
+        contractId,
+        networkId,
+        desiredUrl,
+        delimiter,
+        modalOptions
     }) {
         console.log('Keypom constructor called.');
-        // Check that the desired URL starts and ends with `/`
-        if (!desiredUrl.startsWith("/") && !desiredUrl.endsWith("/")) {
-            throw new Error("desiredUrl must start and end with `/`");
-        }
-
         this.networkId = networkId
-        const keyStore = new BrowserLocalStorageKeyStore()
+        this.contractId = contractId
         
+        this.keyStore = new BrowserLocalStorageKeyStore();
         this.near = new Near({
             ...networks[networkId],
-            deps: { keyStore },
+            deps: { keyStore: this.keyStore },
         });
-        this.connection = this.near.connection
         this.desiredUrl = desiredUrl
+        this.delimiter = delimiter
         console.log("finished constructor");
+
+        this.modal = undefined
+        this.modalOptions = modalOptions
+    }
+    
+    getContractId(): string {
+        return this.contractId;
     }
 
-    public transformTransactions = (txns) => {
+    getAccountId(): string {
+        this.assertSignedIn();
+        return this.accountId!
+    }
+
+    public showModal = () => {
+        this.modal?.show()
+    }
+
+    public checkValidTrialInfo = () => {
+        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
+    }
+
+    private transformTransactions = (txns) => {
         this.assertSignedIn();
 
-        const account = new Account(this.connection, this.accountId!);
+        const account = new Account(this.near.connection, this.accountId!);
         const { networkId, signer, provider } = account.connection;
         
         return Promise.all(
@@ -80,12 +106,12 @@ export class KeypomWallet implements KeypomWalletProtocol {
         /// TODO validation
         const split = window.location.href.split(this.desiredUrl);
     
-        if (split.length < 2) {
+        if (split.length != 2) {
             return;
         }
         
         const trialInfo = split[1];
-        const 	[trialAccountId, trialSecretKey] = trialInfo.split('#')
+        const 	[trialAccountId, trialSecretKey] = trialInfo.split(this.delimiter)
         console.log('trialAccountId: ', trialAccountId)
         console.log('trialSecretKey: ', trialSecretKey)
     
@@ -99,12 +125,11 @@ export class KeypomWallet implements KeypomWalletProtocol {
         }
     }
 
-    public tryInitFromLocalStorage(data) {
+    private tryInitFromLocalStorage(data) {
         if (data?.accountId && data?.secretKey && data?.keypomContractId) {
             this.accountId = data.accountId;
             this.secretKey = data.secretKey;
             const keyPair = KeyPair.fromString(data.secretKey);
-            this.keyPair = keyPair
             console.log('Setting keyPair in try init: ', keyPair)
             this.publicKey = keyPair.getPublicKey()
 
@@ -114,17 +139,11 @@ export class KeypomWallet implements KeypomWalletProtocol {
         return false;
     }
 
-    public assertSignedIn() {
+    private assertSignedIn() {
         if (!this.accountId) {
             throw new Error("Wallet not signed in");
         }
     }
-  
-    // public getAccount() {
-    //     this.assertSignedIn();
-    //     const accountObj = new Account(this.connection, this.accountId!);
-    //     return accountObj;
-    // }
   
     public async isSignedIn() {
       return this.accountId != undefined && this.accountId != null
@@ -141,7 +160,8 @@ export class KeypomWallet implements KeypomWalletProtocol {
             throw new Error("Wallet is already signed out");
         }
 
-        this.accountId = this.accountId = this.keyPair = this.secretKey = this.publicKey = undefined;
+        this.accountId = this.accountId = this.secretKey = this.publicKey = undefined;
+        await this.keyStore.removeKey(this.networkId, this.accountId!);
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
@@ -152,16 +172,11 @@ export class KeypomWallet implements KeypomWalletProtocol {
   
     public async getAccounts(): Promise<Account[]> {
         if (this.accountId != undefined && this.accountId != null) {
-            const accountObj = new Account(this.connection, this.accountId!);
+            const accountObj = new Account(this.near.connection, this.accountId!);
             return [accountObj];
         }
 
         return []
-    }
-  
-    public getAccountId() {
-        this.assertSignedIn();
-        return this.accountId!;
     }
   
     public async switchAccount(id: string) {
@@ -182,7 +197,7 @@ export class KeypomWallet implements KeypomWalletProtocol {
             let publicKey;
             
             try {
-                const accountObj = new Account(this.connection, trialAccountId);
+                const accountObj = new Account(this.near.connection, trialAccountId);
                 keyPair = KeyPair.fromString(trialSecretKey);
                 publicKey = keyPair.getPublicKey();
                 console.log('publicKey: ', publicKey.toString())
@@ -202,7 +217,6 @@ export class KeypomWallet implements KeypomWalletProtocol {
              if (isValidTrialInfo) {
                  this.accountId = trialAccountId;
                  this.secretKey = trialSecretKey;
-                 this.keyPair = keyPair;
                  this.publicKey = publicKey;
                  
                  const dataToWrite = {
@@ -228,7 +242,6 @@ export class KeypomWallet implements KeypomWalletProtocol {
                 
                 const keyPair = KeyPair.fromString(secretKey);
                 const publicKey = keyPair.getPublicKey();
-                this.keyPair = keyPair;
                 this.publicKey = publicKey;
                 isValidTrialInfo = true;
                 console.log('Valid trial info from cur env data. Setting data')
@@ -236,14 +249,15 @@ export class KeypomWallet implements KeypomWalletProtocol {
         }
 
         if (!isValidTrialInfo) {
-            throw new Error("Invalid trial info");
+            console.log("no valid trial info. returning")
+            return []
         }
 
         console.log("auto signing in!");
-        // Auto sign in (mess with local storage)
-        autoSignIn(this.accountId, this.secretKey);
- 
-        const accountObj = new Account(this.connection, this.accountId!);
+        await this.keyStore.setKey(this.networkId, this.accountId!, KeyPair.fromString(this.secretKey!));
+        this.modal = setupModal(this.modalOptions);
+
+        const accountObj = new Account(this.near.connection, this.accountId!);
         return [accountObj];
     }
   
@@ -271,14 +285,35 @@ export class KeypomWallet implements KeypomWalletProtocol {
     }
   
     public async signAndSendTransactions(params) {
-        console.log('sign and send txns params: ', params)
+        console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;
+        console.log('transactions: ', transactions)
         
-        const args = genArgs({ transactions })
+        const {wrapped: args, toValidate} = genArgs({ transactions })
+        const res = await validateTransactions(toValidate, this.accountId!);
+        console.log('res from validate transactions: ', res);
+
+        if (res == false) {
+            this.modal?.show(MODAL_TYPE.ERROR);
+            return [FAILED_EXECUTION_OUTCOME];
+        }
+        
         console.log('args: ', args)
 
         const account = await this.near.account(this.accountId!);
+
+        let incomingGas;
+        try {
+            incomingGas = (args as any).transactions[0].actions[0].params[`|kP|gas`].split(`|kS|`)[0].toString();
+        } catch(e) {
+            console.log('e: ', e)
+            incomingGas = `200000000000000`;
+        }
+
+        console.log('incomingGas: ', incomingGas)
+        const gasToAttach = new BN('170000000000000').add(new BN(incomingGas)).toString();
+        console.log('gasToAttach: ', gasToAttach)
 
         const transformedTransactions = await this.transformTransactions([{
             receiverId: account.accountId,
@@ -287,10 +322,11 @@ export class KeypomWallet implements KeypomWalletProtocol {
                 params: {
                     methodName: 'execute',
                     args,
-                    gas: '100000000000000',
+                    gas: gasToAttach,
                 }
             }]
         }])
+        console.log("debugging")
         console.log('transformedTransactions: ', transformedTransactions)
 
         const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));

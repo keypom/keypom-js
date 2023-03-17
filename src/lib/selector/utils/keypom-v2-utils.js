@@ -21,6 +21,8 @@ const genArgs = (json) => {
 		transactions: []
 	}
 
+	const toValidate = []
+
 	json.transactions.forEach((tx) => {
 		const newTx = {}
 		newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId
@@ -28,6 +30,13 @@ const genArgs = (json) => {
 		console.log('newTx: ', newTx)
 
 		tx.actions.forEach((action) => {
+			console.log('action: ', action)
+			toValidate.push({
+				receiverId: tx.contractId || tx.receiverId,
+				methodName: action.params.methodName,
+				deposit: action.params.deposit
+			})
+
 			const newAction = {}
 			console.log('newAction 1: ', newAction)
 			newAction[ACTION_HEADER] = action.type
@@ -38,7 +47,10 @@ const genArgs = (json) => {
 		})
 		newJson.transactions.push(newTx)
 	})
-	return newJson
+	return {
+		wrapped: newJson,
+		toValidate
+	}
 }
 
 module.exports = {

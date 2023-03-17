@@ -47,60 +47,75 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 }
 
-const onSubmitAccountId = async (accountId: string) => {
-	console.log("waiting 2 seconds");
-	// wait 2 seconds
-	await new Promise((resolve) => setTimeout(resolve, 2000));
-	console.log('accountId Submitted From Form: ', accountId)
-}
+export const validateTransactions = async (toValidate, accountId) => {
+	console.log('toValidate: ', toValidate)
 
-export const claimTrialAccount = async (keypomContractId, keyPair, nodeUrl) => {
-	let isTrialClaimed = false;
+	const validInfo = {
+		"guest-book.examples.keypom.testnet": {
+			maxDeposit: "0",
+			allowableMethods: ["add_message"]
+		}
+	}
 	try {
-		const dropInfo = await viewMethod({
-			contractId: keypomContractId, 
-			methodName: 'get_drop_information', 
-			args: {
-				key: keyPair.publicKey.toString()
-			},
-			nodeUrl
-		});
-		console.log('dropInfo: ', dropInfo)
+		// wait 50 milliseconds
+		await new Promise((resolve) => setTimeout(resolve, 50));
 	} catch(e: any) {
-		if (e.toString().includes("no drop ID for PK")) {
-			console.log(`trial is claimed (error: ${e})`);
-			isTrialClaimed = true;
-		} else {
-			console.log("error", e);
+		console.log('error: ', e)
+	}
+
+	// Loop through each transaction in the array
+	for (let i = 0; i < toValidate.length; i++) {
+		const transaction = toValidate[i];
+		console.log('transaction: ', transaction)
+
+		// Check if the contractId is valid
+		if (!validInfo[transaction.receiverId]) {
+			console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
+			return false;
+		}
+
+		// Check if the method name is valid
+		if (!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName)) {
+			console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
+			return false;
+		}
+
+		// Check if the deposit is valid
+		if (new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit))) {
+			console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
+			return false;
 		}
 	}
 
-	let newAccountId = `test-1676383642371.linkdrop-beta.keypom.testnet`;
-	// if(!isTrialClaimed) {
-		// 	const desiredAccountId = window.prompt("Enter a desired account ID");
-		// 	console.log('desiredAccountId: ', desiredAccountId)
-		// 	newAccountId = `${desiredAccountId}.linkdrop-beta.keypom.testnet`
-	// } else {
-	// 	const desiredAccountId = window.prompt("Enter an existing account", `test-1676383642371`);
-	// 	console.log('desiredAccountId: ', desiredAccountId)
-	// 	newAccountId = `${desiredAccountId}.linkdrop-beta.keypom.testnet`
-	// }
-	
-	console.log('isTrialClaimed: ', isTrialClaimed)
-	console.log('newAccountId: ', newAccountId)
-	return newAccountId;
+	return true;
 }
 
-export const autoSignIn = (accountId, secretKey) => {
+export const autoSignIn = (accountId, secretKey, contractId, methodNames) => {
+	contractId = contractId || 'testnet';
+	console.log('contractId in auto sign in: ', contractId)
+	methodNames = methodNames || [];
+	console.log('methodNames in auto sign in: ', methodNames)
+
+	console.log("1");
 	localStorage.setItem(`near-api-js:keystore:${accountId}:testnet`, `ed25519:${secretKey}`)
 	
 	// Contract
-	localStorage.setItem('near-wallet-selector:contract', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
-	localStorage.setItem('near-wallet-selector:contract:pending', "{\"contractId\":\"testnet\",\"methodNames\":[]}")
+	console.log("2");
+	localStorage.setItem('near-wallet-selector:contract', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
+	console.log("3");
+	localStorage.setItem('near-wallet-selector:contract:pending', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
 
+	console.log("4");
 	// Selected Wallet
 	localStorage.setItem('near-wallet-selector:selectedWalletId', "\"keypom\"")
+	console.log("5");
 	localStorage.setItem('near-wallet-selector:selectedWalletId:pending', "\"keypom\"")
+	console.log("6");
+	
+	// Print the entire local storage
+	for (var i = 0; i < localStorage.length; i++){
+		console.log(localStorage.key(i) + "=[" + localStorage.getItem(localStorage.key(i)!) + "]");
+	}
 	
 	// let recentWallets = localStorage.get('near-wallet-selector:recentlySignedInWallets');
 
@@ -137,6 +152,10 @@ export const createAction = (action) => {
 	  }
 	  case "FunctionCall": {
 		const { methodName, args, gas, deposit } = action.params;
+		console.log('deposit: ', deposit)
+		console.log('gas: ', gas)
+		console.log('args: ', args)
+		console.log('methodName: ', methodName)
   
 		return nearTransactions.functionCall(
 		  methodName,

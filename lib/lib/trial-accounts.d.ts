@@ -50,7 +50,7 @@ export declare const KEY_LIMIT = 50;
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, trialFundsNEAR, trialFundsYocto, callableContracts, amounts, callableMethods, repayAmountNEAR, repayAmountYocto, repayTo, dropId, config, numKeys, publicKeys, rootEntropy, metadata, useBalance, returnTransactions, successUrl }: {
+export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, trialFundsNEAR, trialFundsYocto, callableContracts, maxAttachableDepositPerContract, callableMethods, trialEndFloorNEAR, trialEndFloorYocto, repayAmountNEAR, repayAmountYocto, repayTo, dropId, config, numKeys, publicKeys, rootEntropy, metadata, useBalance, returnTransactions, successUrl }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: nearAPI.Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
@@ -64,11 +64,15 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
     /** The contracts that the trial account should be able to call. */
     callableContracts: string[];
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
-    amounts: string[];
+    maxAttachableDepositPerContract: string[];
     /** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
     callableMethods: string[];
+    /** Once the account balance falls below this amount (in $NEAR), the trial is over and the exit conditions must be met. */
+    trialEndFloorNEAR: string | number;
+    /** Once the account balance falls below this amount (in yocto), the trial is over and the exit conditions must be met. */
+    trialEndFloorYocto: string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-    repayAmountNEAR?: Number | undefined;
+    repayAmountNEAR?: string | number | undefined;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
     repayAmountYocto?: string | undefined;
     /** The account that should receive the repayment of the trial account. If not specified, the drop funder will be used. */
