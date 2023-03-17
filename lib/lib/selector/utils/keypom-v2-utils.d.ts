@@ -1,4 +1,7 @@
 export function genArgs(json: any): {
-    transactions: never[];
+    wrapped: {
+        transactions: never[];
+    };
+    toValidate: any[];
 };
 export function wrapParams(params: any, newParams?: {}): {};
