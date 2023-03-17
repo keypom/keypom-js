@@ -1,5 +1,3 @@
-const { logger } = require("@near-wallet-selector/core/lib/services")
-
 // helpers for keypom account contract args
 const RECEIVER_HEADER = '|kR|'
 const ACTION_HEADER = '|kA|'
@@ -18,7 +16,7 @@ const wrapParams = (params, newParams = {}) => {
 }
 
 const genArgs = (json) => {
-	logger.log('json: ', json)
+	console.log('json: ', json)
 	const newJson = {
 		transactions: []
 	}
@@ -29,10 +27,10 @@ const genArgs = (json) => {
 		const newTx = {}
 		newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId
 		newTx.actions = []
-		logger.log('newTx: ', newTx)
+		console.log('newTx: ', newTx)
 
 		tx.actions.forEach((action) => {
-			logger.log('action: ', action)
+			console.log('action: ', action)
 			toValidate.push({
 				receiverId: tx.contractId || tx.receiverId,
 				methodName: action.params.methodName,
@@ -40,11 +38,11 @@ const genArgs = (json) => {
 			})
 
 			const newAction = {}
-			logger.log('newAction 1: ', newAction)
+			console.log('newAction 1: ', newAction)
 			newAction[ACTION_HEADER] = action.type
-			logger.log('newAction 2: ', newAction)
+			console.log('newAction 2: ', newAction)
 			newAction.params = wrapParams(action.params)
-			logger.log('newAction 3: ', newAction)
+			console.log('newAction 3: ', newAction)
 			newTx.actions.push(newAction)
 		})
 		newJson.transactions.push(newTx)

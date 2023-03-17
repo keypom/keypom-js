@@ -15,7 +15,6 @@ const {
 
 import { Action, FunctionCallAction } from "@near-wallet-selector/core";
 import { BN } from "bn.js";
-import { logger } from "@near-wallet-selector/core/lib/services";
 
 const gas = '200000000000000'
 
@@ -43,13 +42,13 @@ export const getLocalStorageKeypomEnv = () => {
 
 export const setLocalStorageKeypomEnv = (jsonData) => {
 	const dataToWrite = JSON.stringify(jsonData);
-	logger.log('dataToWrite: ', dataToWrite)
+	console.log('dataToWrite: ', dataToWrite)
 
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 }
 
 export const validateTransactions = async (toValidate, accountId) => {
-	logger.log('toValidate: ', toValidate)
+	console.log('toValidate: ', toValidate)
 	toValidate = [];
 
 	const validInfo = {
@@ -62,29 +61,29 @@ export const validateTransactions = async (toValidate, accountId) => {
 		// wait 50 milliseconds
 		await new Promise((resolve) => setTimeout(resolve, 50));
 	} catch(e: any) {
-		logger.log('error: ', e)
+		console.log('error: ', e)
 	}
 
 	// Loop through each transaction in the array
 	for (let i = 0; i < toValidate.length; i++) {
 		const transaction = toValidate[i];
-		logger.log('transaction: ', transaction)
+		console.log('transaction: ', transaction)
 
 		// Check if the contractId is valid
 		if (!validInfo[transaction.receiverId]) {
-			logger.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
+			console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
 			return false;
 		}
 
 		// Check if the method name is valid
 		if (!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName)) {
-			logger.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
+			console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
 			return false;
 		}
 
 		// Check if the deposit is valid
 		if (new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit))) {
-			logger.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
+			console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
 			return false;
 		}
 	}
@@ -94,34 +93,34 @@ export const validateTransactions = async (toValidate, accountId) => {
 
 export const autoSignIn = (accountId, secretKey, contractId, methodNames) => {
 	contractId = contractId || 'testnet';
-	logger.log('contractId in auto sign in: ', contractId)
+	console.log('contractId in auto sign in: ', contractId)
 	methodNames = methodNames || [];
-	logger.log('methodNames in auto sign in: ', methodNames)
+	console.log('methodNames in auto sign in: ', methodNames)
 
-	logger.log("1");
+	console.log("1");
 	localStorage.setItem(`near-api-js:keystore:${accountId}:testnet`, `ed25519:${secretKey}`)
 	
 	// Contract
-	logger.log("2");
+	console.log("2");
 	localStorage.setItem('near-wallet-selector:contract', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
-	logger.log("3");
+	console.log("3");
 	localStorage.setItem('near-wallet-selector:contract:pending', `{\"contractId\":\"${contractId}\",\"methodNames\":${JSON.stringify(methodNames)}}`)
 
-	logger.log("4");
+	console.log("4");
 	// Selected Wallet
 	localStorage.setItem('near-wallet-selector:selectedWalletId', "\"keypom\"")
-	logger.log("5");
+	console.log("5");
 	localStorage.setItem('near-wallet-selector:selectedWalletId:pending', "\"keypom\"")
-	logger.log("6");
+	console.log("6");
 	
 	// Print the entire local storage
 	for (var i = 0; i < localStorage.length; i++){
-		logger.log(localStorage.key(i) + "=[" + localStorage.getItem(localStorage.key(i)!) + "]");
+		console.log(localStorage.key(i) + "=[" + localStorage.getItem(localStorage.key(i)!) + "]");
 	}
 	
 	// let recentWallets = localStorage.get('near-wallet-selector:recentlySignedInWallets');
 
-	// logger.log('recentWallets: ', recentWallets)
+	// console.log('recentWallets: ', recentWallets)
 	// if (recentWallets) {
 	// 	recentWallets.push(autoAccountId);
 	// }
@@ -154,10 +153,10 @@ export const createAction = (action) => {
 	  }
 	  case "FunctionCall": {
 		const { methodName, args, gas, deposit } = action.params;
-		logger.log('deposit: ', deposit)
-		logger.log('gas: ', gas)
-		logger.log('args: ', args)
-		logger.log('methodName: ', methodName)
+		console.log('deposit: ', deposit)
+		console.log('gas: ', gas)
+		console.log('args: ', args)
+		console.log('methodName: ', methodName)
   
 		return nearTransactions.functionCall(
 		  methodName,
@@ -202,10 +201,10 @@ export const createAction = (action) => {
 
 // Make a read-only call to retrieve information from the network
 export const viewMethod = async ({ contractId, methodName, args = {}, nodeUrl }) => {
-	logger.log('args: ', args)
-	logger.log('methodName: ', methodName)
-	logger.log('contractId: ', contractId)
-	logger.log('nodeUrl: ', nodeUrl)
+	console.log('args: ', args)
+	console.log('methodName: ', methodName)
+	console.log('contractId: ', contractId)
+	console.log('nodeUrl: ', nodeUrl)
 	const provider = new nearAPI.providers.JsonRpcProvider({ url: nodeUrl });
 
 	let res: any = await provider.query({
