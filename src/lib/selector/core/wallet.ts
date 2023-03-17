@@ -1,5 +1,5 @@
 import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
-import { Logger } from "@near-wallet-selector/core/lib/services";
+import { logger } from "@near-wallet-selector/core/lib/services";
 import BN from "bn.js";
 import { Account, Connection, KeyPair, Near, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
@@ -34,7 +34,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         delimiter,
         modalOptions
     }) {
-        console.log('Keypom constructor called.');
+        logger.log('Keypom constructor called.');
         this.networkId = networkId
         this.contractId = contractId
         
@@ -45,7 +45,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         });
         this.desiredUrl = desiredUrl
         this.delimiter = delimiter
-        console.log("finished constructor");
+        logger.log("finished constructor");
 
         this.modal = undefined
         this.modalOptions = modalOptions
@@ -80,15 +80,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 createAction(action)
                 );
                 
-                console.log('actions: ', actions)
+                logger.log('actions: ', actions)
                 const block = await provider.block({ finality: "final" });
-                console.log('block: ', block)
+                logger.log('block: ', block)
 
                 const accessKey: any = await provider.query(
                     `access_key/${account.accountId}/${this.publicKey!}`,
                     ""
                 );
-                console.log('accessKey: ', accessKey)
+                logger.log('accessKey: ', accessKey)
         
                 return transactions.createTransaction(
                     account.accountId,
@@ -112,8 +112,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         
         const trialInfo = split[1];
         const 	[trialAccountId, trialSecretKey] = trialInfo.split(this.delimiter)
-        console.log('trialAccountId: ', trialAccountId)
-        console.log('trialSecretKey: ', trialSecretKey)
+        logger.log('trialAccountId: ', trialAccountId)
+        logger.log('trialSecretKey: ', trialSecretKey)
     
         if (!trialAccountId || !trialSecretKey) {
             return;
@@ -130,7 +130,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             this.accountId = data.accountId;
             this.secretKey = data.secretKey;
             const keyPair = KeyPair.fromString(data.secretKey);
-            console.log('Setting keyPair in try init: ', keyPair)
+            logger.log('Setting keyPair in try init: ', keyPair)
             this.publicKey = keyPair.getPublicKey()
 
             return true;
@@ -184,11 +184,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
   
     public async signIn(): Promise<Account[]> {
-        console.log("IM SIGNING IN")
+        logger.log("IM SIGNING IN")
         // Keep track of whether or not the info coming from the URL is valid (account ID & secret key that exist)
         let isValidTrialInfo = false;
         const parsedData = this.parseUrl();
-        console.log('parsedData: ', parsedData)
+        logger.log('parsedData: ', parsedData)
         
         // URL is valid
         if (parsedData !== undefined) {
@@ -200,17 +200,17 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 const accountObj = new Account(this.near.connection, trialAccountId);
                 keyPair = KeyPair.fromString(trialSecretKey);
                 publicKey = keyPair.getPublicKey();
-                console.log('publicKey: ', publicKey.toString())
+                logger.log('publicKey: ', publicKey.toString())
 
                 const accountKeys = await accountObj.getAccessKeys();
-                console.log('accountKeys: ', accountKeys)
+                logger.log('accountKeys: ', accountKeys)
                 
                 // Check if accountKeys's length is 1 and it has a `public_key` field
                 isValidTrialInfo = accountKeys[0].public_key == publicKey.toString()
-                console.log('isValidTrialInfo: ', isValidTrialInfo)
+                logger.log('isValidTrialInfo: ', isValidTrialInfo)
             } catch(e) {
                 isValidTrialInfo = false;
-                console.log('e: ', e)
+                logger.log('e: ', e)
             }   
 
              // If the trial info is valid (i.e the account ID & secret key exist)
@@ -223,7 +223,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                     accountId: this.accountId,
                     secretKey: this.secretKey
                 }
-                console.log('Trial info valid - setting data', dataToWrite)
+                logger.log('Trial info valid - setting data', dataToWrite)
                 setLocalStorageKeypomEnv(dataToWrite);
              }
         }
@@ -232,7 +232,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // We can check current local storage data
         if (!isValidTrialInfo) {
             const curEnvData = getLocalStorageKeypomEnv();
-            console.log('trial info invalid. Cur env data: ', curEnvData)
+            logger.log('trial info invalid. Cur env data: ', curEnvData)
             
             // If there is any
             if (curEnvData != null) {
@@ -244,16 +244,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 const publicKey = keyPair.getPublicKey();
                 this.publicKey = publicKey;
                 isValidTrialInfo = true;
-                console.log('Valid trial info from cur env data. Setting data')
+                logger.log('Valid trial info from cur env data. Setting data')
             }
         }
 
         if (!isValidTrialInfo) {
-            console.log("no valid trial info. returning")
+            logger.log("no valid trial info. returning")
             return []
         }
 
-        console.log("auto signing in!");
+        logger.log("auto signing in!");
         await this.keyStore.setKey(this.networkId, this.accountId!, KeyPair.fromString(this.secretKey!));
         this.modal = setupModal(this.modalOptions);
 
@@ -263,7 +263,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
   
     public async signAndSendTransaction(params) {
         this.assertSignedIn();
-        console.log('sign and send txn params: ', params)
+        logger.log('sign and send txn params: ', params)
         const { receiverId, actions } = params;
 
         let res;
@@ -278,28 +278,28 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             });
         } catch (e) {
             /// user cancelled or near network error
-            console.warn(e);
+            logger.warn(e);
         }
 
         return res[0] as FinalExecutionOutcome;
     }
   
     public async signAndSendTransactions(params) {
-        console.log('sign and send txns params inner: ', params)
+        logger.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;
-        console.log('transactions: ', transactions)
+        logger.log('transactions: ', transactions)
         
         const {wrapped: args, toValidate} = genArgs({ transactions })
         const res = await validateTransactions(toValidate, this.accountId!);
-        console.log('res from validate transactions: ', res);
+        logger.log('res from validate transactions: ', res);
 
         if (res == false) {
             this.modal?.show(MODAL_TYPE.ERROR);
             return [FAILED_EXECUTION_OUTCOME];
         }
         
-        console.log('args: ', args)
+        logger.log('args: ', args)
 
         const account = await this.near.account(this.accountId!);
 
@@ -307,13 +307,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         try {
             incomingGas = (args as any).transactions[0].actions[0].params[`|kP|gas`].split(`|kS|`)[0].toString();
         } catch(e) {
-            console.log('e: ', e)
+            logger.log('e: ', e)
             incomingGas = `200000000000000`;
         }
 
-        console.log('incomingGas: ', incomingGas)
+        logger.log('incomingGas: ', incomingGas)
         const gasToAttach = new BN('170000000000000').add(new BN(incomingGas)).toString();
-        console.log('gasToAttach: ', gasToAttach)
+        logger.log('gasToAttach: ', gasToAttach)
 
         const transformedTransactions = await this.transformTransactions([{
             receiverId: account.accountId,
@@ -326,8 +326,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 }
             }]
         }])
-        console.log("debugging")
-        console.log('transformedTransactions: ', transformedTransactions)
+        logger.log("debugging")
+        logger.log('transformedTransactions: ', transformedTransactions)
 
         const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));
         return await Promise.all(promises)as FinalExecutionOutcome[];

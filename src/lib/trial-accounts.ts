@@ -237,6 +237,7 @@ export const createTrialAccountDrop = async ({
 		deposit_per_use: '0',
 		config: finalConfig,
 		metadata,
+		required_gas: '150000000000000',
 		fc: {
 			methods: [[
                 {

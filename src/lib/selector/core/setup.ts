@@ -4,6 +4,7 @@ import type {
 	InstantLinkWallet,
 	NetworkId,
   } from "@near-wallet-selector/core";
+import { logger } from "@near-wallet-selector/core/lib/services";
   import type BN from "bn.js";
 import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
@@ -102,7 +103,7 @@ import { KeypomWallet } from "./wallet";
 
 	  // CHECK URL / LOCAL STORAGE TO SEE IF A TRIAL ACCOUNT SHOULD BE SIGNED IN
 	  const shouldSignIn = keypomWallet.checkValidTrialInfo();
-	  console.log('shouldSignIn: ', shouldSignIn)
+	  logger.log('shouldSignIn: ', shouldSignIn)
   
 	  return {
 		id: "keypom",

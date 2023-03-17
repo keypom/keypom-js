@@ -161,6 +161,7 @@ export const createDrop = async ({
 	depositPerUseNEAR,
 	depositPerUseYocto,
 	metadata,
+	requiredGas,
 	config = {},
 	ftData,
 	nftData,
@@ -193,6 +194,8 @@ export const createDrop = async ({
 	config?: DropConfig,
 	/** String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON. */
 	metadata?: string,
+	/** Allows you to overload how much gas should be attached to the transaction when the key is claimed. This should be in Gas units (1 TGas = 1000000000000). By default, 100 TGas is attached. */
+	requiredGas?: string,
 	/** For creating a simple drop, this contains necessary configurable information about the drop. */
 	simpleData?: SimpleData
 	/** For creating a fungible token drop, this contains necessary configurable information about the drop. */
@@ -322,6 +325,7 @@ export const createDrop = async ({
 		deposit_per_use: depositPerUseYocto,
 		config: finalConfig,
 		metadata,
+		required_gas: requiredGas,
 		ft: ftData?.contractId ? ({
 			contract_id: ftData.contractId,
 			sender_id: ftData.senderId,
@@ -370,7 +374,7 @@ export const createDrop = async ({
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key || 1,
-		attachedGas: parseInt(attachedGas!),
+		attachedGas: parseInt(requiredGas || attachedGas!),
 		storage: storageCalculated,
 		ftData,
 		fcData,
