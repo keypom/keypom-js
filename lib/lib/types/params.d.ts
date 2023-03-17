@@ -38,6 +38,7 @@ export interface CreateDropProtocolArgs {
     drop_id?: string;
     config?: ProtocolReturnedDropConfig;
     metadata?: string;
+    required_gas?: string;
     simple?: ProtocolReturnedSimpleData;
     ft?: ProtocolReturnedFTData;
     nft?: ProtocolReturnedNFTData;
