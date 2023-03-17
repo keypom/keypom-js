@@ -9,6 +9,7 @@ import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE } from "../modal/src/lib/modal";
 import { autoSignIn, createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv, validateTransactions } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
+import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly networkId: string;
@@ -295,7 +296,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         if (res == false) {
             this.modal?.show(MODAL_TYPE.ERROR);
-            return [] as FinalExecutionOutcome[];
+            return [FAILED_EXECUTION_OUTCOME];
         }
         
         console.log('args: ', args)

@@ -69,17 +69,20 @@ export const validateTransactions = async (toValidate, accountId) => {
 		console.log('transaction: ', transaction)
 
 		// Check if the contractId is valid
-		if (!validInfo[transaction.contractId]) {
+		if (!validInfo[transaction.receiverId]) {
+			console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
 			return false;
 		}
 
 		// Check if the method name is valid
-		if (!validInfo[transaction.contractId].allowableMethods.includes(transaction.methodName)) {
+		if (!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName)) {
+			console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
 			return false;
 		}
 
 		// Check if the deposit is valid
-		if (transaction.deposit && new BN(transaction.deposit).gt(new BN(validInfo[transaction.contractId].maxDeposit))) {
+		if (new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit))) {
+			console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
 			return false;
 		}
 	}

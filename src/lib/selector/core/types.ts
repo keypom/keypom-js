@@ -4,6 +4,44 @@ import { Account } from "near-api-js";
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { KeypomWallet } from "./wallet";
 
+export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
+    status: {
+        Failure: {
+            error_message: "Invalid Trial Action",
+            error_type: "keypom-trial-error"
+        }
+    },
+    transaction: {},
+    transaction_outcome: {
+        id: "",
+        outcome: {
+            logs: [],
+            receipt_ids: [],
+            gas_burnt: 0,
+            status: {
+                Failure: {
+                    error_message: "Invalid Trial Action",
+                    error_type: "keypom-trial-error"
+                }
+            },
+        }
+    },
+    receipts_outcome: [{
+        id: "",
+        outcome: {
+            logs: [],
+            receipt_ids: [],
+            gas_burnt: 0,
+            status: {
+                Failure: {
+                    error_message: "Invalid Trial Action",
+                    error_type: "keypom-trial-error"
+                }
+            },
+        }
+    }]
+}
+
 export interface SignInOptions {
     contractId?: string;
     allowance?: string;

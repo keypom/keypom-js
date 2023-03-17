@@ -33,8 +33,8 @@ const genArgs = (json) => {
 			console.log('action: ', action)
 			toValidate.push({
 				receiverId: tx.contractId || tx.receiverId,
-				methodName: action.methodName,
-				deposit: action.deposit
+				methodName: action.params.methodName,
+				deposit: action.params.deposit
 			})
 
 			const newAction = {}
