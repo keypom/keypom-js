@@ -132,7 +132,6 @@ export interface UsageConfig {
      * In the case where `autoDeleteDrop` is set to true and the drop is the owner's last, should their balance be automatically withdrawn? If this isn't specified, it defaults to false.
      */
     autoWithdraw?: boolean
-
     /** When calling `create_account` on the root account, which keypom args should be attached to the payload. */
     accountCreationFields?: {
         /**

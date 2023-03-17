@@ -378,8 +378,8 @@ export const createDrop = async ({
 
 	var hasBalance = false;
 	if(useBalance) {
-		let userBal = await getUserBalance({accountId: account!.accountId});
-		if(userBal < requiredDeposit) {
+		let userBal = new BN(await getUserBalance({accountId: account!.accountId}));
+		if(userBal.lt(new BN(requiredDeposit))) {
 			throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
 		}
 
