@@ -75,9 +75,9 @@ import { KeypomWallet } from "./wallet";
 		return await keypomWallet.signAndSendTransaction(params);
 	  },
   
-	  async signAndSendTransactions({ transactions }) {
-		logger.log("Keypom:signAndSendTransactions", { transactions });
-		return await keypomWallet.signAndSendTransactions(transactions);
+	  async signAndSendTransactions(params) {
+		logger.log("Keypom:signAndSendTransactions", params);
+		return await keypomWallet.signAndSendTransactions(params);
 	  },
 	};
   };

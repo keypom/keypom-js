@@ -1,4 +1,3 @@
-import { translate } from "@near-wallet-selector/core";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
@@ -16,12 +15,12 @@ export const MODAL_DEFAULTS = {
       title: "Your Trial Has Ended",
       body: "To continue using NEAR, secure your account with a wallet.",
       headerOne: {
-        title: translate("modal.wallet.secureAndManage"),
-        description: translate("modal.wallet.safelyStore")
+        title: "Secure & Manage Your Digital Assets",
+        description: "No need to create new accounts or credentials. Connect your wallet and you are good to go!"
       },
       headerTwo: {
-        title: translate("modal.wallet.logInToAny"),
-        description: translate("modal.wallet.noNeedToCreate")
+        title: "Log In to Any NEAR App",
+        description: "No need to create new accounts or credentials. Connect your wallet and you are good to go!"
       },
     },
     moduleList: {

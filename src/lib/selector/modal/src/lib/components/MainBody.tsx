@@ -1,4 +1,3 @@
-import { translate } from "@near-wallet-selector/core";
 import React from "react";
 import { MODAL_DEFAULTS } from "../modal";
 import { MainBodyButton, MainBodyHeaders } from "../modal.types";
@@ -52,8 +51,8 @@ export const MainBody: React.FC<WalletHomeProps> = ({
                 </svg>
               </div>
               <div className="content-side">
-                <h3>{headerOne?.title || translate("modal.wallet.secureAndManage")}</h3>
-                <p>{headerTwo?.description || translate("modal.wallet.safelyStore")}</p>
+                <h3>{headerOne?.title || MODAL_DEFAULTS.trialOver.mainBody.headerOne.title}</h3>
+                <p>{headerTwo?.description || MODAL_DEFAULTS.trialOver.mainBody.headerOne.description}</p>
               </div>
             </div>
           )}
@@ -90,8 +89,8 @@ export const MainBody: React.FC<WalletHomeProps> = ({
                 </svg>
               </div>
               <div className="content-side">
-                <h3>{headerTwo.title || translate("modal.wallet.logInToAny")}</h3>
-                <p>{headerTwo.description || translate("modal.wallet.noNeedToCreate")}</p>
+                <h3>{headerTwo.title || MODAL_DEFAULTS.trialOver.mainBody.headerTwo.title}</h3>
+                <p>{headerTwo.description || MODAL_DEFAULTS.trialOver.mainBody.headerTwo.description}</p>
               </div>
             </div>
           )}
