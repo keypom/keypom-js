@@ -56,7 +56,7 @@ async function createTrialAccount(){
         trialFundsNEAR: 10,
         callableContracts: callableContracts,
         callableMethods: callableContracts.map(() => '*'),
-        maxAttachableDepositPerContract: callableContracts.map(() => '1'),
+        maxAttachableNEARPerContract: callableContracts.map(() => '1'),
         trialEndFloorNEAR: 11
     })
 
