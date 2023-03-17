@@ -311,8 +311,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         console.log('incomingGas: ', incomingGas)
-        const gasToAttach = new BN('170000000000000').add(new BN(incomingGas)).toString();
-        console.log('gasToAttach: ', gasToAttach)
+        let gasToAttach = new BN('35000000000000').add(new BN(incomingGas)).toString();
+        // check if the gas to attach is over 300 TGas and if it is, clamp it
+        if (new BN(gasToAttach).gt(new BN('300000000000000'))) {
+            console.log('gas to attach is over 300 TGas. Clamping it')
+            gasToAttach = '300000000000000';
+        }
 
         const transformedTransactions = await this.transformTransactions([{
             receiverId: account.accountId,
