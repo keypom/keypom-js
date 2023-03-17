@@ -49,7 +49,7 @@ async function createTrialAccount(){
 
     // const newUserName = "benji-monday" + Date.now()
 
-    const {keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} 
+    const {dropId, keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} 
     = await createTrialAccountDrop({
         numKeys: 1,
         contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
@@ -60,13 +60,18 @@ async function createTrialAccount(){
         trialEndFloorNEAR: 11
     })
 
-    const trialMeta = "bafkreiavyvm5qw4pdinqddeisfgl6gx55on4l32bocqqrlardulnrmqmy4"
+    const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
     const keypomInstance = "http://localhost:3030"//"https://testnet.keypom-airfoil.pages.dev"
     console.log(`
     
  ${keypomInstance}/claim/v2.keypom.testnet?meta=${trialMeta}#${trialSecretKeys[0]}
     
     `)
+
+    const drop = await getDropInformation({
+        dropId
+    })
+    console.log('drop: ', drop)
 
     // console.log(`
 	
