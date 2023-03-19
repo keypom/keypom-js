@@ -1,6 +1,7 @@
 import type {
 	WalletBehaviourFactory, WalletModuleFactory
 } from "@near-wallet-selector/core";
+import { MODAL_TYPE } from "../modal/src/lib/modal";
 import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
   
@@ -25,8 +26,8 @@ import { KeypomWallet } from "./wallet";
 	  // 	return keypomWallet.getAccount();
 	  // },
 
-	  showModal() {
-		keypomWallet.showModal();
+	  showModal(modalType = MODAL_TYPE.TRIAL_OVER) {
+		keypomWallet.showModal(modalType);
 	  },
   
 	  async getAccounts() {

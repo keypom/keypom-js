@@ -107,7 +107,7 @@ export const createTrialAccountDrop = async ({
 	trialFundsNEAR?: Number,
 	/** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
 	trialFundsYocto?: string,
-    /** The contracts that the trial account should be able to call. */
+    /** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
     callableContracts: string[],
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
     maxAttachableNEARPerContract: (string | number)[],
@@ -266,7 +266,7 @@ export const createTrialAccountDrop = async ({
                                 public_key: "INSERT_TRIAL_PUBLIC_KEY",
                                 allowance: trialFundsYocto,
                                 receiver_id: "INSERT_NEW_ACCOUNT",
-                                method_names: 'execute',
+                                method_names: 'execute,create_account_and_claim',
                             }],
                         }
                     }),

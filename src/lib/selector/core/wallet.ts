@@ -1,12 +1,12 @@
 import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
 import BN from "bn.js";
-import { Account, KeyPair, Near, transactions } from "near-api-js";
+import { Account, KeyPair, Near, providers, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE } from "../modal/src/lib/modal";
-import { createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv, validateTransactions } from "../utils/keypom-lib";
+import { createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 import { genArgs } from "../utils/keypom-v2-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
@@ -59,8 +59,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.accountId!
     }
 
-    public showModal = () => {
-        this.modal?.show()
+    public showModal = (modalType = MODAL_TYPE.TRIAL_OVER) => {
+        console.log('modalType for show modal: ', modalType)
+        this.modal?.show(modalType)
     }
 
     public checkValidTrialInfo = () => {
@@ -99,6 +100,91 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 );
             })
         );
+    }
+
+    private canExitTrial = async () => {
+        try {
+            const keyInfo = await this.viewMethod({
+                contractId: this.accountId!,
+                methodName: 'get_key_information',
+                args: {},
+            })
+            console.log('keyInfo: ', keyInfo)
+            return keyInfo.trial_data.exit == true
+        } catch(e: any) {
+            console.log('error: ', e)
+        }
+
+        return false;
+    }
+
+    private validateTransactions = async (toValidate) => {
+        console.log('toValidate: ', toValidate)
+    
+        let validInfo = {}
+        try {
+            const rules = await this.viewMethod({
+                contractId: this.accountId!,
+                methodName: 'get_rules',
+                args: {},
+            })
+            let contracts = rules.contracts.split(",");
+            let amounts = rules.amounts.split(",");
+            let methods = rules.methods.split(",");
+
+            for (let i = 0; i < contracts.length; i++) {
+                validInfo[contracts[i]] = {
+                    maxDeposit: amounts[i],
+                    allowableMethods: methods[i] == "*" ? "*" : methods[i].split(":")
+                }
+            }
+        } catch(e: any) {
+            console.log('error: ', e)
+        }
+        console.log('validInfo after view calls: ', validInfo)
+    
+        // Loop through each transaction in the array
+        for (let i = 0; i < toValidate.length; i++) {
+            const transaction = toValidate[i];
+            console.log('transaction: ', transaction)
+            
+            const validInfoForReceiver = validInfo[transaction.receiverId];
+            console.log('validInfoForReceiver: ', validInfoForReceiver)
+            // Check if the contractId is valid
+            if (!validInfoForReceiver) {
+                console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
+                return false;
+            }
+    
+            // Check if the method name is valid
+            if (validInfoForReceiver.allowableMethods != "*" && !validInfoForReceiver.allowableMethods.includes(transaction.methodName)) {
+                console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
+                return false;
+            }
+    
+            // Check if the deposit is valid
+            if (validInfoForReceiver.maxDeposit != "*" && new BN(transaction.deposit).gt(new BN(validInfoForReceiver.maxDeposit))) {
+                console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
+                return false;
+            }
+        }
+    
+        return true;
+    }
+
+    // Make a read-only call to retrieve information from the network
+    private viewMethod = async ({ contractId, methodName, args = {} }) => {
+        const provider = this.near.connection.provider;
+
+        let res: any = await provider.query({
+            request_type: 'call_function',
+            account_id: contractId,
+            method_name: methodName,
+            args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
+            finality: 'optimistic',
+        });
+        
+        return JSON.parse(Buffer.from(res.result).toString());
     }
 
     public parseUrl = () => {
@@ -289,8 +375,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         const { transactions } = params;
         console.log('transactions: ', transactions)
         
+        const shouldExit = await this.canExitTrial();
+        if (shouldExit == true) {
+            this.modal?.show(MODAL_TYPE.TRIAL_OVER);
+            return [FAILED_EXECUTION_OUTCOME];
+        }
+
         const {wrapped: args, toValidate} = genArgs({ transactions })
-        const res = await validateTransactions(toValidate, this.accountId!);
+        const res = await this.validateTransactions(toValidate);
         console.log('res from validate transactions: ', res);
 
         if (res == false) {
