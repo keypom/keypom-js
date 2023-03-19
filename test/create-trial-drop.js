@@ -57,7 +57,7 @@ async function createTrialAccount(){
         callableContracts: callableContracts,
         callableMethods: callableContracts.map(() => '*'),
         maxAttachableNEARPerContract: callableContracts.map(() => '1'),
-        trialEndFloorNEAR: 11
+        trialEndFloorNEAR: 9
     })
 
     const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
