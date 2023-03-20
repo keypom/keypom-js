@@ -48,57 +48,57 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 
 export const createAction = (action) => {
 	switch (action.type) {
-	  case "CreateAccount":
-		return nearTransactions.createAccount();
-	  case "DeployContract": {
-		const { code } = action.params;
-  
-		return nearTransactions.deployContract(code);
-	  }
-	  case "FunctionCall": {
-		const { methodName, args, gas, deposit } = action.params;
-		console.log('deposit: ', deposit)
-		console.log('gas: ', gas)
-		console.log('args: ', args)
-		console.log('methodName: ', methodName)
-  
-		return nearTransactions.functionCall(
-		  methodName,
-		  args,
-		  new BN(gas),
-		  new BN(deposit)
-		);
-	  }
-	  case "Transfer": {
-		const { deposit } = action.params;
-  
-		return nearTransactions.transfer(new BN(deposit));
-	  }
-	  case "Stake": {
-		const { stake, publicKey } = action.params;
-  
-		return nearTransactions.stake(new BN(stake), utils.PublicKey.from(publicKey));
-	  }
-	  case "AddKey": {
-		const { publicKey, accessKey } = action.params;
-  
-		// return nearTransactions.addKey(
-		//   utils.PublicKey.from(publicKey),
-		//   // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
-		//   getAccessKey(accessKey.permission)
-		// );
-	  }
-	  case "DeleteKey": {
-		const { publicKey } = action.params;
-  
-		return nearTransactions.deleteKey(utils.PublicKey.from(publicKey));
-	  }
-	  case "DeleteAccount": {
-		const { beneficiaryId } = action.params;
-  
-		return nearTransactions.deleteAccount(beneficiaryId);
-	  }
-	  default:
-		throw new Error("Invalid action type");
+		case "CreateAccount":
+			return nearTransactions.createAccount();
+		case "DeployContract": {
+			const { code } = action.params;
+
+			return nearTransactions.deployContract(code);
+		}
+		case "FunctionCall": {
+			const { methodName, args, gas, deposit } = action.params;
+			console.log('deposit: ', deposit)
+			console.log('gas: ', gas)
+			console.log('args: ', args)
+			console.log('methodName: ', methodName)
+
+			return nearTransactions.functionCall(
+				methodName,
+				args,
+				new BN(gas),
+				new BN(deposit)
+			);
+		}
+		case "Transfer": {
+			const { deposit } = action.params;
+
+			return nearTransactions.transfer(new BN(deposit));
+		}
+		case "Stake": {
+			const { stake, publicKey } = action.params;
+
+			return nearTransactions.stake(new BN(stake), utils.PublicKey.from(publicKey));
+		}
+		case "AddKey": {
+			const { publicKey, accessKey } = action.params;
+
+			// return nearTransactions.addKey(
+			//   utils.PublicKey.from(publicKey),
+			//   // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
+			//   getAccessKey(accessKey.permission)
+			// );
+		}
+		case "DeleteKey": {
+			const { publicKey } = action.params;
+
+			return nearTransactions.deleteKey(utils.PublicKey.from(publicKey));
+		}
+		case "DeleteAccount": {
+			const { beneficiaryId } = action.params;
+
+			return nearTransactions.deleteAccount(beneficiaryId);
+		}
+		default:
+			throw new Error("Invalid action type");
 	}
-  };
+};

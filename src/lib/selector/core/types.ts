@@ -59,14 +59,14 @@ export interface KeypomInitializeOptions {
 }
 
 export interface KeypomParams {
-	networkId: NetworkId;
-	contractId: string;
-	iconUrl?: string;
-	deprecated?: boolean;
-	desiredUrl?: string;
-	delimiter?: string;
-	modalOptions?: any;
-  }
+    networkId: NetworkId;
+    contractId: string;
+    iconUrl?: string;
+    deprecated?: boolean;
+    desiredUrl?: string;
+    delimiter?: string;
+    modalOptions?: any;
+}
 
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;
@@ -76,4 +76,4 @@ export type KeypomWalletInstant = InstantLinkWallet & {
     isSignedIn: () => Promise<boolean>;
     getAvailableBalance: () => Promise<BN>;
     showModal();
-  };
+};

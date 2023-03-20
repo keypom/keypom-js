@@ -110,18 +110,18 @@ export const claim = async ({
 	secretKey,
 	accountId,
 	newAccountId,
-	newPublicKey, 
+	newPublicKey,
 	password,
 	fcArgs
 }: {
 	/** The private key associated with the Keypom link. This can either contain the `ed25519:` prefix or not. */
 	secretKey: string,
 	/** The account ID of an existing account that will be used to claim the drop. */
-	accountId?: string, 
+	accountId?: string,
 	/** If passed in, a new account ID will be created and the drop will be claimed to that account. This must be an account that does not exist yet. */
-	newAccountId?: string, 
+	newAccountId?: string,
 	/** If creating a new account, a public key must be passed in to be used as the full access key for the newly created account. */
-	newPublicKey?: string, 
+	newPublicKey?: string,
 	/** If a password is required to use the key, it can be passed in */
 	password?: string,
 	/** For FC drops, if `user_args_rule` is set by the funder, when claiming, custom arguments can be passed into the function. The number of args in the array need to match the number of methods being executed. */
@@ -135,53 +135,53 @@ export const claim = async ({
 	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
-	
-	const dropInfo = await getDropInformation({secretKey});
-	
+
+	const dropInfo = await getDropInformation({ secretKey });
+
 	let checkAccounts = true;
 	if (fcArgs) {
 		assert(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
-		
-		const curMethodData = await getCurMethodData({secretKey});
+
+		const curMethodData = await getCurMethodData({ secretKey });
 		if (curMethodData == null) {
 			checkAccounts = false;
 		}
-		
+
 		assert((curMethodData || []).length === fcArgs.length, 'The number of fcArgs must match the number of methods being executed.');
 	}
 
 	if (checkAccounts) {
 		assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
 	}
-	
+
 	const transactions: any[] = [{
 		receiverId,
 		actions: [{
 			type: 'FunctionCall',
-			params: newAccountId ? 
-			{
-				methodName: 'create_account_and_claim',
-				args: {
-					new_account_id: newAccountId,
-					new_public_key: newPublicKey,
-					password,
-					fc_args: fcArgs
-				},
-				gas: attachedGas,
-			}
-			:
-			{
-				methodName: 'claim',
-				args: {
-					account_id: accountId,
-					password,
-					fc_args: fcArgs
-				},
-				gas: attachedGas,
-			}
+			params: newAccountId ?
+				{
+					methodName: 'create_account_and_claim',
+					args: {
+						new_account_id: newAccountId,
+						new_public_key: newPublicKey,
+						password,
+						fc_args: fcArgs
+					},
+					gas: attachedGas,
+				}
+				:
+				{
+					methodName: 'claim',
+					args: {
+						account_id: accountId,
+						password,
+						fc_args: fcArgs
+					},
+					gas: attachedGas,
+				}
 		}]
 	}]
-	
+
 	const result = await execute({ transactions, account: contractAccount })
 
 	return result

@@ -101,7 +101,7 @@ let viewCall: any = undefined;
  * @returns {EnvVars} The environment variables used by the Keypom library.
  * @group Keypom SDK Environment
  */
-export const getEnv = (): EnvVars  => {
+export const getEnv = (): EnvVars => {
 	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
 
 	return {
@@ -113,7 +113,7 @@ export const getEnv = (): EnvVars  => {
 /** @group Utility */
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = async ({ account, wallet }: {account: Account, wallet: any}) : Promise<Account | KeypomWallet> => {
+const getAccount = async ({ account, wallet }: { account: Account, wallet: any }): Promise<Account | KeypomWallet> => {
 
 	if (wallet) {
 		wallet = await wallet
@@ -207,7 +207,7 @@ export const initKeypom = async ({
 	network: string;
 	/**
 	 * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
-     * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
+	 * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
 	 */
 	funder?: Funder;
 	/**
@@ -216,7 +216,7 @@ export const initKeypom = async ({
 	keypomContractId?: string;
 }) => {
 	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
-	
+
 	if (_near) {
 		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
 		near = _near
@@ -229,7 +229,7 @@ export const initKeypom = async ({
 			deps: { keyStore },
 		});
 	}
-	
+
 	connection = near.connection;
 	networkId = near.config.networkId
 
@@ -296,7 +296,7 @@ export const initKeypom = async ({
 */
 export const updateFunder = async ({
 	funder
-}:{funder: Funder}) => {
+}: { funder: Funder }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the funder account.")
 	assert(isValidFunderObject(funder), "The funder object passed in is not valid. Please pass in a valid funder object.");
 	assert(funder.secretKey || funder.seedPhrase, "The funder object passed in must have either a secretKey or seedphrase");
@@ -307,7 +307,7 @@ export const updateFunder = async ({
 	}
 	funder.fundingKeyPair = KeyPair.fromString(secretKey!)
 	await keyStore!.setKey(networkId!, accountId, funder.fundingKeyPair)
-	
+
 	fundingAccountDetails = funder;
 	fundingAccount = new Account(connection!, accountId)
 
@@ -347,7 +347,7 @@ export const updateFunder = async ({
 */
 export const updateKeypomContractId = async ({
 	keypomContractId
-}:{keypomContractId: string}) => {
+}: { keypomContractId: string }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
 	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
 	if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
