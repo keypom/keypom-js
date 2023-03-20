@@ -13,7 +13,6 @@ const {
 } = nearAPI;
 
 
-import { Action, FunctionCallAction } from "@near-wallet-selector/core";
 import { BN } from "bn.js";
 
 const gas = '200000000000000'

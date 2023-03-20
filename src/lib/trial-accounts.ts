@@ -14,7 +14,7 @@ import { FTData } from './types/ft';
 import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit,
-	ftTransferCall, generateKeys, generatePerUsePasswords, getPubFromSecret, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
+	ftTransferCall, generateKeys, generatePerUsePasswords, getPubFromSecret, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount, wrapParams
 } from "./keypom-utils";
 import { NFTData } from './types/nft';
 import { ProtocolReturnedDrop, ProtocolReturnedDropConfig, ProtocolReturnedMethod } from './types/protocol';
@@ -22,7 +22,6 @@ import { SimpleData } from './types/simple';
 import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
 import { getDropInformation, getUserBalance } from './views';
 import { DropConfig } from './types/drops';
-import { wrapParams } from './selector/utils/keypom-v2-utils';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const KEY_LIMIT = 50;
@@ -76,8 +75,8 @@ export const createTrialAccountDrop = async ({
 	account,
 	wallet,
     contractBytes,
-    trialFundsNEAR,
-    trialFundsYocto,
+    startingBalanceNEAR,
+    startingBalanceYocto,
     callableContracts,
     maxAttachableNEARPerContract,
 	maxAttachableYoctoPerContract,
@@ -103,10 +102,10 @@ export const createTrialAccountDrop = async ({
 	wallet?: AnyWallet,
     /** Bytes of the trial account smart contract */
     contractBytes: number[],
-    /** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-	trialFundsNEAR?: Number,
-	/** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
-	trialFundsYocto?: string,
+    /** How much $NEAR should the trial account start with? Unit in $NEAR (i.e `1` = 1 $NEAR) */
+	startingBalanceNEAR?: string | number,
+	/** How much $NEAR should the trial account start with? Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
+	startingBalanceYocto?: string,
     /** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
     callableContracts: string[],
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
@@ -216,10 +215,10 @@ export const createTrialAccountDrop = async ({
 	numKeys = publicKeys!.length;
 
     /// parse args
-	if (trialFundsNEAR) {
-		trialFundsYocto = parseNearAmount(trialFundsNEAR.toString()) || '0'
+	if (startingBalanceNEAR) {
+		startingBalanceYocto = parseNearAmount(startingBalanceNEAR.toString()) || '0'
 	}
-	if (!trialFundsYocto) trialFundsYocto = '0';
+	if (!startingBalanceYocto) startingBalanceYocto = '0';
 
     if (repayAmountNEAR) {
 		repayAmountYocto = parseNearAmount(repayAmountNEAR.toString()) || '0'
@@ -241,7 +240,7 @@ export const createTrialAccountDrop = async ({
 	// If !maxAttachableYoctoPerContract, create an array of the same size as callableMethods and fill it with "*"
 	if (!maxAttachableYoctoPerContract) maxAttachableYoctoPerContract = Array(callableMethods.length).fill("*");
 
-    const attachedDeposit = new BN(trialFundsYocto).add(new BN(parseNearAmount("0.3"))).toString();
+    const attachedDeposit = new BN(startingBalanceYocto).add(new BN(parseNearAmount("0.3"))).toString();
     const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
 
 	const createDropArgs: CreateDropProtocolArgs = {
@@ -264,7 +263,7 @@ export const createTrialAccountDrop = async ({
                             contract_bytes: contractBytes,
                             limited_access_keys: [{
                                 public_key: "INSERT_TRIAL_PUBLIC_KEY",
-                                allowance: trialFundsYocto,
+                                allowance: '0',
                                 receiver_id: "INSERT_NEW_ACCOUNT",
                                 method_names: 'execute,create_account_and_claim',
                             }],
@@ -303,7 +302,7 @@ export const createTrialAccountDrop = async ({
                     contract_bytes: contractBytes,
                     limited_access_keys: [{
                         public_key: "INSERT_TRIAL_PUBLIC_KEY",
-                        allowance: trialFundsYocto,
+                        allowance: "0",
                         receiver_id: "INSERT_NEW_ACCOUNT",
                         method_names: 'execute',
                     }],

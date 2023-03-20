@@ -4,10 +4,10 @@ import { Account, KeyPair, Near, providers, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
+import { genArgs } from "../../keypom-utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE } from "../modal/src/lib/modal";
 import { createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
-import { genArgs } from "../utils/keypom-v2-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -110,6 +110,21 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 args: {},
             })
             console.log('keyInfo: ', keyInfo)
+
+            const floor = await this.viewMethod({
+                contractId: this.accountId!,
+                methodName: 'get_floor',
+                args: {},
+            })
+            console.log('floor: ', floor)
+
+            const rules = await this.viewMethod({
+                contractId: this.accountId!,
+                methodName: 'get_rules',
+                args: {},
+            })
+            console.log('rules: ', rules)
+
             return keyInfo.trial_data.exit == true
         } catch(e: any) {
             console.log('error: ', e)
@@ -394,16 +409,35 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         const account = await this.near.account(this.accountId!);
 
-        let incomingGas;
+        let incomingGas = new BN("0");
+        let numActions = 0;
         try {
-            incomingGas = (args as any).transactions[0].actions[0].params[`|kP|gas`].split(`|kS|`)[0].toString();
+            for (let i = 0; i < (args as any).transactions.length; i++) {
+                let transaction = (args as any).transactions[i];
+                console.log('transaction in gas loop: ', transaction)
+                for (let j = 0; j < transaction.actions.length; j++) {
+                    let action = transaction.actions[j];
+                    console.log('action in gas loop: ', action)
+                    let gasToAdd = action.params[`|kP|gas`].split(`|kS|`)[0].toString();
+                    console.log('gasToAdd: ', gasToAdd)
+                    incomingGas = incomingGas.add(new BN(gasToAdd));
+                    numActions += 1
+                }
+            }
         } catch(e) {
+            numActions = 1;
             console.log('e: ', e)
-            incomingGas = `200000000000000`;
+            incomingGas = new BN(`300000000000000`);
         }
 
-        console.log('incomingGas: ', incomingGas)
-        let gasToAttach = new BN('35000000000000').add(new BN(incomingGas)).toString();
+        console.log('incomingGas: ', incomingGas.toString())
+        // Take 15 TGas as a base for loading rules as well as 20 TGas for the callback.
+        // For each action, add 15 TGas on top of that and then add the final incoming gas on top.
+        let gasToAttach = new BN('15000000000000') // Loading rules
+            .add(new BN('20000000000000')) // Callback
+            .add(new BN('15000000000000').mul(new BN(numActions))) // Actions
+            .add(incomingGas).toString(); // Incoming gas
+
         // check if the gas to attach is over 300 TGas and if it is, clamp it
         if (new BN(gasToAttach).gt(new BN('300000000000000'))) {
             console.log('gas to attach is over 300 TGas. Clamping it')
