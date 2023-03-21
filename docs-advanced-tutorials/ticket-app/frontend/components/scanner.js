@@ -50,7 +50,7 @@ export const Scanner = () => {
   });
 
   // Functions that only run when scanner is mounted 
-  // connect to NEAR, initKeypom, and get password
+  // Get password
   useEffect(() => {
       let PASSWORD = "NULL"
       PASSWORD = prompt("Enter base password for drop")
