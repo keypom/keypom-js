@@ -100,7 +100,7 @@ export const Scanner = () => {
             }
             setMasterStatus(tempMaster1)
 
-            // Wait 3s, then flip go back to stage 1
+            // Wait 3s, then flip go back to pre-claim
             await timeout(3000)
             var emptyRes = new Array(splitRes.length)
             setSplitRes(emptyRes)
@@ -125,7 +125,7 @@ export const Scanner = () => {
           }
           setMasterStatus(tempMaster1)
 
-          // Wait 3s, then flip go back to stage 1
+          // Wait 3s, then flip go back to pre-claim
           await timeout(3000)
           var emptyRes = new Array(splitRes.length)
           setSplitRes(emptyRes)

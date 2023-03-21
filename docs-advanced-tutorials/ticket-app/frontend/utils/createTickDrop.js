@@ -24,9 +24,9 @@ async function createTickDrop(){
 
     let near = await connect(nearConfig);
     const fundingAccount = await near.account('minqi.testnet'); 
+    
     // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
     // Here we are connecting to the testnet network
-
     await initKeypom({
         near: near,
         network: "testnet"
@@ -75,13 +75,11 @@ async function createTickDrop(){
     const {contractId: KEYPOM_CONTRACT} = getEnv()
     // Creating list of pk's and linkdrops; copied from orignal simple-create.js
     for(var i = 0; i < keys.keyPairs.length; i++) {
-        let linkdropUrl = formatLinkdropUrl({
-            customURL: "https://testnet.mynearwallet.com/linkdrop#CONTRACT_ID/SECRET_KEY",
-            secretKeys: keys.secretKeys[i]
-          })
-        dropInfo[pubKeys[i]] = linkdropUrl;
+        // Replace this with your desired URL format. 
+        let url = `http://localhost:1234/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`
+        dropInfo[pubKeys[i]] = url;
     }   
-    // Write file of all pk's and their respective linkdrops
+    // Console log all pk's and their respective links
     console.log('Public Keys and Linkdrops: ', dropInfo)
     console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
     return keys
