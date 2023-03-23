@@ -61,12 +61,6 @@ export const assertValidDropConfig = (config?: ProtocolReturnedDropConfig) => {
 
 export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: string, usesPerKey: number) => {
     const { networkId } = getEnv();
-
-    if (fcData?.config?.attachedGas) {
-        assert(depositPerUse == "0", "Cannot specify gas to attach and have a balance in the linkdrop")
-        assert(new BN(fcData.config.attachedGas).lte(new BN("80000000000000")), "Cannot have 0 attached gas");
-    }
-
     if (fcData?.methods) {
         const numMethodData = fcData.methods.length;
 
@@ -102,8 +96,8 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
 
 export const assertDropIdUnique = async (dropId: string) => {
     const {
-		viewCall, contractId
-	} = getEnv()
+        viewCall, contractId
+    } = getEnv()
 
     try {
         const dropInfo = await viewCall({
@@ -114,5 +108,5 @@ export const assertDropIdUnique = async (dropId: string) => {
             }
         })
         assert(!dropInfo, `Drop with ID ${dropId} already exists. Please use a different drop ID.`);
-    } catch(_) {}
+    } catch (_) { }
 }

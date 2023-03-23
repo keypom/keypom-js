@@ -6,31 +6,33 @@ export declare const officialKeypomContracts: {
         "v1.keypom.near": boolean;
         "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
+        "v2.keypom.near": boolean;
     };
     testnet: {
         "v1.keypom.testnet": boolean;
         "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
+        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedKeypomContracts: {
     mainnet: {
-        "v1-3.keypom.near": boolean;
         "v1-4.keypom.near": boolean;
+        "v2.keypom.near": boolean;
     };
     testnet: {
-        "v1-3.keypom.testnet": boolean;
         "v1-4.keypom.testnet": boolean;
+        "v2.keypom.testnet": boolean;
     };
 };
 export declare const supportedLinkdropClaimPages: {
     mainnet: {
         mynearwallet: string;
-        "wallet.near.org": string;
+        keypom: string;
     };
     testnet: {
         mynearwallet: string;
-        "wallet.near.org": string;
+        keypom: string;
     };
 };
 export type Maybe<T> = T | undefined;

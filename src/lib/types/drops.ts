@@ -79,26 +79,6 @@ export interface DropConfig {
      * It's important to note that this root account *MUST* have a smart contract deployed that has a method `create_account`.
     */
 	dropRoot?: string,
-
-    /** When calling `create_account` on the root account, which keypom args should be attached to the payload. */
-    accountCreationFields?: {
-        /**
-         * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the `create_account` function.
-        */
-        accountIdField?: string,
-        /**
-         * Specifies what field Keypom should auto-inject the drop's ID into when calling the `create_account` function.
-        */
-        dropIdField?: string,
-        /**
-         * Specifies what field Keypom should auto-inject the key's ID into when calling the `create_account` function.
-        */
-        keyIdField?: string,
-        /**
-         * Specifies what field Keypom should auto-inject the drop funder's account ID into when calling the `create_account` function.
-        */
-        funderIdField?: string,
-    },
 }
 
 /** 
@@ -152,6 +132,25 @@ export interface UsageConfig {
      * In the case where `autoDeleteDrop` is set to true and the drop is the owner's last, should their balance be automatically withdrawn? If this isn't specified, it defaults to false.
      */
     autoWithdraw?: boolean
+    /** When calling `create_account` on the root account, which keypom args should be attached to the payload. */
+    accountCreationFields?: {
+        /**
+         * Specifies what field Keypom should auto-inject the account that claimed the drop's ID into when calling the `create_account` function.
+        */
+        accountIdField?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the drop's ID into when calling the `create_account` function.
+        */
+        dropIdField?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the key's ID into when calling the `create_account` function.
+        */
+        keyIdField?: string,
+        /**
+         * Specifies what field Keypom should auto-inject the drop funder's account ID into when calling the `create_account` function.
+        */
+        funderIdField?: string,
+    },
 }
 
 /** 

@@ -480,12 +480,11 @@ export declare const getNftTokenIDsForDrop: ({ dropId, start, limit }: {
  * });
  *
  * // Query for the drop information for a specific drop
- * const dropInfo = await getDropInformation({
- * dropId: "1669840629120",
- * withKeys: true
+ * const userBal = await getUserBalance({
+ * accountId: "benjiman.testnet",
  * })
  *
- * console.log('dropInfo: ', dropInfo)
+ * console.log('userBal: ', userBal)
  * ```
  * @group View Functions
 */

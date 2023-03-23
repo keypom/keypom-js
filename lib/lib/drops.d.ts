@@ -134,7 +134,7 @@ export declare const KEY_LIMIT = 50;
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions, successUrl }: {
+export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, requiredGas, config, ftData, nftData, simpleData, fcData, basePassword, passwordProtectedUses, useBalance, returnTransactions, successUrl }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: nearAPI.Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
@@ -156,6 +156,8 @@ export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys
     config?: DropConfig | undefined;
     /** String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON. */
     metadata?: string | undefined;
+    /** Allows you to overload how much gas should be attached to the transaction when the key is claimed. This should be in Gas units (1 TGas = 1000000000000). By default, 100 TGas is attached. */
+    requiredGas?: string | undefined;
     /** For creating a simple drop, this contains necessary configurable information about the drop. */
     simpleData?: SimpleData | undefined;
     /** For creating a fungible token drop, this contains necessary configurable information about the drop. */

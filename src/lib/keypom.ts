@@ -17,6 +17,11 @@ import { EnvVars, Funder } from "./types/general";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
+type KeypomWallet = {
+	accountId: string,
+	signAndSendTransactions: any;
+}
+
 const gas = '200000000000000'
 const gas300 = '300000000000000'
 const attachedGas = '100000000000000'
@@ -41,39 +46,41 @@ export const officialKeypomContracts = {
 	mainnet: {
 		"v1.keypom.near": true,
 		"v1-3.keypom.near": true,
-		"v1-4.keypom.near": true
+		"v1-4.keypom.near": true,
+		"v2.keypom.near": true,
 	},
 	testnet: {
 		"v1.keypom.testnet": true,
 		"v1-3.keypom.testnet": true,
-		"v1-4.keypom.testnet": true
+		"v1-4.keypom.testnet": true,
+		"v2.keypom.testnet": true,
 	}
 }
 
 export const supportedKeypomContracts = {
 	mainnet: {
-		"v1-3.keypom.near": true,
-		"v1-4.keypom.near": true
+		"v1-4.keypom.near": true,
+		"v2.keypom.near": true
 	},
 	testnet: {
-		"v1-3.keypom.testnet": true,
-		"v1-4.keypom.testnet": true
+		"v1-4.keypom.testnet": true,
+		"v2.keypom.testnet": true,
 	}
 }
 
 export const supportedLinkdropClaimPages = {
 	mainnet: {
-		"mynearwallet": "https://app.mynearwallet.com/linkdrop",
-		"wallet.near.org": "https://wallet.near.org/linkdrop",
+		"mynearwallet": `https://app.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY`,
+		"keypom": "https://keypom.xyz/claim/CONTRACT_ID#SECRET_KEY"
 
 	},
 	testnet: {
-		"mynearwallet": "https://app.testnet.mynearwallet.com/linkdrop",
-		"wallet.near.org": "https://wallet.testnet.near.org/linkdrop"
+		"mynearwallet": "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+		"keypom": "https://testnet.keypom.xyz/claim/CONTRACT_ID#SECRET_KEY"
 	}
 }
 
-let contractBase = 'v1-4.keypom'
+let contractBase = 'v2.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
 
@@ -94,7 +101,7 @@ let viewCall: any = undefined;
  * @returns {EnvVars} The environment variables used by the Keypom library.
  * @group Keypom SDK Environment
  */
-export const getEnv = (): EnvVars  => {
+export const getEnv = (): EnvVars => {
 	assert(near, 'Keypom uninitialized. Please call initKeypom or initKeypomContext')
 
 	return {
@@ -106,8 +113,15 @@ export const getEnv = (): EnvVars  => {
 /** @group Utility */
 export const execute = async (args) => _execute({ ...args, fundingAccount })
 
-const getAccount = async ({ account, wallet }: {account: Account, wallet: AnyWallet}) : Promise<Account | AnyWallet> => {
-	let returnedAccount = account || await wallet || fundingAccount;
+const getAccount = async ({ account, wallet }: { account: Account, wallet: any }): Promise<Account | KeypomWallet> => {
+
+	if (wallet) {
+		wallet = await wallet
+		assert(wallet.signAndSendTransactions, 'Incorrect wallet type');
+		wallet.accountId = (await wallet.getAccounts())[0].accountId
+	}
+
+	let returnedAccount = account || wallet || fundingAccount;
 
 	// If neither a wallet object, account object, or funding account is provided, throw an error
 	assert(returnedAccount, 'No account provided. Either pass in an account object, wallet object, or initialize Keypom with a funding account')
@@ -193,7 +207,7 @@ export const initKeypom = async ({
 	network: string;
 	/**
 	 * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
-     * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
+	 * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
 	 */
 	funder?: Funder;
 	/**
@@ -202,7 +216,7 @@ export const initKeypom = async ({
 	keypomContractId?: string;
 }) => {
 	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
-	
+
 	if (_near) {
 		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
 		near = _near
@@ -215,7 +229,7 @@ export const initKeypom = async ({
 			deps: { keyStore },
 		});
 	}
-	
+
 	connection = near.connection;
 	networkId = near.config.networkId
 
@@ -282,7 +296,7 @@ export const initKeypom = async ({
 */
 export const updateFunder = async ({
 	funder
-}:{funder: Funder}) => {
+}: { funder: Funder }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the funder account.")
 	assert(isValidFunderObject(funder), "The funder object passed in is not valid. Please pass in a valid funder object.");
 	assert(funder.secretKey || funder.seedPhrase, "The funder object passed in must have either a secretKey or seedphrase");
@@ -293,7 +307,7 @@ export const updateFunder = async ({
 	}
 	funder.fundingKeyPair = KeyPair.fromString(secretKey!)
 	await keyStore!.setKey(networkId!, accountId, funder.fundingKeyPair)
-	
+
 	fundingAccountDetails = funder;
 	fundingAccount = new Account(connection!, accountId)
 
@@ -333,7 +347,7 @@ export const updateFunder = async ({
 */
 export const updateKeypomContractId = async ({
 	keypomContractId
-}:{keypomContractId: string}) => {
+}: { keypomContractId: string }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
 	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
 	if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {

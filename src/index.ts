@@ -1,3 +1,5 @@
+export type { KeypomWallet } from "./lib/selector/core/wallet";
+export { setupKeypom } from "./lib/selector/core/setup";
 export {
 	addToBalance,
 	withdrawBalance
@@ -20,7 +22,7 @@ export {
 import { exportedNearAPI } from "./lib/keypom-utils";
 export const {
 	/** @group Utility */
-	parseNearAmount, 
+	parseNearAmount,
 	/** @group Utility */
 	formatNearAmount
 } = exportedNearAPI.utils.format;
@@ -32,6 +34,10 @@ export {
 	createDrop,
 	deleteDrops,
 } from "./lib/drops";
+export {
+	createTrialAccountDrop,
+	claimTrialAccountDrop
+} from "./lib/trial-accounts";
 export {
 	addKeys,
 	deleteKeys
@@ -45,7 +51,8 @@ export {
 	initKeypom,
 	getEnv,
 	updateKeypomContractId,
-	updateFunder
+	updateFunder,
+	supportedLinkdropClaimPages
 } from "./lib/keypom";
 export * from "./lib/views";
 export * from "./lib/sales";

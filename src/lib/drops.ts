@@ -15,7 +15,7 @@ import { FTData } from './types/ft';
 import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit,
-	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nftTransferCall, parseFTAmount
+	ftTransferCall, generateKeys, generatePerUsePasswords, getStorageBase, key2str, keypomView, nearArgsToYocto, nftTransferCall, parseFTAmount
 } from "./keypom-utils";
 import { NFTData } from './types/nft';
 import { ProtocolReturnedDrop, ProtocolReturnedDropConfig, ProtocolReturnedMethod } from './types/protocol';
@@ -161,6 +161,7 @@ export const createDrop = async ({
 	depositPerUseNEAR,
 	depositPerUseYocto,
 	metadata,
+	requiredGas,
 	config = {},
 	ftData,
 	nftData,
@@ -178,13 +179,14 @@ export const createDrop = async ({
 	wallet?: AnyWallet,
 	/**
 	 * Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed in, the keys will be
-     * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly. 
+	 * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly. 
+	 * If this is not passed in, the publicKeys parameter *must* be passed in.
 	*/
-	numKeys: number,
+	numKeys?: number,
 	/** Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter. */
 	publicKeys?: string[],
 	/** How much $NEAR should be contained in each link. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-	depositPerUseNEAR?: Number,
+	depositPerUseNEAR?: number | string,
 	/** How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
 	depositPerUseYocto?: string,
 	/** Specify a custom drop ID rather than using the incrementing nonce on the contract. */
@@ -193,6 +195,8 @@ export const createDrop = async ({
 	config?: DropConfig,
 	/** String of metadata to attach to the drop. This can be whatever you would like and is optional. Often this is stringified JSON. */
 	metadata?: string,
+	/** Allows you to overload how much gas should be attached to the transaction when the key is claimed. This should be in Gas units (1 TGas = 1000000000000). By default, 100 TGas is attached. */
+	requiredGas?: string,
 	/** For creating a simple drop, this contains necessary configurable information about the drop. */
 	simpleData?: SimpleData
 	/** For creating a fungible token drop, this contains necessary configurable information about the drop. */
@@ -204,9 +208,9 @@ export const createDrop = async ({
 	/** Specify an entropy to use for generating keys (will overload the funder's rootEntropy if applicable). This parameter only matters if the publicKeys variable is not passed in. */
 	rootEntropy?: string,
 	/** For doing password protected drops, this is the base password that will be used to generate all the passwords. It will be double hashed with the public keys. If specified, by default, all key uses will have their own unique password unless passwordProtectedUses is passed in. */
-    basePassword?: string,
+	basePassword?: string,
 	/** For doing password protected drops, specifies exactly which uses will be password protected. The uses are NOT zero indexed (i.e 1st use = 1). Each use will have a different, unique password generated via double hashing the base password + public key + key use. */
-    passwordProtectedUses?: number[],
+	passwordProtectedUses?: number[],
 	/** If the account has a balance within the Keypom contract, set this to true to avoid the need to attach a deposit. If the account doesn't have enough balance, an error will throw. */
 	useBalance?: boolean,
 	/** If true, the transaction will be returned instead of being signed and sent. This is useful for getting the requiredDeposit from the return value without actually signing the transaction. */
@@ -222,12 +226,10 @@ export const createDrop = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
+	assert(publicKeys || numKeys, 'Must pass in either publicKeys or numKeys to create a drop.');
 
 	/// parse args
-	if (depositPerUseNEAR) {
-		depositPerUseYocto = parseNearAmount(depositPerUseNEAR.toString()) || '0'
-	}
-	if (!depositPerUseYocto) depositPerUseYocto = '0'
+	depositPerUseYocto = nearArgsToYocto(depositPerUseNEAR, depositPerUseYocto);
 
 	// Ensure that if the dropID is passed in, it's greater than 1 billion
 	assert(parseInt(dropId || "1000000000") >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
@@ -243,6 +245,12 @@ export const createDrop = async ({
 			auto_withdraw: config?.usage?.autoWithdraw || true,
 			permissions: config?.usage?.permissions,
 			refund_deposit: config?.usage?.refundDeposit,
+			account_creation_fields: {
+				account_id_field: config?.usage?.accountCreationFields?.accountIdField,
+				drop_id_field: config?.usage?.accountCreationFields?.dropIdField,
+				key_id_field: config?.usage?.accountCreationFields?.keyIdField,
+				funder_id_field: config?.usage?.accountCreationFields?.funderIdField
+			}
 		},
 		sale: config?.sale ? {
 			max_num_keys: config?.sale?.maxNumKeys,
@@ -261,13 +269,13 @@ export const createDrop = async ({
 	// If there are no publicKeys being passed in, we should generate our own based on the number of keys
 	if (!publicKeys) {
 		var keys;
-		
+
 		// Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
 		const rootEntropyUsed = rootEntropy || fundingAccountDetails?.rootEntropy;
 		// If either root entropy was passed into the function or the funder has some set, we should use that.
-		if(rootEntropyUsed) {
+		if (rootEntropyUsed) {
 			// Create an array of size numKeys with increasing strings from 0 -> numKeys - 1. Each element should also contain the dropId infront of the string 
-			const nonceDropIdMeta = Array.from({length: numKeys}, (_, i) => `${dropId}_${i}`);
+			const nonceDropIdMeta = Array.from({ length: numKeys }, (_, i) => `${dropId}_${i}`);
 			keys = await generateKeys({
 				numKeys,
 				rootEntropy: rootEntropyUsed,
@@ -279,7 +287,7 @@ export const createDrop = async ({
 				numKeys,
 			});
 		}
-		
+
 		publicKeys = keys.publicKeys
 	}
 
@@ -287,18 +295,18 @@ export const createDrop = async ({
 	let passwords;
 	if (basePassword) {
 		assert(numKeys <= 50, "Cannot add 50 keys at once with passwords");
-		
+
 		// Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
 		passwords = await generatePerUsePasswords({
 			publicKeys: publicKeys!,
 			basePassword,
-			uses: passwordProtectedUses || Array.from({length: config?.usesPerKey || 1}, (_, i) => i+1)
+			uses: passwordProtectedUses || Array.from({ length: config?.usesPerKey || 1 }, (_, i) => i + 1)
 		})
 	}
 
 	if (ftData) {
 		var ftBalancePerUse = ftData?.absoluteAmount || "0"
-		
+
 		if (ftData.amount) {
 			const metadata = viewCall({
 				contractId: ftData.contractId,
@@ -316,6 +324,7 @@ export const createDrop = async ({
 		deposit_per_use: depositPerUseYocto,
 		config: finalConfig,
 		metadata,
+		required_gas: requiredGas,
 		ft: ftData?.contractId ? ({
 			contract_id: ftData.contractId,
 			sender_id: ftData.senderId,
@@ -326,25 +335,24 @@ export const createDrop = async ({
 			sender_id: nftData.senderId,
 		}) : undefined,
 		fc: fcData?.methods ? ({
-			config: fcData.config ? ({
-				attached_gas: fcData.config?.attachedGas,
-			}) : undefined,
-			methods: fcData.methods.map((useMethods) => 
-				useMethods ? 
-				useMethods.map((method) => {
-					let ret: ProtocolReturnedMethod = {
-						receiver_id: method.receiverId,
-						method_name: method.methodName,
-						args: method.args,
-						attached_deposit: method.attachedDeposit,
-						account_id_field: method.accountIdField,
-						drop_id_field: method.dropIdField,
-						key_id_field: method.keyIdField,
-						funder_id_field: method.funderIdField,
-						user_args_rule: method.userArgsRule
-					}
-					return ret
-				}) : undefined
+			methods: fcData.methods.map((useMethods) =>
+				useMethods ?
+					useMethods.map((method) => {
+						let ret: ProtocolReturnedMethod = {
+							receiver_id: method.receiverId,
+							method_name: method.methodName,
+							args: method.args,
+							attached_deposit: method.attachedDeposit,
+							attached_gas: method.attachedGas,
+							account_id_field: method.accountIdField,
+							drop_id_field: method.dropIdField,
+							key_id_field: method.keyIdField,
+							funder_id_field: method.funderIdField,
+							receiver_to_claimer: method.receiverToClaimer,
+							user_args_rule: method.userArgsRule
+						}
+						return ret
+					}) : undefined
 			)
 		}) : undefined,
 		simple: simpleData?.lazyRegister ? ({
@@ -365,16 +373,16 @@ export const createDrop = async ({
 		depositPerUse: depositPerUseYocto,
 		numKeys,
 		usesPerKey: finalConfig.uses_per_key || 1,
-		attachedGas: parseInt(attachedGas!),
+		attachedGas: parseInt(requiredGas || attachedGas!),
 		storage: storageCalculated,
 		ftData,
 		fcData,
 	})
 
 	var hasBalance = false;
-	if(useBalance) {
-		let userBal = await getUserBalance({accountId: account!.accountId});
-		if(userBal < requiredDeposit) {
+	if (useBalance) {
+		let userBal = new BN(await getUserBalance({ accountId: account!.accountId }));
+		if (userBal.lt(new BN(requiredDeposit))) {
 			throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
 		}
 
@@ -382,7 +390,7 @@ export const createDrop = async ({
 	}
 
 	const deposit = !hasBalance ? requiredDeposit : '0'
-	
+
 	let transactions: Transaction[] = []
 
 	transactions.push({
@@ -408,7 +416,7 @@ export const createDrop = async ({
 			returnTransaction: true
 		}) as Transaction)
 	}
-	
+
 	let tokenIds = nftData?.tokenIds
 	if (nftData && tokenIds && tokenIds?.length > 0) {
 		if (tokenIds.length > 2) {
@@ -423,7 +431,7 @@ export const createDrop = async ({
 		}) as Transaction[]
 		transactions = transactions.concat(nftTXs)
 	}
-	
+
 	if (returnTransactions) {
 		return { keys, dropId, transactions, requiredDeposit }
 	}
@@ -498,20 +506,20 @@ export const deleteDrops = async ({
 	const {
 		gas300, receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
-	
+
 	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
-	
+
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
-	
+
 	// If the drop information isn't passed in, we should get it from the drop IDs
 	if (!drops) {
-		if (!dropIds) {throw new Error('Must pass in either drops or dropIds')};
+		if (!dropIds) { throw new Error('Must pass in either drops or dropIds') };
 
 		// For each drop ID in drop IDs, get the drop information	
 		drops = [];
 		await Promise.all(await (dropIds.map(async (dropId) => {
-			drops?.push(await getDropInformation({dropId}))
+			drops?.push(await getDropInformation({ dropId }))
 		})));
 	}
 
@@ -529,7 +537,7 @@ export const deleteDrops = async ({
 
 		const updateKeys = async () => {
 			let keyPromises = [
-				(async() => {
+				(async () => {
 					keySupply = await keypomView({
 						methodName: 'get_key_supply_for_drop',
 						args: {
@@ -538,8 +546,8 @@ export const deleteDrops = async ({
 					})
 				})()
 			]
-	
-			keyPromises.push((async() => {
+
+			keyPromises.push((async () => {
 				keys = await keypomView({
 					methodName: 'get_keys_for_drop',
 					args: {
@@ -549,7 +557,7 @@ export const deleteDrops = async ({
 					}
 				})
 			})())
-			
+
 			await Promise.all(keyPromises)
 		}
 		await updateKeys()
@@ -558,7 +566,7 @@ export const deleteDrops = async ({
 
 		if (registered_uses !== 0 && (ft !== undefined || nft !== undefined)) {
 			responses.push(...(await execute({
-				account, 
+				account,
 				wallet,
 				transactions: [{
 					receiverId,

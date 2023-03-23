@@ -23,7 +23,7 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
  * ```
  * @group User Balance Functions
 */
-export declare const addToBalance: ({ account, wallet, amount, absoluteAmount }: {
+export declare const addToBalance: ({ account, wallet, amountNear, amountYocto, successUrl, }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
@@ -33,13 +33,15 @@ export declare const addToBalance: ({ account, wallet, amount, absoluteAmount }:
      * @example
      * Transferring one $NEAR should be passed in as "1000000000000000000000000" and NOT "1"
     */
-    absoluteAmount?: string | undefined;
+    amountYocto?: string | undefined;
     /**
      * Human readable format for the amount of tokens to add.
      * @example
      * Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
      */
-    amount?: string | undefined;
+    amountNear?: string | undefined;
+    /** When signing with a wallet, a success URl can be included that the user will be redirected to once the transaction has been successfully signed. */
+    successUrl?: string | undefined;
 }) => Promise<any>;
 /**
  * Withdraw all the $NEAR from your balance in the Keypom contract.

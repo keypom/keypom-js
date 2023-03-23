@@ -4,6 +4,7 @@ import { getEnv } from "./keypom";
 
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
+import { nearArgsToYocto } from "./keypom-utils";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -32,8 +33,9 @@ type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const addToBalance = async ({
 	account,
 	wallet,
-	amount,
-    absoluteAmount
+	amountNear,
+	amountYocto,
+	successUrl,
 }: {
 	/** Account object that if passed in, will be used to sign the txn instead of the funder account. */
 	account?: Account,
@@ -44,13 +46,15 @@ export const addToBalance = async ({
 	 * @example
 	 * Transferring one $NEAR should be passed in as "1000000000000000000000000" and NOT "1" 
 	*/
-	absoluteAmount?: string
+	amountYocto?: string
 	/**
 	 * Human readable format for the amount of tokens to add.
 	 * @example
 	 * Example: transferring one $NEAR should be passed in as "1" and NOT "1000000000000000000000000"
 	 */
-	amount?: string,
+	amountNear?: string,
+	/** When signing with a wallet, a success URl can be included that the user will be redirected to once the transaction has been successfully signed. */
+	successUrl?: string
 }) => {
 	const {
 		receiverId, execute, getAccount
@@ -59,11 +63,9 @@ export const addToBalance = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 
-    let deposit = absoluteAmount || '0';
-    if (amount) {
-        deposit = parseNearAmount(amount.toString()) || "0";
-    }
-
+	let deposit = nearArgsToYocto(amountNear, amountYocto)
+	assert(amountYocto != "0", 'Amount to add to balance cannot be 0.');
+	
 	const actions: any[] = []
 	actions.push({
 		type: 'FunctionCall',
@@ -71,7 +73,7 @@ export const addToBalance = async ({
 			methodName: 'add_to_balance',
 			args: {},
 			gas: '100000000000000',
-            deposit,
+			deposit,
 		}
 	})
 
@@ -80,7 +82,7 @@ export const addToBalance = async ({
 		actions,
 	}]
 
-	return execute({ transactions, account, wallet })
+	return execute({ transactions, account, wallet, successUrl })
 }
 
 /**

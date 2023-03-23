@@ -28,7 +28,7 @@ export declare const key2str: (v: any) => any;
  * ```
  * @group Utility
  */
-export declare const getPubFromSecret: (secretKey: string) => Promise<string>;
+export declare const getPubFromSecret: (secretKey: string) => string;
 /**
  * Check whether or not a given account ID exists on the network.
  *
@@ -153,28 +153,96 @@ export declare const createNFTSeries: ({ account, wallet, dropId, metadata, roya
     royalty?: Map<string, number> | undefined;
 }) => Promise<void | FinalExecutionOutcome[]>;
 /**
- * Constructs a valid linkdrop URL for a given claim page or custom base URL.
+ * Constructs a valid linkdrop URL for a given claim page or custom URL. To view the list of supported claim pages, see the exported `supportedLinkdropClaimPages` variable.
  *
- * @param {string} secretKeys - An array of secret keys that should be embedded in the linkdrop URLs.
+ * @param {string | string[]} secretKeys - Either a single secret key or an array of secret keys that should be embedded in the linkdrop URLs.
  * @param {string=} claimPage - A valid reference to the claim page. See the exported `supportedLinkdropClaimPages` variable for a list of supported claim pages. If not provided, a custom base URL must be provided.
  * @param {string=} networkId - The network ID you wish to linkdrop on. If not provided, the current network that the SDK is connected to will be used.
  * @param {string=} contractId - The contract ID where the secret key belongs to. If not provided, the current contract ID that the SDK is connected to will be used.
- * @param {string=} baseUrl - A custom URL to use as the base for the linkdrop.
+ * @param {string=} customURL - A custom URL containing a `SECRET_KEY` string and `CONTRACT_ID` string for where to insert the secret key and contract ID. For example, a base URL of `foo.com/CONTRACT_ID#SECRET_KEY` with a contract `v2.keypom.near` and secret key `5CBLiJK21EQoB...` would result in `foo.com/v2.keypom.near#5CBLiJK21EQoB...`.
  *
  * @returns {string[]} - An array of the linkdrop URLs
  *
  * @example
+ * Use the keypom claim page:
  * ```js
- * const linkdropUrl = formatLinkdropUrl({
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
  *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     claimPage: "keypom",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with ONLY the secret key
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
+ * @example
+ * Use a custom claim page with both the secret key and contract ID
+ * ```js
+ * await initKeypom({
+ *     network: 'testnet',
+ *     funder: {
+ *         accountId,
+ *         secretKey,
+ *     }
+ * })
+ *
+ * const {keys} = await createDrop({
+ *     numKeys: 1,
+ *     depositPerUseNEAR: 1
+ * });
+ *
+ * const linkdropUrl = formatLinkdropUrl({
+ *     customURL: "foobar/SECRET_KEY/barfoo/CONTRACT_ID",
+ *     contractId: "v2.keypom.testnet",
+ *     secretKeys: keys.secretKeys[0] // Can be either the array or individual secret key string
+ * })
+ *
+ * console.log('linkdropUrl: ', linkdropUrl)
+ * ```
  * @group Utility
  */
-export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, secretKeys, baseUrl }: {
+export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, secretKeys, customURL }: {
     claimPage?: string | undefined;
     networkId?: string | undefined;
     contractId?: string | undefined;
-    secretKeys: string[];
-    baseUrl?: string | undefined;
+    secretKeys: string[] | string;
+    customURL?: string | undefined;
 }) => string[];
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
@@ -202,7 +270,8 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * @param {string=} rootEntropy (OPTIONAL) - A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random.
  * @param {string=} metaEntropy (OPTIONAL) - An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply
  pass in the string itself directly (not within an array).
- *
+ * @param {number=} autoMetaNonceStart (OPTIONAL) - Specify a starting index whereby the meta entropy will automatically increment by 1 for each key generated. This is to avoid having to pass in an array of meta entropy that simply increments by 1 each time.
+ * This is very useful as auto key generation uses the drop ID, base password and key nonce. The drop ID and base password would be a constant and make up the root entropy and then the key nonce increments by 1 for each key generated.
  * @returns {Promise<GeneratedKeyPairs>} - An object containing an array of KeyPairs, Public Keys and Secret Keys.
  *
  * @example
@@ -224,16 +293,14 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * Generating 1 keypair based on entropy:
  * ```js
  * // Generate 1 key with the given entropy
- * let keys = await generateKeys({
+ * let {publicKeys, secretKeys} = await generateKeys({
  *     numKeys: 1,
- *     entropy: {
- *         rootKey: "my-global-password",
- *         meta: "user-password-123",
- *     } // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
+ *     rootEntropy: "my-global-password",
+ *     metaEntropy: "user-password-123" // In this case, since there is only 1 key, the entropy can be an array of size 1 as well.
  * })
  *
- * let pubKey = keys.publicKeys[0];
- * let secretKey = keys.secretKeys[0];
+ * let pubKey = publicKeys[0];
+ * let secretKey = secretKeys[0];
  *
  * console.log('Public Key: ', pubKey);
  * console.log('Secret Key: ', secretKey)
@@ -245,18 +312,26 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * // Generate 2 keys each with their own unique entropy
  * let keys = await generateKeys({
  *     numKeys: 2,
- *     entropy: [
- *         {
- *             rootKey: "my-global-password",
- *             meta: "first-password",
- *             nonce: 1
- *         },
- *         {
- *             rootKey: "my-global-password",
- *             meta: "second-password",
- *             nonce: 2
- *         }
- *     ]
+ *     rootEntropy: "my-global-password",
+ *     metaEntropy: [
+ *        `first-password:0`,
+ *        `second-password:1`
+ *    ]
+ * })
+ *
+ * console.log('Pub Keys ', keys.publicKeys);
+ * console.log('Secret Keys ', keys.secretKeys);
+ * ```
+ *  * @example
+ * Generate 50 keys exactly how the auto key generation would in createDrop and addKeys:
+ * ```js
+ * const dropId = '1676913490360';
+ * const basePassword = "my-password";
+ * // Generate 50 keys each with their own unique entropy
+ * let keys = await generateKeys({
+ *     numKeys: 50,
+ *     rootEntropy: `${basePassword}-${dropId}`,
+ *     autoMetaNonceStart: 0
  * })
  *
  * console.log('Pub Keys ', keys.publicKeys);
@@ -264,7 +339,7 @@ export declare const hashPassword: (str: string, fromHex?: boolean) => Promise<s
  * ```
  * @group Utility
  */
-export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
+export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy, autoMetaNonceStart }: {
     /** The number of keys to generate. */
     numKeys: number;
     /** A root string that will be used as a baseline for all keys in conjunction with different metaEntropies (if provided) to deterministically generate a keypair. If not provided, the keypair will be completely random. */
@@ -272,6 +347,7 @@ export declare const generateKeys: ({ numKeys, rootEntropy, metaEntropy }: {
     /** An array of entropies to use in conjunction with a base rootEntropy to deterministically generate the private keys. For single key generation, you can either pass in a string array with a single element, or simply
  pass in the string itself directly (not within an array). */
     metaEntropy?: string | string[] | undefined;
+    autoMetaNonceStart?: number | undefined;
 }) => Promise<GeneratedKeyPairs>;
 export declare const keypomView: ({ methodName, args }: {
     methodName: any;
