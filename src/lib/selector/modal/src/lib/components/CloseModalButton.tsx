@@ -1,10 +1,10 @@
 import React from "react";
 
-interface CloseButtonProps {
+interface CloseModalButtonProps {
   onClick: () => void;
 }
 
-export const CloseButton: React.FC<CloseButtonProps> = ({ onClick }) => {
+export const CloseModalButton: React.FC<CloseModalButtonProps> = ({ onClick }) => {
   return (
     <button onClick={onClick} className="close-button">
       <svg

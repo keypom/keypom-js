@@ -1,7 +1,7 @@
 import type {
 	WalletBehaviourFactory, WalletModuleFactory
 } from "@near-wallet-selector/core";
-import { MODAL_TYPE } from "../modal/src/lib/modal";
+import { MODAL_TYPE } from "../modal/src/lib/modal.types";
 import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
 

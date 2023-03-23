@@ -6,7 +6,7 @@ import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { genArgs } from "../../keypom-utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
-import { MODAL_TYPE } from "../modal/src/lib/modal";
+import { MODAL_TYPE } from "../modal/src/lib/modal.types";
 import { createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
