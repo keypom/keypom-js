@@ -1281,11 +1281,11 @@ export const genArgs = (json) => {
     }
 }
 
-export const nearArgsToYocto = (nearAmount, yoctoAmount) => {
+export const nearArgsToYocto = (nearAmount?: string | number, yoctoAmount?: string) => {
+    let yoctoToReturn: string = yoctoAmount || '0';
     if (nearAmount) {
-        yoctoAmount = parseNearAmount(nearAmount.toString()) || '0'
+        yoctoToReturn = parseNearAmount(nearAmount.toString()) || '0'
     }
-    if (!yoctoAmount) yoctoAmount = '0';
 
-    return yoctoAmount;
+    return yoctoToReturn;
 }

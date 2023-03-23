@@ -4,6 +4,7 @@ import { getEnv } from "./keypom";
 
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
+import { nearArgsToYocto } from "./keypom-utils";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -62,11 +63,9 @@ export const addToBalance = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });
 
-	let deposit = amountYocto || '0';
-	if (amountNear) {
-		deposit = parseNearAmount(amountNear.toString()) || "0";
-	}
-
+	let deposit = nearArgsToYocto(amountNear, amountYocto)
+	assert(amountYocto != "0", 'Amount to add to balance cannot be 0.');
+	
 	const actions: any[] = []
 	actions.push({
 		type: 'FunctionCall',

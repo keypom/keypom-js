@@ -134,6 +134,7 @@ export const claim = async ({
 	const keyPair = KeyPair.fromString(secretKey)
 	await keyStore!.setKey(networkId!, contractId!, keyPair)
 
+	assert(secretKey, 'A secretKey must be passed in.')
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
 
 	const dropInfo = await getDropInformation({ secretKey });
