@@ -80,7 +80,6 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-	iconUrl = "",
 	delimiter = "/",
 	deprecated = false,
 	desiredUrl = "/keypom-trial#",
@@ -107,7 +106,7 @@ export function setupKeypom({
 			metadata: {
 				name: "Keypom Account",
 				description: null,
-				iconUrl,
+				iconUrl: "",
 				deprecated,
 				available: true,
 				contractId: signInContractId,
