@@ -358,5 +358,3 @@ export const updateKeypomContractId = async ({
 	contractAccount = new Account(connection!, contractId)
 	return null
 }
-
-

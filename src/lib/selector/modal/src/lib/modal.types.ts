@@ -30,16 +30,22 @@ export interface MainBodyHeaders {
 }
 
 export interface MainBodyButton {
-  onClick?: any;
+  url?: string;
+  newTab?: boolean;
   text?: string;
 }
 
 export interface KeypomTrialModal {
-  show(modalType?: string): void;
+  show(modalType?: ModalType): void;
   hide(): void;
 }
 
-export const MODAL_TYPE = {
+export interface ModalType {
+  id: string;
+  meta?: any;
+}
+
+export const MODAL_TYPE_IDS = {
   CLAIM_TRIAL: "claim-trial",
   TRIAL_OVER: "trial-over",
   ERROR: "action-error"

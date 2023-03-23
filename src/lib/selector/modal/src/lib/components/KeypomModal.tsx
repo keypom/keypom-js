@@ -3,13 +3,14 @@ import { renderModalType } from "../handleModalType";
 
 import type {
   ModalOptions,
+  ModalType,
   Theme
 } from "../modal.types";
 
 
 interface ModalProps {
   options: ModalOptions;
-  modalType: string;
+  modalType: ModalType;
   visible: boolean;
   hide: () => void;
 }

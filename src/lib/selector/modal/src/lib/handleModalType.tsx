@@ -2,11 +2,11 @@ import React from "react";
 import { ClaimTrial } from "./components/ClaimTrial";
 import { InvalidActions } from "./components/InvalidActions";
 import { TrialOver } from "./components/TrialOver";
-import { ModalOptions, MODAL_TYPE } from "./modal.types";
+import { ModalOptions, ModalType, MODAL_TYPE_IDS } from "./modal.types";
 
-export const renderModalType = (modalType: string, options: ModalOptions, hide: () => void) => {
-  switch (modalType) {
-    case MODAL_TYPE.TRIAL_OVER:
+export const renderModalType = (modalType: ModalType, options: ModalOptions, hide: () => void) => {
+  switch (modalType.id) {
+    case MODAL_TYPE_IDS.TRIAL_OVER:
       return (
         <TrialOver
           modulesTitle={options.modulesTitle}
@@ -21,10 +21,10 @@ export const renderModalType = (modalType: string, options: ModalOptions, hide: 
           hide={hide}
         />
       )
-    case MODAL_TYPE.ERROR:
+    case MODAL_TYPE_IDS.ERROR:
       return <InvalidActions hide={hide} />
-    case MODAL_TYPE.CLAIM_TRIAL:
-      return <ClaimTrial hide={hide} />
+    case MODAL_TYPE_IDS.CLAIM_TRIAL:
+      return <ClaimTrial hide={hide} secretKey={modalType.meta.secretKey} redirectUrlBase={modalType.meta.redirectUrlBase} delimiter={modalType.meta.delimiter}/>
     default: return null;
   }
 }

@@ -99,7 +99,12 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                button.onClick || window.open('https://keypom.xyz/', '_blank');
+                if (button.newTab) {
+                  window.open(button.url, '_blank')
+                } else {
+                  window.location.replace(button.url || 'https://keypom.xyz/'); 
+                  window.location.reload()
+                }
               }}
             >
               {button.text || "Next Steps"}
@@ -112,7 +117,12 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                button.onClick || window.open('https://keypom.xyz/', '_blank');
+                if (button.newTab) {
+                  window.open(button.url, '_blank')
+                } else {
+                  window.location.replace(button.url || 'https://keypom.xyz/'); 
+                  window.location.reload()
+                }
               }}
             >
               {button.text || "Next Steps"}

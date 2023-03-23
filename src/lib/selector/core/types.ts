@@ -60,7 +60,7 @@ export interface KeypomInitializeOptions {
 
 export interface KeypomParams {
     networkId: NetworkId;
-    contractId: string;
+    signInContractId: string;
     iconUrl?: string;
     deprecated?: boolean;
     desiredUrl?: string;

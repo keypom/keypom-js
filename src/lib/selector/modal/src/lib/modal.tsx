@@ -2,7 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import { KeypomModal } from "./components/KeypomModal";
-import { KeypomTrialModal, ModalOptions, MODAL_TYPE } from "./modal.types";
+import { KeypomTrialModal, ModalOptions, MODAL_TYPE_IDS } from "./modal.types";
 
 const MODAL_ELEMENT_ID = "near-wallet-selector-modal";
 let modalInstance: KeypomTrialModal | null = null;
@@ -19,7 +19,7 @@ export const setupModal = (
   const container = document.getElementById(MODAL_ELEMENT_ID);
   const root = createRoot(container!);
 
-  const render = (visible = false, modalType = MODAL_TYPE.TRIAL_OVER) => {
+  const render = (visible = false, modalType = { id: MODAL_TYPE_IDS.TRIAL_OVER }) => {
     root.render(
       <KeypomModal
         options={options}
