@@ -96,8 +96,8 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
 
 export const assertDropIdUnique = async (dropId: string) => {
     const {
-		viewCall, contractId
-	} = getEnv()
+        viewCall, contractId
+    } = getEnv()
 
     try {
         const dropInfo = await viewCall({
@@ -108,5 +108,5 @@ export const assertDropIdUnique = async (dropId: string) => {
             }
         })
         assert(!dropInfo, `Drop with ID ${dropId} already exists. Please use a different drop ID.`);
-    } catch(_) {}
+    } catch (_) { }
 }

@@ -17,11 +17,11 @@ export interface ModalOptions {
 }
 
 export interface PostTrialModules {
-    name: string;
-    description: string;
-    iconUrl: string;
-    baseRedirectUrl: string;
-    delimiter?: string;
+  name: string;
+  description: string;
+  iconUrl: string;
+  baseRedirectUrl: string;
+  delimiter?: string;
 }
 
 export interface MainBodyHeaders {

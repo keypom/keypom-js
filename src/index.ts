@@ -22,7 +22,7 @@ export {
 import { exportedNearAPI } from "./lib/keypom-utils";
 export const {
 	/** @group Utility */
-	parseNearAmount, 
+	parseNearAmount,
 	/** @group Utility */
 	formatNearAmount
 } = exportedNearAPI.utils.format;

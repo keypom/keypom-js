@@ -119,15 +119,15 @@ export const getKeyTotalSupply = async (): Promise<number> => {
  * @group View Functions
 */
 export const getKeys = async ({
-    start,
-    limit
-}: {start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
+	start,
+	limit
+}: { start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys',
 		args: {
-            from_index: start?.toString(),
-            limit
-        }
+			from_index: start?.toString(),
+			limit
+		}
 	})
 }
 
@@ -167,9 +167,9 @@ export const getKeys = async ({
  * @group View Functions
 */
 export const getKeyInformation = async ({
-    publicKey,
+	publicKey,
 	secretKey
-}: {publicKey?: string, secretKey?: string }): Promise<ProtocolReturnedKeyInfo> => {
+}: { publicKey?: string, secretKey?: string }): Promise<ProtocolReturnedKeyInfo> => {
 	// Assert that either a secretKey or public key is passed in
 	assert(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
 	if (secretKey) {
@@ -179,8 +179,8 @@ export const getKeyInformation = async ({
 	return keypomView({
 		methodName: 'get_key_information',
 		args: {
-            key: publicKey
-        }
+			key: publicKey
+		}
 	})
 }
 
@@ -220,21 +220,21 @@ export const getKeyInformation = async ({
  * @group View Functions
 */
 export const getKeyInformationBatch = async ({
-    publicKeys,
+	publicKeys,
 	secretKeys
-}: {publicKeys?: string[], secretKeys?: string[] }): Promise<Array<ProtocolReturnedKeyInfo>> => {
+}: { publicKeys?: string[], secretKeys?: string[] }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	// Assert that either secretKeys or public keys are passed in
 	assert(secretKeys || publicKeys, 'Must pass in either publicKeys or secretKeys');
 	if (secretKeys) {
 		// Map the secret keys into public keys by calling getPubFromSecret
-		publicKeys = await Promise.all(secretKeys.map(async (secretKey) => {return await getPubFromSecret(secretKey)}));
+		publicKeys = await Promise.all(secretKeys.map(async (secretKey) => { return await getPubFromSecret(secretKey) }));
 	}
-	
+
 	return keypomView({
 		methodName: 'get_key_information_batch',
 		args: {
-            keys: publicKeys
-        }
+			keys: publicKeys
+		}
 	})
 }
 
@@ -311,7 +311,7 @@ export const getKeyInformationBatch = async ({
  * ```
  * @group View Functions
 */
-export const getDropInformation = async ({ dropId, secretKey, publicKey, withKeys = false } : {dropId?: string, secretKey?: string, publicKey?: string, withKeys?: boolean}): Promise<ProtocolReturnedDrop> => {
+export const getDropInformation = async ({ dropId, secretKey, publicKey, withKeys = false }: { dropId?: string, secretKey?: string, publicKey?: string, withKeys?: boolean }): Promise<ProtocolReturnedDrop> => {
 	const {
 		contractId, viewCall
 	} = getEnv()
@@ -331,7 +331,7 @@ export const getDropInformation = async ({ dropId, secretKey, publicKey, withKey
 			key: publicKey,
 		},
 	})
-	
+
 	if (withKeys) {
 		dropInfo.keys = await keypomView({
 			methodName: 'get_keys_for_drop',
@@ -381,13 +381,13 @@ export const getDropInformation = async ({ dropId, secretKey, publicKey, withKey
  * @group View Functions
 */
 export const getKeySupplyForDrop = async ({
-    dropId
-}: {dropId: string }): Promise<number> => {
+	dropId
+}: { dropId: string }): Promise<number> => {
 	return keypomView({
 		methodName: 'get_key_supply_for_drop',
 		args: {
-            drop_id: dropId
-        }
+			drop_id: dropId
+		}
 	})
 }
 
@@ -428,17 +428,17 @@ export const getKeySupplyForDrop = async ({
  * @group View Functions
 */
 export const getKeysForDrop = async ({
-    dropId,
-    start,
-    limit
-}: {dropId: string, start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
+	dropId,
+	start,
+	limit
+}: { dropId: string, start?: string | number, limit?: number }): Promise<Array<ProtocolReturnedKeyInfo>> => {
 	return keypomView({
 		methodName: 'get_keys_for_drop',
 		args: {
-            drop_id: dropId,
-            from_index: start?.toString(),
-            limit
-        }
+			drop_id: dropId,
+			from_index: start?.toString(),
+			limit
+		}
 	})
 }
 
@@ -476,13 +476,13 @@ export const getKeysForDrop = async ({
  * @group View Functions
 */
 export const getDropSupplyForOwner = async ({
-    accountId,
-}: {accountId: string }): Promise<number> => {
+	accountId,
+}: { accountId: string }): Promise<number> => {
 	return keypomView({
 		methodName: 'get_drop_supply_for_owner',
 		args: {
-            account_id: accountId
-        }
+			account_id: accountId
+		}
 	})
 }
 
@@ -587,13 +587,13 @@ export const getDrops = async ({
  * @group View Functions
 */
 export const getNftSupplyForDrop = async ({
-    dropId
-}: {dropId: string}): Promise<number> => {
-    return keypomView({
+	dropId
+}: { dropId: string }): Promise<number> => {
+	return keypomView({
 		methodName: 'get_nft_supply_for_drop',
 		args: {
-            drop_id: dropId
-        }
+			drop_id: dropId
+		}
 	})
 }
 
@@ -624,17 +624,17 @@ export const getNftSupplyForDrop = async ({
  * @group View Functions
 */
 export const getNftTokenIDsForDrop = async ({
-    dropId,
-    start,
-    limit
-}: {dropId: string, start?: string | number, limit?: number}): Promise<Array<string>> => {
-    return keypomView({
+	dropId,
+	start,
+	limit
+}: { dropId: string, start?: string | number, limit?: number }): Promise<Array<string>> => {
+	return keypomView({
 		methodName: 'get_nft_token_ids_for_drop',
 		args: {
-            drop_id: dropId,
-            from_index: start,
-            limit
-        }
+			drop_id: dropId,
+			from_index: start,
+			limit
+		}
 	})
 }
 
@@ -663,13 +663,13 @@ export const getNftTokenIDsForDrop = async ({
  * @group View Functions
 */
 export const getUserBalance = async ({
-    accountId
-}: {accountId: string}): Promise<string> => {
-    return keypomView({
+	accountId
+}: { accountId: string }): Promise<string> => {
+	return keypomView({
 		methodName: 'get_user_balance',
 		args: {
-            account_id: accountId
-        }
+			account_id: accountId
+		}
 	})
 }
 
@@ -746,12 +746,12 @@ export const getCurMethodData = async ({
 	publicKey,
 	keyUse
 }: {
-	secretKey?: string, 
+	secretKey?: string,
 	publicKey?: string,
 	keyUse?: number
 }): Promise<Maybe<Array<ProtocolReturnedMethod>>> => {
-	const keyInfo = await getKeyInformation({publicKey, secretKey});
-	const dropInfo = await getDropInformation({publicKey, secretKey});
+	const keyInfo = await getKeyInformation({ publicKey, secretKey });
+	const dropInfo = await getDropInformation({ publicKey, secretKey });
 
 	assert(dropInfo.fc, 'No FC drop found');
 	let methodDataArray = dropInfo.fc!.methods
@@ -761,7 +761,7 @@ export const getCurMethodData = async ({
 		assert(keyUse > 0 && keyUse <= methodDataArray.length, 'Invalid key use passed in - out of bounds');
 		startingIdx = keyUse - 1;
 	}
-	
+
 	return methodDataArray[startingIdx];
 }
 
@@ -794,14 +794,14 @@ export const getCurMethodData = async ({
 */
 export const canUserAddKeys = async ({
 	dropId,
-    accountId
-}: {dropId: string, accountId: string}): Promise<boolean> => {
+	accountId
+}: { dropId: string, accountId: string }): Promise<boolean> => {
 	assert(dropId && accountId, 'Must pass in a drop ID and account ID');
-	
+
 	const canAddKeys: boolean = await keypomView({
-		methodName: 'can_user_add_keys', 
-		args: { 
-			drop_id: dropId, 
+		methodName: 'can_user_add_keys',
+		args: {
+			drop_id: dropId,
 			account_id: accountId
 		}
 	});
@@ -831,7 +831,7 @@ export const canUserAddKeys = async ({
  * @group View Functions
 */
 export const getContractSourceMetadata = async (): Promise<ContractSourceMetadata> => {
-    return keypomView({
+	return keypomView({
 		methodName: 'contract_source_metadata',
 		args: {}
 	})
