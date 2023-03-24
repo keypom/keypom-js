@@ -311,7 +311,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // URL is valid
         if (parsedData !== undefined) {
             const { accountId, secretKey } = parsedData;
-            let publicKey;
 
             // Check if this is an existing keypom drop that is claimable:
             try {
@@ -360,7 +359,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             if (isValidTrialInfo) {
                 this.trialAccountId = accountId;
                 this.secretKey = secretKey;
-                this.publicKey = publicKey;
+
+                let keyPair = KeyPair.fromString(secretKey);
+                this.publicKey = keyPair.getPublicKey();
 
                 const dataToWrite = {
                     accountId: this.trialAccountId,
