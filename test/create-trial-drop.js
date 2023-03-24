@@ -51,15 +51,23 @@ async function createTrialAccount(){
         callableContracts: callableContracts,
         callableMethods: ['set:grant_write_permission', '*'],
         maxAttachableNEARPerContract: callableContracts.map(() => '1'),
-        trialEndFloorNEAR: 0.33
+        trialEndFloorNEAR: 0.33 + 0.3
     })
 
     const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
     const keypomInstance = "http://localhost:3030"//"https://testnet.keypom-airfoil.pages.dev"
     console.log(`
     
+    Keypom App:
  ${keypomInstance}/claim/v2.keypom.testnet?meta=${trialMeta}#${trialSecretKeys[0]}
-    
+
+    Guest-Book App:
+ http://localhost:1234/keypom-url#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Alpha Frontend:
+ http://localhost:3000/#/#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Good Luck!
     `)
 
     // console.log(`
