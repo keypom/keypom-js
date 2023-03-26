@@ -29,40 +29,43 @@ async function connectNear(privateKey, contractId){
       network: NETWORK_ID,
       keypomContractId: contractId
   });
-  let resQrText = `${contractId}/${privateKey}`
-  return resQrText
 }
 
-async function setup(){
+
+let contractId;
+let privKey;
+let qrText;
+function setup() {
   // Setting contract id, priv key and link state variables.
-  splitResTemp = window.location.href.split("/");
-  tempContractId = splitResTemp[3]
-  tempPrivKey = splitResTemp[4]
-  tempQrText = await connectNear(tempPrivKey, tempContractId)
+  const urlSplit = window.location.href.split("/");
+
+  if (urlSplit.length > 3) {
+    contractId = urlSplit[3]
+    privKey = urlSplit[4]
+    qrText =  `${contractId}/${privKey}`
+  }
+
+  if (contractId) {
+    connectNear(contractId)
+  }
 }
 
-let tempContractId = ""
-let tempPrivKey = ""
-let tempQrText = ""
-let splitResTemp = ""
 setup()
-
 
 function App() {
   //state variables
-  const [contractId, setContractId] = useState(tempContractId)
-  const [privKey, setprivKey] = useState(tempPrivKey)
-  const [splitRes, setSplitRes] = useState(splitResTemp)
-  const [pubKey, setPubkey] = useState("");
   const [curUse, setCurUse] = useState(0);
-  const [qrText, setQrText] = useState(tempQrText)
+  // Using a pubkey state variable to re-render keyInfo once getPubFromSecret returns
+  // Otherwise, page would render with an empty pubKey, then receive the value of pubKey but be unable to re-render the component
+  const [pubKey, setPubKey] = useState("");
+  
+  const homepath = `/${contractId}/${privKey}`
+  const scannerpath = `/${contractId}/scanner`
 
   // rendering stuff
   if(curUse == 1){
     // QR code
     console.log("scenario 1, QR code")
-    const homepath = `${contractId}/${privKey}`
-    const scannerpath = `${contractId}/scanner`
     return (
       <div className="content">
           <Routes>
@@ -74,7 +77,7 @@ function App() {
               <br></br>
               <QrCode link={qrText} />
               <br></br>
-              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
+              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubKey={setPubKey} />
             </>}/>
           </Routes>
       </div>
@@ -82,8 +85,6 @@ function App() {
   }
   else if(curUse==2){
     // Direct user to claim POAP
-    const homepath = `${contractId}/${privKey}`
-    const scannerpath = `${contractId}/scanner`
     let link = formatLinkdropUrl({
       customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
       secretKeys: privKey
@@ -96,32 +97,27 @@ function App() {
             <>
               <h1>You're all set! Enjoy the event</h1>
               <a href={link} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Claim your POAP</button></a>
-              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
+              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubKey={setPubKey} />
             </>}/>
           </Routes>
       </div>
     );
   }
-  else if(curUse==0 && splitRes[3]==''|| curUse==0 && splitRes[3]==undefined){
+  else if(curUse==0 && !contractId && !privKey){
     // Event Landing Page
-    const homepath = `${contractId}/${privKey}`
-    const scannerpath = `${contractId}/scanner`
-    console.log(splitRes[3])
     return (
       <div className="content">
         <h1>Welcome to the Keypom Party!</h1>
           <div>Drinks are on the house tonight!</div>
           <Routes>
             <Route path={scannerpath} element={ <Scanner/> } />
-            <Route path={homepath} element={  <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} /> }></Route>
+            <Route path={homepath} element={  <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubKey={setPubKey} /> }></Route>
           </Routes>
       </div>
     );
   }
   else if(curUse==0){
     // Key has been depleted, show resources for NEAR
-    const homepath = `${contractId}/${privKey}`
-    const scannerpath = `${contractId}/scanner`
     return (
       <div className="content">
           <Routes>
@@ -130,7 +126,7 @@ function App() {
             <>
               <h1>Now that you have a wallet...</h1>
               <a href={"https://near.org/learn/#anker_near"} target="_blank" rel="noopener noreferrer"><button className="onboard_button">Continue your journey into NEAR</button></a>
-              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubkey={setPubkey} />
+              <KeyInfo contractId={contractId} privKey={privKey} curUse={curUse} setCurUse={setCurUse} pubKey={pubKey} setPubKey={setPubKey} />
             </>}/>
           </Routes>
       </div>

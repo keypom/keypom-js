@@ -6,25 +6,30 @@ import { useState, useEffect } from "react";
 const { keyStores, connect } = nearAPI;
 
 
-const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) => {
-
+const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubKey }) => {
+    
     // These functions will run anytime the component is re-rendered 
     useEffect(() => {
-        async function getPubkey(privKey){
-            const publicKey = await getPubFromSecret(privKey)
-            setPubkey(publicKey)
+        async function getUsesRemaining(privKey){
+            let tempKey = await getPubFromSecret(privKey)
+            setPubKey(tempKey)
+            const resKeyInfo = await getKeyInformation({publicKey: tempKey})
+            if(resKeyInfo){
+                setCurUse(resKeyInfo.cur_key_use)
+            }
+            else{
+                setCurUse(0)
+            }
         }
-
-        async function getUsesRemaining(pubKey){
-            const resKeyInfo = await getKeyInformation({publicKey: pubKey})
-            setCurUse(resKeyInfo.cur_key_use)
-
+        async function main(privKey){
+            await getUsesRemaining(privKey)
         }
-        getPubkey(privKey)
-        getUsesRemaining(pubKey)
+        main(privKey)
+        
     });
 
     if(curUse==1){
+        console.log(pubKey)
         return (
             <div>
               <div>Public Key: {pubKey}</div>
@@ -33,6 +38,7 @@ const KeyInfo = ({ contractId, privKey, curUse, setCurUse, pubKey, setPubkey }) 
           )
     }
     else{
+        console.log(curUse)
         return
     }
    
