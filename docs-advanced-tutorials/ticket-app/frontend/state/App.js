@@ -55,8 +55,6 @@ setup()
 function App() {
   //state variables
   const [curUse, setCurUse] = useState(0);
-  // Using a pubkey state variable to re-render keyInfo once getPubFromSecret returns
-  // Otherwise, page would render with an empty pubKey, then receive the value of pubKey but be unable to re-render the component
   const [pubKey, setPubKey] = useState("");
   
   const homepath = `/${contractId}/${privKey}`
