@@ -6,12 +6,16 @@ const homedir = require("os").homedir();
 var assert = require('assert');
 
 async function createTickDrop(){
+    // STEP 1: Initiate a NEAR connection.
+
+    // STEP 2: Create the drop with funciton call data.
+
+    // STEP 3: Make NFT series for POAPs.
 }
 
 async function main(){
     createTickDrop()
-    
-    // Test drop logic
+    // Test drop logic here
 }
 
 

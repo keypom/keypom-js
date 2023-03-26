@@ -39,7 +39,6 @@ async function createTickDrop(){
         config: {
             usesPerKey: 2
         },
-        metadata: "My Cool Drop Title!",
         depositPerUseNEAR: "0.1",
         basePassword: "event-password",
         passwordProtectedUses: [1],
@@ -76,7 +75,11 @@ async function createTickDrop(){
     // Creating list of pk's and linkdrops; copied from orignal simple-create.js
     for(var i = 0; i < keys.keyPairs.length; i++) {
         // Replace this with your desired URL format. 
-        let url = `http://localhost:1234/${KEYPOM_CONTRACT}/${keys.secretKeys[i]}`
+        let url = formatLinkdropUrl({
+            customURL: "http://localhost:1234/CONTRACT_ID/SECRET_KEY",
+	    	secretKeys: keys.secretKeys[i],
+            contractId: KEYPOM_CONTRACT,
+        })
         dropInfo[pubKeys[i]] = url;
     }   
     // Console log all pk's and their respective links
@@ -95,7 +98,6 @@ async function main(){
 
     // Incorrect Password
     let keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    console.log(`Key use before claiming with wrong password: ${keyInfo.cur_key_use}`)
     console.log("Claiming with wrong password...")
     await claim({
         secretKey: myPrivatekey,
@@ -104,7 +106,6 @@ async function main(){
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
     assert(keyInfo.cur_key_use == 1, `Key has claimed with an incorrect password. Current Key Use: ${keyInfo.cur_key_use}`)
-    console.log(`Key use after claiming with wrong password and before claiming with correct password: ${keyInfo.cur_key_use}`)
 
     // Correct password
     let password = "event-password"
@@ -117,7 +118,6 @@ async function main(){
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
     assert(keyInfo.cur_key_use == 2, `Claim Failed. Current Key Use: ${keyInfo.cur_key_use}`)
-    console.log(`Key use after claiming with correct password: ${keyInfo.cur_key_use}`)
 
     // Second claim, no password needed
     console.log("Second claim with no password")

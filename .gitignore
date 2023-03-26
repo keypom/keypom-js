@@ -8,6 +8,8 @@ package-lock.json
 /docs-advanced-tutorials/ticket-app/frontend/node_modules
 /docs-advanced-tutorials/ticketing/node_modules
 /docs-advanced-tutorials/ticket-app/integration-tests/node_modules
+/docs-advanced-tutorials/ticket-app/frontend/dist/index.3d214d75.js
+/docs-advanced-tutorials/ticket-app/frontend/dist/index.3d214d75.js.map
 /.pnp
 .pnp.js
 /out
