@@ -1,4 +1,4 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret } = require("keypom-js");
+const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret, generateKeys } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
 const { hostClaim } = require("./utilFunctions");
@@ -160,8 +160,11 @@ async function main(){
     // Scanning a fake key
     console.log("Claim with fake key")
     try{
+        let keys = await generateKeys({
+            numKeys: 1,
+        })
         let claimFail = await hostClaim({
-            privKey: "fakekey",
+            privKey: keys.secretKeys[0],
         })
         if(claimFail){
             throw new Error
