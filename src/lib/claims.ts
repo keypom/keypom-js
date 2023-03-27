@@ -174,7 +174,7 @@ export const claim = async ({
 				{
 					methodName: 'claim',
 					args: {
-						account_id: accountId,
+						account_id: accountId || "",
 						password,
 						fc_args: fcArgs
 					},
