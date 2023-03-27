@@ -72,7 +72,7 @@ async function createTickDrop(){
     }); 
     var dropInfo = {};
     const {contractId: KEYPOM_CONTRACT} = getEnv()
-    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
+    // Creating list of pk's and links
     for(var i = 0; i < keys.keyPairs.length; i++) {
         // Replace this with your desired URL format. 
         let url = formatLinkdropUrl({
