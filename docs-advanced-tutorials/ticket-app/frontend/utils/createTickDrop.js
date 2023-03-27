@@ -124,6 +124,8 @@ async function main(){
         privKey: myPrivatekey,
         basePassword: "event-password"
     })
+    assert(keyInfo.cur_key_use == 2, `Claim Succeeded Unexpectedly. Current Key Use: ${keyInfo.cur_key_use}`)
+
 
     // Second claim, no password needed
     console.log("Normal second claim with no password")
