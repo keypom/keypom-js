@@ -1,6 +1,7 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl } = require("keypom-js");
+const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
+const { hostClaim } = require("./utilFunctions");
 const path = require("path");
 const homedir = require("os").homedir();
 var assert = require('assert');
@@ -88,6 +89,8 @@ async function createTickDrop(){
     return keys
 }
 
+
+
 async function main(){
     // Create Drop
     let keys = await createTickDrop();
@@ -99,28 +102,31 @@ async function main(){
     // Incorrect Password
     let keyInfo = await getKeyInformation({publicKey: myPublicKey})
     console.log("Claiming with wrong password...")
-    await claim({
-        secretKey: myPrivatekey,
-        accountId: "minqi.testnet",
-        password: "wrong-password"
+    await hostClaim({
+        privKey: myPrivatekey, 
+        basePassword: "wrong-password"
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
     assert(keyInfo.cur_key_use == 1, `Key has claimed with an incorrect password. Current Key Use: ${keyInfo.cur_key_use}`)
 
     // Correct password
-    let password = "event-password"
-    let claimPassword = await hashPassword(password + myPublicKey + keyInfo.cur_key_use.toString())
     console.log("claiming with correct password...")
-    await claim({
-        secretKey: myPrivatekey,
-        accountId: "minqi.testnet",
-        password: claimPassword
+    await hostClaim({
+        privKey: myPrivatekey,
+        basePassword: "event-password"
     })
     keyInfo = await getKeyInformation({publicKey: myPublicKey})
     assert(keyInfo.cur_key_use == 2, `Claim Failed. Current Key Use: ${keyInfo.cur_key_use}`)
 
+    // Trying to use host scanner for second claim
+    console.log("Second scanner claim, should fail")
+    await hostClaim({
+        privKey: myPrivatekey,
+        basePassword: "event-password"
+    })
+
     // Second claim, no password needed
-    console.log("Second claim with no password")
+    console.log("Normal second claim with no password")
     await claim({
         secretKey: myPrivatekey,
         accountId: "minqi.testnet",
@@ -134,26 +140,30 @@ async function main(){
         console.log("Second claim successful. Key has been depleted and deleted")
     }
 
-    // Depleted key
+    // Scanning a depleted key
     console.log("Claim with depleted key")
     try{
-        await claim({
-            secretKey: myPrivatekey,
-            accountId: "minqi.testnet",
+        await hostClaim({
+            privKey: myPrivatekey,
         })
+        if(claimFail){
+            throw new Error
+        }
         console.log("claimed successfully, this should not be happening")
     }
     catch(err){
         console.log("Claim failed, as expected")
     }
 
-    // Bogus key
+    // Scanning a fake key
     console.log("Claim with fake key")
     try{
-        await claim({
-            secretKey: "fake-key",
-            accountId: "minqi.testnet",
+        let claimFail = await hostClaim({
+            privKey: "fakekey",
         })
+        if(claimFail){
+            throw new Error
+        }
         console.log("claimed successfully, this should not be happening")
     }
     catch(err){
@@ -162,4 +172,3 @@ async function main(){
 }
 
 main()
-

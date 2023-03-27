@@ -7,9 +7,8 @@ import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png" 
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
+import { hostClaim } from "../utils/utilFunctions";
 const { keyStores, connect } = nearAPI; 
-
-
 
 export const Scanner = () => {
   // Stage enum
@@ -64,61 +63,32 @@ export const Scanner = () => {
       }
 
       async function scannerClaim(){
-        try{
-          // Test 1: Check if Key exists, get curUse
-          var publicKey = await getPubFromSecret(resPrivKey)
-          var resKeyInfo = await getKeyInformation({publicKey: publicKey})
-          if(resKeyInfo == null){
-            // Key does not exist
-            throw new Error(`Key does not exist`)
-          }
-          var resCurUse = resKeyInfo.cur_key_use 
+        let claimFail = await hostClaim({
+          privKey: resPrivKey, 
+          basePassword: password
+        })
 
-          // Test 2: Only claim if it has never been scanned
-          if(resCurUse == 1){
-            // Create password using base + pubkey + key use as string
-            let passwordForClaim = await hashPassword(password + publicKey + resCurUse.toString())
-            // Claim with created password
-            await claim({
-                secretKey: resPrivKey,
-                accountId: "minqi.testnet",
-                password: passwordForClaim
-            })
+        if(!claimFail){
+          // Successful Claim
+          let tempMaster1 = {
+            stage: Stage.successClaim, 
+            data: Data.captured
           }
-          else{
-            // Ticket was already scanned
-            throw new Error(`The Key has already been scanned`)
-          }
+          setMasterStatus(tempMaster1)
 
-          // Test 3: Check if curUse decremented
-          var newKeyInfo = await getKeyInformation({publicKey: publicKey})
-          if(newKeyInfo.cur_key_use - resCurUse === 1){
-            // Successful Claim
-            let tempMaster1 = {
-              stage: Stage.successClaim, 
-              data: Data.captured
-            }
-            setMasterStatus(tempMaster1)
-
-            // Wait 3s, then flip go back to pre-claim
-            await timeout(3000)
-            var emptyRes = new Array(splitRes.length)
-            setSplitRes(emptyRes)
-            setResPrivkey("")
-            let tempMaster2 = {
-              stage: Stage.preClaim, 
-              data: Data.empty
-            }
-            setMasterStatus(tempMaster2)
+          // Wait 3s, then flip go back to pre-claim
+          await timeout(3000)
+          var emptyRes = new Array(splitRes.length)
+          setSplitRes(emptyRes)
+          setResPrivkey("")
+          let tempMaster2 = {
+            stage: Stage.preClaim, 
+            data: Data.empty
           }
-          else if(newKeyInfo.cur_key_use === resCurUse ){
-            // Claim Failed
-            throw new Error(`Claim has failed, check password`)
-          }
+          setMasterStatus(tempMaster2)
         }
-        catch(err){
-          // Claim Failed
-          console.log(`Claim Failed: ${err}`)
+        else{
+          // Failed Claim
           let tempMaster1 = {
             stage: Stage.failClaim, 
             data: Data.captured
@@ -135,6 +105,7 @@ export const Scanner = () => {
             data: Data.empty
           }
           setMasterStatus(tempMaster2)
+
         }
       }
       // Only claim if there is data present
