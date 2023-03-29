@@ -213,8 +213,8 @@ export const initKeypom = async ({
 }: {
 	/** The NEAR connection instance to use. If not passed in, it will create a new one. */
 	near?: Near;
-	/** The network to connect to either `mainnet` or `testnet`. */
-	network: string;
+	/** The network to connect to either `mainnet` or `testnet`. If a near object is passed in, this field can be omitted*/
+	network?: string;
 	/**
 	 * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
 	 * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
@@ -225,9 +225,14 @@ export const initKeypom = async ({
 	 */
 	keypomContractId?: string;
 }) => {
-	assert(network == "testnet" || network == "mainnet" || "localnet", "Network must be either `testnet` or `mainnet` or `localnet`");
-	// Assert that if network was passed in as "localnet", a near object should also be passed in
-	assert(network != "localnet" || _near, "If network is `localnet`, a NEAR connection object must be passed in.");
+	// Assert that either a near object or network is passed in
+	assert(_near || network, "Either a NEAR connection object or network must be passed in.");
+
+	if (network != undefined) {
+		assert(network == "testnet" || network == "mainnet" || "localnet", "Network must be either `testnet` or `mainnet` or `localnet`");
+		// Assert that if network was passed in as "localnet", a near object should also be passed in
+		assert(network != "localnet" || _near, "If network is `localnet`, a NEAR connection object must be passed in.");
+	}
 	
 	if (_near) {
 		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
