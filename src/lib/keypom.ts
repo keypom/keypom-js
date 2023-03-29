@@ -39,6 +39,10 @@ const networks = {
 		nodeUrl: 'https://rpc.testnet.near.org',
 		walletUrl: 'https://wallet.testnet.near.org',
 		helperUrl: 'https://helper.testnet.near.org'
+	},
+	localnet: {
+		networkId: 'localnet',
+		viewAccountId: 'test.near',
 	}
 }
 
@@ -68,6 +72,9 @@ export const supportedKeypomContracts = {
 	testnet: {
 		"v1-4.keypom.testnet": true,
 		"v2.keypom.testnet": true,
+	},
+	localnet: {
+		"keypom.test.near": true
 	}
 }
 
@@ -240,6 +247,10 @@ export const initKeypom = async ({
 
 	if (networkId === 'mainnet') {
 		contractId = receiverId = `${contractBase}.near`
+	}
+
+	if (networkId === 'localnet') {
+		contractId = receiverId = `keypom.test.near`
 	}
 
 	if (keypomContractId) {
