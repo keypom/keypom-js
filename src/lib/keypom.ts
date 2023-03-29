@@ -9,7 +9,7 @@ import { Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
-import { assert, isValidFunderObject, isValidNearObject } from "./checks";
+import { assert, assertValidKeypomContract, isValidFunderObject, isValidNearObject } from "./checks";
 import {
 	execute as _execute
 } from "./keypom-utils";
@@ -54,6 +54,9 @@ export const officialKeypomContracts = {
 		"v1-3.keypom.testnet": true,
 		"v1-4.keypom.testnet": true,
 		"v2.keypom.testnet": true,
+	},
+	localnet: {
+		"keypom.test.near": true
 	}
 }
 
@@ -215,8 +218,10 @@ export const initKeypom = async ({
 	 */
 	keypomContractId?: string;
 }) => {
-	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
-
+	assert(network == "testnet" || network == "mainnet" || "localnet", "Network must be either `testnet` or `mainnet` or `localnet`");
+	// Assert that if network was passed in as "localnet", a near object should also be passed in
+	assert(network != "localnet" || _near, "If network is `localnet`, a NEAR connection object must be passed in.");
+	
 	if (_near) {
 		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
 		near = _near
@@ -226,7 +231,7 @@ export const initKeypom = async ({
 		keyStore = process?.versions?.node ? new InMemoryKeyStore() : new BrowserLocalStorageKeyStore()
 		near = new Near({
 			...networkConfig,
-			deps: { keyStore },
+			keyStore,
 		});
 	}
 
@@ -238,7 +243,7 @@ export const initKeypom = async ({
 	}
 
 	if (keypomContractId) {
-		assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+		assert(assertValidKeypomContract(keypomContractId), "The keypom contract passed in must be an official Keypom contract for the given network.");
 		if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
 			console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 		}
@@ -247,7 +252,7 @@ export const initKeypom = async ({
 	}
 
 	viewAccount = new Account(connection, networks[networkId!].viewAccountId)
-	viewCall = viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction(contractId, methodName, args);
+	viewCall = viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount!.viewFunction({contractId, methodName, args});
 
 	contractAccount = new Account(connection, contractId)
 
@@ -349,7 +354,7 @@ export const updateKeypomContractId = async ({
 	keypomContractId
 }: { keypomContractId: string }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
-	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+	assert(assertValidKeypomContract(keypomContractId), "The keypom contract passed in must be an official Keypom contract for the given network.");
 	if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
 		console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 	}

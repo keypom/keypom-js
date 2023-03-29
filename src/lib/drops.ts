@@ -226,7 +226,7 @@ export const createDrop = async ({
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
 	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
-	assert(publicKeys || numKeys, 'Must pass in either publicKeys or numKeys to create a drop.');
+	assert(publicKeys != undefined || numKeys != undefined, 'Must pass in either publicKeys or numKeys to create a drop.');
 
 	/// parse args
 	depositPerUseYocto = nearArgsToYocto(depositPerUseNEAR, depositPerUseYocto);

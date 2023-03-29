@@ -5,6 +5,11 @@ import { getEnv, officialKeypomContracts } from "./keypom";
 import { Funder } from "./types/general";
 import { ProtocolReturnedDropConfig } from "./types/protocol";
 
+export function assertValidKeypomContract(keypomContractId: string) {
+    const {networkId} = getEnv();
+    return officialKeypomContracts[networkId!][keypomContractId] === true
+}
+
 export function isValidAccountObj(o: Account | undefined): o is Account {
     if (o) {
         return (o as Account).connection !== undefined && (o as Account).accountId !== undefined;
