@@ -1,17 +1,16 @@
-import React, { useEffect } from "react";
-import { MODAL_DEFAULTS, MODAL_TYPE } from "../modal";
+import React, { useEffect, useState } from "react";
+import { renderModalType } from "../handleModalType";
 
 import type {
   ModalOptions,
+  ModalType,
   Theme
 } from "../modal.types";
-import { MainBody } from "./MainBody";
 
-import { TrialOver } from "./TrialOver";
 
 interface ModalProps {
   options: ModalOptions;
-  modalType: string;
+  modalType: ModalType;
   visible: boolean;
   hide: () => void;
 }
@@ -20,50 +19,12 @@ const getThemeClass = (theme?: Theme) => {
   switch (theme) {
     case "dark":
       return "dark-theme";
-    case "light":
+    case "light": 
       return "light-theme";
     default:
       return "";
   }
 };
-
-const renderModalType = (modalType: string, options: ModalOptions, hide: () => void) => {
-  switch (modalType) {
-    case MODAL_TYPE.TRIAL_OVER:
-      return (
-        <TrialOver
-          modulesTitle={options.modulesTitle}
-          modules={options.modules}
-          accountId={options.accountId}
-          secretKey={options.secretKey}
-          mainTitle={options.mainTitle}
-          mainBody={options.mainBody}
-          headerOne={options.headerOne}
-          headerTwo={options.headerTwo}
-          button={options.button}
-          hide={hide}
-        />
-      )
-    case MODAL_TYPE.ERROR:
-      return (
-        <div className="nws-modal" style={{width: "70%", height: "27%"}}>
-          <div className="modal-right" style={{width: "100%"}}>
-              <MainBody
-                title={MODAL_DEFAULTS.error.title}
-                body={MODAL_DEFAULTS.error.body}
-                headerOne={null}
-                headerTwo={null}
-                button={options.button}
-                onCloseModal={() =>
-                  hide()
-                }
-              />
-          </div>
-        </div>
-      )
-    default: return null;
-  }
-}
 
 export const KeypomModal: React.FC<ModalProps> = ({
   options,
@@ -71,6 +32,8 @@ export const KeypomModal: React.FC<ModalProps> = ({
   visible,
   hide
 }) => {
+  
+
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
