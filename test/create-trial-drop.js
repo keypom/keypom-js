@@ -39,39 +39,36 @@ async function createTrialAccount(){
 	});
 
     const callableContracts = [
-        //'counter.examples.keypom.testnet',
         `v1.social08.testnet`,
-        `v2.keypom.testnet`,
-        'donation.examples.keypom.testnet',
         'guest-book.examples.keypom.testnet',
-        'hello-near.examples.keypom.testnet'
     ]
-
-    // const newUserName = "benji-monday" + Date.now()
 
     const {dropId, keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} 
     = await createTrialAccountDrop({
         numKeys: 1,
         contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
-        trialFundsNEAR: 10,
+        startingBalanceNEAR: 0.5,
         callableContracts: callableContracts,
-        callableMethods: callableContracts.map(() => '*'),
+        callableMethods: ['set:grant_write_permission', '*'],
         maxAttachableNEARPerContract: callableContracts.map(() => '1'),
-        trialEndFloorNEAR: 9
+        trialEndFloorNEAR: 0.33 + 0.3
     })
 
     const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
     const keypomInstance = "http://localhost:3030"//"https://testnet.keypom-airfoil.pages.dev"
     console.log(`
     
+    Keypom App:
  ${keypomInstance}/claim/v2.keypom.testnet?meta=${trialMeta}#${trialSecretKeys[0]}
-    
-    `)
 
-    const drop = await getDropInformation({
-        dropId
-    })
-    console.log('drop: ', drop)
+    Guest-Book App:
+ http://localhost:1234/keypom-url#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Alpha Frontend:
+ http://localhost:3000/#/#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Good Luck!
+    `)
 
     // console.log(`
 	

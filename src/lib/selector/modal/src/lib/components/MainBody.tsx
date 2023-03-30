@@ -1,7 +1,6 @@
 import React from "react";
-import { MODAL_DEFAULTS } from "../modal";
-import { MainBodyButton, MainBodyHeaders } from "../modal.types";
-import { CloseButton } from "./CloseButton";
+import { MainBodyButton, MainBodyHeaders, MODAL_DEFAULTS } from "../modal.types";
+import { CloseModalButton } from "./CloseModalButton";
 
 interface WalletHomeProps {
   title: string;
@@ -25,7 +24,7 @@ export const MainBody: React.FC<WalletHomeProps> = ({
       <div className="nws-modal-header-wrapper">
         <div className="nws-modal-header">
           <h3 className='middleTitle'>{title}</h3>
-          <CloseButton onClick={onCloseModal} />
+          <CloseModalButton onClick={onCloseModal} />
         </div>
       </div>
       <>
@@ -100,7 +99,12 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                window.open(button.url || 'https://keypom.xyz/', '_blank');
+                if (button.newTab) {
+                  window.open(button.url, '_blank')
+                } else {
+                  window.location.replace(button.url || 'https://keypom.xyz/'); 
+                  window.location.reload()
+                }
               }}
             >
               {button.text || "Next Steps"}
@@ -113,20 +117,19 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             <button
               className="middleButton"
               onClick={() => {
-                window.open(button.url || 'https://keypom.xyz/', '_blank');
+                if (button.newTab) {
+                  window.open(button.url, '_blank')
+                } else {
+                  window.location.replace(button.url || 'https://keypom.xyz/'); 
+                  window.location.reload()
+                }
               }}
             >
               {button.text || "Next Steps"}
             </button>
           </div>
         )}
-        <div className="lang-selector-wrapper">
-          <select className="lang-selector" name="lang">
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-          </select>
-        </div>
       </>
-    </div>
+    </div >
   );
 };
