@@ -23,7 +23,7 @@
   "dependencies": {
     "@near-wallet-selector/core": "^7.9.1",
     "@types/react": "^18.0.26",
-    "ava": "^4.3.3",
+    "ava": "^5.2.0",
     "bn.js": "^5.2.1",
     "dotenv": "^16.0.3",
     "near-api-js": "^1.1.0",

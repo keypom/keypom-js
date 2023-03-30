@@ -289,6 +289,7 @@ export const createDrop = async ({
 		}
 
 		publicKeys = keys.publicKeys
+		console.log(`publicKeys: `, publicKeys)
 	}
 
 	numKeys = publicKeys!.length;

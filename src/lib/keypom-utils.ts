@@ -842,6 +842,9 @@ const trimLeadingZeroes = (value: string): string => {
 
 /// sequentially execute all transactions
 const signAndSendTransactions = async (account: Account, txs: SignAndSendTransactionOptions[]): Promise<FinalExecutionOutcome[]> => {
+    console.log(`account to sign and send txns: `, account)
+    console.log(`account to sign and send txns2: `, account.connection.signer)
+    console.log(`account to sign and send txns3: `, (account.connection.signer as any).keyStore)
     const responses: FinalExecutionOutcome[] = []
     for (let i = 0; i < txs.length; i++) {
         // @ts-ignore
@@ -854,8 +857,9 @@ const signAndSendTransactions = async (account: Account, txs: SignAndSendTransac
 
 export const transformTransactions = (transactions: Transaction[]): SignAndSendTransactionOptions[] => transactions.map(({ receiverId, actions: _actions }) => {
     const actions = _actions.map((action) =>
-        createAction(action)
+    createAction(action)
     );
+    console.log(`actions: `, actions)
     let txnOption: SignAndSendTransactionOptions = {
         receiverId: receiverId as string,
         actions
