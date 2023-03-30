@@ -9,7 +9,7 @@ const {
 import { Transaction } from "@near-wallet-selector/core";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
-import { assert, isValidAccountObj } from './checks';
+import { assert, isSupportedKeypomContract, isValidAccountObj } from './checks';
 import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit, ftTransferCall, generateKeys,
@@ -196,7 +196,7 @@ export const addKeys = async ({
 
 	assert(drop || dropId, 'Either a dropId or drop object must be passed in.')
 	assert(numKeys || publicKeys?.length, "Either pass in publicKeys or set numKeys to a positive non-zero value.")
-	assert(supportedKeypomContracts[networkId!][contractId!] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
+	assert(isSupportedKeypomContract(contractId!) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
 
 	account = await getAccount({ account, wallet });
 	
@@ -394,7 +394,7 @@ export const deleteKeys = async ({
 	const {
 		receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
+	assert(isSupportedKeypomContract(contractId!) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
 
 	const { owner_id, drop_id, registered_uses, ft, nft } = await getDropInformation({ dropId })
 	

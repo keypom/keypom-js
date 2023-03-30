@@ -1,7 +1,7 @@
 import * as nearAPI from "near-api-js";
 import { Near } from "near-api-js";
 import { EnvVars, Funder } from "./types/general";
-export declare const officialKeypomContracts: {
+export declare const supportedKeypomContracts: {
     mainnet: {
         "v1.keypom.near": boolean;
         "v1-3.keypom.near": boolean;
@@ -14,15 +14,8 @@ export declare const officialKeypomContracts: {
         "v1-4.keypom.testnet": boolean;
         "v2.keypom.testnet": boolean;
     };
-};
-export declare const supportedKeypomContracts: {
-    mainnet: {
-        "v1-4.keypom.near": boolean;
-        "v2.keypom.near": boolean;
-    };
-    testnet: {
-        "v1-4.keypom.testnet": boolean;
-        "v2.keypom.testnet": boolean;
+    localnet: {
+        "keypom.test.near": boolean;
     };
 };
 export declare const supportedLinkdropClaimPages: {
@@ -114,8 +107,8 @@ export declare const execute: (args: any) => Promise<void | nearAPI.providers.Fi
 export declare const initKeypom: ({ near: _near, network, funder, keypomContractId, }: {
     /** The NEAR connection instance to use. If not passed in, it will create a new one. */
     near?: nearAPI.Near | undefined;
-    /** The network to connect to either `mainnet` or `testnet`. */
-    network: string;
+    /** The network to connect to either `mainnet` or `testnet`. If a near object is passed in, this field can be omitted*/
+    network?: string | undefined;
     /**
      * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
      * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
@@ -184,7 +177,7 @@ export declare const updateFunder: ({ funder }: {
  *	});
  *
  *	// Update the current Keypom contract ID
- *	await updateKeypomContractId({
+ *	updateKeypomContractId({
  *		keypomContractId: "v1.keypom.testnet"
  *	})
  *
@@ -198,5 +191,5 @@ export declare const updateFunder: ({ funder }: {
 */
 export declare const updateKeypomContractId: ({ keypomContractId }: {
     keypomContractId: string;
-}) => Promise<null>;
+}) => null;
 export {};

@@ -4,7 +4,7 @@ import { Account, KeyPair, Near, providers, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
-import { getEnv, initKeypom, officialKeypomContracts, updateKeypomContractId } from "../../keypom";
+import { getEnv, initKeypom, updateKeypomContractId } from "../../keypom";
 import { genArgs, getPubFromSecret, viewAccessKeyData } from "../../keypom-utils";
 import { getKeyInformation } from "../../views";
 import { KeypomTrialModal, setupModal } from "../modal/src";

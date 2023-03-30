@@ -353,6 +353,27 @@ export declare const keypomView: ({ methodName, args }: {
     methodName: any;
     args: any;
 }) => Promise<any>;
+/**
+ * Query for important access key data such as the nonce, allowance, method names etc. that is stored on the NEAR protocol for a given account and public key.
+ *
+ * @example
+ * Check if an access key belongs to a trial account
+ * ```js
+ * const keyInfo = await viewAccessKeyData({accountId, secretKey});
+ * let keyPerms = keyInfo.permission.FunctionCall;
+ * isValidTrialInfo = keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute')
+ * console.log('isValidTrialInfo: ', isValidTrialInfo)
+ * ```
+ * @group Utility
+*/
+export declare const viewAccessKeyData: ({ accountId, publicKey, secretKey }: {
+    /** The account that the access key belongs to. */
+    accountId: string;
+    /** The secret key of the access key */
+    secretKey?: string | undefined;
+    /** The public key of the access key */
+    publicKey?: string | undefined;
+}) => Promise<any>;
 /** @group Utility */
 export declare const execute: ({ transactions, account, wallet, fundingAccount, successUrl, }: {
     transactions: Transaction[];
@@ -494,4 +515,10 @@ export declare function generatePerUsePasswords({ publicKeys, uses, basePassword
 }): Promise<Array<Array<PasswordPerUse>>>;
 export declare const snakeToCamel: (str: any) => any;
 export declare const toCamel: (o: any) => any;
+export declare const wrapParams: (params: any, newParams?: {}) => {};
+export declare const genArgs: (json: any) => {
+    wrapped: any;
+    toValidate: any;
+};
+export declare const nearArgsToYocto: (nearAmount?: string | number, yoctoAmount?: string) => string;
 export {};

@@ -27,9 +27,48 @@ export interface MainBodyHeaders {
 }
 export interface MainBodyButton {
     url?: string;
+    newTab?: boolean;
     text?: string;
 }
 export interface KeypomTrialModal {
-    show(modalType?: string): void;
+    show(modalType?: ModalType): void;
     hide(): void;
 }
+export interface ModalType {
+    id: string;
+    meta?: any;
+}
+export declare const MODAL_TYPE_IDS: {
+    CLAIM_TRIAL: string;
+    TRIAL_OVER: string;
+    ERROR: string;
+};
+export declare const MODAL_DEFAULTS: {
+    claimTrial: {
+        mainBody: {
+            title: string;
+            body: string;
+        };
+    };
+    trialOver: {
+        mainBody: {
+            title: string;
+            body: string;
+            headerOne: {
+                title: string;
+                description: string;
+            };
+            headerTwo: {
+                title: string;
+                description: string;
+            };
+        };
+        moduleList: {
+            modulesTitle: string;
+        };
+    };
+    error: {
+        title: string;
+        body: string;
+    };
+};

@@ -142,12 +142,13 @@ export declare const createDrop: ({ account, wallet, dropId, numKeys, publicKeys
     /**
      * Specify how many keys should be generated for the drop. If the funder has rootEntropy set OR rootEntropy is passed in, the keys will be
      * deterministically generated using the drop ID, key nonce, and entropy. Otherwise, each key will be generated randomly.
+     * If this is not passed in, the publicKeys parameter *must* be passed in.
     */
-    numKeys: number;
+    numKeys?: number | undefined;
     /** Pass in a custom set of publicKeys to add to the drop. If this is not passed in, keys will be generated based on the numKeys parameter. */
     publicKeys?: string[] | undefined;
     /** How much $NEAR should be contained in each link. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-    depositPerUseNEAR?: Number | undefined;
+    depositPerUseNEAR?: string | number | undefined;
     /** How much $yoctoNEAR should be contained in each link. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
     depositPerUseYocto?: string | undefined;
     /** Specify a custom drop ID rather than using the incrementing nonce on the contract. */
