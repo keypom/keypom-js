@@ -1,7 +1,7 @@
 const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret, generateKeys } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
-const { hostClaim } = require("./utilFunctions");
+const { allowEntry } = require("../frontend/utils/utilFunctions");
 const path = require("path");
 const homedir = require("os").homedir();
 var assert = require('assert');
@@ -102,7 +102,7 @@ async function main(){
     // Incorrect Password
     let keyInfo = await getKeyInformation({publicKey: myPublicKey})
     console.log("Claiming with wrong password...")
-    await hostClaim({
+    await allowEntry({
         privKey: myPrivatekey, 
         basePassword: "wrong-password"
     })
@@ -111,7 +111,7 @@ async function main(){
 
     // Correct password
     console.log("claiming with correct password...")
-    await hostClaim({
+    await allowEntry({
         privKey: myPrivatekey,
         basePassword: "event-password"
     })
@@ -120,7 +120,7 @@ async function main(){
 
     // Trying to use host scanner for second claim
     console.log("Second scanner claim, should fail")
-    await hostClaim({
+    await allowEntry({
         privKey: myPrivatekey,
         basePassword: "event-password"
     })
@@ -145,8 +145,9 @@ async function main(){
     // Scanning a depleted key
     console.log("Claim with depleted key")
     try{
-        await hostClaim({
+        await allowEntry({
             privKey: myPrivatekey,
+            basePassword: "event-password"
         })
         if(claimFail){
             throw new Error
@@ -163,7 +164,7 @@ async function main(){
         let keys = await generateKeys({
             numKeys: 1,
         })
-        let claimFail = await hostClaim({
+        let claimFail = await allowEntry({
             privKey: keys.secretKeys[0],
         })
         if(claimFail){

@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png" 
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
-import { hostClaim } from "../utils/utilFunctions";
+import { allowEntry } from "../utils/utilFunctions";
 const { keyStores, connect } = nearAPI; 
 
 export const Scanner = () => {
@@ -63,7 +63,7 @@ export const Scanner = () => {
       }
 
       async function scannerClaim(){
-        let claimFail = await hostClaim({
+        let claimFail = await allowEntry({
           privKey: resPrivKey, 
           basePassword: password
         })

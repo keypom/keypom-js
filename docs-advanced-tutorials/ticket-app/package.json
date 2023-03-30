@@ -1,18 +1,19 @@
 {
-  "name": "greeter",
+  "name": "ticket-app",
   "version": "1.0.0",
   "homepage": ".#",
-  "license": "(MIT AND Apache-2.0)",
+  "author": "Min Qian Lu",
+  "license": "ISC",
+  "main": "frontend/index.js",
   "scripts": {
-    "build": "npm run build:contract && npm run build:web",
-    "build:contract": "cd contract && rustup target add wasm32-unknown-unknown && cargo build --all --target wasm32-unknown-unknown --release && cp ./target/wasm32-unknown-unknown/release/greeter.wasm ../out/main.wasm",
+    "build": "yarn run build:web",
     "build:web": "parcel build frontend/index.html --public-url ./",
-    "deploy": "npm run build:contract && near dev-deploy",
-    "start": "cd frontend && npm run start",
-    "dev": "nodemon --watch contract -e ts --exec \"npm run start\"",
-    "test": "npm run build:contract && npm run test:unit && npm run test:integration",
+    "deploy": "yarn run build:contract && near dev-deploy",
+    "start": "cd frontend && parcel index.html --open",
+    "dev": "nodemon --watch contract -e ts --exec \"yarn run start\"",
+    "test": "yarn run build:contract && yarn run test:unit && yarn run test:integration",
     "test:unit": "cd contract && cargo test",
-    "test:integration": "npm run deploy && cd integration-tests && npm run test",
+    "test:integration": "yarn run deploy && cd integration-tests && yarn run test",
     "test:integration:ts": "echo not supported"
   },
   "devDependencies": {
@@ -27,13 +28,22 @@
     "process": "^0.11.10",
     "react-test-renderer": "~18.1.0",
     "ts-node": "^10.8.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "assert": "^2.0.0",
+    "crypto-browserify": "^3.12.0",
+    "os-browserify": "^0.3.0",
+    "stream-browserify": "^3.0.0"
   },
   "dependencies": {
+    "keypom-js": "^1.4.1-rc.3",
+    "qrcode.react": "^3.1.0",
     "near-api-js": "~0.44.2",
-    "react": "~18.1.0",
-    "react-dom": "~18.1.0",
-    "regenerator-runtime": "~0.13.9"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "regenerator-runtime": "~0.13.9",
+    "react-router-dom": "^6.8.2",
+    "react-zxing": "^1.1.3",
+    "web-vitals": "^3.1.1"
   },
   "resolutions": {
     "@babel/preset-env": "7.13.8"
