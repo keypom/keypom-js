@@ -2,7 +2,6 @@ import React from "react";
 import { useZxing } from "react-zxing";
 import { initKeypom, claim, hashPassword, getPubFromSecret, getKeyInformation } from "keypom-js";
 import * as nearAPI from "near-api-js";
-import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png"
 import xLogo from "../static/img/red-x.png"
