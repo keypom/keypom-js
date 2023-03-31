@@ -1115,10 +1115,10 @@ js-yaml@^3.14.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-keypom-js@1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/keypom-js/-/keypom-js-1.4.1.tgz#ab7b4a84ccad2807017e201158aa3d259db16ccc"
-  integrity sha512-OD1WypuGjtbCjjcGXecINWajomywN+hkwo4Ea9H2K5i9kf6jjX/713ogUrAF/SqgRAmmKNTifGM6S7eWZTcmFg==
+keypom-js@1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/keypom-js/-/keypom-js-1.4.2.tgz#038e377fd1a1442e71af1e9e57b00ae17a08aaca"
+  integrity sha512-qBcyLYdyM6HQsi3CLlFjYbAKyzlKbWZLy4vZq1eolDoLorqbmYh8/rVyZ9fvDsxeG//gsTu/ApmIVivmZiyD/A==
   dependencies:
     "@near-wallet-selector/core" "^7.9.1"
     "@types/react" "^18.0.26"

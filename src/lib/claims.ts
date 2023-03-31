@@ -139,22 +139,20 @@ export const claim = async ({
 
 	const dropInfo = await getDropInformation({ secretKey });
 
-	let checkAccounts = true;
+	if (dropInfo.fc) {
+		var curMethodData = await getCurMethodData({ secretKey });
+		if (curMethodData == null) {
+			accountId = "none"
+		}
+	}
+
 	if (fcArgs) {
 		assert(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
-
-		const curMethodData = await getCurMethodData({ secretKey });
-		if (curMethodData == null) {
-			checkAccounts = false;
-		}
-
 		assert((curMethodData || []).length === fcArgs.length, 'The number of fcArgs must match the number of methods being executed.');
 	}
 
-	if (checkAccounts) {
-		assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
-	}
-
+	assert(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.')
+	
 	const transactions: any[] = [{
 		receiverId,
 		actions: [{
@@ -174,7 +172,7 @@ export const claim = async ({
 				{
 					methodName: 'claim',
 					args: {
-						account_id: accountId || "",
+						account_id: accountId,
 						password,
 						fc_args: fcArgs
 					},
