@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png" 
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
-import { hostClaim } from "../utils/utilFunctions";
+import { allowEntry } from "../utils/utilFunctions";
 const { keyStores, connect } = nearAPI; 
 
 export const Scanner = () => {
@@ -62,52 +62,32 @@ export const Scanner = () => {
           return new Promise( res => setTimeout(res, delay) );
       }
 
-      async function scannerClaim(){
-        let claimFail = await hostClaim({
-          privKey: resPrivKey, 
-          basePassword: password
+      async function scannerClaim() {
+        let isAllowedIn = await allowEntry({
+            privKey: resPrivKey,
+            basePassword: password
         })
-
-        if(!claimFail){
-          // Successful Claim
-          let tempMaster1 = {
-            stage: Stage.successClaim, 
-            data: Data.captured
-          }
-          setMasterStatus(tempMaster1)
-
-          // Wait 3s, then flip go back to pre-claim
-          await timeout(3000)
-          var emptyRes = new Array(splitRes.length)
-          setSplitRes(emptyRes)
-          setResPrivkey("")
-          let tempMaster2 = {
-            stage: Stage.preClaim, 
-            data: Data.empty
-          }
-          setMasterStatus(tempMaster2)
+    
+        // Successful Claim
+        if (isAllowedIn) {
+            setMasterStatus({
+                stage: Stage.successClaim,
+                data: Data.captured
+            })
+        } else { // Failed Claim
+            setMasterStatus({
+                stage: Stage.failClaim,
+                data: Data.captured
+            })
         }
-        else{
-          // Failed Claim
-          let tempMaster1 = {
-            stage: Stage.failClaim, 
-            data: Data.captured
-          }
-          setMasterStatus(tempMaster1)
-
-          // Wait 3s, then flip go back to pre-claim
-          await timeout(3000)
-          var emptyRes = new Array(splitRes.length)
-          setSplitRes(emptyRes)
-          setResPrivkey("")
-          let tempMaster2 = {
-            stage: Stage.preClaim, 
+    
+        // Wait 3s, then flip go back to pre-claim
+        await timeout(3000)
+        setMasterStatus({
+            stage: Stage.preClaim,
             data: Data.empty
-          }
-          setMasterStatus(tempMaster2)
-
-        }
-      }
+        })
+    }
       // Only claim if there is data present
       if(masterStatus.data === Data.captured){
         scannerClaim()
