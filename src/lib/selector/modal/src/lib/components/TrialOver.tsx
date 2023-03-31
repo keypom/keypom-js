@@ -1,6 +1,5 @@
 import React from "react";
-import { MODAL_DEFAULTS } from "../modal";
-import { MainBodyButton, MainBodyHeaders, PostTrialModules } from "../modal.types";
+import { MainBodyButton, MainBodyHeaders, MODAL_DEFAULTS, PostTrialModules } from "../modal.types";
 import { MainBody } from "./MainBody";
 import { ModuleList } from "./ModuleList";
 

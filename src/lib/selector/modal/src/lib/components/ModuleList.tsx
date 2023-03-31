@@ -4,8 +4,7 @@ import type {
   ModuleState,
   Wallet,
 } from "@near-wallet-selector/core";
-import { PostTrialModules } from "../modal.types";
-import { MODAL_DEFAULTS } from "../modal";
+import { PostTrialModules, MODAL_DEFAULTS } from "../modal.types";
 
 interface ModuleListProps {
   modulesTitle?: string;

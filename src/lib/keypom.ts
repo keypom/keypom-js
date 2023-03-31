@@ -333,7 +333,7 @@ export const updateFunder = async ({
  *	});
  *
  *	// Update the current Keypom contract ID
- *	await updateKeypomContractId({
+ *	updateKeypomContractId({
  *		keypomContractId: "v1.keypom.testnet"
  *	})
  *
@@ -345,7 +345,7 @@ export const updateFunder = async ({
  * ``` 
  * @group Keypom SDK Environment
 */
-export const updateKeypomContractId = async ({
+export const updateKeypomContractId = ({
 	keypomContractId
 }: { keypomContractId: string }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
@@ -358,5 +358,3 @@ export const updateKeypomContractId = async ({
 	contractAccount = new Account(connection!, contractId)
 	return null
 }
-
-

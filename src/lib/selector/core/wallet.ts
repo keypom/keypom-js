@@ -4,30 +4,31 @@ import { Account, KeyPair, Near, providers, transactions } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
-import { genArgs } from "../../keypom-utils";
+import { getEnv, initKeypom, officialKeypomContracts, updateKeypomContractId } from "../../keypom";
+import { genArgs, getPubFromSecret, viewAccessKeyData } from "../../keypom-utils";
+import { getKeyInformation } from "../../views";
 import { KeypomTrialModal, setupModal } from "../modal/src";
-import { MODAL_TYPE } from "../modal/src/lib/modal";
-import { createAction, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
+import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
+import { createAction, getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly networkId: string;
-    readonly contractId: string;
-
+    readonly signInContractId: string;
+    
     private readonly near: Near;
     private readonly keyStore: BrowserLocalStorageKeyStore;
     private readonly desiredUrl: string;
     private readonly delimiter: string;
-
-    private accountId?: string;
+    
+    private trialAccountId?: string;
     private secretKey?: string;
 
     private publicKey?: PublicKey;
-    private readonly modalOptions?: any;
-    private modal?: KeypomTrialModal;
+    private modal: KeypomTrialModal;
 
     public constructor({
-        contractId,
+        signInContractId,
         networkId,
         desiredUrl,
         delimiter,
@@ -35,7 +36,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }) {
         console.log('Keypom constructor called.');
         this.networkId = networkId
-        this.contractId = contractId
+        this.signInContractId = signInContractId
 
         this.keyStore = new BrowserLocalStorageKeyStore();
         this.near = new Near({
@@ -44,24 +45,23 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         });
         this.desiredUrl = desiredUrl
         this.delimiter = delimiter
+        
+        this.modal = setupModal(modalOptions);
         console.log("finished constructor");
-
-        this.modal = undefined
-        this.modalOptions = modalOptions
     }
 
     getContractId(): string {
-        return this.contractId;
+        return this.signInContractId;
     }
 
     getAccountId(): string {
         this.assertSignedIn();
-        return this.accountId!
+        return this.trialAccountId!
     }
 
-    public showModal = (modalType = MODAL_TYPE.TRIAL_OVER) => {
+    public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
         console.log('modalType for show modal: ', modalType)
-        this.modal?.show(modalType)
+        this.modal.show(modalType)
     }
 
     public checkValidTrialInfo = () => {
@@ -71,7 +71,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     private transformTransactions = (txns) => {
         this.assertSignedIn();
 
-        const account = new Account(this.near.connection, this.accountId!);
+        const account = new Account(this.near.connection, this.trialAccountId!);
         const { networkId, signer, provider } = account.connection;
 
         return Promise.all(
@@ -102,26 +102,40 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         );
     }
 
+    private internalSignIn = async (accountId, secretKey) => {
+        console.log("internal sign in: ", accountId, " ", secretKey)
+        this.trialAccountId = accountId;
+        this.secretKey = secretKey;
+
+        let keyPair = KeyPair.fromString(secretKey);
+        this.publicKey = keyPair.getPublicKey();
+
+        const dataToWrite = {
+            accountId: this.trialAccountId,
+            secretKey: this.secretKey
+        }
+        setLocalStorageKeypomEnv(dataToWrite);
+        await this.keyStore.setKey(this.networkId, this.trialAccountId!, KeyPair.fromString(this.secretKey!));
+
+        const accountObj = new Account(this.near.connection, this.trialAccountId!);
+        return [accountObj];
+    }
+
     private canExitTrial = async () => {
+        const {viewCall} = getEnv();
+
         try {
-            const keyInfo = await this.viewMethod({
-                contractId: this.accountId!,
+            const keyInfo = await viewCall({
+                contractId: this.trialAccountId!,
                 methodName: 'get_key_information',
-                args: {},
+                args: {}
             })
-            console.log('keyInfo: ', keyInfo)
+            console.log(`keyInfo: `, keyInfo)
 
-            const floor = await this.viewMethod({
-                contractId: this.accountId!,
-                methodName: 'get_floor',
-                args: {},
-            })
-            console.log('floor: ', floor)
-
-            const rules = await this.viewMethod({
-                contractId: this.accountId!,
+            const rules = await viewCall({
+                contractId: this.trialAccountId!,
                 methodName: 'get_rules',
-                args: {},
+                args: {}
             })
             console.log('rules: ', rules)
 
@@ -134,14 +148,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     private validateTransactions = async (toValidate) => {
+        const {viewCall} = getEnv();
         console.log('toValidate: ', toValidate)
 
         let validInfo = {}
         try {
-            const rules = await this.viewMethod({
-                contractId: this.accountId!,
+            const rules = await viewCall({
+                contractId: this.trialAccountId!,
                 methodName: 'get_rules',
-                args: {},
+                args: {}
             })
             let contracts = rules.contracts.split(",");
             let amounts = rules.amounts.split(",");
@@ -187,23 +202,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return true;
     }
 
-    // Make a read-only call to retrieve information from the network
-    private viewMethod = async ({ contractId, methodName, args = {} }) => {
-        const provider = this.near.connection.provider;
-
-        let res: any = await provider.query({
-            request_type: 'call_function',
-            account_id: contractId,
-            method_name: methodName,
-            args_base64: Buffer.from(JSON.stringify(args)).toString('base64'),
-            finality: 'optimistic',
-        });
-
-        return JSON.parse(Buffer.from(res.result).toString());
-    }
-
     public parseUrl = () => {
-        /// TODO validation
         const split = window.location.href.split(this.desiredUrl);
 
         if (split.length != 2) {
@@ -211,42 +210,26 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         const trialInfo = split[1];
-        const [trialAccountId, trialSecretKey] = trialInfo.split(this.delimiter)
-        console.log('trialAccountId: ', trialAccountId)
-        console.log('trialSecretKey: ', trialSecretKey)
+        const [accountId, secretKey] = trialInfo.split(this.delimiter)
 
-        if (!trialAccountId || !trialSecretKey) {
+        if (!accountId || !secretKey) {
             return;
         }
 
         return {
-            trialAccountId,
-            trialSecretKey
+            accountId,
+            secretKey
         }
-    }
-
-    private tryInitFromLocalStorage(data) {
-        if (data?.accountId && data?.secretKey && data?.keypomContractId) {
-            this.accountId = data.accountId;
-            this.secretKey = data.secretKey;
-            const keyPair = KeyPair.fromString(data.secretKey);
-            console.log('Setting keyPair in try init: ', keyPair)
-            this.publicKey = keyPair.getPublicKey()
-
-            return true;
-        }
-
-        return false;
     }
 
     private assertSignedIn() {
-        if (!this.accountId) {
+        if (!this.trialAccountId) {
             throw new Error("Wallet not signed in");
         }
     }
 
     public async isSignedIn() {
-        return this.accountId != undefined && this.accountId != null
+        return this.trialAccountId != undefined && this.trialAccountId != null
     }
 
     async verifyOwner() {
@@ -256,12 +239,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     public async signOut() {
-        if (this.accountId == undefined || this.accountId == null) {
+        if (this.trialAccountId == undefined || this.trialAccountId == null) {
             throw new Error("Wallet is already signed out");
         }
 
-        this.accountId = this.accountId = this.secretKey = this.publicKey = undefined;
-        await this.keyStore.removeKey(this.networkId, this.accountId!);
+        this.trialAccountId = this.trialAccountId = this.secretKey = this.publicKey = undefined;
+        await this.keyStore.removeKey(this.networkId, this.trialAccountId!);
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
@@ -271,8 +254,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     public async getAccounts(): Promise<Account[]> {
-        if (this.accountId != undefined && this.accountId != null) {
-            const accountObj = new Account(this.near.connection, this.accountId!);
+        if (this.trialAccountId != undefined && this.trialAccountId != null) {
+            const accountObj = new Account(this.near.connection, this.trialAccountId!);
             return [accountObj];
         }
 
@@ -285,80 +268,76 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     public async signIn(): Promise<Account[]> {
         console.log("IM SIGNING IN")
-        // Keep track of whether or not the info coming from the URL is valid (account ID & secret key that exist)
-        let isValidTrialInfo = false;
+        
+        await initKeypom({
+            network: this.networkId
+        })
+
         const parsedData = this.parseUrl();
-        console.log('parsedData: ', parsedData)
 
-        // URL is valid
+        // URL is valid (case 1 & 2)
         if (parsedData !== undefined) {
-            const { trialAccountId, trialSecretKey } = parsedData;
-            let keyPair;
-            let publicKey;
+            let { accountId, secretKey } = parsedData;
 
+            // Check if this is an existing keypom drop that is claimable (case 1)
+            const isOriginalLink = isKeypomDrop(this.networkId, accountId);
+            console.log(`isOriginalLink: `, isOriginalLink)
+            
+            // If the drop is from keypom, it is either unclaimed or claimed
+            if (isOriginalLink) {
+                try {
+                    const isUnclaimed = await isUnclaimedTrialDrop(this.networkId, accountId, secretKey);
+                    console.log(`isUnclaimed: `, isUnclaimed)
+                    
+                    // If the drop is unclaimed, we should show the unclaimed drop modal
+                    if (isUnclaimed === true) {
+                        this.modal.show({
+                            id: MODAL_TYPE_IDS.CLAIM_TRIAL,
+                            meta: {
+                                secretKey,
+                                redirectUrlBase: this.desiredUrl,
+                                delimiter: this.delimiter
+                            }
+                        });
+                        return [];
+                    } else {
+                        // If the drop is claimed, we should attempt to recover the drop
+                        console.log("DROP IS CLAIMED. RECOVERY TODO");
+                        accountId = "foobar";
+                    }
+                } catch(e) {
+                    console.log('e checking if drop is from keypom: ', e)
+                }
+            }
+            
+            
+            // Check if the account ID and secret key are valid and sign in accordingly
             try {
-                const accountObj = new Account(this.near.connection, trialAccountId);
-                keyPair = KeyPair.fromString(trialSecretKey);
-                publicKey = keyPair.getPublicKey();
-                console.log('publicKey: ', publicKey.toString())
+                const keyInfo = await viewAccessKeyData({accountId, secretKey});
 
-                const accountKeys = await accountObj.getAccessKeys();
-                console.log('accountKeys: ', accountKeys)
-
+                let keyPerms = keyInfo.permission.FunctionCall;
+                console.log('keyPerms: ', keyPerms)
                 // Check if accountKeys's length is 1 and it has a `public_key` field
-                isValidTrialInfo = accountKeys[0].public_key == publicKey.toString()
-                console.log('isValidTrialInfo: ', isValidTrialInfo)
+                if (keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute')) {
+                    return this.internalSignIn(accountId, secretKey);
+                }
             } catch (e) {
-                isValidTrialInfo = false;
                 console.log('e: ', e)
             }
-
-            // If the trial info is valid (i.e the account ID & secret key exist)
-            if (isValidTrialInfo) {
-                this.accountId = trialAccountId;
-                this.secretKey = trialSecretKey;
-                this.publicKey = publicKey;
-
-                const dataToWrite = {
-                    accountId: this.accountId,
-                    secretKey: this.secretKey
-                }
-                console.log('Trial info valid - setting data', dataToWrite)
-                setLocalStorageKeypomEnv(dataToWrite);
-            }
         }
 
-        // If anything went wrong (URL invalid or account doesn't exist or secret key doesn't belong)
-        // We can check current local storage data
-        if (!isValidTrialInfo) {
-            const curEnvData = getLocalStorageKeypomEnv();
-            console.log('trial info invalid. Cur env data: ', curEnvData)
+        // The URL is invalid or the trial info is incorrect. We should check local storage:
+        const curEnvData = getLocalStorageKeypomEnv();
+        console.log('trial info invalid. Cur env data: ', curEnvData)
 
-            // If there is any
-            if (curEnvData != null) {
-                const { accountId, secretKey } = JSON.parse(curEnvData);
-                this.accountId = accountId;
-                this.secretKey = secretKey;
-
-                const keyPair = KeyPair.fromString(secretKey);
-                const publicKey = keyPair.getPublicKey();
-                this.publicKey = publicKey;
-                isValidTrialInfo = true;
-                console.log('Valid trial info from cur env data. Setting data')
-            }
+        // If there is any
+        if (curEnvData != null) {
+            const { accountId, secretKey } = JSON.parse(curEnvData);
+            return this.internalSignIn(accountId, secretKey);
         }
 
-        if (!isValidTrialInfo) {
-            console.log("no valid trial info. returning")
-            return []
-        }
-
-        console.log("auto signing in!");
-        await this.keyStore.setKey(this.networkId, this.accountId!, KeyPair.fromString(this.secretKey!));
-        this.modal = setupModal(this.modalOptions);
-
-        const accountObj = new Account(this.near.connection, this.accountId!);
-        return [accountObj];
+        // Invalid local storage info so return nothing
+        return []
     }
 
     public async signAndSendTransaction(params) {
@@ -392,7 +371,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         const shouldExit = await this.canExitTrial();
         if (shouldExit == true) {
-            this.modal?.show(MODAL_TYPE.TRIAL_OVER);
+            this.modal.show({id: MODAL_TYPE_IDS.TRIAL_OVER});
             return [FAILED_EXECUTION_OUTCOME];
         }
 
@@ -401,13 +380,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         console.log('res from validate transactions: ', res);
 
         if (res == false) {
-            this.modal?.show(MODAL_TYPE.ERROR);
+            this.modal.show({id: MODAL_TYPE_IDS.ERROR});
             return [FAILED_EXECUTION_OUTCOME];
         }
 
         console.log('args: ', args)
 
-        const account = await this.near.account(this.accountId!);
+        const account = await this.near.account(this.trialAccountId!);
 
         let incomingGas = new BN("0");
         let numActions = 0;

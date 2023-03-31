@@ -1,7 +1,7 @@
 import type {
 	WalletBehaviourFactory, WalletModuleFactory
 } from "@near-wallet-selector/core";
-import { MODAL_TYPE } from "../modal/src/lib/modal";
+import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
 import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
 
@@ -26,7 +26,7 @@ const Keypom: WalletBehaviourFactory<
 		// 	return keypomWallet.getAccount();
 		// },
 
-		showModal(modalType = MODAL_TYPE.TRIAL_OVER) {
+		showModal(modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) {
 			keypomWallet.showModal(modalType);
 		},
 
@@ -80,17 +80,16 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-	iconUrl = "",
 	delimiter = "/",
 	deprecated = false,
 	desiredUrl = "/keypom-trial#",
 	networkId,
-	contractId,
+	signInContractId,
 	modalOptions
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
 	return async () => {
 		const keypomWallet = new KeypomWallet({
-			contractId,
+			signInContractId,
 			networkId,
 			desiredUrl,
 			delimiter,
@@ -107,10 +106,10 @@ export function setupKeypom({
 			metadata: {
 				name: "Keypom Account",
 				description: null,
-				iconUrl,
+				iconUrl: "",
 				deprecated,
 				available: true,
-				contractId,
+				contractId: signInContractId,
 				runOnStartup: shouldSignIn,
 			},
 			init: async (config) =>
