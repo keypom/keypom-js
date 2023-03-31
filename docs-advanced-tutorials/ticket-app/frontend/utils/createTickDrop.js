@@ -3,7 +3,7 @@ const homedir = require("os").homedir();
 const { KeyPair, keyStores, connect, Account } = require("near-api-js");
 var assert = require('assert');
 
-const keypom = require("../../../../../keypom-js");
+const keypom = require("keypom-js");
 const {
 	initKeypom,
 	getEnv,
