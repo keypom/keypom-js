@@ -1,9 +1,19 @@
 import { Account, Near } from "near-api-js";
 import { FCData } from "./types/fc";
 import BN from 'bn.js';
-import { getEnv, officialKeypomContracts } from "./keypom";
+import { getEnv, supportedKeypomContracts } from "./keypom";
 import { Funder } from "./types/general";
 import { ProtocolReturnedDropConfig } from "./types/protocol";
+
+export function isValidKeypomContract(keypomContractId: string) {
+    const {networkId} = getEnv();
+    return supportedKeypomContracts[networkId!][keypomContractId] !== undefined
+}
+
+export function isSupportedKeypomContract(keypomContractId: string) {
+    const {networkId} = getEnv();
+    return supportedKeypomContracts[networkId!][keypomContractId] === true
+}
 
 export function isValidAccountObj(o: Account | undefined): o is Account {
     if (o) {
@@ -86,7 +96,7 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
                         assert(methodData.args != undefined, "Must specify arguments for method");
                         assert(typeof methodData.args == "string", "Arguments must be a string. If you want to pass a JSON object, stringify it first.");
                         assert(methodData.receiverId != undefined, "Must specify arguments for method");
-                        assert(officialKeypomContracts[networkId!][methodData.receiverId] == undefined, "Cannot have a keypom contract as the receiver");
+                        assert(isValidKeypomContract(methodData.receiverId) !== false, "Cannot have a keypom contract as the receiver");
                     }
                 }
             }

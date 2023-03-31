@@ -9,7 +9,7 @@ import { Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account, Connection, Near } from "near-api-js";
 import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
-import { assert, isValidFunderObject, isValidNearObject } from "./checks";
+import { assert, isSupportedKeypomContract, isValidFunderObject, isValidKeypomContract, isValidNearObject } from "./checks";
 import {
 	execute as _execute
 } from "./keypom-utils";
@@ -39,32 +39,28 @@ const networks = {
 		nodeUrl: 'https://rpc.testnet.near.org',
 		walletUrl: 'https://wallet.testnet.near.org',
 		helperUrl: 'https://helper.testnet.near.org'
-	}
-}
-
-export const officialKeypomContracts = {
-	mainnet: {
-		"v1.keypom.near": true,
-		"v1-3.keypom.near": true,
-		"v1-4.keypom.near": true,
-		"v2.keypom.near": true,
 	},
-	testnet: {
-		"v1.keypom.testnet": true,
-		"v1-3.keypom.testnet": true,
-		"v1-4.keypom.testnet": true,
-		"v2.keypom.testnet": true,
+	localnet: {
+		networkId: 'localnet',
+		viewAccountId: 'test.near',
 	}
 }
 
 export const supportedKeypomContracts = {
 	mainnet: {
+		"v1.keypom.near": false,
+		"v1-3.keypom.near": false,
 		"v1-4.keypom.near": true,
-		"v2.keypom.near": true
+		"v2.keypom.near": true,
 	},
 	testnet: {
+		"v1.keypom.testnet": false,
+		"v1-3.keypom.testnet": false,
 		"v1-4.keypom.testnet": true,
 		"v2.keypom.testnet": true,
+	},
+	localnet: {
+		"keypom.test.near": true
 	}
 }
 
@@ -203,8 +199,8 @@ export const initKeypom = async ({
 }: {
 	/** The NEAR connection instance to use. If not passed in, it will create a new one. */
 	near?: Near;
-	/** The network to connect to either `mainnet` or `testnet`. */
-	network: string;
+	/** The network to connect to either `mainnet` or `testnet`. If a near object is passed in, this field can be omitted*/
+	network?: string;
 	/**
 	 * The account that will sign transactions to create drops and interact with the Keypom contract. This account will be added to the KeyStore if provided.
 	 * If rootEntropy is provided for the funder, all access keys will be derived deterministically based off this string.
@@ -215,7 +211,14 @@ export const initKeypom = async ({
 	 */
 	keypomContractId?: string;
 }) => {
-	assert(network == "testnet" || network == "mainnet", "Network must be either `testnet` or `mainnet`");
+	// Assert that either a near object or network is passed in
+	assert(_near || network, "Either a NEAR connection object or network must be passed in.");
+
+	if (network != undefined) {
+		assert(network == "testnet" || network == "mainnet" || "localnet", "Network must be either `testnet` or `mainnet` or `localnet`");
+		// Assert that if network was passed in as "localnet", a near object should also be passed in
+		assert(network != "localnet" || _near, "If network is `localnet`, a NEAR connection object must be passed in.");
+	}
 
 	if (_near) {
 		assert(isValidNearObject(_near), "The NEAR object passed in is not valid. Please pass in a valid NEAR object.");
@@ -226,7 +229,7 @@ export const initKeypom = async ({
 		keyStore = process?.versions?.node ? new InMemoryKeyStore() : new BrowserLocalStorageKeyStore()
 		near = new Near({
 			...networkConfig,
-			deps: { keyStore },
+			keyStore,
 		});
 	}
 
@@ -236,10 +239,13 @@ export const initKeypom = async ({
 	if (networkId === 'mainnet') {
 		contractId = receiverId = `${contractBase}.near`
 	}
+	if (networkId === 'localnet') {
+		contractId = receiverId = `keypom.test.near`
+	}
 
 	if (keypomContractId) {
-		assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
-		if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
+		assert(isValidKeypomContract(keypomContractId) === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+		if (isSupportedKeypomContract(keypomContractId) !== true) {
 			console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 		}
 
@@ -349,8 +355,8 @@ export const updateKeypomContractId = ({
 	keypomContractId
 }: { keypomContractId: string }) => {
 	assert(near !== undefined, "You must initialize the SDK via `initKeypom` before updating the Keypom contract ID.")
-	assert(officialKeypomContracts[networkId!][keypomContractId] === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
-	if (supportedKeypomContracts[networkId!][keypomContractId] !== true) {
+	assert(isValidKeypomContract(keypomContractId) === true, "The keypom contract passed in must be an official Keypom contract for the given network.");
+	if (isSupportedKeypomContract(keypomContractId) !== true) {
 		console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
 	}
 

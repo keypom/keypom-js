@@ -14,8 +14,9 @@ const {
 
 
 import { BN } from "bn.js";
-import { officialKeypomContracts, updateKeypomContractId } from "../../keypom";
+import { updateKeypomContractId } from "../../keypom";
 import { getKeyInformation } from "../../views";
+import { isValidKeypomContract } from "../../checks";
 
 const gas = '200000000000000'
 
@@ -49,7 +50,7 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 }
 
 export const isKeypomDrop = (networkId, keypomContractId) => {
-	if (officialKeypomContracts[networkId][keypomContractId] === true) {
+	if (isValidKeypomContract(keypomContractId) === true) {
 		updateKeypomContractId({
 			keypomContractId
 		})

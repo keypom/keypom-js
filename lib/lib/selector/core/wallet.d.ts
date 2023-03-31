@@ -3,18 +3,17 @@ import BN from "bn.js";
 import { Account } from "near-api-js";
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     readonly networkId: string;
-    readonly contractId: string;
+    readonly signInContractId: string;
     private readonly near;
     private readonly keyStore;
     private readonly desiredUrl;
     private readonly delimiter;
-    private accountId?;
+    private trialAccountId?;
     private secretKey?;
     private publicKey?;
-    private readonly modalOptions?;
-    private modal?;
-    constructor({ contractId, networkId, desiredUrl, delimiter, modalOptions }: {
-        contractId: any;
+    private modal;
+    constructor({ signInContractId, networkId, desiredUrl, delimiter, modalOptions }: {
+        signInContractId: any;
         networkId: any;
         desiredUrl: any;
         delimiter: any;
@@ -22,14 +21,18 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     });
     getContractId(): string;
     getAccountId(): string;
-    showModal: () => void;
+    showModal: (modalType?: {
+        id: string;
+    }) => void;
     checkValidTrialInfo: () => boolean;
     private transformTransactions;
+    private internalSignIn;
+    private canExitTrial;
+    private validateTransactions;
     parseUrl: () => {
-        trialAccountId: string;
-        trialSecretKey: string;
+        accountId: string;
+        secretKey: string;
     } | undefined;
-    private tryInitFromLocalStorage;
     private assertSignedIn;
     isSignedIn(): Promise<boolean>;
     verifyOwner(): Promise<void>;

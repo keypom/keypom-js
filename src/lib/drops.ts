@@ -9,7 +9,7 @@ const {
 import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import { Account } from "near-api-js";
-import { assert, assertDropIdUnique, assertValidDropConfig, assertValidFCData, isValidAccountObj } from './checks';
+import { assert, assertDropIdUnique, assertValidDropConfig, assertValidFCData, isSupportedKeypomContract, isValidAccountObj } from './checks';
 import { FCData } from './types/fc';
 import { FTData } from './types/ft';
 import { getEnv, supportedKeypomContracts } from "./keypom";
@@ -225,8 +225,8 @@ export const createDrop = async ({
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
-	assert(publicKeys || numKeys, 'Must pass in either publicKeys or numKeys to create a drop.');
+	assert(isSupportedKeypomContract(contractId!) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
+	assert(publicKeys != undefined || numKeys != undefined, 'Must pass in either publicKeys or numKeys to create a drop.');
 
 	/// parse args
 	depositPerUseYocto = nearArgsToYocto(depositPerUseNEAR, depositPerUseYocto);
@@ -507,7 +507,7 @@ export const deleteDrops = async ({
 		gas300, receiverId, execute, getAccount, networkId, contractId
 	} = getEnv()
 
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
+	assert(isSupportedKeypomContract(contractId!) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet });

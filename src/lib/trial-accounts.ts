@@ -3,7 +3,7 @@ import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/w
 import BN from 'bn.js';
 import * as nearAPI from "near-api-js";
 import { Account, KeyPair } from "near-api-js";
-import { assert, assertDropIdUnique, assertValidDropConfig, isValidAccountObj } from './checks';
+import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from './checks';
 import { getEnv, supportedKeypomContracts } from "./keypom";
 import {
 	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto, wrapParams
@@ -149,7 +149,7 @@ export const createTrialAccountDrop = async ({
 
 	assert(isValidAccountObj(account), 'Passed in account is not a valid account object.')
 	account = await getAccount({ account, wallet })
-	assert(supportedKeypomContracts[networkId!][contractId] === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
+	assert(isSupportedKeypomContract(contractId!) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
 
 	// Ensure that if the dropID is passed in, it's greater than 1 billion
 	assert(parseInt(dropId || "1000000000") >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
