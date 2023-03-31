@@ -96,7 +96,7 @@ export const assertValidFCData = (fcData: FCData | undefined, depositPerUse: str
                         assert(methodData.args != undefined, "Must specify arguments for method");
                         assert(typeof methodData.args == "string", "Arguments must be a string. If you want to pass a JSON object, stringify it first.");
                         assert(methodData.receiverId != undefined, "Must specify arguments for method");
-                        assert(isValidKeypomContract(methodData.receiverId) !== false, "Cannot have a keypom contract as the receiver");
+                        assert(isValidKeypomContract(methodData.receiverId) === false, "Cannot have a keypom contract as the receiver");
                     }
                 }
             }
