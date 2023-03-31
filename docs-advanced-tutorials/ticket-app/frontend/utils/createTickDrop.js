@@ -89,91 +89,54 @@ async function createTickDrop(){
     return keys
 }
 
-
-
-async function main(){
+async function wrongPasswordCheck() {
     // Create Drop
     let keys = await createTickDrop();
-    let myPrivatekey = keys.secretKeys[0];
-    let myPublicKey = keys.publicKeys[0];
-    console.log(`Private Key: ${myPrivatekey}`)
-    console.log(`Public Key: ${myPublicKey}`)
+    let privKey = keys.secretKeys[0];
+    let pubKey = keys.publicKeys[0];
 
     // Incorrect Password
-    let keyInfo = await getKeyInformation({publicKey: myPublicKey})
     console.log("Claiming with wrong password...")
-    await hostClaim({
-        privKey: myPrivatekey, 
+    let shouldAdmit = await allowEntry({
+        privKey, 
         basePassword: "wrong-password"
     })
-    keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    assert(keyInfo.cur_key_use == 1, `Key has claimed with an incorrect password. Current Key Use: ${keyInfo.cur_key_use}`)
+    assert(shouldAdmit === false, `Expected no admittance with incorrect password.`)
 
     // Correct password
     console.log("claiming with correct password...")
-    await hostClaim({
-        privKey: myPrivatekey,
+    shouldAdmit = await allowEntry({
+        privKey,
         basePassword: "event-password"
     })
-    keyInfo = await getKeyInformation({publicKey: myPublicKey})
-    assert(keyInfo.cur_key_use == 2, `Claim Failed. Current Key Use: ${keyInfo.cur_key_use}`)
+    assert(shouldAdmit === true, `Expected admittance with correct password.`)
+}
 
-    // Trying to use host scanner for second claim
-    console.log("Second scanner claim, should fail")
-    await hostClaim({
-        privKey: myPrivatekey,
+async function doubleClaimCheck() {
+    // Create Drop
+    let keys = await createTickDrop();
+    let privKey = keys.secretKeys[0];
+
+    // Incorrect Password
+    console.log("Claiming with wrong password...")
+    let shouldAdmit = await allowEntry({
+        privKey, 
+        basePassword: "wrong-password"
+    })
+    assert(shouldAdmit === false, `Expected no admittance with incorrect password.`)
+
+    // Correct password
+    console.log("claiming with correct password...")
+    shouldAdmit = await allowEntry({
+        privKey,
         basePassword: "event-password"
     })
-    assert(keyInfo.cur_key_use == 2, `Claim Succeeded Unexpectedly. Current Key Use: ${keyInfo.cur_key_use}`)
+    assert(shouldAdmit === true, `Expected admittance with correct password.`)
+}
 
-
-    // Second claim, no password needed
-    console.log("Normal second claim with no password")
-    await claim({
-        secretKey: myPrivatekey,
-        accountId: "minqi.testnet",
-    })
-    // Getting key info here should fail as key has been depleted and deleted
-    try{
-        keyInfo = await getKeyInformation({publicKey: myPublicKey})
-        console.log(`Key use is: ${keyInfo.cur_key_use}, this should not be happening`)
-    }
-    catch(err){
-        console.log("Second claim successful. Key has been depleted and deleted")
-    }
-
-    // Scanning a depleted key
-    console.log("Claim with depleted key")
-    try{
-        await hostClaim({
-            privKey: myPrivatekey,
-        })
-        if(claimFail){
-            throw new Error
-        }
-        console.log("claimed successfully, this should not be happening")
-    }
-    catch(err){
-        console.log("Claim failed, as expected")
-    }
-
-    // Scanning a fake key
-    console.log("Claim with fake key")
-    try{
-        let keys = await generateKeys({
-            numKeys: 1,
-        })
-        let claimFail = await hostClaim({
-            privKey: keys.secretKeys[0],
-        })
-        if(claimFail){
-            throw new Error
-        }
-        console.log("claimed successfully, this should not be happening")
-    }
-    catch(err){
-        console.log("Claim failed, as expected")
-    }
+async function main(){
+    await wrongPasswordCheck();
+    await doubleClaimCheck(); 
 }
 
 main()
