@@ -4,12 +4,11 @@ import { initKeypom, claim, hashPassword, getPubFromSecret, getKeyInformation } 
 import * as nearAPI from "near-api-js";
 import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
-import logo from "../static/img/green-check.png" 
+import logo from "../static/img/green-check.png"
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
-const { keyStores, connect } = nearAPI; 
-
-
+import { allowEntry } from "../utils/allowEntry";
+const { keyStores, connect } = nearAPI;
 
 export const Scanner = () => {
 
