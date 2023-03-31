@@ -4,11 +4,11 @@ import { initKeypom, claim, hashPassword, getPubFromSecret, getKeyInformation } 
 import * as nearAPI from "near-api-js";
 import { NETWORK_ID, ACCOUNT_ID } from "../utils/configurations";
 import { useState, useEffect } from "react";
-import logo from "../static/img/green-check.png" 
+import logo from "../static/img/green-check.png"
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
 import { hostClaim } from "../utils/utilFunctions";
-const { keyStores, connect } = nearAPI; 
+const { keyStores, connect } = nearAPI;
 
 export const Scanner = () => {
   // Stage enum
@@ -30,7 +30,7 @@ export const Scanner = () => {
   const [splitRes, setSplitRes] = useState([]);
   const [resPrivKey, setResPrivkey] = useState("")
   const [password, setPassword] = useState("NULL")
-  const [masterStatus, setMasterStatus] = useState({stage: Stage.preClaim, data: Data.empty})
+  const [masterStatus, setMasterStatus] = useState({ stage: Stage.preClaim, data: Data.empty })
 
   // Scanner and getting results of scan
   const { ref } = useZxing({
@@ -41,7 +41,7 @@ export const Scanner = () => {
 
       //indicate new data
       let tempMaster = {
-        stage: Stage.claiming, 
+        stage: Stage.claiming,
         data: Data.captured
       }
       setMasterStatus(tempMaster)
@@ -51,67 +51,47 @@ export const Scanner = () => {
   // Functions that only run when scanner is mounted 
   // Get password
   useEffect(() => {
-      let PASSWORD = "NULL"
-      PASSWORD = prompt("Enter base password for drop")
-      setPassword(PASSWORD)
+    let PASSWORD = "NULL"
+    PASSWORD = prompt("Enter base password for drop")
+    setPassword(PASSWORD)
   }, [])
 
   // Claiming the drop using password
   useEffect(() => {
-      function timeout(delay) {
-          return new Promise( res => setTimeout(res, delay) );
-      }
+    function timeout(delay) {
+      return new Promise(res => setTimeout(res, delay));
+    }
 
-      async function scannerClaim(){
-        let claimFail = await hostClaim({
-          privKey: resPrivKey, 
-          basePassword: password
+    async function scannerClaim() {
+      let isAllowedIn = await allowEntry({
+        privKey: resPrivKey,
+        basePassword: password
+      })
+
+      // Successful Claim
+      if (isAllowedIn) {
+        setMasterStatus({
+          stage: Stage.successClaim,
+          data: Data.captured
         })
-
-        if(!claimFail){
-          // Successful Claim
-          let tempMaster1 = {
-            stage: Stage.successClaim, 
-            data: Data.captured
-          }
-          setMasterStatus(tempMaster1)
-
-          // Wait 3s, then flip go back to pre-claim
-          await timeout(3000)
-          var emptyRes = new Array(splitRes.length)
-          setSplitRes(emptyRes)
-          setResPrivkey("")
-          let tempMaster2 = {
-            stage: Stage.preClaim, 
-            data: Data.empty
-          }
-          setMasterStatus(tempMaster2)
-        }
-        else{
-          // Failed Claim
-          let tempMaster1 = {
-            stage: Stage.failClaim, 
-            data: Data.captured
-          }
-          setMasterStatus(tempMaster1)
-
-          // Wait 3s, then flip go back to pre-claim
-          await timeout(3000)
-          var emptyRes = new Array(splitRes.length)
-          setSplitRes(emptyRes)
-          setResPrivkey("")
-          let tempMaster2 = {
-            stage: Stage.preClaim, 
-            data: Data.empty
-          }
-          setMasterStatus(tempMaster2)
-
-        }
+      } else { // Failed Claim
+        setMasterStatus({
+          stage: Stage.failClaim,
+          data: Data.captured
+        })
       }
-      // Only claim if there is data present
-      if(masterStatus.data === Data.captured){
-        scannerClaim()
-      }
+
+      // Wait 3s, then flip go back to pre-claim
+      await timeout(3000)
+      setMasterStatus({
+        stage: Stage.preClaim,
+        data: Data.empty
+      })
+    }
+    // Only claim if there is data present
+    if (masterStatus.data === Data.captured) {
+      scannerClaim()
+    }
 
   }, [masterStatus.data])
 
@@ -120,7 +100,7 @@ export const Scanner = () => {
       return (
         <>
           <div className="content">
-          <div style={{border:"0.5rem solid white"}}><video ref={ref} /></div>
+            <div style={{ border: "0.5rem solid white" }}><video ref={ref} /></div>
             <h2>Scan a linkdrop QR code to claim</h2>
             <h4>To re-enter password, refresh the page</h4>
           </div>
@@ -130,7 +110,7 @@ export const Scanner = () => {
       return (
         <>
           <div className="content">
-            <div style={{border:"0.5rem solid yellow"}}><video ref={ref} /></div>
+            <div style={{ border: "0.5rem solid yellow" }}><video ref={ref} /></div>
             <h2>Claiming</h2>
             <h4>Note this should take a few seconds</h4>
           </div>
@@ -140,7 +120,7 @@ export const Scanner = () => {
       return (
         <>
           <div className="content">
-            <div style={{border:"0.5rem solid green"}}><video ref={ref} /></div>
+            <div style={{ border: "0.5rem solid green" }}><video ref={ref} /></div>
             <h2>Claimed!</h2>
             <img src={logo} alt="green check" width="50" height="60" className="img_center"></img>
           </div>
@@ -150,7 +130,7 @@ export const Scanner = () => {
       return (
         <>
           <div className="content">
-            <div style={{border:"0.5rem solid red"}}><video ref={ref} /></div>
+            <div style={{ border: "0.5rem solid red" }}><video ref={ref} /></div>
             <h2>Could Not Be Claimed!</h2>
             <h3>Ensure Password is Correct</h3>
             <h4>To re-enter password, refresh the page</h4>
@@ -163,10 +143,10 @@ export const Scanner = () => {
       return (
         <>
           <div className="content">
-            <h2>{ errorMsg }</h2>
+            <h2>{errorMsg}</h2>
             <img src={xLogo} alt="red x" width="50" height="60" className="img_center"></img>
           </div>
         </>
       );
-    }
+  }
 };
