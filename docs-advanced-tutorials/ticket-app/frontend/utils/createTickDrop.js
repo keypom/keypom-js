@@ -6,7 +6,29 @@ const path = require("path");
 const homedir = require("os").homedir();
 var assert = require('assert');
 
-async function createTickDrop(){
+const keypom = require("../../../../lib");
+const {
+	execute,
+	initKeypom,
+	createTrialAccountDrop,
+	claimTrialAccountDrop,
+	getEnv,
+	createDrop,
+	getDrops,
+	claim,
+	deleteKeys,
+	deleteDrops,
+	addKeys,
+	generateKeys,
+	withdrawBalance,
+	addToBalance,
+    parseNearAmount
+} = keypom
+
+// Change this to your account ID
+const FUNDER_ACCOUNT_ID = "minqi.testnet";
+const NETWORK_ID = "testnet";
+async function createTickDrop() {
     // Initiate connection to the NEAR blockchain.
     const network = "testnet"
     const CREDENTIALS_DIR = ".near-credentials";
