@@ -14,6 +14,8 @@ const {
 
 
 import { BN } from "bn.js";
+import { officialKeypomContracts, updateKeypomContractId } from "../../keypom";
+import { getKeyInformation } from "../../views";
 
 const gas = '200000000000000'
 
@@ -44,6 +46,32 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 	console.log('dataToWrite: ', dataToWrite)
 
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
+}
+
+export const isKeypomDrop = (networkId, keypomContractId) => {
+	if (officialKeypomContracts[networkId][keypomContractId] === true) {
+		updateKeypomContractId({
+			keypomContractId
+		})
+
+		return true;
+	}
+
+	return false;
+}
+
+export const isUnclaimedTrialDrop = async (networkId, keypomContractId, secretKey) => {
+	console.log('accountId is valid keypom contract ', keypomContractId)
+	const keyInfo = await getKeyInformation({
+		secretKey
+	})
+	console.log('keyInfo: ', keyInfo)
+
+	if (keyInfo !== null) {
+		return true;
+	}
+
+	return false;
 }
 
 export const createAction = (action) => {

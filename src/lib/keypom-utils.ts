@@ -65,7 +65,6 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> => sha256Ha
  */
 export const getPubFromSecret = (secretKey: string): string => {
     var keyPair = KeyPair.fromString(secretKey);
-    console.log('keyPair: ', keyPair)
     return keyPair.getPublicKey().toString()
 };
 
@@ -561,6 +560,47 @@ export const keypomView = async ({ methodName, args }) => {
         methodName,
         args
     })
+}
+
+/**
+ * Query for important access key data such as the nonce, allowance, method names etc. that is stored on the NEAR protocol for a given account and public key.
+ * 
+ * @example
+ * Check if an access key belongs to a trial account
+ * ```js
+ * const keyInfo = await viewAccessKeyData({accountId, secretKey});
+ * let keyPerms = keyInfo.permission.FunctionCall;
+ * isValidTrialInfo = keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute')
+ * console.log('isValidTrialInfo: ', isValidTrialInfo)
+ * ```
+ * @group Utility
+*/
+export const viewAccessKeyData = async ({accountId, publicKey, secretKey}:{
+    /** The account that the access key belongs to. */
+    accountId: string,
+    /** The secret key of the access key */
+    secretKey?: string,
+    /** The public key of the access key */
+    publicKey?: string
+}) => {
+    const {
+        near
+    } = getEnv()
+
+    const provider = near!.connection.provider;
+
+    if (secretKey) {
+        publicKey = getPubFromSecret(secretKey)
+    }
+
+    let res: any = await provider.query({
+        request_type: "view_access_key",
+        finality: "final",
+        account_id: accountId,
+        public_key: publicKey!,
+    });
+    
+    return res;
 }
 
 /// TODO WIP: helper to remove the deposit if the user already has enough balance to cover the drop,add_keys
