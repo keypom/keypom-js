@@ -3,23 +3,14 @@ const homedir = require("os").homedir();
 const { KeyPair, keyStores, connect, Account } = require("near-api-js");
 var assert = require('assert');
 
-const keypom = require("keypom-js");
+const keypom = require("../../../../../keypom-js");
 const {
-	execute,
 	initKeypom,
-	createTrialAccountDrop,
-	claimTrialAccountDrop,
 	getEnv,
 	createDrop,
-	getDrops,
-	claim,
-	deleteKeys,
-	deleteDrops,
-	addKeys,
-	generateKeys,
-	withdrawBalance,
-	addToBalance,
-    parseNearAmount
+    parseNearAmount,
+    createNFTSeries,
+    formatLinkdropUrl
 } = keypom
 
 // Change this to your account ID
@@ -43,17 +34,12 @@ async function createTickDrop() {
 
     let near = await connect(nearConfig);
     const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
-    console.log(`fundingAccount: ${JSON.stringify(fundingAccount)}`)
     
     // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
     // Here we are connecting to the testnet network
     await initKeypom({
         near,
         network: "testnet",
-        // funder: {
-        //     accountId: "mothafucka.testnet",
-        //     secretKey: "43yrjbzT6WGA9zJEbc9rNqoRLUYxfWhmZt6VQgzdoGrnQZDYBT7LME5fhzDyxTkc2dKTHkqt8d57zvBjmT2azaRM"
-        // }
     });
 
     // Create drop with 10 keys and 2 key uses each
@@ -99,10 +85,20 @@ async function createTickDrop() {
         customURL: "http://localhost:1234/CONTRACT_ID/SECRET_KEY",
         secretKeys: keys.secretKeys,
         contractId: KEYPOM_CONTRACT,
-    })  
-    console.log(`tickets: ${tickets}`)
+    })
+    console.log(`
+    
+    Ticket Links: 
+    
+    ${tickets}
+    
+    `)
 
     return keys
 }
 
 createTickDrop()
+
+module.exports = {
+    createTickDrop
+}

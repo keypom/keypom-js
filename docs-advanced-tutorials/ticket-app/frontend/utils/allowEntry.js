@@ -1,9 +1,10 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret } = require("keypom-js");
-const { KeyPair, keyStores, connect } = require("near-api-js");
-const { parseNearAmount } = require("near-api-js/lib/utils/format");
-const path = require("path");
-const homedir = require("os").homedir();
-var assert = require('assert');
+const keypom = require("../../../../../keypom-js");
+const {
+	getPubFromSecret,
+	getKeyInformation,
+	hashPassword,
+    claim
+} = keypom
 
 async function allowEntry({privKey, basePassword}) {
     try {
@@ -25,7 +26,7 @@ async function allowEntry({privKey, basePassword}) {
         }
 
         // Create password using base + pubkey + key use as string
-        let passwordForClaim = await hashPassword(basePassword + publicKey + resCurUse.toString())
+        let passwordForClaim = await hashPassword(basePassword + publicKey + curUse.toString())
         // Claim with created password
         await claim({
             secretKey: privKey,
