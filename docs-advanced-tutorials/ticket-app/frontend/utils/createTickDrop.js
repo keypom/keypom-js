@@ -1,7 +1,7 @@
 const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret, generateKeys } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const { parseNearAmount } = require("near-api-js/lib/utils/format");
-const { hostClaim } = require("./utilFunctions");
+const { allowEntry } = require("./utilFunctions");
 const path = require("path");
 const homedir = require("os").homedir();
 var assert = require('assert');
@@ -132,33 +132,64 @@ async function wrongPasswordCheck() {
         basePassword: "event-password"
     })
     assert(shouldAdmit === true, `Expected admittance with correct password.`)
-}
 
-async function doubleClaimCheck() {
-    // Create Drop
-    let keys = await createTickDrop();
-    let privKey = keys.secretKeys[0];
-
-    // Incorrect Password
-    console.log("Claiming with wrong password...")
-    let shouldAdmit = await allowEntry({
-        privKey, 
-        basePassword: "wrong-password"
-    })
-    assert(shouldAdmit === false, `Expected no admittance with incorrect password.`)
-
-    // Correct password
-    console.log("claiming with correct password...")
+    // Trying to use host scanner for second claim
+    console.log("Second scanner claim, should fail")
     shouldAdmit = await allowEntry({
-        privKey,
+        privKey: privKey,
         basePassword: "event-password"
     })
-    assert(shouldAdmit === true, `Expected admittance with correct password.`)
-}
+    assert(shouldAdmit == false, `Second scanner claim succeeded unexpectedly.`)
 
-async function main(){
-    await wrongPasswordCheck();
-    await doubleClaimCheck(); 
+
+    // Second claim, no password needed
+    console.log("Normal second claim with no password")
+    await claim({
+        secretKey: privKey,
+        accountId: "minqi.testnet",
+    })
+    // Getting key info here should fail as key has been depleted and deleted
+    try{
+        keyInfo = await getKeyInformation({publicKey: myPublicKey})
+        console.log(`Key use is: ${keyInfo.cur_key_use}, this should not be happening`)
+    }
+    catch(err){
+        console.log("Second claim successful. Key has been depleted and deleted")
+    }
+
+    // Scanning a depleted key
+    console.log("Claim with depleted key")
+    try{
+        shouldAdmit = await allowEntry({
+            privKey: privKey,
+            basePassword: "event-password"
+        })
+        if(!shouldAdmit){
+            throw new Error
+        }
+        console.log("claimed successfully, this should not be happening")
+    }
+    catch(err){
+        console.log("Claim failed, as expected")
+    }
+
+    // Scanning a fake key
+    console.log("Claim with fake key")
+    try{
+        let keys = await generateKeys({
+            numKeys: 1,
+        })
+        let shouldAdmit = await allowEntry({
+            privKey: keys.secretKeys[0],
+        })
+        if(!shouldAdmit){
+            throw new Error
+        }
+        console.log("claimed successfully, this should not be happening")
+    }
+    catch(err){
+        console.log("Claim failed, as expected")
+    }
 }
 
 main()
