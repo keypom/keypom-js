@@ -184,7 +184,7 @@ export declare const updateFunder: ({ funder }: {
  *	});
  *
  *	// Update the current Keypom contract ID
- *	await updateKeypomContractId({
+ *	updateKeypomContractId({
  *		keypomContractId: "v1.keypom.testnet"
  *	})
  *
@@ -198,5 +198,5 @@ export declare const updateFunder: ({ funder }: {
 */
 export declare const updateKeypomContractId: ({ keypomContractId }: {
     keypomContractId: string;
-}) => Promise<null>;
+}) => null;
 export {};

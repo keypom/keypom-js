@@ -1,8 +1,8 @@
-import * as nearAPI from "near-api-js";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import * as nearAPI from "near-api-js";
 import { Account } from "near-api-js";
-import { CreateOrAddReturn } from './types/params';
 import { DropConfig } from './types/drops';
+import { CreateOrAddReturn } from './types/params';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
@@ -50,18 +50,18 @@ export declare const KEY_LIMIT = 50;
  * ```
  * @group Creating, And Claiming Drops
 */
-export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, trialFundsNEAR, trialFundsYocto, callableContracts, maxAttachableNEARPerContract, maxAttachableYoctoPerContract, callableMethods, trialEndFloorNEAR, trialEndFloorYocto, repayAmountNEAR, repayAmountYocto, repayTo, dropId, config, numKeys, publicKeys, rootEntropy, metadata, useBalance, returnTransactions, successUrl }: {
+export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, startingBalanceNEAR, startingBalanceYocto, callableContracts, maxAttachableNEARPerContract, maxAttachableYoctoPerContract, callableMethods, trialEndFloorNEAR, trialEndFloorYocto, repayAmountNEAR, repayAmountYocto, repayTo, dropId, config, numKeys, publicKeys, rootEntropy, metadata, useBalance, returnTransactions, successUrl }: {
     /** Account object that if passed in, will be used to sign the txn instead of the funder account. */
     account?: nearAPI.Account | undefined;
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
     wallet?: AnyWallet | undefined;
     /** Bytes of the trial account smart contract */
     contractBytes: number[];
-    /** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in $NEAR (i.e `1` = 1 $NEAR) */
-    trialFundsNEAR?: Number | undefined;
-    /** How much $NEAR should the trial account be able to spend before the trial is exhausted. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
-    trialFundsYocto?: string | undefined;
-    /** The contracts that the trial account should be able to call. */
+    /** How much $NEAR should the trial account start with? Unit in $NEAR (i.e `1` = 1 $NEAR) */
+    startingBalanceNEAR?: string | number | undefined;
+    /** How much $NEAR should the trial account start with? Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
+    startingBalanceYocto?: string | undefined;
+    /** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
     callableContracts: string[];
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
     maxAttachableNEARPerContract: (string | number)[];
@@ -107,16 +107,20 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
  * @example
  * Creating a trial account with any callable methods, an amount of 0.5 $NEAR and 5 keys.
  * ```js
- * const {keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} = await createTrialAccountDrop({
- *     contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
- *     trialFundsNEAR: 0.5,
- *     callableContracts: ['dev-1676298343226-57701595703433'],
- *     callableMethods: ['*'],
- *     amounts: ['0.5'],
- *     numKeys: 5,
- *     config: {
- *         dropRoot: "linkdrop-beta.keypom.testnet"
- *     }
+ * const callableContracts = [
+ * 	`v1.social08.testnet`,
+ * 	'guest-book.examples.keypom.testnet',
+ * ]
+ *
+ * const {dropId, keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}}
+ * = await createTrialAccountDrop({
+ * 	numKeys: 1,
+ * 	contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
+ * 	startingBalanceNEAR: 0.5,
+ * 	callableContracts: callableContracts,
+ * 	callableMethods: ['set:grant_write_permission', '*'],
+ * 	maxAttachableNEARPerContract: callableContracts.map(() => '1'),
+ * 	trialEndFloorNEAR: 0.33
  * })
  *
  * const newAccountId = `${Date.now().toString()}.linkdrop-beta.keypom.testnet`

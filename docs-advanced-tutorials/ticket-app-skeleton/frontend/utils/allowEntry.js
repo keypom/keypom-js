@@ -5,10 +5,5 @@ const path = require("path");
 const homedir = require("os").homedir();
 var assert = require('assert');
 
-async function hostClaim({privKey, basePassword=""}){
-  
-}
-
-module.exports = {
-    hostClaim
+export async function allowEntry({privKey, basePassword}) {
 }

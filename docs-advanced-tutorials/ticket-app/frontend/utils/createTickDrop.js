@@ -1,42 +1,65 @@
-const { initKeypom, createDrop, createNFTSeries, addToBalance, getEnv, claim, getKeyInformation, hashPassword, formatLinkdropUrl, getPubFromSecret, generateKeys } = require("keypom-js");
-const { KeyPair, keyStores, connect } = require("near-api-js");
-const { parseNearAmount } = require("near-api-js/lib/utils/format");
-const { hostClaim } = require("./utilFunctions");
 const path = require("path");
 const homedir = require("os").homedir();
+const { KeyPair, keyStores, connect, Account } = require("near-api-js");
 var assert = require('assert');
 
-async function createTickDrop(){
+const keypom = require("keypom-js");
+const {
+	execute,
+	initKeypom,
+	createTrialAccountDrop,
+	claimTrialAccountDrop,
+	getEnv,
+	createDrop,
+	getDrops,
+	claim,
+	deleteKeys,
+	deleteDrops,
+	addKeys,
+	generateKeys,
+	withdrawBalance,
+	addToBalance,
+    parseNearAmount
+} = keypom
+
+// Change this to your account ID
+const FUNDER_ACCOUNT_ID = "minqi.testnet";
+const NETWORK_ID = "testnet";
+async function createTickDrop() {
     // Initiate connection to the NEAR blockchain.
-    const network = "testnet"
     const CREDENTIALS_DIR = ".near-credentials";
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
     let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
 
     let nearConfig = {
-        networkId: network,
+        networkId: NETWORK_ID,
         keyStore: keyStore,
-        nodeUrl: `https://rpc.${network}.near.org`,
-        walletUrl: `https://wallet.${network}.near.org`,
-        helperUrl: `https://helper.${network}.near.org`,
-        explorerUrl: `https://explorer.${network}.near.org`,
+        nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
+        walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
+        helperUrl: `https://helper.${NETWORK_ID}.near.org`,
+        explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
     };  
 
     let near = await connect(nearConfig);
-    const fundingAccount = await near.account('minqi.testnet'); 
+    const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
+    console.log(`fundingAccount: ${JSON.stringify(fundingAccount)}`)
     
     // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
     // Here we are connecting to the testnet network
     await initKeypom({
-        near: near,
-        network: "testnet"
-    }); 
+        near,
+        network: "testnet",
+        // funder: {
+        //     accountId: "mothafucka.testnet",
+        //     secretKey: "43yrjbzT6WGA9zJEbc9rNqoRLUYxfWhmZt6VQgzdoGrnQZDYBT7LME5fhzDyxTkc2dKTHkqt8d57zvBjmT2azaRM"
+        // }
+    });
 
     // Create drop with 10 keys and 2 key uses each
     let {keys, dropId} = await createDrop({
         account: fundingAccount,
-        numKeys: 10,
+        numKeys: 1,
         config: {
             usesPerKey: 2
         },
@@ -60,8 +83,7 @@ async function createTickDrop(){
         }   
     })
 
-    let pubKeys = keys.publicKeys
-    const res = await createNFTSeries({
+    await createNFTSeries({
         account: fundingAccount,
         dropId,
         metadata: {
@@ -71,72 +93,16 @@ async function createTickDrop(){
             copies: 30
         }
     }); 
-    var dropInfo = {};
+
     const {contractId: KEYPOM_CONTRACT} = getEnv()
-    // Creating list of pk's and links
-    for(var i = 0; i < keys.keyPairs.length; i++) {
-        // Replace this with your desired URL format. 
-        let url = formatLinkdropUrl({
-            customURL: "http://localhost:1234/CONTRACT_ID/SECRET_KEY",
-	    	secretKeys: keys.secretKeys[i],
-            contractId: KEYPOM_CONTRACT,
-        })
-        dropInfo[pubKeys[i]] = url;
-    }   
-    // Console log all pk's and their respective links
-    console.log('Public Keys and Linkdrops: ', dropInfo)
-    console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
+    let tickets = formatLinkdropUrl({
+        customURL: "http://localhost:1234/CONTRACT_ID/SECRET_KEY",
+        secretKeys: keys.secretKeys,
+        contractId: KEYPOM_CONTRACT,
+    })  
+    console.log(`tickets: ${tickets}`)
+
     return keys
 }
 
-async function wrongPasswordCheck() {
-    // Create Drop
-    let keys = await createTickDrop();
-    let privKey = keys.secretKeys[0];
-    let pubKey = keys.publicKeys[0];
-
-    // Incorrect Password
-    console.log("Claiming with wrong password...")
-    let shouldAdmit = await allowEntry({
-        privKey, 
-        basePassword: "wrong-password"
-    })
-    assert(shouldAdmit === false, `Expected no admittance with incorrect password.`)
-
-    // Correct password
-    console.log("claiming with correct password...")
-    shouldAdmit = await allowEntry({
-        privKey,
-        basePassword: "event-password"
-    })
-    assert(shouldAdmit === true, `Expected admittance with correct password.`)
-}
-
-async function doubleClaimCheck() {
-    // Create Drop
-    let keys = await createTickDrop();
-    let privKey = keys.secretKeys[0];
-
-    // Incorrect Password
-    console.log("Claiming with wrong password...")
-    let shouldAdmit = await allowEntry({
-        privKey, 
-        basePassword: "wrong-password"
-    })
-    assert(shouldAdmit === false, `Expected no admittance with incorrect password.`)
-
-    // Correct password
-    console.log("claiming with correct password...")
-    shouldAdmit = await allowEntry({
-        privKey,
-        basePassword: "event-password"
-    })
-    assert(shouldAdmit === true, `Expected admittance with correct password.`)
-}
-
-async function main(){
-    await wrongPasswordCheck();
-    await doubleClaimCheck(); 
-}
-
-main()
+createTickDrop()
