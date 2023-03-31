@@ -39,7 +39,7 @@ async function createTickDrop() {
     // Here we are connecting to the testnet network
     await initKeypom({
         near,
-        network: "testnet",
+        network: NETWORK_ID,
     });
 
     // Create drop with 10 keys and 2 key uses each
@@ -57,7 +57,7 @@ async function createTickDrop() {
                 null,
                 [
                     {
-                        receiverId: `nft-v2.keypom.testnet`,
+                        receiverId: `nft-v2.keypom.${NETWORK_ID}`,
                         methodName: "nft_mint",
                         args: "",
                         dropIdField: "mint_id",
