@@ -6,6 +6,7 @@ import { PublicKey } from "near-api-js/lib/utils";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { getEnv, initKeypom, updateKeypomContractId } from "../../keypom";
 import { genArgs, getPubFromSecret, viewAccessKeyData } from "../../keypom-utils";
+import { canExitTrial, validateTransactions } from "../../trial-accounts/pre-trial";
 import { getKeyInformation } from "../../views";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
@@ -13,25 +14,24 @@ import { createAction, getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialD
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
-    readonly networkId: string;
-    readonly signInContractId: string;
+    networkId: string;
+    signInContractId: string;
     
-    private readonly near: Near;
-    private readonly keyStore: BrowserLocalStorageKeyStore;
-    private readonly desiredUrl: string;
-    private readonly delimiter: string;
+    near: Near;
+    keyStore: BrowserLocalStorageKeyStore;
+    trialBaseUrl: string;
+    trialSplitDelim: string;
     
-    private trialAccountId?: string;
-    private secretKey?: string;
+    trialAccountId?: string;
+    trialSecretKey?: string;
 
-    private publicKey?: PublicKey;
-    private modal: KeypomTrialModal;
+    modal: KeypomTrialModal;
 
     public constructor({
         signInContractId,
         networkId,
-        desiredUrl,
-        delimiter,
+        trialBaseUrl,
+        trialSplitDelim,
         modalOptions
     }) {
         console.log('Keypom constructor called.');
@@ -43,8 +43,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             ...networks[networkId],
             deps: { keyStore: this.keyStore },
         });
-        this.desiredUrl = desiredUrl
-        this.delimiter = delimiter
+        this.trialBaseUrl = trialBaseUrl
+        this.trialSplitDelim = trialSplitDelim
         
         this.modal = setupModal(modalOptions);
         console.log("finished constructor");
@@ -59,158 +59,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.trialAccountId!
     }
 
-    public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
-        console.log('modalType for show modal: ', modalType)
-        this.modal.show(modalType)
-    }
-
-    public checkValidTrialInfo = () => {
-        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
-    }
-
-    private transformTransactions = (txns) => {
-        this.assertSignedIn();
-
-        const account = new Account(this.near.connection, this.trialAccountId!);
-        const { networkId, signer, provider } = account.connection;
-
-        return Promise.all(
-            txns.map(async (transaction, index) => {
-                const actions = transaction.actions.map((action) =>
-                    createAction(action)
-                );
-
-                console.log('actions: ', actions)
-                const block = await provider.block({ finality: "final" });
-                console.log('block: ', block)
-
-                const accessKey: any = await provider.query(
-                    `access_key/${account.accountId}/${this.publicKey!}`,
-                    ""
-                );
-                console.log('accessKey: ', accessKey)
-
-                return transactions.createTransaction(
-                    account.accountId,
-                    this.publicKey!,
-                    transaction.receiverId,
-                    accessKey.nonce + index + 1,
-                    actions,
-                    base_decode(block.header.hash)
-                );
-            })
-        );
-    }
-
-    private internalSignIn = async (accountId, secretKey) => {
-        console.log("internal sign in: ", accountId, " ", secretKey)
-        this.trialAccountId = accountId;
-        this.secretKey = secretKey;
-
-        let keyPair = KeyPair.fromString(secretKey);
-        this.publicKey = keyPair.getPublicKey();
-
-        const dataToWrite = {
-            accountId: this.trialAccountId,
-            secretKey: this.secretKey
-        }
-        setLocalStorageKeypomEnv(dataToWrite);
-        await this.keyStore.setKey(this.networkId, this.trialAccountId!, KeyPair.fromString(this.secretKey!));
-
-        const accountObj = new Account(this.near.connection, this.trialAccountId!);
-        return [accountObj];
-    }
-
-    private canExitTrial = async () => {
-        const {viewCall} = getEnv();
-
-        try {
-            const keyInfo = await viewCall({
-                contractId: this.trialAccountId!,
-                methodName: 'get_key_information',
-                args: {}
-            })
-            console.log(`keyInfo: `, keyInfo)
-
-            const rules = await viewCall({
-                contractId: this.trialAccountId!,
-                methodName: 'get_rules',
-                args: {}
-            })
-            console.log('rules: ', rules)
-
-            return keyInfo.trial_data.exit == true
-        } catch (e: any) {
-            console.log('error: ', e)
-        }
-
-        return false;
-    }
-
-    private validateTransactions = async (toValidate) => {
-        const {viewCall} = getEnv();
-        console.log('toValidate: ', toValidate)
-
-        let validInfo = {}
-        try {
-            const rules = await viewCall({
-                contractId: this.trialAccountId!,
-                methodName: 'get_rules',
-                args: {}
-            })
-            let contracts = rules.contracts.split(",");
-            let amounts = rules.amounts.split(",");
-            let methods = rules.methods.split(",");
-
-            for (let i = 0; i < contracts.length; i++) {
-                validInfo[contracts[i]] = {
-                    maxDeposit: amounts[i],
-                    allowableMethods: methods[i] == "*" ? "*" : methods[i].split(":")
-                }
-            }
-        } catch (e: any) {
-            console.log('error: ', e)
-        }
-        console.log('validInfo after view calls: ', validInfo)
-
-        // Loop through each transaction in the array
-        for (let i = 0; i < toValidate.length; i++) {
-            const transaction = toValidate[i];
-            console.log('transaction: ', transaction)
-
-            const validInfoForReceiver = validInfo[transaction.receiverId];
-            console.log('validInfoForReceiver: ', validInfoForReceiver)
-            // Check if the contractId is valid
-            if (!validInfoForReceiver) {
-                console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
-                return false;
-            }
-
-            // Check if the method name is valid
-            if (validInfoForReceiver.allowableMethods != "*" && !validInfoForReceiver.allowableMethods.includes(transaction.methodName)) {
-                console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
-                return false;
-            }
-
-            // Check if the deposit is valid
-            if (validInfoForReceiver.maxDeposit != "*" && new BN(transaction.deposit).gt(new BN(validInfoForReceiver.maxDeposit))) {
-                console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     public parseUrl = () => {
-        const split = window.location.href.split(this.desiredUrl);
+        const split = window.location.href.split(this.trialSplitDelim);
 
         if (split.length != 2) {
             return;
         }
 
         const trialInfo = split[1];
-        const [accountId, secretKey] = trialInfo.split(this.delimiter)
+        const [accountId, secretKey] = trialInfo.split(this.trialSplitDelim)
 
         if (!accountId || !secretKey) {
             return;
@@ -222,13 +80,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
     }
 
-    private assertSignedIn() {
-        if (!this.trialAccountId) {
-            throw new Error("Wallet not signed in");
-        }
+    public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
+        console.log('modalType for show modal: ', modalType)
+        this.modal.show(modalType)
     }
 
-    public async isSignedIn() {
+    public checkValidTrialInfo = () => {
+        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
+    }
+
+    async isSignedIn() {
         return this.trialAccountId != undefined && this.trialAccountId != null
     }
 
@@ -238,22 +99,22 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         );
     }
 
-    public async signOut() {
+    async signOut() {
         if (this.trialAccountId == undefined || this.trialAccountId == null) {
             throw new Error("Wallet is already signed out");
         }
 
-        this.trialAccountId = this.trialAccountId = this.secretKey = this.publicKey = undefined;
+        this.trialAccountId = this.trialAccountId = this.trialSecretKey = undefined;
         await this.keyStore.removeKey(this.networkId, this.trialAccountId!);
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
-    public async getAvailableBalance(id?: string): Promise<BN> {
+    async getAvailableBalance(id?: string): Promise<BN> {
         // TODO: get access key allowance
         return new BN(0);
     }
 
-    public async getAccounts(): Promise<Account[]> {
+    async getAccounts(): Promise<Account[]> {
         if (this.trialAccountId != undefined && this.trialAccountId != null) {
             const accountObj = new Account(this.near.connection, this.trialAccountId!);
             return [accountObj];
@@ -262,11 +123,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return []
     }
 
-    public async switchAccount(id: string) {
+    async switchAccount(id: string) {
         // TODO:  maybe?
     }
 
-    public async signIn(): Promise<Account[]> {
+    async signIn(): Promise<Account[]> {
         console.log("IM SIGNING IN")
         
         await initKeypom({
@@ -295,8 +156,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                             id: MODAL_TYPE_IDS.CLAIM_TRIAL,
                             meta: {
                                 secretKey,
-                                redirectUrlBase: this.desiredUrl,
-                                delimiter: this.delimiter
+                                redirectUrlBase: this.trialBaseUrl,
+                                delimiter: this.trialSplitDelim
                             }
                         });
                         return [];
@@ -340,7 +201,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return []
     }
 
-    public async signAndSendTransaction(params) {
+    async signAndSendTransaction(params) {
         this.assertSignedIn();
         console.log('sign and send txn params: ', params)
         const { receiverId, actions } = params;
@@ -363,81 +224,35 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return res[0] as FinalExecutionOutcome;
     }
 
-    public async signAndSendTransactions(params) {
+    async signAndSendTransactions(params) {
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;
         console.log('transactions: ', transactions)
 
-        const shouldExit = await this.canExitTrial();
-        if (shouldExit == true) {
-            this.modal.show({id: MODAL_TYPE_IDS.TRIAL_OVER});
-            return [FAILED_EXECUTION_OUTCOME];
-        }
-
-        const { wrapped: args, toValidate } = genArgs({ transactions })
-        const res = await this.validateTransactions(toValidate);
-        console.log('res from validate transactions: ', res);
-
-        if (res == false) {
-            this.modal.show({id: MODAL_TYPE_IDS.ERROR});
-            return [FAILED_EXECUTION_OUTCOME];
-        }
-
-        console.log('args: ', args)
-
-        const account = await this.near.account(this.trialAccountId!);
-
-        let incomingGas = new BN("0");
-        let numActions = 0;
-        try {
-            for (let i = 0; i < (args as any).transactions.length; i++) {
-                let transaction = (args as any).transactions[i];
-                console.log('transaction in gas loop: ', transaction)
-                for (let j = 0; j < transaction.actions.length; j++) {
-                    let action = transaction.actions[j];
-                    console.log('action in gas loop: ', action)
-                    let gasToAdd = action.params[`|kP|gas`].split(`|kS|`)[0].toString();
-                    console.log('gasToAdd: ', gasToAdd)
-                    incomingGas = incomingGas.add(new BN(gasToAdd));
-                    numActions += 1
-                }
-            }
-        } catch (e) {
-            numActions = 1;
-            console.log('e: ', e)
-            incomingGas = new BN(`300000000000000`);
-        }
-
-        console.log('incomingGas: ', incomingGas.toString())
-        // Take 15 TGas as a base for loading rules as well as 20 TGas for the callback.
-        // For each action, add 15 TGas on top of that and then add the final incoming gas on top.
-        let gasToAttach = new BN('15000000000000') // Loading rules
-            .add(new BN('20000000000000')) // Callback
-            .add(new BN('15000000000000').mul(new BN(numActions))) // Actions
-            .add(incomingGas).toString(); // Incoming gas
-
-        // check if the gas to attach is over 300 TGas and if it is, clamp it
-        if (new BN(gasToAttach).gt(new BN('300000000000000'))) {
-            console.log('gas to attach is over 300 TGas. Clamping it')
-            gasToAttach = '300000000000000';
-        }
-
-        const transformedTransactions = await this.transformTransactions([{
-            receiverId: account.accountId,
-            actions: [{
-                type: 'FunctionCall',
-                params: {
-                    methodName: 'execute',
-                    args,
-                    gas: gasToAttach,
-                }
-            }]
-        }])
-        console.log("debugging")
-        console.log('transformedTransactions: ', transformedTransactions)
-
         const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));
         return await Promise.all(promises) as FinalExecutionOutcome[];
+    }
+
+    private async internalSignIn (accountId, secretKey) {
+        console.log("internal sign in: ", accountId, " ", secretKey)
+        this.trialAccountId = accountId;
+        this.trialSecretKey = secretKey;
+
+        const dataToWrite = {
+            accountId,
+            secretKey
+        }
+        setLocalStorageKeypomEnv(dataToWrite);
+        await this.keyStore.setKey(this.networkId, accountId, KeyPair.fromString(secretKey));
+
+        const accountObj = new Account(this.near.connection, this.trialAccountId!);
+        return [accountObj];
+    }
+
+    private assertSignedIn() {
+        if (!this.trialAccountId) {
+            throw new Error("Wallet not signed in");
+        }
     }
 }

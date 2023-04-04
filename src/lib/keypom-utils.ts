@@ -904,7 +904,7 @@ export const transformTransactions = (transactions: Transaction[]): SignAndSendT
 });
 
 // reference: https://github.com/near/wallet-selector/blob/d09f69e50df05c8e5f972beab4f336d7cfa08c65/packages/wallet-utils/src/lib/create-action.ts
-const createAction = (action: Action): transactions.Action => {
+export const createAction = (action: Action): transactions.Action => {
     switch (action.type) {
         case "CreateAccount":
             return transactions.createAccount();
@@ -1264,61 +1264,6 @@ export const toCamel = o => {
         }
     }
     return newO
-}
-
-// helpers for keypom account contract args
-const RECEIVER_HEADER = '|kR|'
-const ACTION_HEADER = '|kA|'
-const PARAM_START = '|kP|'
-const PARAM_STOP = '|kS|'
-
-export const wrapParams = (params, newParams = {}) => {
-    Object.entries(params).forEach(([k, v]) => {
-        if (k === 'args' && typeof v !== 'string') {
-            v = JSON.stringify(v)
-        }
-        if (Array.isArray(v)) v = v.join()
-        newParams[PARAM_START + k] = v + PARAM_STOP
-    })
-    return newParams
-}
-
-export const genArgs = (json) => {
-    console.log('json: ', json)
-    const newJson: any = {
-        transactions: []
-    }
-
-    const toValidate: any = []
-
-    json.transactions.forEach((tx) => {
-        const newTx: any = {}
-        newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId
-        newTx.actions = []
-        console.log('newTx: ', newTx)
-
-        tx.actions.forEach((action) => {
-            console.log('action: ', action)
-            toValidate.push({
-                receiverId: tx.contractId || tx.receiverId,
-                methodName: action.params.methodName,
-                deposit: action.params.deposit
-            })
-
-            const newAction: any = {}
-            console.log('newAction 1: ', newAction)
-            newAction[ACTION_HEADER] = action.type
-            console.log('newAction 2: ', newAction)
-            newAction.params = wrapParams(action.params)
-            console.log('newAction 3: ', newAction)
-            newTx.actions.push(newAction)
-        })
-        newJson.transactions.push(newTx)
-    })
-    return {
-        wrapped: newJson,
-        toValidate
-    }
 }
 
 export const nearArgsToYocto = (nearAmount?: string | number, yoctoAmount?: string) => {

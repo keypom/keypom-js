@@ -2,17 +2,20 @@ import { Transaction } from "@near-wallet-selector/core";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import BN from 'bn.js';
 import * as nearAPI from "near-api-js";
-import { Account, KeyPair } from "near-api-js";
-import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from './checks';
-import { getEnv, supportedKeypomContracts } from "./keypom";
+import { Account, KeyPair, transactions } from "near-api-js";
+import { base_decode } from "near-api-js/lib/utils/serialize";
+import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from '../checks';
+import { getEnv, supportedKeypomContracts } from "../keypom";
 import {
-	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto, wrapParams
-} from "./keypom-utils";
-import { DropConfig } from './types/drops';
-import { FCData } from './types/fc';
-import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
-import { ProtocolReturnedDropConfig } from './types/protocol';
-import { getDropInformation, getUserBalance } from './views';
+	createAction,
+	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto
+} from "../keypom-utils";
+import { DropConfig } from '../types/drops';
+import { FCData } from '../types/fc';
+import { CreateDropProtocolArgs, CreateOrAddReturn } from '../types/params';
+import { ProtocolReturnedDropConfig } from '../types/protocol';
+import { getDropInformation, getUserBalance } from '../views';
+import { convertArgsToTrialArgs } from "./utils";
 const {
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
@@ -65,7 +68,7 @@ export const KEY_LIMIT = 50;
  * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
  * 
  * ```
- * @group Creating, And Claiming Drops
+ * @group Trial Accounts
 */
 export const createTrialAccountDrop = async ({
 	account,
@@ -261,7 +264,7 @@ export const createTrialAccountDrop = async ({
 					method_name: 'setup',
 					//@ts-ignore
 					attached_deposit: '0',
-					args: JSON.stringify(wrapParams({
+					args: JSON.stringify(convertArgsToTrialArgs({
 						contracts: callableContracts,
 						amounts: maxAttachableYoctoPerContract,
 						methods: callableMethods,
@@ -300,7 +303,7 @@ export const createTrialAccountDrop = async ({
 			methodName: 'setup',
 			//@ts-ignore
 			attachedDeposit: '0',
-			args: JSON.stringify(wrapParams({
+			args: JSON.stringify(convertArgsToTrialArgs({
 				contracts: callableContracts,
 				amounts: maxAttachableYoctoPerContract,
 				methods: callableMethods,
@@ -403,7 +406,7 @@ export const createTrialAccountDrop = async ({
  * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
  * 
  * ```
- * @group Creating, And Claiming Drops
+ * @group Trial Accounts
 */
 export const claimTrialAccountDrop = async ({
 	secretKey,
