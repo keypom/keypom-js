@@ -25,7 +25,7 @@ type KeypomWallet = {
 const gas = '200000000000000'
 const gas300 = '300000000000000'
 const attachedGas = '100000000000000'
-const networks = {
+export const networks = {
 	mainnet: {
 		networkId: 'mainnet',
 		viewAccountId: 'near',

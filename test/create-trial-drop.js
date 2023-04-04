@@ -1,7 +1,7 @@
-const path = require("path");
-const homedir = require("os").homedir();
-const { KeyPair, keyStores, connect, Account } = require("near-api-js");
-var assert = require('assert');
+require('dotenv').config()
+const { readFileSync } = require('fs');
+const { formatNearAmount } = require('near-api-js/lib/utils/format');
+const { getDropInformation } = require('../lib');
 
 const keypom = require("../lib");
 const {
@@ -18,91 +18,76 @@ const {
 	addKeys,
 	generateKeys,
 	withdrawBalance,
-	addToBalance,
-    parseNearAmount
+	addToBalance
 } = keypom
 
-// Change this to your account ID
-const FUNDER_ACCOUNT_ID = "minqi.testnet";
-const NETWORK_ID = "testnet";
-async function createTickDrop() {
-    // Initiate connection to the NEAR blockchain.
-    const CREDENTIALS_DIR = ".near-credentials";
-    const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+const fundingAccountId = process.env.TEST_ACCOUNT_ID
+const fundingAccountSecretKey = process.env.TEST_ACCOUNT_PRVKEY
 
-    let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+async function createTrialAccount(){
+    if (!fundingAccountId || !fundingAccountSecretKey) {
+        throw new Error('Please set TEST_ACCOUNT_ID and TEST_ACCOUNT_PRVKEY in terminal')
+    }
 
-    let nearConfig = {
-        networkId: NETWORK_ID,
-        keyStore: keyStore,
-        nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
-        walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
-        helperUrl: `https://helper.${NETWORK_ID}.near.org`,
-        explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
-    };  
-
-    let near = await connect(nearConfig);
-    const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
-    console.log(`fundingAccount: ${JSON.stringify(fundingAccount)}`)
-    
-    // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
-    // Here we are connecting to the testnet network
     await initKeypom({
-        near,
-        network: "testnet",
-        // funder: {
-        //     accountId: "mothafucka.testnet",
-        //     secretKey: "43yrjbzT6WGA9zJEbc9rNqoRLUYxfWhmZt6VQgzdoGrnQZDYBT7LME5fhzDyxTkc2dKTHkqt8d57zvBjmT2azaRM"
-        // }
-    });
+		// near,
+		network: 'testnet',
+		funder: {
+			accountId: fundingAccountId,
+			secretKey: fundingAccountSecretKey,
+		}
+	});
 
-    // Create drop with 10 keys and 2 key uses each
-    let {keys, dropId} = await createDrop({
-        account: fundingAccount,
+    const callableContracts = [
+        `v1.social08.testnet`,
+        'guest-book.examples.keypom.testnet',
+    ]
+
+    const {dropId, keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} 
+    = await createTrialAccountDrop({
         numKeys: 1,
-        config: {
-            usesPerKey: 2
-        },
-        depositPerUseNEAR: "0.1",
-        basePassword: "event-password",
-        passwordProtectedUses: [1],
-        fcData: {
-            methods: [
-                null,
-                [
-                    {
-                        receiverId: `nft-v2.keypom.testnet`,
-                        methodName: "nft_mint",
-                        args: "",
-                        dropIdField: "mint_id",
-                        accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
-                    }
-                ],
-            ]   
-        }   
+        contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
+        startingBalanceNEAR: 1.1,
+        callableContracts: callableContracts,
+        callableMethods: ['set:grant_write_permission', '*'],
+        maxAttachableNEARPerContract: callableContracts.map(() => '1'),
+        trialEndFloorNEAR: (1.1 + 0.3) - 0.5
     })
 
-    await createNFTSeries({
-        account: fundingAccount,
-        dropId,
-        metadata: {
-            title: "Moon NFT Ticket!",
-            description: "A cool NFT POAP for the best dog in the world.",
-            media: "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq",
-            copies: 30
-        }
-    }); 
+    const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
+    const keypomInstance = "http://localhost:3030"//"https://testnet.keypom-airfoil.pages.dev"
+    console.log(`
+    
+    Keypom App:
+ ${keypomInstance}/claim/v2.keypom.testnet?meta=${trialMeta}#${trialSecretKeys[0]}
 
-    const {contractId: KEYPOM_CONTRACT} = getEnv()
-    let tickets = formatLinkdropUrl({
-        customURL: "http://localhost:1234/CONTRACT_ID/SECRET_KEY",
-        secretKeys: keys.secretKeys,
-        contractId: KEYPOM_CONTRACT,
-    })  
-    console.log(`tickets: ${tickets}`)
+    Guest-Book App:
+ http://localhost:1234/keypom-url#v2.keypom.testnet/${trialSecretKeys[0]}
 
-    return keys
+ Alpha Frontend:
+ http://localhost:3000/#/#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Good Luck!
+    `)
+
+    // console.log(`
+	
+	// ${JSON.stringify({
+	// 	account_id: newAccountId,
+	// 	public_key: trialPublicKeys[0],
+	// 	private_key: trialSecretKeys[0]
+	// })}
+
+	// `)
+
+	// console.log(`/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
+
+
+	// console.log(`
+    
+    // localhost:3000/claim/v2.keypom.testnet#${trialSecretKeys[0]}
+    
+    // `)
 }
 
-createTickDrop()
+createTrialAccount();

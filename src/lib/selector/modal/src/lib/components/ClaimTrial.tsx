@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { accountExists } from "../../../../../keypom-utils";
-import { claimTrialAccountDrop } from "../../../../../trial-accounts";
+import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
 import { MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
 

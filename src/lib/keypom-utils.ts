@@ -6,6 +6,7 @@ import BN from 'bn.js';
 import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
+import { base_decode } from "near-api-js/lib/utils/serialize";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { assert, isValidAccountObj } from "./checks";
 import { getEnv, supportedLinkdropClaimPages } from "./keypom";
@@ -904,7 +905,7 @@ export const transformTransactions = (transactions: Transaction[]): SignAndSendT
 });
 
 // reference: https://github.com/near/wallet-selector/blob/d09f69e50df05c8e5f972beab4f336d7cfa08c65/packages/wallet-utils/src/lib/create-action.ts
-const createAction = (action: Action): transactions.Action => {
+export const createAction = (action: Action): transactions.Action => {
     switch (action.type) {
         case "CreateAccount":
             return transactions.createAccount();
@@ -1266,61 +1267,6 @@ export const toCamel = o => {
     return newO
 }
 
-// helpers for keypom account contract args
-const RECEIVER_HEADER = '|kR|'
-const ACTION_HEADER = '|kA|'
-const PARAM_START = '|kP|'
-const PARAM_STOP = '|kS|'
-
-export const wrapParams = (params, newParams = {}) => {
-    Object.entries(params).forEach(([k, v]) => {
-        if (k === 'args' && typeof v !== 'string') {
-            v = JSON.stringify(v)
-        }
-        if (Array.isArray(v)) v = v.join()
-        newParams[PARAM_START + k] = v + PARAM_STOP
-    })
-    return newParams
-}
-
-export const genArgs = (json) => {
-    console.log('json: ', json)
-    const newJson: any = {
-        transactions: []
-    }
-
-    const toValidate: any = []
-
-    json.transactions.forEach((tx) => {
-        const newTx: any = {}
-        newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId
-        newTx.actions = []
-        console.log('newTx: ', newTx)
-
-        tx.actions.forEach((action) => {
-            console.log('action: ', action)
-            toValidate.push({
-                receiverId: tx.contractId || tx.receiverId,
-                methodName: action.params.methodName,
-                deposit: action.params.deposit
-            })
-
-            const newAction: any = {}
-            console.log('newAction 1: ', newAction)
-            newAction[ACTION_HEADER] = action.type
-            console.log('newAction 2: ', newAction)
-            newAction.params = wrapParams(action.params)
-            console.log('newAction 3: ', newAction)
-            newTx.actions.push(newAction)
-        })
-        newJson.transactions.push(newTx)
-    })
-    return {
-        wrapped: newJson,
-        toValidate
-    }
-}
-
 export const nearArgsToYocto = (nearAmount?: string | number, yoctoAmount?: string) => {
     let yoctoToReturn: string = yoctoAmount || '0';
     if (nearAmount) {
@@ -1328,4 +1274,39 @@ export const nearArgsToYocto = (nearAmount?: string | number, yoctoAmount?: stri
     }
 
     return yoctoToReturn;
+}
+
+export const createTransactions = ({
+	txnInfos,
+	signerId,
+	signerPk
+}) => {
+	const {near} = getEnv();
+
+	const account = new Account(near!.connection, signerId);
+	const { provider } = account.connection;
+
+	return Promise.all(
+		txnInfos.map(async (txnInfo, index) => {
+			const actions = txnInfo.actions.map((action) =>
+				createAction(action)
+			);
+
+			const block = await provider.block({ finality: "final" });
+
+			const accessKey: any = await provider.query(
+				`access_key/${signerId}/${signerPk}`,
+				""
+			);
+
+			return transactions.createTransaction(
+				signerId,
+				signerPk,
+				txnInfo.receiverId,
+				accessKey.nonce + index + 1,
+				actions,
+				base_decode(block.header.hash)
+			);
+		})
+	);
 }

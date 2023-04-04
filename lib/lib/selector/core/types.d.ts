@@ -18,10 +18,10 @@ export interface KeypomInitializeOptions {
 export interface KeypomParams {
     networkId: NetworkId;
     signInContractId: string;
+    trialBaseUrl: string;
     iconUrl?: string;
     deprecated?: boolean;
-    desiredUrl?: string;
-    delimiter?: string;
+    trialSplitDelim?: string;
     modalOptions?: any;
 }
 export type KeypomWalletInstant = InstantLinkWallet & {

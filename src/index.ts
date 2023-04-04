@@ -37,7 +37,12 @@ export {
 export {
 	createTrialAccountDrop,
 	claimTrialAccountDrop
-} from "./lib/trial-accounts";
+} from "./lib/trial-accounts/pre-trial";
+export {
+	trialSignAndSendTxns,
+	trialCallMethod,
+	canExitTrial
+} from "./lib/trial-accounts/trial-active";
 export {
 	addKeys,
 	deleteKeys
