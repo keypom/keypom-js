@@ -18,6 +18,13 @@ export const TRIAL_ERRORS = {
 export const validateDesiredMethods = async ({
 	methodData,
 	trialAccountId
+}: {
+	methodData: {
+		receiverId: string;
+		methodName: string;
+		deposit: string;
+	}[];
+	trialAccountId: string;
 }) => {
 	const {viewCall} = getEnv();
 
@@ -83,7 +90,30 @@ export const wrapTxnParamsForTrial = (params, newParams = {}) => {
     return newParams
 }
 
-export const generateExecuteArgs = ({ desiredTxns }) => {
+export const generateExecuteArgs = ({ desiredTxns }: {
+	/** The transactions to execute */
+	desiredTxns: {
+		contractId?: string;
+		/** The contract ID to execute the transaction on */
+		receiverId: string;
+		/** The actions to execute */
+		actions: {
+			/** The type of action to execute */
+			type: string;
+			/** The parameters for the action */
+			params: {
+				/** The method name to execute */
+				methodName: string;
+				/** The arguments to pass to the method */
+				args: Object;
+				/** The amount of gas to attach to the transaction */
+				gas: string;
+				/** The amount of NEAR to attach to the transaction */
+				deposit: string;
+			};
+		}[];
+	}[];
+}) => {
 	const methodDataToValidate: any = [];
 	const executeArgs: any = {
 		transactions: []
@@ -119,7 +149,29 @@ export const generateExecuteArgs = ({ desiredTxns }) => {
     }
 }
 
-export const estimateTrialGas = ({ executeArgs }) => {
+export const estimateTrialGas = ({ executeArgs }: {
+	executeArgs: {
+		transactions: {
+			'|kR|': string,
+			/** The actions to execute */
+			actions: {
+				/** The type of action to execute */
+				'|kA|': 'FunctionCall';
+				/** The parameters for the action */
+				params: {
+					/** The method name to execute */
+					'|kP|methodName': string;
+					/** The arguments to pass to the method */
+					'|kP|args': string;
+					/** The amount of gas to attach to the transaction */
+					'|kP|gas': string;
+					/** The amount of NEAR to attach to the transaction */
+					'|kP|deposit': string;
+				};
+			}[];
+		}[];
+	};
+}) => {
 	let transactions = executeArgs.transactions;
 	let incomingGas = new BN("0");
 	let numActions = 0;
@@ -130,7 +182,7 @@ export const estimateTrialGas = ({ executeArgs }) => {
 			for (let j = 0; j < transaction.actions.length; j++) {
 				let action = transaction.actions[j];
 				console.log('action in gas loop: ', action)
-				let gasToAdd = action.params[`|kP|gas`].split(`|kS|`)[0].toString();
+				let gasToAdd = action.params['|kP|gas'].split(`|kS|`)[0].toString();
 				console.log('gasToAdd: ', gasToAdd)
 				incomingGas = incomingGas.add(new BN(gasToAdd));
 				numActions += 1

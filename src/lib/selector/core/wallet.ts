@@ -4,6 +4,7 @@ import { Account, KeyPair, Near } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
 import { initKeypom } from "../../keypom";
 import { viewAccessKeyData } from "../../keypom-utils";
+import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
 import { getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
@@ -222,11 +223,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     async signAndSendTransactions(params) {
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
-        // const { transactions } = params;
-        // console.log('transactions: ', transactions)
+        const { transactions } = params;
+        console.log('transactions: ', transactions)
 
-        // const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));
-        return await Promise.all([]) as FinalExecutionOutcome[];
+        return await trialSignAndSendTxns({
+            trialAccountId: this.trialAccountId!,
+            trialAccountSecretKey: this.trialSecretKey!,
+            txns: transactions
+        })
     }
 
     private async internalSignIn (accountId, secretKey) {

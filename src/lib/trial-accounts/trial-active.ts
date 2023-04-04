@@ -9,6 +9,8 @@ import { estimateTrialGas, generateExecuteArgs, TRIAL_ERRORS, validateDesiredMet
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
  * cannot be executed by the trial account (e.g. the attached deposit exceeds the trial account's restrictions), this will throw an error.
  * 
+ * @returns {Promise<FinalExecutionOutcome[]>} The outcomes of the transactions
+ * 
  * @example
  * Use a Trial Account to min2 
  * ```js
@@ -116,7 +118,7 @@ export const trialSignAndSendTxns = async ({
 				/** The method name to execute */
 				methodName: string;
 				/** The arguments to pass to the method */
-				args: any;
+				args: Object;
 				/** The amount of gas to attach to the transaction */
 				gas: string;
 				/** The amount of NEAR to attach to the transaction */
@@ -124,7 +126,7 @@ export const trialSignAndSendTxns = async ({
 			};
 		}[];
 	}[];
-}) => {
+}): Promise<FinalExecutionOutcome[]> => {
 	const {near, keyStore, networkId} = getEnv();
 	const exitExpected = await canExitTrial({trialAccountId});
 	if (exitExpected == true) {
@@ -171,6 +173,8 @@ export const trialSignAndSendTxns = async ({
 /**
  * Execute a method using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if the given method data
  * cannot be executed by the trial account (e.g. the attached deposit exceeds the trial account's restrictions), this will throw an error.
+ * 
+ * @returns {Promise<FinalExecutionOutcome[]>} The outcome of the transaction
  * 
  * @example
  * Using a trial account to mint a new NFT:
