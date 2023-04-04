@@ -82,12 +82,17 @@ const Keypom: WalletBehaviourFactory<
 export function setupKeypom({
 	trialSplitDelim = "/",
 	deprecated = false,
-	trialBaseUrl = "/keypom-trial#",
+	trialBaseUrl,
 	networkId,
 	signInContractId,
 	modalOptions
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
 	return async () => {
+		if (!signInContractId || !networkId || !trialBaseUrl) {
+			console.warn(`KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.`)
+			return null;
+		}
+		
 		const keypomWallet = new KeypomWallet({
 			signInContractId,
 			networkId,

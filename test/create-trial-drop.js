@@ -1,26 +1,24 @@
 require('dotenv').config()
 const { readFileSync } = require('fs');
-const { formatNearAmount, parseNearAmount } = require('near-api-js/lib/utils/format');
+const { formatNearAmount } = require('near-api-js/lib/utils/format');
 const { getDropInformation } = require('../lib');
 
 const keypom = require("../lib");
 const {
-    execute,
-    initKeypom,
-    createTrialAccountDrop,
-    claimTrialAccountDrop,
-    trialCallMethod,
-    getEnv,
-    createDrop,
-    getDrops,
-    claim,
-    deleteKeys,
-    deleteDrops,
-    addKeys,
-    generateKeys,
-    withdrawBalance,
-    addToBalance,
-    trialSignAndSendTxns
+	execute,
+	initKeypom,
+	createTrialAccountDrop,
+	claimTrialAccountDrop,
+	getEnv,
+	createDrop,
+	getDrops,
+	claim,
+	deleteKeys,
+	deleteDrops,
+	addKeys,
+	generateKeys,
+	withdrawBalance,
+	addToBalance
 } = keypom
 
 const fundingAccountId = process.env.TEST_ACCOUNT_ID
@@ -32,40 +30,64 @@ async function createTrialAccount(){
     }
 
     await initKeypom({
-        // near,
-        network: 'testnet',
-        funder: {
-            accountId: fundingAccountId,
-            secretKey: fundingAccountSecretKey,
-        }
-    });
+		// near,
+		network: 'testnet',
+		funder: {
+			accountId: fundingAccountId,
+			secretKey: fundingAccountSecretKey,
+		}
+	});
 
     const callableContracts = [
-        `nft.examples.testnet`
+        `v1.social08.testnet`,
+        'guest-book.examples.keypom.testnet',
     ]
 
     const {dropId, keys: {secretKeys: trialSecretKeys, publicKeys: trialPublicKeys}} 
     = await createTrialAccountDrop({
         numKeys: 1,
         contractBytes: [...readFileSync('./test/ext-wasm/trial-accounts.wasm')],
-        startingBalanceNEAR: 0.5,
+        startingBalanceNEAR: 1.1,
         callableContracts: callableContracts,
-        callableMethods: ['*'],
-        maxAttachableNEARPerContract: [1],
-        trialEndFloorNEAR: 0.33 + 0.3
+        callableMethods: ['set:grant_write_permission', '*'],
+        maxAttachableNEARPerContract: callableContracts.map(() => '1'),
+        trialEndFloorNEAR: (1.1 + 0.3) - 0.5
     })
 
-    const desiredAccountId = `${dropId}-keypom.testnet`
-    const trialSecretKey = trialSecretKeys[0]
-    await claimTrialAccountDrop({
-        desiredAccountId,
-        secretKey: trialSecretKey
-    })
+    const trialMeta = "bafkreihubzorx65v6yqxrhls3xjnh3r4d66e3a6jokn77esllsdp7xtfoy"
+    const keypomInstance = "http://localhost:3030"//"https://testnet.keypom-airfoil.pages.dev"
+    console.log(`
+    
+    Keypom App:
+ ${keypomInstance}/claim/v2.keypom.testnet?meta=${trialMeta}#${trialSecretKeys[0]}
 
-    const canExitTrial = await keypom.canExitTrial({
-        trialAccountId: desiredAccountId
-    })
-    console.log('canExitTrial: ', canExitTrial)
+    Guest-Book App:
+ http://localhost:1234/keypom-url#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Alpha Frontend:
+ http://localhost:3000/#/#v2.keypom.testnet/${trialSecretKeys[0]}
+
+ Good Luck!
+    `)
+
+    // console.log(`
+	
+	// ${JSON.stringify({
+	// 	account_id: newAccountId,
+	// 	public_key: trialPublicKeys[0],
+	// 	private_key: trialSecretKeys[0]
+	// })}
+
+	// `)
+
+	// console.log(`/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
+
+
+	// console.log(`
+    
+    // localhost:3000/claim/v2.keypom.testnet#${trialSecretKeys[0]}
+    
+    // `)
 }
 
 createTrialAccount();

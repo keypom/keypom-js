@@ -5,9 +5,11 @@ import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_
 import { initKeypom } from "../../keypom";
 import { viewAccessKeyData } from "../../keypom-utils";
 import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
+import { TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
 import { getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
+import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     networkId: string;
@@ -57,7 +59,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
 
     public parseUrl = () => {
-        const split = window.location.href.split(this.trialSplitDelim);
+        const split = window.location.href.split(this.trialBaseUrl);
 
         if (split.length != 2) {
             return;
@@ -226,11 +228,31 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         const { transactions } = params;
         console.log('transactions: ', transactions)
 
-        return await trialSignAndSendTxns({
-            trialAccountId: this.trialAccountId!,
-            trialAccountSecretKey: this.trialSecretKey!,
-            txns: transactions
-        })
+        try {
+            var res = await trialSignAndSendTxns({
+                trialAccountId: this.trialAccountId!,
+                trialAccountSecretKey: this.trialSecretKey!,
+                txns: transactions
+            })
+        } catch(e) {
+            console.log(`e: ${JSON.stringify(e)}`)
+            switch (e) {
+                case TRIAL_ERRORS.EXIT_EXPECTED: {
+                    this.modal.show({id: MODAL_TYPE_IDS.TRIAL_OVER});
+                    break;
+                }
+                case TRIAL_ERRORS.INVALID_ACTION: {
+                    this.modal.show({id: MODAL_TYPE_IDS.ERROR});
+                    break;
+                }
+                default: {
+                    console.log('Unidentified error when signing txn: ', e)
+                    break;
+                }
+            }
+            return [FAILED_EXECUTION_OUTCOME];
+        }
+        return res
     }
 
     private async internalSignIn (accountId, secretKey) {
