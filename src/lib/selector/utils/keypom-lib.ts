@@ -18,23 +18,6 @@ import { updateKeypomContractId } from "../../keypom";
 import { getKeyInformation } from "../../views";
 import { isValidKeypomContract } from "../../checks";
 
-const gas = '200000000000000'
-
-export const networks = {
-	mainnet: {
-		networkId: 'mainnet',
-		nodeUrl: 'https://rpc.mainnet.near.org',
-		walletUrl: 'https://wallet.near.org',
-		helperUrl: 'https://helper.mainnet.near.org'
-	},
-	testnet: {
-		networkId: 'testnet',
-		nodeUrl: 'https://rpc.testnet.near.org',
-		walletUrl: 'https://wallet.testnet.near.org',
-		helperUrl: 'https://helper.testnet.near.org'
-	}
-}
-
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 
 export const getLocalStorageKeypomEnv = () => {
@@ -49,26 +32,12 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 }
 
-export const isKeypomDrop = (networkId, keypomContractId) => {
+export const updateKeypomContractIfValid = (keypomContractId) => {
 	if (isValidKeypomContract(keypomContractId) === true) {
 		updateKeypomContractId({
 			keypomContractId
 		})
 
-		return true;
-	}
-
-	return false;
-}
-
-export const isUnclaimedTrialDrop = async (networkId, keypomContractId, secretKey) => {
-	console.log('accountId is valid keypom contract ', keypomContractId)
-	const keyInfo = await getKeyInformation({
-		secretKey
-	})
-	console.log('keyInfo: ', keyInfo)
-
-	if (keyInfo !== null) {
 		return true;
 	}
 

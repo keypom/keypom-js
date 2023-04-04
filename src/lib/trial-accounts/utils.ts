@@ -3,6 +3,7 @@ import { Account, transactions } from 'near-api-js';
 import { base_decode } from 'near-api-js/lib/utils/serialize';
 import { getEnv } from '../keypom';
 import { createAction } from '../keypom-utils';
+import { getKeyInformation } from '../views';
 
 // helpers for keypom account contract args
 const RECEIVER_HEADER = '|kR|'
@@ -209,4 +210,18 @@ export const estimateTrialGas = ({ executeArgs }: {
 	}
 
     return gasToAttach;
+}
+
+export const isUnclaimedTrialDrop = async ({keypomContractId, secretKey}) => {
+	console.log('accountId is valid keypom contract ', keypomContractId)
+	const keyInfo = await getKeyInformation({
+		secretKey
+	})
+	console.log('keyInfo: ', keyInfo)
+
+	if (keyInfo !== null) {
+		return true;
+	}
+
+	return false;
 }

@@ -2,13 +2,13 @@ import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-
 import BN from "bn.js";
 import { Account, KeyPair, Near } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
-import { initKeypom } from "../../keypom";
+import { initKeypom, networks } from "../../keypom";
 import { viewAccessKeyData } from "../../keypom-utils";
 import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
-import { TRIAL_ERRORS } from "../../trial-accounts/utils";
+import { isUnclaimedTrialDrop, TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
-import { getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
+import { getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/keypom-lib";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -57,72 +57,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.trialAccountId!
     }
 
-
-    public parseUrl = () => {
-        const split = window.location.href.split(this.trialBaseUrl);
-
-        if (split.length != 2) {
-            return;
-        }
-
-        const trialInfo = split[1];
-        const [accountId, secretKey] = trialInfo.split(this.trialSplitDelim)
-
-        if (!accountId || !secretKey) {
-            return;
-        }
-
-        return {
-            accountId,
-            secretKey
-        }
-    }
-
-    public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
-        console.log('modalType for show modal: ', modalType)
-        this.modal.show(modalType)
-    }
-
-    public checkValidTrialInfo = () => {
-        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
-    }
-
     async isSignedIn() {
         return this.trialAccountId != undefined && this.trialAccountId != null
-    }
-
-    async verifyOwner() {
-        throw Error(
-            "KeypomWallet:verifyOwner is deprecated"
-        );
-    }
-
-    async signOut() {
-        if (this.trialAccountId == undefined || this.trialAccountId == null) {
-            throw new Error("Wallet is already signed out");
-        }
-
-        this.trialAccountId = this.trialAccountId = this.trialSecretKey = undefined;
-        await this.keyStore.removeKey(this.networkId, this.trialAccountId!);
-        localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
-    }
-
-    async getAvailableBalance(id?: string): Promise<BN> {
-        // TODO: get access key allowance
-        return new BN(0);
-    }
-
-    async getAccounts(): Promise<Account[]> {
-        if (this.trialAccountId != undefined && this.trialAccountId != null) {
-            const accountObj = new Account(this.near.connection, this.trialAccountId!);
-            return [accountObj];
-        }
-
-        return []
-    }
-
-    async switchAccount(id: string) {
-        // TODO:  maybe?
     }
 
     async signIn(): Promise<Account[]> {
@@ -139,13 +75,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             let { accountId, secretKey } = parsedData;
 
             // Check if this is an existing keypom drop that is claimable (case 1)
-            const isOriginalLink = isKeypomDrop(this.networkId, accountId);
+            const isOriginalLink = updateKeypomContractIfValid(accountId);
             console.log(`isOriginalLink: `, isOriginalLink)
             
             // If the drop is from keypom, it is either unclaimed or claimed
             if (isOriginalLink) {
                 try {
-                    const isUnclaimed = await isUnclaimedTrialDrop(this.networkId, accountId, secretKey);
+                    const isUnclaimed = await isUnclaimedTrialDrop({keypomContractId: accountId, secretKey});
                     console.log(`isUnclaimed: `, isUnclaimed)
                     
                     // If the drop is unclaimed, we should show the unclaimed drop modal
@@ -197,6 +133,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         // Invalid local storage info so return nothing
         return []
+    }
+
+    async signOut() {
+        if (this.trialAccountId == undefined || this.trialAccountId == null) {
+            throw new Error("Wallet is already signed out");
+        }
+
+        this.trialAccountId = this.trialAccountId = this.trialSecretKey = undefined;
+        await this.keyStore.removeKey(this.networkId, this.trialAccountId!);
+        localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
     async signAndSendTransaction(params) {
@@ -253,6 +199,59 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             return [FAILED_EXECUTION_OUTCOME];
         }
         return res
+    }
+
+    private parseUrl = () => {
+        const split = window.location.href.split(this.trialBaseUrl);
+
+        if (split.length != 2) {
+            return;
+        }
+
+        const trialInfo = split[1];
+        const [accountId, secretKey] = trialInfo.split(this.trialSplitDelim)
+
+        if (!accountId || !secretKey) {
+            return;
+        }
+
+        return {
+            accountId,
+            secretKey
+        }
+    }
+
+    public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
+        console.log('modalType for show modal: ', modalType)
+        this.modal.show(modalType)
+    }
+
+    public checkValidTrialInfo = () => {
+        return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
+    }
+
+    async verifyOwner() {
+        throw Error(
+            "KeypomWallet:verifyOwner is deprecated"
+        );
+    }
+
+    async getAvailableBalance(id?: string): Promise<BN> {
+        // TODO: get access key allowance
+        return new BN(0);
+    }
+
+    async getAccounts(): Promise<Account[]> {
+        if (this.trialAccountId != undefined && this.trialAccountId != null) {
+            const accountObj = new Account(this.near.connection, this.trialAccountId!);
+            return [accountObj];
+        }
+
+        return []
+    }
+
+    async switchAccount(id: string) {
+        // TODO:  maybe?
     }
 
     private async internalSignIn (accountId, secretKey) {

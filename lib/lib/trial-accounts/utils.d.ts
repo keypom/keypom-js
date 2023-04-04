@@ -61,3 +61,7 @@ export declare const estimateTrialGas: ({ executeArgs }: {
         }[];
     };
 }) => any;
+export declare const isUnclaimedTrialDrop: ({ keypomContractId, secretKey }: {
+    keypomContractId: any;
+    secretKey: any;
+}) => Promise<boolean>;

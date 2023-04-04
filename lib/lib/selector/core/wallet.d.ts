@@ -22,23 +22,20 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     });
     getContractId(): string;
     getAccountId(): string;
-    parseUrl: () => {
-        accountId: string;
-        secretKey: string;
-    } | undefined;
+    isSignedIn(): Promise<boolean>;
+    signIn(): Promise<Account[]>;
+    signOut(): Promise<void>;
+    signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;
+    signAndSendTransactions(params: any): Promise<FinalExecutionOutcome[]>;
+    private parseUrl;
     showModal: (modalType?: {
         id: string;
     }) => void;
     checkValidTrialInfo: () => boolean;
-    isSignedIn(): Promise<boolean>;
     verifyOwner(): Promise<void>;
-    signOut(): Promise<void>;
     getAvailableBalance(id?: string): Promise<BN>;
     getAccounts(): Promise<Account[]>;
     switchAccount(id: string): Promise<void>;
-    signIn(): Promise<Account[]>;
-    signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;
-    signAndSendTransactions(params: any): Promise<FinalExecutionOutcome[]>;
     private internalSignIn;
     private assertSignedIn;
 }
