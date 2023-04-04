@@ -76,6 +76,11 @@ export const supportedLinkdropClaimPages = {
 	}
 }
 
+export const accountMappingContract = {
+	mainnet: `v1.mapping.keypom.near`,
+	testnet: `v1.mapping.keypom.testnet`
+}
+
 let contractBase = 'v2.keypom'
 let contractId = `${contractBase}.testnet`
 let receiverId = contractId
