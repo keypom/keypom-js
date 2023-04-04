@@ -1,4 +1,3 @@
-import * as nearAPI from "near-api-js";
 export declare const networks: {
     mainnet: {
         networkId: string;
@@ -18,4 +17,3 @@ export declare const getLocalStorageKeypomEnv: () => string | null;
 export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
 export declare const isKeypomDrop: (networkId: any, keypomContractId: any) => boolean;
 export declare const isUnclaimedTrialDrop: (networkId: any, keypomContractId: any, secretKey: any) => Promise<boolean>;
-export declare const createAction: (action: any) => nearAPI.transactions.Action;

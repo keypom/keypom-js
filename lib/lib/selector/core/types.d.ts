@@ -20,8 +20,8 @@ export interface KeypomParams {
     signInContractId: string;
     iconUrl?: string;
     deprecated?: boolean;
-    desiredUrl?: string;
-    delimiter?: string;
+    trialBaseUrl?: string;
+    trialSplitDelim?: string;
     modalOptions?: any;
 }
 export type KeypomWalletInstant = InstantLinkWallet & {

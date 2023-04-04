@@ -15,51 +15,8 @@ export const TRIAL_ERRORS = {
     INVALID_ACTION: 'invalid_action'
 }
 
-/**
- * Check whether a trial account is able to exit their trial state and become a fully fledged normal account.
- * 
- * @group Trial Accounts
-*/
-export const convertTxnToTrialTxn = ({
-	txns,
-	trialAccountId,
-	trialAccountPublicKey
-}) => {
-	const {near} = getEnv();
-
-	const account = new Account(near!.connection, trialAccountId);
-	const { provider } = account.connection;
-
-	return Promise.all(
-		txns.map(async (transaction, index) => {
-			const actions = transaction.actions.map((action) =>
-				createAction(action)
-			);
-
-			console.log('actions: ', actions)
-			const block = await provider.block({ finality: "final" });
-			console.log('block: ', block)
-
-			const accessKey: any = await provider.query(
-				`access_key/${trialAccountId}/${trialAccountPublicKey}`,
-				""
-			);
-			console.log('accessKey: ', accessKey)
-
-			return transactions.createTransaction(
-				trialAccountId,
-				trialAccountPublicKey,
-				transaction.receiverId,
-				accessKey.nonce + index + 1,
-				actions,
-				base_decode(block.header.hash)
-			);
-		})
-	);
-}
-
-export const validateTransactions = async ({
-	txnInfos,
+export const validateDesiredMethods = async ({
+	methodData,
 	trialAccountId
 }) => {
 	const {viewCall} = getEnv();
@@ -87,27 +44,27 @@ export const validateTransactions = async ({
 	console.log('validInfo after view calls: ', validInfo)
 
 	// Loop through each transaction in the array
-	for (let i = 0; i < txnInfos.length; i++) {
-		const transaction = txnInfos[i];
-		console.log('transaction: ', transaction)
+	for (let i = 0; i < methodData.length; i++) {
+		const method = methodData[i];
+		console.log('method: ', method)
 
-		const validInfoForReceiver = validInfo[transaction.receiverId];
+		const validInfoForReceiver = validInfo[method.receiverId];
 		console.log('validInfoForReceiver: ', validInfoForReceiver)
 		// Check if the contractId is valid
 		if (!validInfoForReceiver) {
-			console.log('!validInfo[transaction.receiverId]: ', !validInfo[transaction.receiverId])
+			console.log('!validInfo[transaction.receiverId]: ', !validInfo[method.receiverId])
 			return false;
 		}
 
 		// Check if the method name is valid
-		if (validInfoForReceiver.allowableMethods != "*" && !validInfoForReceiver.allowableMethods.includes(transaction.methodName)) {
-			console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName))
+		if (validInfoForReceiver.allowableMethods != "*" && !validInfoForReceiver.allowableMethods.includes(method.methodName)) {
+			console.log('!validInfo[transaction.receiverId].allowableMethods.includes(transaction.methodName): ', !validInfo[method.receiverId].allowableMethods.includes(method.methodName))
 			return false;
 		}
 
 		// Check if the deposit is valid
-		if (validInfoForReceiver.maxDeposit != "*" && new BN(transaction.deposit).gt(new BN(validInfoForReceiver.maxDeposit))) {
-			console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)))
+		if (validInfoForReceiver.maxDeposit != "*" && new BN(method.deposit).gt(new BN(validInfoForReceiver.maxDeposit))) {
+			console.log('new BN(transaction.deposit).gt(new BN(validInfo[transaction.receiverId].maxDeposit)): ', new BN(method.deposit).gt(new BN(validInfo[method.receiverId].maxDeposit)))
 			return false;
 		}
 	}
@@ -115,7 +72,7 @@ export const validateTransactions = async ({
 	return true;
 }
 
-export const convertArgsToTrialArgs = (params, newParams = {}) => {
+export const wrapTxnParamsForTrial = (params, newParams = {}) => {
     Object.entries(params).forEach(([k, v]) => {
         if (k === 'args' && typeof v !== 'string') {
             v = JSON.stringify(v)
@@ -126,13 +83,13 @@ export const convertArgsToTrialArgs = (params, newParams = {}) => {
     return newParams
 }
 
-export const generateTrialExecuteArgs = ({ txns }) => {
-	const argsToValidate: any = [];
-	const generatedArgs: any = {
+export const generateExecuteArgs = ({ desiredTxns }) => {
+	const methodDataToValidate: any = [];
+	const executeArgs: any = {
 		transactions: []
 	}
 
-    txns.forEach((tx) => {
+    desiredTxns.forEach((tx) => {
         const newTx: any = {}
         newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId
         newTx.actions = []
@@ -140,7 +97,7 @@ export const generateTrialExecuteArgs = ({ txns }) => {
 
         tx.actions.forEach((action) => {
             console.log('action: ', action)
-            argsToValidate.push({
+            methodDataToValidate.push({
                 receiverId: tx.contractId || tx.receiverId,
                 methodName: action.params.methodName,
                 deposit: action.params.deposit
@@ -150,24 +107,25 @@ export const generateTrialExecuteArgs = ({ txns }) => {
             console.log('newAction 1: ', newAction)
             newAction[ACTION_HEADER] = action.type
             console.log('newAction 2: ', newAction)
-            newAction.params = convertArgsToTrialArgs(action.params)
+            newAction.params = wrapTxnParamsForTrial(action.params)
             console.log('newAction 3: ', newAction)
             newTx.actions.push(newAction)
         })
-        generatedArgs.transactions.push(newTx)
+        executeArgs.transactions.push(newTx)
     })
     return {
-        generatedArgs,
-        argsToValidate
+        executeArgs,
+        methodDataToValidate
     }
 }
 
-export const estimateTrialGas = ({ txns }) => {
+export const estimateTrialGas = ({ executeArgs }) => {
+	let transactions = executeArgs.transactions;
 	let incomingGas = new BN("0");
 	let numActions = 0;
 	try {
-		for (let i = 0; i < txns.length; i++) {
-			let transaction = txns[i];
+		for (let i = 0; i < transactions.length; i++) {
+			let transaction = transactions[i];
 			console.log('transaction in gas loop: ', transaction)
 			for (let j = 0; j < transaction.actions.length; j++) {
 				let action = transaction.actions[j];

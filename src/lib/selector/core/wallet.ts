@@ -1,17 +1,12 @@
 import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
 import BN from "bn.js";
-import { Account, KeyPair, Near, providers, transactions } from "near-api-js";
+import { Account, KeyPair, Near } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
-import { PublicKey } from "near-api-js/lib/utils";
-import { base_decode } from "near-api-js/lib/utils/serialize";
-import { getEnv, initKeypom, updateKeypomContractId } from "../../keypom";
-import { genArgs, getPubFromSecret, viewAccessKeyData } from "../../keypom-utils";
-import { canExitTrial, validateTransactions } from "../../trial-accounts/pre-trial";
-import { getKeyInformation } from "../../views";
+import { initKeypom } from "../../keypom";
+import { viewAccessKeyData } from "../../keypom-utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
-import { createAction, getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
-import { FAILED_EXECUTION_OUTCOME } from "./types";
+import { getLocalStorageKeypomEnv, isKeypomDrop, isUnclaimedTrialDrop, KEYPOM_LOCAL_STORAGE_KEY, networks, setLocalStorageKeypomEnv } from "../utils/keypom-lib";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     networkId: string;
@@ -227,11 +222,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     async signAndSendTransactions(params) {
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
-        const { transactions } = params;
-        console.log('transactions: ', transactions)
+        // const { transactions } = params;
+        // console.log('transactions: ', transactions)
 
-        const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));
-        return await Promise.all(promises) as FinalExecutionOutcome[];
+        // const promises = transformedTransactions.map((tx) => (account as any).signAndSendTransaction(tx));
+        return await Promise.all([]) as FinalExecutionOutcome[];
     }
 
     private async internalSignIn (accountId, secretKey) {

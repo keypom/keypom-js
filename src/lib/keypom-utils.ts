@@ -6,6 +6,7 @@ import BN from 'bn.js';
 import * as nearAPI from 'near-api-js';
 import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
+import { base_decode } from "near-api-js/lib/utils/serialize";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { assert, isValidAccountObj } from "./checks";
 import { getEnv, supportedLinkdropClaimPages } from "./keypom";
@@ -1273,4 +1274,39 @@ export const nearArgsToYocto = (nearAmount?: string | number, yoctoAmount?: stri
     }
 
     return yoctoToReturn;
+}
+
+export const createTransactions = ({
+	txnInfos,
+	signerId,
+	signerPk
+}) => {
+	const {near} = getEnv();
+
+	const account = new Account(near!.connection, signerId);
+	const { provider } = account.connection;
+
+	return Promise.all(
+		txnInfos.map(async (txnInfo, index) => {
+			const actions = txnInfo.actions.map((action) =>
+				createAction(action)
+			);
+
+			const block = await provider.block({ finality: "final" });
+
+			const accessKey: any = await provider.query(
+				`access_key/${signerId}/${signerPk}`,
+				""
+			);
+
+			return transactions.createTransaction(
+				signerId,
+				signerPk,
+				txnInfo.receiverId,
+				accessKey.nonce + index + 1,
+				actions,
+				base_decode(block.header.hash)
+			);
+		})
+	);
 }

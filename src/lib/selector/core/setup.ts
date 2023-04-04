@@ -80,9 +80,9 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-	delimiter = "/",
+	trialSplitDelim = "/",
 	deprecated = false,
-	desiredUrl = "/keypom-trial#",
+	trialBaseUrl = "/keypom-trial#",
 	networkId,
 	signInContractId,
 	modalOptions
@@ -91,8 +91,8 @@ export function setupKeypom({
 		const keypomWallet = new KeypomWallet({
 			signInContractId,
 			networkId,
-			desiredUrl,
-			delimiter,
+			trialBaseUrl,
+			trialSplitDelim,
 			modalOptions
 		});
 

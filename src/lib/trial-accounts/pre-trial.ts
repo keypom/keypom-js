@@ -15,7 +15,7 @@ import { FCData } from '../types/fc';
 import { CreateDropProtocolArgs, CreateOrAddReturn } from '../types/params';
 import { ProtocolReturnedDropConfig } from '../types/protocol';
 import { getDropInformation, getUserBalance } from '../views';
-import { convertArgsToTrialArgs } from "./utils";
+import { wrapTxnParamsForTrial } from "./utils";
 const {
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
@@ -264,7 +264,7 @@ export const createTrialAccountDrop = async ({
 					method_name: 'setup',
 					//@ts-ignore
 					attached_deposit: '0',
-					args: JSON.stringify(convertArgsToTrialArgs({
+					args: JSON.stringify(wrapTxnParamsForTrial({
 						contracts: callableContracts,
 						amounts: maxAttachableYoctoPerContract,
 						methods: callableMethods,
@@ -303,7 +303,7 @@ export const createTrialAccountDrop = async ({
 			methodName: 'setup',
 			//@ts-ignore
 			attachedDeposit: '0',
-			args: JSON.stringify(convertArgsToTrialArgs({
+			args: JSON.stringify(wrapTxnParamsForTrial({
 				contracts: callableContracts,
 				amounts: maxAttachableYoctoPerContract,
 				methods: callableMethods,
