@@ -48,6 +48,10 @@ export declare const supportedLinkdropClaimPages: {
         keypom: string;
     };
 };
+export declare const accountMappingContract: {
+    mainnet: string;
+    testnet: string;
+};
 export type Maybe<T> = T | undefined;
 declare let near: Maybe<Near>;
 /**

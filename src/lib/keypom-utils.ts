@@ -1289,15 +1289,19 @@ export const createTransactions = ({
 	return Promise.all(
 		txnInfos.map(async (txnInfo, index) => {
 			const actions = txnInfo.actions.map((action) =>
-				createAction(action)
+            createAction(action)
 			);
-
+            
+            console.log(`actions: ${JSON.stringify(actions)}`)
 			const block = await provider.block({ finality: "final" });
+            console.log(`block: ${JSON.stringify(block)}`)
 
+            console.log('`access_key/${signerId}/${signerPk}`: ', `access_key/${signerId}/${signerPk}`)
 			const accessKey: any = await provider.query(
-				`access_key/${signerId}/${signerPk}`,
+                `access_key/${signerId}/${signerPk}`,
 				""
-			);
+            );
+            console.log(`accessKey: ${JSON.stringify(accessKey)}`)
 
 			return transactions.createTransaction(
 				signerId,

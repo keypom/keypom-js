@@ -5,7 +5,7 @@ import * as nearAPI from "near-api-js";
 import { Account, KeyPair, transactions } from "near-api-js";
 import { base_decode } from "near-api-js/lib/utils/serialize";
 import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from '../checks';
-import { getEnv, supportedKeypomContracts } from "../keypom";
+import { accountMappingContract, getEnv, supportedKeypomContracts } from "../keypom";
 import {
 	createAction,
 	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto
@@ -230,6 +230,11 @@ export const createTrialAccountDrop = async ({
 
 	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(parseNearAmount("0.3"))).toString();
 	const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
+
+	// Account Mapping Contract Changes
+	callableContracts.push(accountMappingContract[networkId!]);
+	maxAttachableYoctoPerContract.push(parseNearAmount("0.002")!);
+	callableMethods.push("set");
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,

@@ -2,12 +2,15 @@ import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-
 import BN from "bn.js";
 import { Account, KeyPair, Near } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { initKeypom, networks } from "../../keypom";
 import { viewAccessKeyData } from "../../keypom-utils";
-import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
+import { trialCallMethod, trialSignAndSendTxns } from "../../trial-accounts/trial-active";
 import { isUnclaimedTrialDrop, TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
+import { addUserToMappingContract } from "../utils/selector-utils";
+import { getAccountFromMap } from "../utils/selector-utils";
 import { getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
@@ -98,13 +101,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                     } else {
                         // If the drop is claimed, we should attempt to recover the drop
                         console.log("DROP IS CLAIMED. RECOVERY TODO");
-                        accountId = "foobar";
+                        accountId = await getAccountFromMap(secretKey);
                     }
                 } catch(e) {
                     console.log('e checking if drop is from keypom: ', e)
                 }
             }
-            
             
             // Check if the account ID and secret key are valid and sign in accordingly
             try {
@@ -175,6 +177,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         console.log('transactions: ', transactions)
 
         try {
+            addUserToMappingContract(this.trialAccountId!, this.trialSecretKey!);
             var res = await trialSignAndSendTxns({
                 trialAccountId: this.trialAccountId!,
                 trialAccountSecretKey: this.trialSecretKey!,
@@ -265,6 +268,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
         setLocalStorageKeypomEnv(dataToWrite);
         await this.keyStore.setKey(this.networkId, accountId, KeyPair.fromString(secretKey));
+
+        // Check if the account exists in the mapping contract. If they do, don't do anything. If they
+        // Don't, add them to the mapping contract
+        addUserToMappingContract(accountId, secretKey);
 
         const accountObj = new Account(this.near.connection, this.trialAccountId!);
         return [accountObj];

@@ -14,9 +14,11 @@ const {
 
 
 import { BN } from "bn.js";
-import { updateKeypomContractId } from "../../keypom";
+import { accountMappingContract, getEnv, updateKeypomContractId } from "../../keypom";
 import { getKeyInformation } from "../../views";
 import { isValidKeypomContract } from "../../checks";
+import { trialCallMethod } from "../../trial-accounts/trial-active";
+import { getPubFromSecret } from "../../keypom-utils";
 
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 
@@ -30,6 +32,37 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 	console.log('dataToWrite: ', dataToWrite)
 
 	localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
+}
+
+export const getAccountFromMap = async (secretKey) => {
+	const {viewCall} = getEnv();
+	let pk = getPubFromSecret(secretKey);
+
+	const accountId = await viewCall({
+		contractId: accountMappingContract[getEnv().networkId!],
+		methodName: 'get_account_id',
+		args: {pk}
+	})
+	console.log('accountId found from map: ', accountId)
+	
+	return accountId
+}
+
+export const addUserToMappingContract = async (accountId, secretKey) => {
+	const accountIdFromMapping = await getAccountFromMap(secretKey);
+
+	if (accountIdFromMapping !== accountId) {
+		console.log(`No Account ID found from mapping contract: ${JSON.stringify(accountIdFromMapping)} Adding now.`);
+		trialCallMethod({
+			trialAccountId: accountId,
+			trialAccountSecretKey: secretKey,
+			contractId: accountMappingContract[getEnv().networkId!],
+			methodName: 'set',
+			args: {},
+			attachedDeposit: parseNearAmount('0.002')!,
+			attachedGas: '10000000000000'
+		});
+	}
 }
 
 export const updateKeypomContractIfValid = (keypomContractId) => {
