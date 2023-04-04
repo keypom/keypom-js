@@ -8,7 +8,7 @@ import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
 import { isUnclaimedTrialDrop, TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
-import { getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/keypom-lib";
+import { getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
