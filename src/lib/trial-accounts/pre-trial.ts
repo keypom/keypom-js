@@ -113,9 +113,9 @@ export const createTrialAccountDrop = async ({
 	maxAttachableYoctoPerContract: string[],
 	/** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
 	callableMethods: string[],
-	/** Once the account balance falls below this amount (in $NEAR), the trial is over and the exit conditions must be met. */
+	/** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
 	trialEndFloorNEAR: string | number,
-	/** Once the account balance falls below this amount (in yocto), the trial is over and the exit conditions must be met. */
+	/** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
 	trialEndFloorYocto: string,
 	/** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
 	repayAmountNEAR?: number | string,
@@ -228,13 +228,17 @@ export const createTrialAccountDrop = async ({
 	// If !maxAttachableYoctoPerContract, create an array of the same size as callableMethods and fill it with "*"
 	if (!maxAttachableYoctoPerContract) maxAttachableYoctoPerContract = Array(callableMethods.length).fill("*");
 
-	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(parseNearAmount("0.3"))).toString();
 	const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
-
+	
 	// Account Mapping Contract Changes
 	callableContracts.push(accountMappingContract[networkId!]);
 	maxAttachableYoctoPerContract.push(parseNearAmount("0.002")!);
 	callableMethods.push("set");
+	
+	// Take the storage cost into consideration for the attached deposit and trial end floor
+	const storageCost = parseNearAmount("0.3")!;
+	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(storageCost)).toString();
+	trialEndFloorNEAR = new BN(maxAttachableYoctoPerContract).sub(new BN(trialEndFloorYocto).add(new BN(storageCost))).toString();
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
