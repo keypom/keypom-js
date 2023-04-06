@@ -238,7 +238,7 @@ export const createTrialAccountDrop = async ({
 	// Take the storage cost into consideration for the attached deposit and trial end floor
 	const storageCost = parseNearAmount("0.3")!;
 	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(storageCost)).toString();
-	trialEndFloorNEAR = new BN(maxAttachableYoctoPerContract).sub(new BN(trialEndFloorYocto).add(new BN(storageCost))).toString();
+	trialEndFloorYocto = new BN(attachedDeposit).sub(new BN(trialEndFloorYocto)).toString();
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,

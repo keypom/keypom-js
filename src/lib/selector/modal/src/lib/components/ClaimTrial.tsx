@@ -44,8 +44,8 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
             <div className="nws-modal" style={{ width: "70%", height: "27%" }} >
                 <div className="modal-right" style={{ width: "100%" }}>
                     <MainBody
-                        title={"Yooooo The Drop Is Being Claimed!!"}
-                        body={"It's Party Time!! Dance a lil' while you wait bruv"}
+                        title={"The Drop Is Being Claimed!!"}
+                        body={"Please Wait"}
                         headerOne={null}
                         headerTwo={null}
                         onCloseModal={() =>
@@ -59,12 +59,12 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
                 <div className="nws-modal" style={{ width: "70%", height: "27%" }}>
                     <div className="modal-right" style={{ width: "100%" }}>
                         <MainBody
-                            title={"The Drop Was Claimed!!"}
-                            body={"Ser click this button for airdrop"}
+                            title={"The Drop Was Claimed!"}
+                            body={"Click the button to continue"}
                             headerOne={null}
                             headerTwo={null}
                             button={{
-                                text: "Click Me 🫡",
+                                text: "Click To Start",
                                 url: `${redirectUrlBase}${accountId}${delimiter}${secretKey}`,
                                 newTab: false
                             }}

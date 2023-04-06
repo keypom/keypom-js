@@ -69,9 +69,9 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
     maxAttachableYoctoPerContract: string[];
     /** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
     callableMethods: string[];
-    /** Once the account balance falls below this amount (in $NEAR), the trial is over and the exit conditions must be met. */
+    /** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
     trialEndFloorNEAR: string | number;
-    /** Once the account balance falls below this amount (in yocto), the trial is over and the exit conditions must be met. */
+    /** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
     trialEndFloorYocto: string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
     repayAmountNEAR?: string | number | undefined;

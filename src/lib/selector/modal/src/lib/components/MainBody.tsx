@@ -111,24 +111,6 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             </button>
           )}
         </div>
-
-        {button && (
-          <div className="what-wallet-mobile">
-            <button
-              className="middleButton"
-              onClick={() => {
-                if (button.newTab) {
-                  window.open(button.url, '_blank')
-                } else {
-                  window.location.replace(button.url || 'https://keypom.xyz/'); 
-                  window.location.reload()
-                }
-              }}
-            >
-              {button.text || "Next Steps"}
-            </button>
-          </div>
-        )}
       </>
     </div >
   );

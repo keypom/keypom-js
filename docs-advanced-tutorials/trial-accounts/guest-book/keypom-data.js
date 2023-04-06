@@ -4,10 +4,10 @@ export const KEYPOM_OPTIONS = {
   //mainDescription: "Main Description",
   //headerOne: null,
   //headerTwo: {title: "my overloaded header title"},
-  button: {
-    text: "Button Text",
-    url: "https://www.google.com/"
-  },
+  // button: {
+  //   text: "Button Text",
+  //   url: "https://www.google.com/"
+  // },
   modules: [
     {
       name: "FastAuth",

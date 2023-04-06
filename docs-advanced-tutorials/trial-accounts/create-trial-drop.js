@@ -50,17 +50,18 @@ async function createTrialAccount() {
 		'1'
 	]
 
+    const wasmDirectory = `${require('path').resolve(__dirname, '..')}/trial-accounts/ext-wasm/trial-accounts.wasm`
     const {keys} = await createTrialAccountDrop({
 		account: fundingAccount,
         numKeys: 1,
-        contractBytes: [...readFileSync('./ext-wasm/trial-accounts.wasm')],
+        contractBytes: [...readFileSync(wasmDirectory)],
 		// How much $NEAR should be made available to the trial account when it's created?
-        startingBalanceNEAR: 2,
+        startingBalanceNEAR: 2.5,
         callableContracts,
         callableMethods,
         maxAttachableNEARPerContract,
 		// Once the trial account has spent this much $NEAR, the trial will be over.
-        trialEndFloorNEAR: 1
+        trialEndFloorNEAR: 1.25
     })
 
     const guestBookInstance = "http://localhost:1234"
