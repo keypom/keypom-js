@@ -34,7 +34,7 @@ async function createTrialAccount() {
 	// Initialize the SDK and point it to the custom NEAR object that was created.
     await initKeypom({
 		near,
-		network: 'testnet'
+		network: NETWORK_ID
 	});
 
 	// What contracts can the trial account call?
