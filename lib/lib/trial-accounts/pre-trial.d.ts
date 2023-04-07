@@ -61,14 +61,14 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
     startingBalanceNEAR?: string | number | undefined;
     /** How much $NEAR should the trial account start with? Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
     startingBalanceYocto?: string | undefined;
-    /** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
+    /** The contracts that the trial account should be able to call. */
     callableContracts: string[];
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
     maxAttachableNEARPerContract: (string | number)[];
     /** The upper bound of $yocto that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $yoctoNEAR (i.e `1` = 1 $yoctoNEAR). */
     maxAttachableYoctoPerContract: string[];
-    /** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
-    callableMethods: string[];
+    /** An array that contains the list of methods that the trial account should be able to call on each respective contract. To allow any methods to be called on the receiver contract, pass in `[*]`. */
+    callableMethods: string[][];
     /** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
     trialEndFloorNEAR: string | number;
     /** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */

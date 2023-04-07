@@ -41,13 +41,13 @@ async function createTrialAccount() {
     const callableContracts = [
         'guest-book.examples.keypom.testnet'
     ]
+    // What is the maximum amount of $NEAR that can be attached to a call for each callable contract?
+    const maxAttachableNEARPerContract = [
+        '1',
+    ]
 	// What methods can the trial account call?
 	const callableMethods = [
-		'*'
-	]
-	// What is the maximum amount of $NEAR that can be attached to a call for each callable contract?
-	const maxAttachableNEARPerContract = [
-		'1'
+		['*'],
 	]
 
     const wasmDirectory = `${require('path').resolve(__dirname, '..')}/trial-accounts/ext-wasm/trial-accounts.wasm`

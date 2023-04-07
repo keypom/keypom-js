@@ -105,14 +105,14 @@ export const createTrialAccountDrop = async ({
 	startingBalanceNEAR?: string | number,
 	/** How much $NEAR should the trial account start with? Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
 	startingBalanceYocto?: string,
-	/** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
+	/** The contracts that the trial account should be able to call. */
 	callableContracts: string[],
 	/** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
 	maxAttachableNEARPerContract: (string | number)[],
 	/** The upper bound of $yocto that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $yoctoNEAR (i.e `1` = 1 $yoctoNEAR). */
 	maxAttachableYoctoPerContract: string[],
-	/** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
-	callableMethods: string[],
+	/** An array that contains the list of methods that the trial account should be able to call on each respective contract. To allow any methods to be called on the receiver contract, pass in `[*]`. */
+	callableMethods: string[][],
 	/** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
 	trialEndFloorNEAR: string | number,
 	/** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
@@ -233,12 +233,17 @@ export const createTrialAccountDrop = async ({
 	// Account Mapping Contract Changes
 	callableContracts.push(accountMappingContract[networkId!]);
 	maxAttachableYoctoPerContract.push(parseNearAmount("0.002")!);
-	callableMethods.push("set");
+	callableMethods.push(["set"]);
 	
 	// Take the storage cost into consideration for the attached deposit and trial end floor
 	const storageCost = parseNearAmount("0.3")!;
 	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(storageCost)).toString();
 	trialEndFloorYocto = new BN(attachedDeposit).sub(new BN(trialEndFloorYocto)).toString();
+
+	// Generate the proper args for setup:
+	let actualContracts = callableContracts.join(",");
+	let actualAmounts = maxAttachableYoctoPerContract.join(",");
+	let actualMethods = callableMethods.map((method) => method.join(":")).join(",");
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -274,9 +279,9 @@ export const createTrialAccountDrop = async ({
 					//@ts-ignore
 					attached_deposit: '0',
 					args: JSON.stringify(wrapTxnParamsForTrial({
-						contracts: callableContracts,
-						amounts: maxAttachableYoctoPerContract,
-						methods: callableMethods,
+						contracts: actualContracts,
+						amounts: actualAmounts,
+						methods: actualMethods,
 						funder: repayTo || account!.accountId,
 						repay: repayAmountYocto,
 						floor: trialEndFloorYocto,
@@ -313,9 +318,9 @@ export const createTrialAccountDrop = async ({
 			//@ts-ignore
 			attachedDeposit: '0',
 			args: JSON.stringify(wrapTxnParamsForTrial({
-				contracts: callableContracts,
-				amounts: maxAttachableYoctoPerContract,
-				methods: callableMethods,
+				contracts: actualContracts,
+				amounts: actualAmounts,
+				methods: actualMethods,
 				funder: repayTo || account!.accountId,
 				repay: repayAmountYocto,
 				floor: trialEndFloorYocto,
