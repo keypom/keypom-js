@@ -29,7 +29,7 @@ export const MainBody: React.FC<WalletHomeProps> = ({
       </div>
       <>
         <h4>{body}</h4>
-        <div className="wallet-info-wrapper what-wallet-hide">
+        <div>
           {headerOne && (
             <div className="wallet-what">
               <div className={"icon-side"}>
@@ -94,7 +94,6 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             </div>
           )}
 
-          <div className="button-spacing" />
           {button && (
             <button
               className="middleButton"

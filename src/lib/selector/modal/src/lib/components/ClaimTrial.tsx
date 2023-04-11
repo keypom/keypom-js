@@ -41,7 +41,7 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
     }
 
     return (isClaimingTrial ? (
-            <div className="nws-modal" style={{ width: "70%", height: "27%" }} >
+            <div className="nws-modal" style={{ width: "100%", height: "auto", maxWidth: '500px' }} >
                 <div className="modal-right" style={{ width: "100%" }}>
                     <MainBody
                         title={"The Drop Is Being Claimed!!"}
@@ -56,7 +56,7 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
             </div >
         ) : (
             (dropClaimed ? (
-                <div className="nws-modal" style={{ width: "70%", height: "27%" }}>
+                <div className="nws-modal" style={{ width: "100%", height: "auto", maxWidth: '500px' }}>
                     <div className="modal-right" style={{ width: "100%" }}>
                         <MainBody
                             title={"The Drop Was Claimed!"}
@@ -75,7 +75,7 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
                     </div>
                 </div>
                 ) : (
-                <div className="nws-modal" style={{ width: "70%", height: "27%" }}>
+                <div className="nws-modal" style={{ width: "100%", height: "auto", maxWidth: '500px' }}>
                     <div className="modal-right" style={{ width: "100%" }}>
                         <MainBody
                             title={MODAL_DEFAULTS.claimTrial.mainBody.title}
@@ -86,16 +86,15 @@ export const ClaimTrial: React.FC<ClaimTrialProps> = ({
                                 hide()
                             }
                         />
-                        <form onSubmit={handleSubmit}>
-                            <label>Enter your name:
-                                <input
-                                    type="text"
-                                    value={accountId}
-                                    onChange={(e) => setAccountId(e.target.value) }
-                                />
-                            </label>
-                            <input type="submit" />
-                        </form>
+                        <input
+                            type="text"
+                            value={accountId}
+                            placeholder={'Account Name'}
+                            onChange={(e) => setAccountId(e.target.value) }
+                            style={{ padding: '8px', marginBottom: '16px', border: '1px solid', borderRadius: '4px'}}
+                        />
+                        <br/>
+                        <button onClick={handleSubmit}>Create Account</button>
                     </div>
                 </div>
                 )

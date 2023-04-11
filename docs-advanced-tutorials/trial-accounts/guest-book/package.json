@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "(MIT AND Apache-2.0)",
   "scripts": {
-    "start": "./start.sh"
+    "start": "rm -rf .parcel-cache && ./start.sh"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",

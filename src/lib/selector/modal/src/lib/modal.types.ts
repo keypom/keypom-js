@@ -54,7 +54,7 @@ export const MODAL_DEFAULTS = {
   claimTrial: {
     mainBody: {
       title: "Create An Account",
-      body: "Enter a username to start using the app.",
+      body: "Choose a new Account name to start using the app:",
     }
   },
   trialOver: {

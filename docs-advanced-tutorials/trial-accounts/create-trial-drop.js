@@ -10,7 +10,7 @@ const {
 	createTrialAccountDrop
 } = keypom
 
-const funderAccountId = 'benjiman.testnet';
+const funderAccountId = 'md1.testnet';
 const NETWORK_ID = 'testnet';
 async function createTrialAccount() {
 	// Initiate connection to the NEAR blockchain.
