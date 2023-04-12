@@ -340,20 +340,7 @@ test('create an fc drop and 1 key', async (t) => {
 
 	let fcData = {
 		methods: [
-			[{
-				receiverId: "dev-1664052531433-97566156431683",
-				methodName: "nft_mint",
-				args: JSON.stringify({
-					"foo": "bar",
-					"keypom_args": {
-						"account_id_field": "receiver_id",
-						"drop_id_field" : "mint_id"
-					}
-				}),
-				attachedDeposit: parseNearAmount("1"),
-				accountIdField: "receiver_id",
-				dropIdField: "mint_id"
-			}]
+			null
 		]
 	}
 

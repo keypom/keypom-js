@@ -70,6 +70,7 @@ async function createDAODrop() {
                             }
                         ),
                         accountIdField: "proposal.kind.AddMemberToRole.member_id",
+                        dropIdField: "proposal.kind.AddMemberToRole.dao_id",
                         attachedDeposit: parseNearAmount("0.1")
                     }
                 ],
