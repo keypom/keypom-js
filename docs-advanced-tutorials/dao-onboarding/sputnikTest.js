@@ -23,10 +23,13 @@ async function daoFn(){
 	let near = await connect(nearConfig);
 	const councilMember = await near.account("minqianlu.testnet");
     const onboardTeamMember = await near.account("minqi.testnet");
+
+    const dev_contract = "dev-1681508516627-53574348032107";
     
     // Create DAO, specify minqianlu as council
+    console.log("\u001b[1;35m CREATING DROP")
     createdDao = await councilMember.functionCall(
-		"dev-1681494717382-11686702269708", 
+        dev_contract, 
 		'new', 
 		{
             config: {
@@ -40,12 +43,12 @@ async function daoFn(){
     )
 
     await councilMember.viewFunction(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
     	'get_members_roles',
     )
     
     let viewReturn = await councilMember.viewFunction(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
 		'get_proposals',
         {
             from_index: 0,
@@ -55,19 +58,16 @@ async function daoFn(){
     console.log(viewReturn)
     
     viewReturn = await councilMember.viewFunction(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
 		'get_policy'
     )
-    // console.log(viewReturn)
-    // viewReturn = await councilMember.viewFunction(
-    //     "dev-1681401491394-18732768526440", 
-	// 	'get_available_amount'
-    // )
-    // console.log(viewReturn)
+    console.log(" ")
 
-    // Add two more roles, one "minqi-role" and one "onboardee-role"
+
+    // Add minqi to dao as new role "minqi-role" with ability to add proposals, this should not automatically add
+    console.log( "\u001b[1;35m ADDING PROPOSAL" );
     await councilMember.functionCall(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
     	'add_proposal', 
     	{
             proposal: {
@@ -94,7 +94,7 @@ async function daoFn(){
     )
     
     viewReturn = await councilMember.viewFunction(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
 		'get_proposals',
         {
             from_index: 0,
@@ -103,8 +103,17 @@ async function daoFn(){
     )
     console.log(viewReturn)
 
+    console.log( "\u001b[1;35m minqi should not be in dao yet" );
+
+    await councilMember.viewFunction(
+        dev_contract, 
+    	'get_members_roles',
+    )
+
+    // Use minqianlu to vote approve on this proposal to add minqi
+    console.log( "\u001b[1;35m approving minqi" );
     await councilMember.functionCall(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
     	'act_proposal', 
     	{
             id: 0, 
@@ -113,31 +122,95 @@ async function daoFn(){
         parseNearAmount("0.0000000001"),
     )
 
+    // Check minqi is added dao in that role
     await councilMember.viewFunction(
-        "dev-1681494717382-11686702269708", 
+        dev_contract, 
     	'get_members_roles',
     )
     
-    // write somewhere in the act proposal and add proposal functions the ability to log all current members, just for us to keep track
-    // make a seperate helper function
-
-
-    // use minqianlu to approve said proposals to add the roles
-
-    // give "minqi-role" the ability to add proposal to add members
-
-    // use minqianlu to approve said proposal to give 
-
-    // Add minqi to dao as new role "minqi-role", this should not automatically add
-
-    // Use minqianlu to vote approve on this proposal to add minqi
-    
-    // Check minqi is added dao in that role
-
-    // Use minqi to propose adding a new member, new-moon-dao-member-1.testnet or something, to "onboardee-role"
+    // // Use minqi to propose adding a new member, new-moon-dao-member-1.testnet or something, to "onboardee-role"
+    console.log( "\u001b[1;35m creating onboarding role" );
+    await councilMember.functionCall(
+        dev_contract, 
+    	'add_proposal', 
+    	{
+            proposal: {
+                description: "adding moon-dao-member",
+                kind: {
+                    ChangePolicyAddOrUpdateRole: {
+                        role: {
+                            /// Name of the role to display to the user.
+                           name: 'new-onboardee-role',
+                           /// Kind of the role: defines which users this permissions apply.
+                           kind: { Group: ["minqi.testnet"] },
+                           /// Set of actions on which proposals that this role is allowed to execute.
+                           /// <proposal_kind>:<action>
+                           permissions: ['*:AddProposal'],
+                           /// For each proposal kind, defines voting policy.
+                           vote_policy: {},
+                       }, 
+                    }
+                }
+            }
+    	},
+        parseNearAmount("0.0000000001"),
+        parseNearAmount("1"),
+    )
+    await councilMember.functionCall(
+        dev_contract, 
+    	'act_proposal', 
+    	{
+            id: 1, 
+            action: 'VoteApprove'
+    	},
+        parseNearAmount("0.0000000001"),
+    )
 
     // This should auto approve, get status/existence of the proposal and check for 
+    await councilMember.viewFunction(
+        dev_contract, 
+    	'get_members_roles',
+    )
 
+    await onboardTeamMember.functionCall(
+        dev_contract, 
+    	'add_proposal', 
+    	{
+            proposal: {
+                description: "adding moon-dao-member",
+                kind: {
+                    AddMemberToRole: {
+                        member_id: "new-moon-dao-member-1.testnet",
+                        role: "new-onboardee-role"
+                    }
+                }
+            },
+            keypom_args:{
+                account_id_field: "proposal.kind.AddMemberToRole.member_id",
+                drop_id_field: "",
+                funder_id_field: "funder", 
+                key_id_field: "",
+            },
+            funder: "minqi.testnet"
+    	},
+        parseNearAmount("0.0000000001"),
+        parseNearAmount("1"),
+    )
+
+    viewReturn = await councilMember.viewFunction(
+        dev_contract, 
+		'get_proposals',
+        {
+            from_index: 0,
+            limit: 2
+        } 
+    )
+    console.log(viewReturn)
+
+    await councilMember.viewFunction(
+        dev_contract, 
+    	'get_members_roles',
+    )
 	
 }
 
