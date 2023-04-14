@@ -25,23 +25,27 @@ async function daoFn(){
     const onboardTeamMember = await near.account("minqi.testnet");
     
     // Create DAO, specify minqianlu as council
-    // createdDao = await councilMember.functionCall(
-	// 	"dev-1681312181173-69377159098922", 
-	// 	'new', 
-	// 	{
-    //         config: {
-    //             name: 'keypomtestdao',
-    //             purpose: 'to test adding members automatically',
-    //             metadata: '',
-    //         },
+    createdDao = await councilMember.functionCall(
+		"dev-1681494717382-11686702269708", 
+		'new', 
+		{
+            config: {
+                name: 'keypomtestdao',
+                purpose: 'to test adding members automatically',
+                metadata: '',
+            },
+            policy: ['minqianlu.testnet']
             
-	// 		policy: '["minqianlu.testnet"]'
-	// 	},
-    // )
-		
-	// Ensure DAO creation successful
+		},
+    )
+
+    await councilMember.viewFunction(
+        "dev-1681494717382-11686702269708", 
+    	'get_members_roles',
+    )
+    
     let viewReturn = await councilMember.viewFunction(
-        "dev-1681312181173-69377159098922", 
+        "dev-1681494717382-11686702269708", 
 		'get_proposals',
         {
             from_index: 0,
@@ -49,34 +53,73 @@ async function daoFn(){
         } 
     )
     console.log(viewReturn)
+    
+    viewReturn = await councilMember.viewFunction(
+        "dev-1681494717382-11686702269708", 
+		'get_policy'
+    )
+    // console.log(viewReturn)
+    // viewReturn = await councilMember.viewFunction(
+    //     "dev-1681401491394-18732768526440", 
+	// 	'get_available_amount'
+    // )
+    // console.log(viewReturn)
 
     // Add two more roles, one "minqi-role" and one "onboardee-role"
-    // await councilMember.functionCall(
-    // 	"dev-1681312181173-69377159098922", 
-    // 	'add_proposal', 
-    // 	{
-    //         proposal: {
-    //             description: "adding minqianlu to council role",
-    //             kind: {
-    //                 ChangePolicyAddOrUpdateRole: {
-    //                     role: {
-    //                         /// Name of the role to display to the user.
-    //                        name: 'council',
-    //                        /// Kind of the role: defines which users this permissions apply.
-    //                        kind: { Group: ["minqianlu.testnet"] },
-    //                        /// Set of actions on which proposals that this role is allowed to execute.
-    //                        /// <proposal_kind>:<action>
-    //                        permissions: ['*:*'],
-    //                        /// For each proposal kind, defines voting policy.
-    //                        vote_policy: {},
-    //                    }, 
-    //                 }
-    //             }
-    //         }
-    // 	},
-    //     parseNearAmount("0.0000000001"),
-    //     parseNearAmount("1"),
-    // )
+    await councilMember.functionCall(
+        "dev-1681494717382-11686702269708", 
+    	'add_proposal', 
+    	{
+            proposal: {
+                description: "adding minqi",
+                kind: {
+                    ChangePolicyAddOrUpdateRole: {
+                        role: {
+                            /// Name of the role to display to the user.
+                           name: 'minqi-role',
+                           /// Kind of the role: defines which users this permissions apply.
+                           kind: { Group: ["minqi.testnet"] },
+                           /// Set of actions on which proposals that this role is allowed to execute.
+                           /// <proposal_kind>:<action>
+                           permissions: ['*:AddProposal'],
+                           /// For each proposal kind, defines voting policy.
+                           vote_policy: {},
+                       }, 
+                    }
+                }
+            }
+    	},
+        parseNearAmount("0.0000000001"),
+        parseNearAmount("1"),
+    )
+    
+    viewReturn = await councilMember.viewFunction(
+        "dev-1681494717382-11686702269708", 
+		'get_proposals',
+        {
+            from_index: 0,
+            limit: 2
+        } 
+    )
+    console.log(viewReturn)
+
+    await councilMember.functionCall(
+        "dev-1681494717382-11686702269708", 
+    	'act_proposal', 
+    	{
+            id: 0, 
+            action: 'VoteApprove'
+    	},
+        parseNearAmount("0.0000000001"),
+    )
+
+    await councilMember.viewFunction(
+        "dev-1681494717382-11686702269708", 
+    	'get_members_roles',
+    )
+    
+    // write somewhere in the act proposal and add proposal functions the ability to log all current members, just for us to keep track
+    // make a seperate helper function
 
 
     // use minqianlu to approve said proposals to add the roles
