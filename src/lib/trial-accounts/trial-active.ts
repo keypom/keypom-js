@@ -2,7 +2,7 @@ import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { KeyPair } from "near-api-js";
 import { getEnv } from "../keypom";
 import { createTransactions } from "../keypom-utils";
-import { estimateTrialGas, generateExecuteArgs, TRIAL_ERRORS, validateDesiredMethods } from "./utils";
+import { estimateTrialGas, generateExecuteArgs, hasEnoughBalance, TRIAL_ERRORS, validateDesiredMethods } from "./utils";
 
 
 /**
@@ -133,13 +133,18 @@ export const trialSignAndSendTxns = async ({
 		throw TRIAL_ERRORS.EXIT_EXPECTED;
 	}
 
-	const {methodDataToValidate, executeArgs} = await generateExecuteArgs({desiredTxns: txns});
+	const {methodDataToValidate, executeArgs, totalAttachedYocto, totalGasForTxns} = await generateExecuteArgs({desiredTxns: txns});
 
 	const isValidTxn = await validateDesiredMethods({methodData: methodDataToValidate, trialAccountId});
 	console.log('isValidTxn: ', isValidTxn)
 
 	if (isValidTxn == false) {
 		throw TRIAL_ERRORS.INVALID_ACTION;
+	}
+
+	const hasBal = await hasEnoughBalance({trialAccountId, totalAttachedYocto, totalGasForTxns});
+	if (hasBal == false) {
+		throw TRIAL_ERRORS.INSUFFICIENT_BALANCE;
 	}
 
 	const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);
@@ -278,13 +283,18 @@ export const trialCallMethod = async ({
 	}];
 	console.log(`txns: ${JSON.stringify(txns)}`)
 	
-	const {methodDataToValidate, executeArgs} = await generateExecuteArgs({desiredTxns: txns});
+	const {methodDataToValidate, executeArgs, totalAttachedYocto, totalGasForTxns} = await generateExecuteArgs({desiredTxns: txns});
 
 	const isValidTxn = await validateDesiredMethods({methodData: methodDataToValidate, trialAccountId});
 	console.log('isValidTxn: ', isValidTxn)
 
 	if (isValidTxn == false) {
 		throw TRIAL_ERRORS.INVALID_ACTION;
+	}
+
+	const hasBal = await hasEnoughBalance({trialAccountId, totalAttachedYocto, totalGasForTxns});
+	if (hasBal == false) {
+		throw TRIAL_ERRORS.INSUFFICIENT_BALANCE;
 	}
 
 	const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);

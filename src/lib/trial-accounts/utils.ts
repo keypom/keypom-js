@@ -13,7 +13,8 @@ const PARAM_STOP = '|kS|'
 
 export const TRIAL_ERRORS = {
     EXIT_EXPECTED: 'exit',
-    INVALID_ACTION: 'invalid_action'
+    INVALID_ACTION: 'invalid_action',
+	INSUFFICIENT_BALANCE: 'insufficient_balance'
 }
 
 export const validateDesiredMethods = async ({
@@ -116,6 +117,8 @@ export const generateExecuteArgs = ({ desiredTxns }: {
 	}[];
 }) => {
 	const methodDataToValidate: any = [];
+	let totalGasBN = new BN(0);
+	let totalDepositsBN = new BN(0);
 	const executeArgs: any = {
 		transactions: []
 	}
@@ -133,6 +136,8 @@ export const generateExecuteArgs = ({ desiredTxns }: {
                 methodName: action.params.methodName,
                 deposit: action.params.deposit
             })
+			totalGasBN = totalGasBN.add(new BN(action.params.gas))
+			totalDepositsBN = totalDepositsBN.add(new BN(action.params.deposit))
 
             const newAction: any = {}
             console.log('newAction 1: ', newAction)
@@ -145,6 +150,8 @@ export const generateExecuteArgs = ({ desiredTxns }: {
         executeArgs.transactions.push(newTx)
     })
     return {
+		totalAttachedYocto: totalDepositsBN.toString(), 
+		totalGasForTxns: totalGasBN.toString(),
         executeArgs,
         methodDataToValidate
     }
@@ -224,4 +231,29 @@ export const isUnclaimedTrialDrop = async ({keypomContractId, secretKey}) => {
 	}
 
 	return false;
+}
+
+export const hasEnoughBalance = async ({
+	trialAccountId, 
+	totalGasForTxns, 
+	totalAttachedYocto
+}: {
+	trialAccountId: string;
+	totalGasForTxns: string;
+	totalAttachedYocto: string;
+}) => {
+	const {near} = getEnv();
+
+	const trialAccountObj = new Account(near!.connection, trialAccountId);
+    const accountState = await trialAccountObj.state();
+
+    const storageCostPerByte = new BN('10000000000000000000');
+    const totalStorage = new BN(accountState.storage_usage).mul(storageCostPerByte);
+    let availAmount = new BN(accountState.amount).sub(totalStorage);
+   
+	const yoctoPerGas = 100000000;
+	let gasCost = new BN(totalGasForTxns).mul(new BN(yoctoPerGas));
+	let totalCost = gasCost.add(new BN(totalAttachedYocto));
+
+	return availAmount.gte(totalCost);
 }

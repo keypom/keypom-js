@@ -48,7 +48,8 @@ export interface ModalType {
 export const MODAL_TYPE_IDS = {
   CLAIM_TRIAL: "claim-trial",
   TRIAL_OVER: "trial-over",
-  ERROR: "action-error"
+  ACTION_ERROR: "action-error",
+  INSUFFICIENT_BALANCE: "insufficient-balance"
 }
 export const MODAL_DEFAULTS = {
   claimTrial: {
@@ -74,8 +75,12 @@ export const MODAL_DEFAULTS = {
       modulesTitle: "Choose a Wallet",
     }
   },
-  error: {
+  invalidAction: {
     title: "Invalid Action",
     body: "Your trial does not allow you to perform this action. For more information, please contact the site administrator."
+  },
+  insufficientBalance: {
+    title: "Insufficient Balance",
+    body: "Your account does not have enough balance for the action you are trying to perform. Please try again with a different action. For more information, please contact the site administrator."
   }
 }
