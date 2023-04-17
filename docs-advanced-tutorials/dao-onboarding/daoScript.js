@@ -4,6 +4,7 @@ const { KeyPair, keyStores, connect, Account } = require("near-api-js");
 var assert = require('assert');
 
 const keypom = require("keypom-js");
+const { DEV_CONTRACT } = require("./configurations");
 const {
 	initKeypom,
 	getEnv,
@@ -54,7 +55,7 @@ async function createDAODrop() {
             methods: [
                 [
                     {
-                        receiverId: `moon-dao.sputnikv2.testnet`,
+                        receiverId: DEV_CONTRACT,
                         methodName: "add_proposal",
                         args: JSON.stringify(
                             {
@@ -62,7 +63,7 @@ async function createDAODrop() {
                                 "description": "Add New Onboardee",
                                 "kind": {
                                   "AddMemberToRole": {
-                                    "role": "Onboardee"
+                                    "role": "new-onboardee-role"
 
                                   }
                                 }
@@ -70,8 +71,8 @@ async function createDAODrop() {
                             }
                         ),
                         accountIdField: "proposal.kind.AddMemberToRole.member_id",
-                        dropIdField: "proposal.kind.AddMemberToRole.dao_id",
-                        attachedDeposit: parseNearAmount("0.1")
+                        funderIdField: "funder",
+                        attachedDeposit: parseNearAmount("1")
                     }
                 ],
             ] 

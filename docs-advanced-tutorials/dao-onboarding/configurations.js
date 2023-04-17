@@ -1,0 +1,5 @@
+const DEV_CONTRACT = "dev-1681698549681-48256069469741";
+
+module.exports = {
+    DEV_CONTRACT,
+};

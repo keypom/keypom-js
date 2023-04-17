@@ -1,5 +1,6 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair, keyStores, connect } = require("near-api-js");
+const { DEV_CONTRACT } = require("./configurations");
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -24,13 +25,12 @@ async function daoFn(){
 	const councilMember = await near.account("minqianlu.testnet");
     const onboardTeamMember = await near.account("minqi.testnet");
 
-    const dev_contract = "dev-1681508516627-53574348032107";
     
     // Create DAO, specify minqianlu as council
     console.log("\u001b[1;35m CREATING DROP")
     createdDao = await councilMember.functionCall(
-        dev_contract, 
-		'new', 
+        DEV_CONTRACT,
+        'new', 
 		{
             config: {
                 name: 'keypomtestdao',
@@ -43,12 +43,12 @@ async function daoFn(){
     )
 
     await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
     	'get_members_roles',
     )
     
     let viewReturn = await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
 		'get_proposals',
         {
             from_index: 0,
@@ -58,7 +58,7 @@ async function daoFn(){
     console.log(viewReturn)
     
     viewReturn = await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
 		'get_policy'
     )
     console.log(" ")
@@ -67,7 +67,7 @@ async function daoFn(){
     // Add minqi to dao as new role "minqi-role" with ability to add proposals, this should not automatically add
     console.log( "\u001b[1;35m ADDING PROPOSAL" );
     await councilMember.functionCall(
-        dev_contract, 
+        DEV_CONTRACT,
     	'add_proposal', 
     	{
             proposal: {
@@ -94,7 +94,7 @@ async function daoFn(){
     )
     
     viewReturn = await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
 		'get_proposals',
         {
             from_index: 0,
@@ -106,14 +106,14 @@ async function daoFn(){
     console.log( "\u001b[1;35m minqi should not be in dao yet" );
 
     await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
     	'get_members_roles',
     )
 
     // Use minqianlu to vote approve on this proposal to add minqi
     console.log( "\u001b[1;35m approving minqi" );
     await councilMember.functionCall(
-        dev_contract, 
+        DEV_CONTRACT,
     	'act_proposal', 
     	{
             id: 0, 
@@ -124,14 +124,14 @@ async function daoFn(){
 
     // Check minqi is added dao in that role
     await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
     	'get_members_roles',
     )
     
     // // Use minqi to propose adding a new member, new-moon-dao-member-1.testnet or something, to "onboardee-role"
     console.log( "\u001b[1;35m creating onboarding role" );
     await councilMember.functionCall(
-        dev_contract, 
+        DEV_CONTRACT,
     	'add_proposal', 
     	{
             proposal: {
@@ -157,7 +157,7 @@ async function daoFn(){
         parseNearAmount("1"),
     )
     await councilMember.functionCall(
-        dev_contract, 
+        DEV_CONTRACT,
     	'act_proposal', 
     	{
             id: 1, 
@@ -168,49 +168,49 @@ async function daoFn(){
 
     // This should auto approve, get status/existence of the proposal and check for 
     await councilMember.viewFunction(
-        dev_contract, 
+        DEV_CONTRACT,
     	'get_members_roles',
     )
 
-    await onboardTeamMember.functionCall(
-        dev_contract, 
-    	'add_proposal', 
-    	{
-            proposal: {
-                description: "adding moon-dao-member",
-                kind: {
-                    AddMemberToRole: {
-                        member_id: "new-moon-dao-member-1.testnet",
-                        role: "new-onboardee-role"
-                    }
-                }
-            },
-            keypom_args:{
-                account_id_field: "proposal.kind.AddMemberToRole.member_id",
-                drop_id_field: "",
-                funder_id_field: "funder", 
-                key_id_field: "",
-            },
-            funder: "minqi.testnet"
-    	},
-        parseNearAmount("0.0000000001"),
-        parseNearAmount("1"),
-    )
+    // await onboardTeamMember.functionCall(
+    //     DEV_CONTRACT,
+    // 	'add_proposal', 
+    // 	{
+    //         proposal: {
+    //             description: "adding moon-dao-member",
+    //             kind: {
+    //                 AddMemberToRole: {
+    //                     member_id: "new-moon-dao-member-1.testnet",
+    //                     role: "new-onboardee-role"
+    //                 }
+    //             }
+    //         },
+    //         keypom_args:{
+    //             account_id_field: "proposal.kind.AddMemberToRole.member_id",
+    //             drop_id_field: "",
+    //             funder_id_field: "funder", 
+    //             key_id_field: "",
+    //         },
+    //         funder: "minqi.testnet"
+    // 	},
+    //     parseNearAmount("0.0000000001"),
+    //     parseNearAmount("1"),
+    // )
 
-    viewReturn = await councilMember.viewFunction(
-        dev_contract, 
-		'get_proposals',
-        {
-            from_index: 0,
-            limit: 2
-        } 
-    )
-    console.log(viewReturn)
+    // viewReturn = await councilMember.viewFunction(
+    //     DEV_CONTRACT,
+	// 	'get_proposals',
+    //     {
+    //         from_index: 0,
+    //         limit: 2
+    //     } 
+    // )
+    // console.log(viewReturn)
 
-    await councilMember.viewFunction(
-        dev_contract, 
-    	'get_members_roles',
-    )
+    // await councilMember.viewFunction(
+    //     DEV_CONTRACT,
+    // 	'get_members_roles',
+    // )
 	
 }
 
