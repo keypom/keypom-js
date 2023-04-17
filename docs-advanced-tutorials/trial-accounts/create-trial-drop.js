@@ -56,12 +56,12 @@ async function createTrialAccount() {
         numKeys: 1,
         contractBytes: [...readFileSync(wasmDirectory)],
 		// How much $NEAR should be made available to the trial account when it's created?
-        startingBalanceNEAR: 2.5,
+        startingBalanceNEAR: 0.05,
         callableContracts,
         callableMethods,
         maxAttachableNEARPerContract,
 		// Once the trial account has spent this much $NEAR, the trial will be over.
-        trialEndFloorNEAR: 1.25
+        trialEndFloorNEAR: .01
     })
 
     const guestBookInstance = "http://localhost:1234"

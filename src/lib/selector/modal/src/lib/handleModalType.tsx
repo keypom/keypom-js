@@ -1,5 +1,6 @@
 import React from "react";
 import { ClaimTrial } from "./components/ClaimTrial";
+import { InsufficientBalance } from "./components/InsufficientBalance";
 import { InvalidActions } from "./components/InvalidActions";
 import { TrialOver } from "./components/TrialOver";
 import { ModalOptions, ModalType, MODAL_TYPE_IDS } from "./modal.types";
@@ -11,8 +12,8 @@ export const renderModalType = (modalType: ModalType, options: ModalOptions, hid
         <TrialOver
           modulesTitle={options.modulesTitle}
           modules={options.modules}
-          accountId={options.accountId}
-          secretKey={options.secretKey}
+          accountId={modalType.meta.accountId}
+          secretKey={modalType.meta.secretKey}
           mainTitle={options.mainTitle}
           mainBody={options.mainBody}
           headerOne={options.headerOne}
@@ -21,8 +22,10 @@ export const renderModalType = (modalType: ModalType, options: ModalOptions, hid
           hide={hide}
         />
       )
-    case MODAL_TYPE_IDS.ERROR:
+    case MODAL_TYPE_IDS.ACTION_ERROR:
       return <InvalidActions hide={hide} />
+    case MODAL_TYPE_IDS.INSUFFICIENT_BALANCE:
+      return <InsufficientBalance hide={hide} />
     case MODAL_TYPE_IDS.CLAIM_TRIAL:
       return <ClaimTrial hide={hide} secretKey={modalType.meta.secretKey} redirectUrlBase={modalType.meta.redirectUrlBase} delimiter={modalType.meta.delimiter}/>
     default: return null;

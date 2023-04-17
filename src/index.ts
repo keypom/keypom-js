@@ -44,6 +44,9 @@ export {
 	canExitTrial
 } from "./lib/trial-accounts/trial-active";
 export {
+	wrapTxnParamsForTrial
+} from "./lib/trial-accounts/utils";
+export {
 	addKeys,
 	deleteKeys
 } from "./lib/keys";

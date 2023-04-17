@@ -187,11 +187,21 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             console.log(`e: ${JSON.stringify(e)}`)
             switch (e) {
                 case TRIAL_ERRORS.EXIT_EXPECTED: {
-                    this.modal.show({id: MODAL_TYPE_IDS.TRIAL_OVER});
+                    this.modal.show({
+                        id: MODAL_TYPE_IDS.TRIAL_OVER, 
+                        meta: {
+                            accountId: this.trialAccountId!,
+                            secretKey: this.trialSecretKey!
+                        }
+                    });
                     break;
                 }
                 case TRIAL_ERRORS.INVALID_ACTION: {
-                    this.modal.show({id: MODAL_TYPE_IDS.ERROR});
+                    this.modal.show({id: MODAL_TYPE_IDS.ACTION_ERROR});
+                    break;
+                }
+                case TRIAL_ERRORS.INSUFFICIENT_BALANCE: {
+                    this.modal.show({id: MODAL_TYPE_IDS.INSUFFICIENT_BALANCE});
                     break;
                 }
                 default: {
