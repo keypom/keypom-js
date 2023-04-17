@@ -1,6 +1,7 @@
 export declare const TRIAL_ERRORS: {
     EXIT_EXPECTED: string;
     INVALID_ACTION: string;
+    INSUFFICIENT_BALANCE: string;
 };
 export declare const validateDesiredMethods: ({ methodData, trialAccountId }: {
     methodData: {
@@ -35,6 +36,8 @@ export declare const generateExecuteArgs: ({ desiredTxns }: {
         }[];
     }[];
 }) => {
+    totalAttachedYocto: any;
+    totalGasForTxns: any;
     executeArgs: any;
     methodDataToValidate: any;
 };
@@ -65,3 +68,8 @@ export declare const isUnclaimedTrialDrop: ({ keypomContractId, secretKey }: {
     keypomContractId: any;
     secretKey: any;
 }) => Promise<boolean>;
+export declare const hasEnoughBalance: ({ trialAccountId, totalGasForTxns, totalAttachedYocto }: {
+    trialAccountId: string;
+    totalGasForTxns: string;
+    totalAttachedYocto: string;
+}) => Promise<any>;

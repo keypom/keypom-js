@@ -41,7 +41,8 @@ export interface ModalType {
 export declare const MODAL_TYPE_IDS: {
     CLAIM_TRIAL: string;
     TRIAL_OVER: string;
-    ERROR: string;
+    ACTION_ERROR: string;
+    INSUFFICIENT_BALANCE: string;
 };
 export declare const MODAL_DEFAULTS: {
     claimTrial: {
@@ -67,7 +68,11 @@ export declare const MODAL_DEFAULTS: {
             modulesTitle: string;
         };
     };
-    error: {
+    invalidAction: {
+        title: string;
+        body: string;
+    };
+    insufficientBalance: {
         title: string;
         body: string;
     };

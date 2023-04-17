@@ -11,6 +11,7 @@ export { useKeypom, KeypomContextProvider, } from './components/KeypomContext';
 export { createDrop, deleteDrops, } from "./lib/drops";
 export { createTrialAccountDrop, claimTrialAccountDrop } from "./lib/trial-accounts/pre-trial";
 export { trialSignAndSendTxns, trialCallMethod, canExitTrial } from "./lib/trial-accounts/trial-active";
+export { wrapTxnParamsForTrial } from "./lib/trial-accounts/utils";
 export { addKeys, deleteKeys } from "./lib/keys";
 export { claim, } from "./lib/claims";
 export { 
