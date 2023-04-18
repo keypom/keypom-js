@@ -135,7 +135,7 @@ async function daoFn(){
     	'add_proposal', 
     	{
             proposal: {
-                description: "adding moon-dao-member",
+                description: "adding onboarding role",
                 kind: {
                     ChangePolicyAddOrUpdateRole: {
                         role: {
