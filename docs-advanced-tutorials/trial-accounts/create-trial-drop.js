@@ -64,11 +64,17 @@ async function createTrialAccount() {
         trialEndFloorNEAR: .01
     })
 
-    const guestBookInstance = "http://localhost:1234"
+    const guestBookInstance = "http://localhost:1234/keypom-url#"
+    const keypomContractId = "v2.keypom.testnet"
+    const delimiter = "/"
+    const secretKey = keys.secretKeys[0]
+
+    const alphaInstance = "http://localhost:3030/#"
+
     console.log(`
     
     Guest-Book App:
- 	${guestBookInstance}/keypom-url#v2.keypom.testnet/${keys.secretKeys[0]}
+ 	${guestBookInstance}${keypomContractId}${delimiter}${secretKey}
 
  	Good Luck!
     `)

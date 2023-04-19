@@ -43,29 +43,82 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
     }
   };
 
-  return isClaimingTrial ? (
-    <div
-      className="nws-modal"
-      style={{ width: "100%", height: "auto", maxWidth: "500px" }}
-    >
-      <div className="modal-right" style={{ width: "100%" }}>
-        <MainBody
-          title={
-            customizations?.claiming?.title ||
-            MODAL_DEFAULTS.beginTrial.claiming.title
-          }
-          body={
-            customizations?.claiming?.body ||
-            MODAL_DEFAULTS.beginTrial.claiming.body
-          }
-          imageOne={null}
-          imageTwo={null}
-          button={null}
-          onCloseModal={() => console.log("cant close... claiming.")}
-        />
+  // Landing modal - drop isn't claimed and we're not in the process of claiming
+  if (!dropClaimed && !isClaimingTrial) {
+    return (
+      <div
+        className="nws-modal"
+        style={{ width: "100%", height: "auto", maxWidth: "500px" }}
+      >
+        <div className="modal-right" style={{ width: "100%" }}>
+          <MainBody
+            title={
+              customizations?.landing?.title ||
+              MODAL_DEFAULTS.beginTrial.landing.title
+            }
+            body={
+              customizations?.landing?.body ||
+              MODAL_DEFAULTS.beginTrial.landing.body
+            }
+            imageOne={null}
+            imageTwo={null}
+            button={null}
+            onCloseModal={() => hide()}
+          />
+          <input
+            type="text"
+            value={accountId}
+            placeholder={
+              customizations?.landing?.fieldPlaceholder ||
+              MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
+            }
+            onChange={(e) => setAccountId(e.target.value)}
+            style={{
+              padding: "8px",
+              marginBottom: "16px",
+              border: "1px solid",
+              borderRadius: "4px",
+            }}
+          />
+          <br />
+          <button className="middleButton" onClick={handleSubmit}>
+            {customizations?.landing?.buttonText ||
+              MODAL_DEFAULTS.beginTrial.landing.buttonText}
+          </button>
+        </div>
       </div>
-    </div>
-  ) : dropClaimed ? (
+    );
+  }
+
+  // Claiming modal - drop is not claimed and we're in the process of claiming
+  if (isClaimingTrial) {
+    return (
+      <div
+        className="nws-modal"
+        style={{ width: "100%", height: "auto", maxWidth: "500px" }}
+      >
+        <div className="modal-right" style={{ width: "100%" }}>
+          <MainBody
+            title={
+              customizations?.claiming?.title ||
+              MODAL_DEFAULTS.beginTrial.claiming.title
+            }
+            body={
+              customizations?.claiming?.body ||
+              MODAL_DEFAULTS.beginTrial.claiming.body
+            }
+            imageOne={null}
+            imageTwo={null}
+            button={null}
+            onCloseModal={() => console.log("cant close... claiming.")}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Drop was claimed
+  return (
     <div
       className="nws-modal"
       style={{ width: "100%", height: "auto", maxWidth: "500px" }}
@@ -90,52 +143,12 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             newTab: false,
           }}
           onCloseModal={() => {
-            window.location.replace(`${redirectUrlBase}${accountId}${delimiter}${secretKey}`);
+            window.location.replace(
+              `${redirectUrlBase}${accountId}${delimiter}${secretKey}`
+            );
             window.location.reload();
           }}
         />
-      </div>
-    </div>
-  ) : (
-    <div
-      className="nws-modal"
-      style={{ width: "100%", height: "auto", maxWidth: "500px" }}
-    >
-      <div className="modal-right" style={{ width: "100%" }}>
-        <MainBody
-          title={
-            customizations?.landing?.title ||
-            MODAL_DEFAULTS.beginTrial.landing.title
-          }
-          body={
-            customizations?.landing?.body ||
-            MODAL_DEFAULTS.beginTrial.landing.body
-          }
-          imageOne={null}
-          imageTwo={null}
-          button={null}
-          onCloseModal={() => hide()}
-        />
-        <input
-          type="text"
-          value={accountId}
-          placeholder={
-            customizations?.landing?.fieldPlaceholder ||
-            MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
-          }
-          onChange={(e) => setAccountId(e.target.value)}
-          style={{
-            padding: "8px",
-            marginBottom: "16px",
-            border: "1px solid",
-            borderRadius: "4px",
-          }}
-        />
-        <br />
-        <button onClick={handleSubmit}>
-          {customizations?.landing?.buttonText ||
-            MODAL_DEFAULTS.beginTrial.landing.buttonText}
-        </button>
       </div>
     </div>
   );
