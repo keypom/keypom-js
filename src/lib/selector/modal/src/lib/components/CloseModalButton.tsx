@@ -4,7 +4,9 @@ interface CloseModalButtonProps {
   onClick: () => void;
 }
 
-export const CloseModalButton: React.FC<CloseModalButtonProps> = ({ onClick }) => {
+export const CloseModalButton: React.FC<CloseModalButtonProps> = ({
+  onClick,
+}) => {
   return (
     <button onClick={onClick} className="close-button">
       <svg

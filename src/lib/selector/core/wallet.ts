@@ -2,16 +2,13 @@ import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-
 import BN from "bn.js";
 import { Account, KeyPair, Near } from "near-api-js";
 import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
-import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { initKeypom, networks } from "../../keypom";
 import { viewAccessKeyData } from "../../keypom-utils";
-import { trialCallMethod, trialSignAndSendTxns } from "../../trial-accounts/trial-active";
+import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
 import { isUnclaimedTrialDrop, TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
-import { addUserToMappingContract } from "../utils/selector-utils";
-import { getAccountFromMap } from "../utils/selector-utils";
-import { getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";
+import { addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -90,7 +87,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                     // If the drop is unclaimed, we should show the unclaimed drop modal
                     if (isUnclaimed === true) {
                         this.modal.show({
-                            id: MODAL_TYPE_IDS.CLAIM_TRIAL,
+                            id: MODAL_TYPE_IDS.BEGIN_TRIAL,
                             meta: {
                                 secretKey,
                                 redirectUrlBase: this.trialBaseUrl,

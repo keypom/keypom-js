@@ -1,57 +1,61 @@
 import React from "react";
-import { MainBodyButton, MainBodyHeaders, MODAL_DEFAULTS, PostTrialModules } from "../modal.types";
+import {
+  MODAL_DEFAULTS,
+  OffboardingWallet,
+  TrialOverCustomizations,
+} from "../modal.types";
 import { MainBody } from "./MainBody";
-import { ModuleList } from "./ModuleList";
+import { OffboardingWallets } from "./OffboardingWallets";
 
 interface TrialOverProps {
-    modules: PostTrialModules[];
-    accountId: string;
-    secretKey: string;
-    hide: () => void;
-    modulesTitle?: string;
-    mainTitle?: string;
-    mainBody?: string;
-    headerOne?: MainBodyHeaders;
-    headerTwo?: MainBodyHeaders;
-    button?: MainBodyButton;
+  accountId: string;
+  secretKey: string;
+  wallets: OffboardingWallet[];
+  hide: () => void;
+  customizations?: TrialOverCustomizations;
 }
 
-export const TrialOver: React.FC<TrialOverProps> = ({ 
-    modulesTitle, 
-    modules, 
-    accountId, 
-    secretKey, 
-    mainTitle, 
-    mainBody, 
-    headerOne, 
-    headerTwo, 
-    button, 
-    hide 
+export const TrialOver: React.FC<TrialOverProps> = ({
+  wallets,
+  accountId,
+  secretKey,
+  customizations,
+  hide,
 }) => {
-    return (
-        <div className="nws-modal">
-            <div className="modal-left">
-                <ModuleList
-                    modulesTitle={modulesTitle}
-                    modules={modules}
-                    accountId={accountId}
-                    secretKey={secretKey}
-                />
-            </div>
-            <div className="modal-right">
-                <div className="nws-modal-body">
-                    <MainBody
-                        title={mainTitle || MODAL_DEFAULTS.trialOver.mainBody.title}
-                        body={mainBody || MODAL_DEFAULTS.trialOver.mainBody.body}
-                        headerOne={headerOne || MODAL_DEFAULTS.trialOver.mainBody.headerOne}
-                        headerTwo={headerTwo || MODAL_DEFAULTS.trialOver.mainBody.headerTwo}
-                        button={button}
-                        onCloseModal={() =>
-                            hide()
-                        }
-                    />
-                </div>
-            </div>
+  return (
+    <div className="nws-modal">
+      <div className="modal-left">
+        <OffboardingWallets
+          customizations={customizations?.offboardingOptions}
+          wallets={wallets}
+          accountId={accountId}
+          secretKey={secretKey}
+        />
+      </div>
+      <div className="modal-right">
+        <div className="nws-modal-body">
+          <MainBody
+            title={
+              customizations?.mainBody?.title ||
+              MODAL_DEFAULTS.trialOver.mainBody.title
+            }
+            body={
+              customizations?.mainBody?.body ||
+              MODAL_DEFAULTS.trialOver.mainBody.body
+            }
+            imageOne={
+              customizations?.mainBody?.imageOne ||
+              MODAL_DEFAULTS.trialOver.mainBody.imageOne
+            }
+            imageTwo={
+              customizations?.mainBody?.imageTwo ||
+              MODAL_DEFAULTS.trialOver.mainBody.imageTwo
+            }
+            button={null}
+            onCloseModal={() => hide()}
+          />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
