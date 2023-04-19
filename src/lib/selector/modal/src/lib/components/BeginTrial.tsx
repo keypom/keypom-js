@@ -61,7 +61,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
           imageOne={null}
           imageTwo={null}
           button={null}
-          onCloseModal={() => hide()}
+          onCloseModal={() => console.log("cant close... claiming.")}
         />
       </div>
     </div>
@@ -89,7 +89,10 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             url: `${redirectUrlBase}${accountId}${delimiter}${secretKey}`,
             newTab: false,
           }}
-          onCloseModal={() => hide()}
+          onCloseModal={() => {
+            window.location.replace(`${redirectUrlBase}${accountId}${delimiter}${secretKey}`);
+            window.location.reload();
+          }}
         />
       </div>
     </div>
