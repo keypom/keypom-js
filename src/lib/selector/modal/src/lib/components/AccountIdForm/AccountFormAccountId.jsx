@@ -1,31 +1,8 @@
 import PropTypes from "prop-types";
 import React, { Component, createRef } from "react";
 import styled from "styled-components";
-
-const classNames = (names) => {
-  if (!names) {
-    return false;
-  }
-
-  const isArray = Array.isArray;
-
-  if (typeof names === "string") {
-    return names || "";
-  }
-
-  if (isArray(names) && names.length > 0) {
-    return names
-      .map((name) => classNames(name))
-      .filter((name) => !!name)
-      .join(" ");
-  }
-
-  return Object.keys(names)
-    .filter((key) => names[key])
-    .join(" ");
-};
-
-export const ACCOUNT_CHECK_TIMEOUT = 500;
+import LocalAlertBox from "./LocalAlertBox";
+import { ACCOUNT_CHECK_TIMEOUT, classNames } from "./utils";
 
 const InputWrapper = styled.div`
   position: relative;
@@ -70,7 +47,7 @@ const InputWrapper = styled.div`
 
 class AccountFormAccountId extends Component {
   state = {
-    accountId: this.props.defaultAccountId || "",
+    accountId: "",
     invalidAccountIdLength: false,
     wrongChar: false,
   };
@@ -79,16 +56,8 @@ class AccountFormAccountId extends Component {
   canvas = null;
   suffix = createRef();
 
-  componentDidMount = () => {
-    const { defaultAccountId } = this.props;
-    const { accountId } = this.state;
-
-    if (defaultAccountId) {
-      this.handleChangeAccountId({ userValue: accountId });
-    }
-  };
-
   updateSuffix = (userValue) => {
+    console.log('userValue: ', userValue)
     if (userValue.match(this.props.pattern)) {
       return;
     }
@@ -96,8 +65,10 @@ class AccountFormAccountId extends Component {
       /Safari/.test(navigator.userAgent) &&
       /Apple Computer/.test(navigator.vendor);
     const width = this.getTextWidth(userValue, "16px Inter");
+    console.log('width: ', width)
     const extraSpace = isSafari ? 21.5 : 22;
-    this.suffix.current.style.left = `${width}${extraSpace}px`;
+    console.log('extraSpace: ', extraSpace)
+    this.suffix.current.style.left = width + extraSpace + "px";
     this.suffix.current.style.visibility = "visible";
     if (userValue.length === 0) {
       this.suffix.current.style.visibility = "hidden";
@@ -108,9 +79,9 @@ class AccountFormAccountId extends Component {
     if (!this.canvas) {
       this.canvas = document.createElement("canvas");
     }
-    const context = this.canvas.getContext("2d");
+    let context = this.canvas.getContext("2d");
     context.font = font;
-    const metrics = context.measureText(text);
+    let metrics = context.measureText(text);
     return metrics.width;
   };
 
@@ -169,8 +140,6 @@ class AccountFormAccountId extends Component {
         !!accountId && !this.checkAccountIdLength(accountId),
     }));
 
-  isImplicitAccount = (accountId) => this.props.type !== "create" && accountId.length === 64;
-
   handleCheckAvailability = (accountId, type) => {
     if (!accountId) {
       return false;
@@ -192,6 +161,8 @@ class AccountFormAccountId extends Component {
     return false;
   };
 
+  isImplicitAccount = (accountId) =>
+    this.props.type !== "create" && accountId.length === 64;
 
   get loaderLocalAlert() {
     return {
@@ -242,50 +213,62 @@ class AccountFormAccountId extends Component {
 
   render() {
     const { mainLoader, autoFocus, type, disabled } = this.props;
+    console.log("props: ", this.props);
 
     const { accountId, wrongChar } = this.state;
-    console.log("{ accountId, wrongChar }: ", { accountId, wrongChar });
 
     const localAlert = this.localAlertWithFormValidation;
     const success = localAlert?.success;
     const problem = !localAlert?.success && localAlert?.show;
 
     return (
-      <InputWrapper
-        className={classNames([
-          type,
-          { success: success },
-          { problem: problem },
-          { "wrong-char": wrongChar },
-        ])}
-      >
-        <input
-          name="accountId"
-          data-test-id="createAccount.accountIdInput"
-          value={accountId}
-          onInput={(e) =>
-            type === "create" && this.updateSuffix(e.target.value.trim())
-          }
-          onChange={(e) =>
-            this.handleChangeAccountId({
-              userValue: e.target.value.trim(),
-              el: e.target,
-            })
-          }
-          placeholder="placeholder"
-          required
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck="false"
-          // rome-ignore lint/a11y/noPositiveTabindex: <explanation>
-          tabIndex="1"
-          disabled={disabled}
+      <>
+        <InputWrapper
+          className={classNames([
+            type,
+            { success: success },
+            { problem: problem },
+            { "wrong-char": wrongChar },
+          ])}
+        >
+          <input
+            name="accountId"
+            data-test-id="createAccount.accountIdInput"
+            value={accountId}
+            onInput={(e) =>
+              type === "create" && this.updateSuffix(e.target.value.trim())
+            }
+            onChange={(e) =>
+              this.handleChangeAccountId({
+                userValue: e.target.value.trim(),
+                el: e.target,
+              })
+            }
+            placeholder="placeholder"
+            required
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            tabIndex="1"
+            autoFocus={autoFocus && accountId.length === 0}
+            disabled={disabled}
+          />
+          <span className="input-suffix" ref={this.suffix}>
+            .{this.props.accountIdSuffix}
+          </span>
+          {type !== "create" && (
+            <div className="input-sub-label">
+              {translate("input.accountId.subLabel")}
+            </div>
+          )}
+        </InputWrapper>
+        <LocalAlertBox
+          dots={mainLoader}
+          localAlert={localAlert}
+          accountId={this.props.accountId}
         />
-        <span className="input-suffix" ref={this.suffix}>
-          .{this.props.accountIdSuffix}
-        </span>
-      </InputWrapper>
+      </>
     );
   }
 }
@@ -293,16 +276,16 @@ class AccountFormAccountId extends Component {
 AccountFormAccountId.propTypes = {
   handleChange: PropTypes.func.isRequired,
   checkAvailability: PropTypes.func.isRequired,
-  defaultAccountId: PropTypes.string,
+  placeholder: PropTypes.string.isRequired,
   autoFocus: PropTypes.bool,
-  accountIdSuffix: PropTypes.string.isRequired
+  accountIdSuffix: PropTypes.string.isRequired,
 };
 
 AccountFormAccountId.defaultProps = {
   autoFocus: false,
   pattern: /[^a-zA-Z0-9._-]/,
   type: "check",
-  accountIdSuffix: 'testnet'
+  accountIdSuffix: "testnet",
 };
 
 export default AccountFormAccountId;

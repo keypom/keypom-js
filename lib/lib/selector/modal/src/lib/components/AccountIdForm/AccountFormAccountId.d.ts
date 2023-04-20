@@ -1,17 +1,15 @@
-export const ACCOUNT_CHECK_TIMEOUT: 500;
 export default AccountFormAccountId;
 declare class AccountFormAccountId extends React.Component<any, any, any> {
     constructor(props: any);
     constructor(props: any, context: any);
     state: {
-        accountId: any;
+        accountId: string;
         invalidAccountIdLength: boolean;
         wrongChar: boolean;
     };
     checkAccountAvailabilityTimer: null;
     canvas: null;
     suffix: React.RefObject<any>;
-    componentDidMount: () => void;
     updateSuffix: (userValue: any) => void;
     getTextWidth: (text: any, font: any) => any;
     handleChangeAccountId: ({ userValue, el }: {
@@ -45,7 +43,7 @@ declare namespace AccountFormAccountId {
     namespace propTypes {
         const handleChange: PropTypes.Validator<(...args: any[]) => any>;
         const checkAvailability: PropTypes.Validator<(...args: any[]) => any>;
-        const defaultAccountId: PropTypes.Requireable<string>;
+        const placeholder: PropTypes.Validator<string>;
         const autoFocus: PropTypes.Requireable<boolean>;
         const accountIdSuffix: PropTypes.Validator<string>;
     }

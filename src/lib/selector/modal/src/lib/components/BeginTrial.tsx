@@ -3,10 +3,11 @@ import { accountExists } from "../../../../../keypom-utils";
 import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
-import AccountFormAccountId from "./AccountFormAccountId";
+import AccountFormAccountId from "./AccountIdForm/AccountFormAccountId";
 import { getEnv } from "../../../../../keypom";
 
-const ACCOUNT_ID_REGEX = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
+const ACCOUNT_ID_REGEX =
+  /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
 interface BeginTrialProps {
   customizations?: BeginTrialCustomizations;
@@ -29,29 +30,29 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   const [validAccountName, setValidAccountName] = useState(true);
   const [doesAccountExist, setDoesAccountExist] = useState(false);
 
-  const {networkId} = getEnv();
+  const { networkId } = getEnv();
   const accountSuffix = networkId! == "testnet" ? "testnet" : "near";
 
   const checkNewAccount = async (accountId) => {
-    console.log('accountId in check: ', accountId)
+    console.log("accountId in check: ", accountId);
     if (!ACCOUNT_ID_REGEX.test(accountId)) {
-        setValidAccountName(false)
-        return false
+      setValidAccountName(false);
+      return false;
     }
 
     if (await accountExists(accountId)) {
-        setDoesAccountExist(true)
-        return false
+      setDoesAccountExist(true);
+      return false;
     }
 
     return true;
-  }
+  };
 
   const handleChange = (value) => {
     if (value.length > 0) {
-        setAccountId(`${value}.${accountSuffix}`);
+      setAccountId(`${value}.${accountSuffix}`);
     } else {
-        setAccountId(value);
+      setAccountId(value);
     }
   };
 
@@ -77,17 +78,20 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             button={null}
             onCloseModal={() => hide()}
           />
-          
+
           <AccountFormAccountId
             handleChange={handleChange}
-            type='create'
+            type="create"
             pattern={/[^a-zA-Z0-9_-]/}
             checkAvailability={checkNewAccount}
             accountId={accountId}
-            defaultAccountId={"foobar"}
+            placeholder={
+              customizations?.landing?.fieldPlaceholder ||
+              MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
+            }
             autoFocus={true}
             accountIdSuffix={accountSuffix}
-        />
+          />
 
           {/* <InputWrapper>
             <input
