@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { createRef, useState } from "react";
 import { accountExists } from "../../../../../keypom-utils";
 import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
+import AccountFormAccountId from "./AccountFormAccountId";
+import { getEnv } from "../../../../../keypom";
+
+const ACCOUNT_ID_REGEX = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
 interface BeginTrialProps {
   customizations?: BeginTrialCustomizations;
@@ -22,24 +26,32 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   const [accountId, setAccountId] = useState("");
   const [isClaimingTrial, setIsClaimingTrial] = useState(false);
   const [dropClaimed, setDropClaimed] = useState(false);
-  const [validName, setValidName] = useState(true);
+  const [validAccountName, setValidAccountName] = useState(true);
+  const [doesAccountExist, setDoesAccountExist] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const exists = await accountExists(accountId);
+  const {networkId} = getEnv();
+  const accountSuffix = networkId! == "testnet" ? "testnet" : "near";
 
-    if (exists) {
-      alert(
-        `The account: ${accountId} already exists. Please choose a new one.`
-      );
+  const checkNewAccount = async (accountId) => {
+    console.log('accountId in check: ', accountId)
+    if (!ACCOUNT_ID_REGEX.test(accountId)) {
+        setValidAccountName(false)
+        return false
+    }
+
+    if (await accountExists(accountId)) {
+        setDoesAccountExist(true)
+        return false
+    }
+
+    return true;
+  }
+
+  const handleChange = (value) => {
+    if (value.length > 0) {
+        setAccountId(`${value}.${accountSuffix}`);
     } else {
-      alert(`The account: ${accountId} is available. Click the claim.`);
-      setIsClaimingTrial(true);
-
-      await claimTrialAccountDrop({ desiredAccountId: accountId, secretKey });
-
-      setIsClaimingTrial(false);
-      setDropClaimed(true);
+        setAccountId(value);
     }
   };
 
@@ -65,26 +77,61 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             button={null}
             onCloseModal={() => hide()}
           />
-          <input
-            type="text"
-            value={accountId}
-            placeholder={
-              customizations?.landing?.fieldPlaceholder ||
-              MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
-            }
-            onChange={(e) => setAccountId(e.target.value)}
-            style={{
-              padding: "8px",
-              marginBottom: "16px",
-              border: "1px solid",
-              borderRadius: "4px",
-            }}
-          />
-          <br />
-          <button className="middleButton" onClick={handleSubmit}>
-            {customizations?.landing?.buttonText ||
-              MODAL_DEFAULTS.beginTrial.landing.buttonText}
-          </button>
+          
+          <AccountFormAccountId
+            handleChange={handleChange}
+            type='create'
+            pattern={/[^a-zA-Z0-9_-]/}
+            checkAvailability={checkNewAccount}
+            accountId={accountId}
+            defaultAccountId={"foobar"}
+            autoFocus={true}
+            accountIdSuffix={accountSuffix}
+        />
+
+          {/* <InputWrapper>
+            <input
+              type="text"
+              value={accountId}
+              onInput={(e) => updateSuffix(e.target.value.trim())}
+              onChange={(e) =>
+                handleChangeAccountId({
+                  userValue: e.target.value.trim(),
+                  el: e.target,
+                })
+              }
+              placeholder={
+                customizations?.landing?.fieldPlaceholder ||
+                MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
+              }
+              required
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              disabled={disabled}
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginBottom: "48px",
+                border: "1px solid",
+                borderRadius: "8px",
+              }}
+            />
+            <button
+              className="middleButton"
+              onClick={handleSubmit}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid",
+                borderRadius: "8px",
+              }}
+            >
+              {customizations?.landing?.buttonText ||
+                MODAL_DEFAULTS.beginTrial.landing.buttonText}
+            </button>
+          </InputWrapper> */}
         </div>
       </div>
     );

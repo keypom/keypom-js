@@ -44,7 +44,7 @@ export class Wallet {
         setupMyNearWallet({ iconUrl: MyNearIconUrl }),
         setupLedger({ iconUrl: LedgerIconUrl }),
         setupKeypom({ 
-          trialBaseUrl: "http://localhost:1234/keypom-url#", 
+          trialBaseUrl: "http://localhost:1234/#", 
           networkId: this.network, 
           signInContractId: this.createAccessKeyFor,
           modalOptions: KEYPOM_OPTIONS
