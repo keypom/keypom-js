@@ -1,29 +1,65 @@
 export type Theme = "dark" | "light" | "auto";
 export interface ModalOptions {
-    modules: any[];
     accountId: string;
     secretKey: string;
-    modulesTitle?: string;
-    mainTitle?: string;
-    mainBody?: string;
-    headerOne?: any;
-    headerTwo?: any;
-    button?: any;
     delimiter: string;
+    wallets: OffboardingWallet[];
+    beginTrial?: BeginTrialCustomizations;
+    trialOver?: TrialOverCustomizations;
+    invalidAction?: InvalidActionCustomizations;
+    insufficientBalance?: InsufficientBalanceCustomizations;
     theme?: Theme;
-    description?: string;
     onHide?: (hideReason: "user-triggered" | "wallet-navigation") => void;
 }
-export interface PostTrialModules {
+export interface BeginTrialCustomizations {
+    landing?: {
+        title?: string;
+        body?: string;
+        fieldPlaceholder?: string;
+        buttonText?: string;
+    };
+    claiming?: {
+        title?: string;
+        body?: string;
+    };
+    claimed?: {
+        title?: string;
+        body?: string;
+        buttonText?: string;
+    };
+}
+export interface TrialOverCustomizations {
+    mainBody?: MainBodyCustomizations;
+    offboardingOptions?: OffboardingWalletCustomizations;
+}
+export interface MainBodyCustomizations {
+    title?: string;
+    body?: string;
+    imageOne?: MainBodyImage;
+    imageTwo?: MainBodyImage;
+    button?: MainBodyButton;
+}
+export interface OffboardingWalletCustomizations {
+    title?: string;
+}
+export interface InvalidActionCustomizations {
+    title?: string;
+    body?: string;
+}
+export interface InsufficientBalanceCustomizations {
+    title?: string;
+    body?: string;
+}
+export interface OffboardingWallet {
     name: string;
     description: string;
     iconUrl: string;
     baseRedirectUrl: string;
     delimiter?: string;
 }
-export interface MainBodyHeaders {
-    title?: string;
-    description?: string;
+export interface MainBodyImage {
+    title: string;
+    body: string;
 }
 export interface MainBodyButton {
     url?: string;
@@ -39,33 +75,44 @@ export interface ModalType {
     meta?: any;
 }
 export declare const MODAL_TYPE_IDS: {
-    CLAIM_TRIAL: string;
+    BEGIN_TRIAL: string;
     TRIAL_OVER: string;
     ACTION_ERROR: string;
     INSUFFICIENT_BALANCE: string;
 };
 export declare const MODAL_DEFAULTS: {
-    claimTrial: {
-        mainBody: {
+    beginTrial: {
+        landing: {
             title: string;
             body: string;
+            fieldPlaceholder: string;
+            buttonText: string;
+        };
+        claiming: {
+            title: string;
+            body: string;
+        };
+        claimed: {
+            title: string;
+            body: string;
+            buttonText: string;
         };
     };
     trialOver: {
         mainBody: {
             title: string;
             body: string;
-            headerOne: {
+            imageOne: {
                 title: string;
-                description: string;
+                body: string;
             };
-            headerTwo: {
+            imageTwo: {
                 title: string;
-                description: string;
+                body: string;
             };
         };
-        moduleList: {
-            modulesTitle: string;
+        offboardingOptions: {
+            title: string;
         };
     };
     invalidAction: {

@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { createRef, useState } from "react";
 import { accountExists } from "../../../../../keypom-utils";
 import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
+import { getEnv } from "../../../../../keypom";
+
+const ACCOUNT_ID_REGEX =
+  /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
 
 interface BeginTrialProps {
   customizations?: BeginTrialCustomizations;
@@ -19,28 +23,54 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   delimiter,
   customizations,
 }) => {
+  const [userInput, setUserInput] = useState("");
   const [accountId, setAccountId] = useState("");
   const [isClaimingTrial, setIsClaimingTrial] = useState(false);
   const [dropClaimed, setDropClaimed] = useState(false);
-  const [validName, setValidName] = useState(true);
+
+  const [borderColor, setBorderColor] = useState("");
+  const [validAccountName, setValidAccountName] = useState(true);
+  const [doesAccountExist, setDoesAccountExist] = useState(false);
+
+  const { networkId } = getEnv();
+  const accountIdSuffix = networkId == "testnet" ? ".testnet" : ".near";
+
+  const handleChangeInput = (e) => {
+    setDoesAccountExist(false);
+    let userInput = e.target.value;
+
+    let validInput = ACCOUNT_ID_REGEX.test(userInput) || userInput.length === 0;
+
+    if (!validInput) {
+      setValidAccountName(false);
+      setBorderColor("red");
+      return;
+    }
+
+    setUserInput(userInput);
+    setAccountId(`${userInput}${accountIdSuffix}`);
+
+    setBorderColor("");
+    setValidAccountName(true);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const exists = await accountExists(accountId);
+    setDoesAccountExist(exists);
 
     if (exists) {
-      alert(
-        `The account: ${accountId} already exists. Please choose a new one.`
-      );
-    } else {
-      alert(`The account: ${accountId} is available. Click the claim.`);
-      setIsClaimingTrial(true);
-
-      await claimTrialAccountDrop({ desiredAccountId: accountId, secretKey });
-
-      setIsClaimingTrial(false);
-      setDropClaimed(true);
+      setBorderColor("red");
+      return;
     }
+
+    setBorderColor("green");
+    setIsClaimingTrial(true);
+
+    await claimTrialAccountDrop({ desiredAccountId: accountId, secretKey });
+
+    setIsClaimingTrial(false);
+    setDropClaimed(true);
   };
 
   // Landing modal - drop isn't claimed and we're not in the process of claiming
@@ -65,23 +95,59 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             button={null}
             onCloseModal={() => hide()}
           />
-          <input
-            type="text"
-            value={accountId}
-            placeholder={
-              customizations?.landing?.fieldPlaceholder ||
-              MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
-            }
-            onChange={(e) => setAccountId(e.target.value)}
+          <div
             style={{
-              padding: "8px",
-              marginBottom: "16px",
-              border: "1px solid",
-              borderRadius: "4px",
+              position: "relative",
             }}
-          />
-          <br />
-          <button className="middleButton" onClick={handleSubmit}>
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <input
+                type="text"
+                value={userInput}
+                onChange={handleChangeInput}
+                placeholder={
+                  customizations?.landing?.fieldPlaceholder ||
+                  MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder
+                }
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid",
+                  borderRadius: "8px",
+                  marginRight: "8px",
+                  borderColor: borderColor,
+                }}
+              />
+              <span>{accountIdSuffix}</span>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: "42px",
+                left: 0,
+                color: "red",
+              }}
+            >
+              {!validAccountName && <sub>Invalid character</sub>}
+              {doesAccountExist && <sub>Account already exists</sub>}
+            </div>
+          </div>
+          <div style={{ marginBottom: "32px" }} />
+          <button
+            className="middleButton"
+            onClick={handleSubmit}
+            style={{
+              width: "100%",
+              padding: "8px",
+              border: "1px solid",
+              borderRadius: "8px",
+            }}
+          >
             {customizations?.landing?.buttonText ||
               MODAL_DEFAULTS.beginTrial.landing.buttonText}
           </button>
@@ -135,13 +201,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
           }
           imageOne={null}
           imageTwo={null}
-          button={{
-            text:
-              customizations?.claimed?.buttonText ||
-              MODAL_DEFAULTS.beginTrial.claimed.buttonText,
-            url: `${redirectUrlBase}${accountId}${delimiter}${secretKey}`,
-            newTab: false,
-          }}
+          button={null}
           onCloseModal={() => {
             window.location.replace(
               `${redirectUrlBase}${accountId}${delimiter}${secretKey}`
@@ -149,6 +209,24 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             window.location.reload();
           }}
         />
+        <button
+          className="middleButton"
+          onClick={() => {
+            window.location.replace(
+              `${redirectUrlBase}${accountId}${delimiter}${secretKey}`
+            );
+            window.location.reload();
+          }}
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid",
+            borderRadius: "8px",
+          }}
+        >
+          {customizations?.claimed?.buttonText ||
+            MODAL_DEFAULTS.beginTrial.claimed.buttonText}
+        </button>
       </div>
     </div>
   );

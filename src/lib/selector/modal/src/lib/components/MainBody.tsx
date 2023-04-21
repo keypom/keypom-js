@@ -28,7 +28,11 @@ export const MainBody: React.FC<MainBodyProps> = ({
         </div>
       </div>
       <>
-        <h4>{body}</h4>
+        <div className="content-side">
+          <p>
+            {body}
+          </p>
+        </div>
         <div>
           {imageOne && (
             <div className="wallet-what">

@@ -46,6 +46,7 @@ export class Wallet {
         setupKeypom({ 
           trialBaseUrl: "http://localhost:1234/keypom-url#", 
           networkId: this.network, 
+          trialSplitDelim: "/",
           signInContractId: this.createAccessKeyFor,
           modalOptions: KEYPOM_OPTIONS
         })

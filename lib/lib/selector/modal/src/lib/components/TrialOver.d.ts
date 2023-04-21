@@ -1,16 +1,11 @@
 import React from "react";
-import { MainBodyButton, MainBodyHeaders, PostTrialModules } from "../modal.types";
+import { OffboardingWallet, TrialOverCustomizations } from "../modal.types";
 interface TrialOverProps {
-    modules: PostTrialModules[];
     accountId: string;
     secretKey: string;
+    wallets: OffboardingWallet[];
     hide: () => void;
-    modulesTitle?: string;
-    mainTitle?: string;
-    mainBody?: string;
-    headerOne?: MainBodyHeaders;
-    headerTwo?: MainBodyHeaders;
-    button?: MainBodyButton;
+    customizations?: TrialOverCustomizations;
 }
 export declare const TrialOver: React.FC<TrialOverProps>;
 export {};
