@@ -38,7 +38,6 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   const handleChangeInput = (e) => {
     setDoesAccountExist(false);
     let userInput = e.target.value;
-    console.log("userInput: ", userInput);
 
     let validInput = ACCOUNT_ID_REGEX.test(userInput) || userInput.length === 0;
 
