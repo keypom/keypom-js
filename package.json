@@ -16,7 +16,9 @@
     "build": "npx tsc",
     "publish": "npx tsc && npm publish",
     "build-docs": "npx typedoc --options typedoc.json",
-    "create-trial-drop": "node ./test/create-trial-drop.js"
+    "create-trial-drop": "node ./test/create-trial-drop.js",
+    "daofulltest": "node docs-advanced-tutorials/dao-onboarding/sputnikPreTest && node docs-advanced-tutorials/dao-onboarding/daoScript",
+    "daotest": "node docs-advanced-tutorials/dao-onboarding/daoScript"
   },
   "author": "benkurrek, mattlockyer",
   "license": "MIT",
