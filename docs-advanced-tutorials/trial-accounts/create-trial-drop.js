@@ -50,7 +50,7 @@ async function createTrialAccount() {
 	// What methods can the trial account call?
 	const callableMethods = [
 		['*'],
-        ['set']
+        ['*']
 	]
 
     const wasmDirectory = `${require('path').resolve(__dirname, '..')}/trial-accounts/ext-wasm/trial-accounts.wasm`
@@ -63,11 +63,11 @@ async function createTrialAccount() {
         callableContracts,
         callableMethods,
         maxAttachableNEARPerContract,
-        repayAmountNEAR: 0.6,
-        repayTo: "dennis.near",
+        // repayAmountNEAR: 0.6,
+        // repayTo: "dennis.near",
 		// Once the trial account has spent this much $NEAR, the trial will be over.
         trialEndFloorNEAR: 0.01
-    })
+    })  
 
     
 
@@ -83,12 +83,16 @@ async function createTrialAccount() {
     // })
 
     const alphaInstance = "http://localhost:3000/#"
-    const mnwInstance = "https://localhost:1234/linkdrop/"
+    const mnwInstance = "https://testnet-preview.mynearwallet.com/linkdrop/"
 
     console.log(`
     
     Guest-Book App:
+ 	${guestBookInstance}${keypomContractId}${delimiter}${secretKey}
+    
+    Alpha:
  	${alphaInstance}${keypomContractId}${delimiter}${secretKey}
+
 
  	Good Luck!
     `)
