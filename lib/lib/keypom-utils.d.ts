@@ -1,8 +1,9 @@
+import type { Action } from "@near-wallet-selector/core";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { Transaction } from "@near-wallet-selector/core/lib/wallet";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import * as nearAPI from 'near-api-js';
-import { Account, Near } from "near-api-js";
+import { Account, Near, transactions } from "near-api-js";
 import { SignAndSendTransactionOptions } from "near-api-js/lib/account";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
@@ -474,6 +475,7 @@ export declare const nftTransferCall: ({ account, wallet, contractId, tokenIds, 
 }) => Promise<Array<void | FinalExecutionOutcome[]> | Transaction[]>;
 export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: Transaction[]) => SignAndSendTransactionOptions[];
+export declare const createAction: (action: Action) => transactions.Action;
 /** @group Utility */
 export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use }: CreateDropProtocolArgs) => string | null;
 /** Initiate the connection to the NEAR blockchain. @group Utility */
@@ -515,10 +517,10 @@ export declare function generatePerUsePasswords({ publicKeys, uses, basePassword
 }): Promise<Array<Array<PasswordPerUse>>>;
 export declare const snakeToCamel: (str: any) => any;
 export declare const toCamel: (o: any) => any;
-export declare const wrapParams: (params: any, newParams?: {}) => {};
-export declare const genArgs: (json: any) => {
-    wrapped: any;
-    toValidate: any;
-};
 export declare const nearArgsToYocto: (nearAmount?: string | number, yoctoAmount?: string) => string;
+export declare const createTransactions: ({ txnInfos, signerId, signerPk }: {
+    txnInfos: any;
+    signerId: any;
+    signerPk: any;
+}) => Promise<any[]>;
 export {};

@@ -80,19 +80,24 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-	delimiter = "/",
+	trialSplitDelim = "/",
 	deprecated = false,
-	desiredUrl = "/keypom-trial#",
+	trialBaseUrl,
 	networkId,
 	signInContractId,
 	modalOptions
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
 	return async () => {
+		if (!signInContractId || !networkId || !trialBaseUrl) {
+			console.warn(`KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.`)
+			return null;
+		}
+		
 		const keypomWallet = new KeypomWallet({
 			signInContractId,
 			networkId,
-			desiredUrl,
-			delimiter,
+			trialBaseUrl,
+			trialSplitDelim,
 			modalOptions
 		});
 

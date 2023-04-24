@@ -1,22 +1,66 @@
 export type Theme = "dark" | "light" | "auto";
 
 export interface ModalOptions {
-  modules: any[];
   accountId: string;
   secretKey: string;
-  modulesTitle?: string;
-  mainTitle?: string;
-  mainBody?: string;
-  headerOne?: any;
-  headerTwo?: any;
-  button?: any;
   delimiter: string;
+  wallets: OffboardingWallet[];
+  
+  beginTrial?: BeginTrialCustomizations,
+  trialOver?: TrialOverCustomizations,
+  invalidAction?: InvalidActionCustomizations,
+  insufficientBalance?: InsufficientBalanceCustomizations,
+
   theme?: Theme;
-  description?: string;
   onHide?: (hideReason: "user-triggered" | "wallet-navigation") => void;
 }
 
-export interface PostTrialModules {
+export interface BeginTrialCustomizations {
+  landing?: {
+    title?: string;
+    body?: string;
+    fieldPlaceholder?: string;
+    buttonText?: string;
+  },
+  claiming?: {
+      title?: string;
+      body?: string;
+  },
+  claimed?: {
+      title?: string;
+      body?: string;
+      buttonText?: string;
+  }
+}
+
+export interface TrialOverCustomizations {
+  mainBody?: MainBodyCustomizations,
+  offboardingOptions?: OffboardingWalletCustomizations
+}
+
+export interface MainBodyCustomizations {
+  title?: string;
+  body?: string;
+  imageOne?: MainBodyImage,
+  imageTwo?: MainBodyImage,
+  button?: MainBodyButton
+}
+
+export interface OffboardingWalletCustomizations {
+  title?: string;
+}
+
+export interface InvalidActionCustomizations {
+  title?: string;
+  body?: string;
+}
+
+export interface InsufficientBalanceCustomizations {
+  title?: string;
+  body?: string;
+}
+
+export interface OffboardingWallet {
   name: string;
   description: string;
   iconUrl: string;
@@ -24,9 +68,9 @@ export interface PostTrialModules {
   delimiter?: string;
 }
 
-export interface MainBodyHeaders {
-  title?: string;
-  description?: string;
+export interface MainBodyImage {
+  title: string;
+  body: string;
 }
 
 export interface MainBodyButton {
@@ -46,36 +90,53 @@ export interface ModalType {
 }
 
 export const MODAL_TYPE_IDS = {
-  CLAIM_TRIAL: "claim-trial",
+  BEGIN_TRIAL: "begin-trial",
   TRIAL_OVER: "trial-over",
-  ERROR: "action-error"
+  ACTION_ERROR: "action-error",
+  INSUFFICIENT_BALANCE: "insufficient-balance"
 }
+
 export const MODAL_DEFAULTS = {
-  claimTrial: {
-    mainBody: {
-      title: "Create An Account",
-      body: "Enter a username to start using the app.",
+  beginTrial: {
+    landing: {
+      title: "Create an Account",
+      body: "To start, enter a username.",
+      fieldPlaceholder: "Account ID",
+      buttonText: "Create",
+    },
+    claiming: {
+        title: "Creating Account",
+        body: "Your account is being created. Please wait...",
+    },
+    claimed: {
+        title: "You're all set!🎉",
+        body: "Your account has been successfully created.",
+        buttonText: "Continue to app"
     }
   },
   trialOver: {
     mainBody: {
-      title: "Your Trial Has Ended",
-      body: "To continue using NEAR, secure your account with a wallet.",
-      headerOne: {
-        title: "Secure & Manage Your Digital Assets",
-        description: "No need to create new accounts or credentials. Connect your wallet and you are good to go!"
+      title: "Your trial has ended",
+      body: "Choose a wallet provider and onboard fully into the NEAR ecosystem.",
+      imageOne: {
+        title: "Secure Your Digital Assets",
+        body: "Now that your trial is over, secure your account with an official wallet provider!"
       },
-      headerTwo: {
+      imageTwo: {
         title: "Log In to Any NEAR App",
-        description: "No need to create new accounts or credentials. Connect your wallet and you are good to go!"
-      },
+        body: "Once your account is secured, you can use any app on NEAR!"
+      }
     },
-    moduleList: {
-      modulesTitle: "Choose a Wallet",
+    offboardingOptions: {
+      title: "Choose a Wallet",
     }
   },
-  error: {
+  invalidAction: {
     title: "Invalid Action",
     body: "Your trial does not allow you to perform this action. For more information, please contact the site administrator."
+  },
+  insufficientBalance: {
+    title: "Insufficient Balance",
+    body: "Your account does not have enough balance for the action you are trying to perform. Please try again with a different action. For more information, please contact the site administrator."
   }
 }

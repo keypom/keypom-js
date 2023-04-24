@@ -1,6 +1,26 @@
 import * as nearAPI from "near-api-js";
 import { Near } from "near-api-js";
 import { EnvVars, Funder } from "./types/general";
+export declare const networks: {
+    mainnet: {
+        networkId: string;
+        viewAccountId: string;
+        nodeUrl: string;
+        walletUrl: string;
+        helperUrl: string;
+    };
+    testnet: {
+        networkId: string;
+        viewAccountId: string;
+        nodeUrl: string;
+        walletUrl: string;
+        helperUrl: string;
+    };
+    localnet: {
+        networkId: string;
+        viewAccountId: string;
+    };
+};
 export declare const supportedKeypomContracts: {
     mainnet: {
         "v1.keypom.near": boolean;
@@ -27,6 +47,10 @@ export declare const supportedLinkdropClaimPages: {
         mynearwallet: string;
         keypom: string;
     };
+};
+export declare const accountMappingContract: {
+    mainnet: string;
+    testnet: string;
 };
 export type Maybe<T> = T | undefined;
 declare let near: Maybe<Near>;

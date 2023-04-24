@@ -1,12 +1,12 @@
 import React from "react";
-import { MainBodyButton, MainBodyHeaders } from "../modal.types";
-interface WalletHomeProps {
+import { MainBodyButton, MainBodyImage } from "../modal.types";
+interface MainBodyProps {
     title: string;
     body: string;
-    headerOne: MainBodyHeaders | null;
-    headerTwo: MainBodyHeaders | null;
-    button?: MainBodyButton;
+    imageOne: MainBodyImage | null;
+    imageTwo: MainBodyImage | null;
+    button: MainBodyButton | null;
     onCloseModal: () => void;
 }
-export declare const MainBody: React.FC<WalletHomeProps>;
+export declare const MainBody: React.FC<MainBodyProps>;
 export {};

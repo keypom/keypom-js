@@ -1,21 +1,21 @@
 import React from "react";
-import { MainBodyButton, MainBodyHeaders, MODAL_DEFAULTS } from "../modal.types";
+import { MainBodyButton, MainBodyImage, MODAL_DEFAULTS } from "../modal.types";
 import { CloseModalButton } from "./CloseModalButton";
 
-interface WalletHomeProps {
+interface MainBodyProps {
   title: string;
   body: string;
-  headerOne: MainBodyHeaders | null;
-  headerTwo: MainBodyHeaders | null;
-  button?: MainBodyButton;
+  imageOne: MainBodyImage | null;
+  imageTwo: MainBodyImage | null;
+  button: MainBodyButton | null;
   onCloseModal: () => void;
 }
 
-export const MainBody: React.FC<WalletHomeProps> = ({
+export const MainBody: React.FC<MainBodyProps> = ({
   title,
   body,
-  headerOne,
-  headerTwo,
+  imageOne,
+  imageTwo,
   button,
   onCloseModal,
 }) => {
@@ -23,14 +23,18 @@ export const MainBody: React.FC<WalletHomeProps> = ({
     <div className="wallet-home-wrapper">
       <div className="nws-modal-header-wrapper">
         <div className="nws-modal-header">
-          <h3 className='middleTitle'>{title}</h3>
+          <h3 className="middleTitle">{title}</h3>
           <CloseModalButton onClick={onCloseModal} />
         </div>
       </div>
       <>
-        <h4>{body}</h4>
-        <div className="wallet-info-wrapper what-wallet-hide">
-          {headerOne && (
+        <div className="content-side">
+          <p>
+            {body}
+          </p>
+        </div>
+        <div>
+          {imageOne && (
             <div className="wallet-what">
               <div className={"icon-side"}>
                 <svg
@@ -50,12 +54,16 @@ export const MainBody: React.FC<WalletHomeProps> = ({
                 </svg>
               </div>
               <div className="content-side">
-                <h3>{headerOne?.title || MODAL_DEFAULTS.trialOver.mainBody.headerOne.title}</h3>
-                <p>{headerTwo?.description || MODAL_DEFAULTS.trialOver.mainBody.headerOne.description}</p>
+                <h3>
+                  {imageOne.title}
+                </h3>
+                <p>
+                  {imageOne.body}
+                </p>
               </div>
             </div>
           )}
-          {headerTwo && (
+          {imageTwo && (
             <div className="wallet-what">
               <div className={"icon-side"}>
                 <svg
@@ -88,22 +96,25 @@ export const MainBody: React.FC<WalletHomeProps> = ({
                 </svg>
               </div>
               <div className="content-side">
-                <h3>{headerTwo.title || MODAL_DEFAULTS.trialOver.mainBody.headerTwo.title}</h3>
-                <p>{headerTwo.description || MODAL_DEFAULTS.trialOver.mainBody.headerTwo.description}</p>
+                <h3>
+                  {imageTwo.title}
+                </h3>
+                <p>
+                  {imageTwo.body}
+                </p>
               </div>
             </div>
           )}
 
-          <div className="button-spacing" />
           {button && (
             <button
               className="middleButton"
               onClick={() => {
                 if (button.newTab) {
-                  window.open(button.url, '_blank')
+                  window.open(button.url, "_blank");
                 } else {
-                  window.location.replace(button.url || 'https://keypom.xyz/'); 
-                  window.location.reload()
+                  window.location.replace(button.url || "https://keypom.xyz/");
+                  window.location.reload();
                 }
               }}
             >
@@ -111,25 +122,7 @@ export const MainBody: React.FC<WalletHomeProps> = ({
             </button>
           )}
         </div>
-
-        {button && (
-          <div className="what-wallet-mobile">
-            <button
-              className="middleButton"
-              onClick={() => {
-                if (button.newTab) {
-                  window.open(button.url, '_blank')
-                } else {
-                  window.location.replace(button.url || 'https://keypom.xyz/'); 
-                  window.location.reload()
-                }
-              }}
-            >
-              {button.text || "Next Steps"}
-            </button>
-          </div>
-        )}
       </>
-    </div >
+    </div>
   );
 };

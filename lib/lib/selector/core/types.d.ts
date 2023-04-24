@@ -1,6 +1,7 @@
 import { InstantLinkWallet, NetworkId, Transaction } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
+import { BeginTrialCustomizations, InsufficientBalanceCustomizations, InvalidActionCustomizations, OffboardingWallet, TrialOverCustomizations } from "../modal/src/lib/modal.types";
 import { KeypomWallet } from "./wallet";
 export declare const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome;
 export interface SignInOptions {
@@ -18,11 +19,17 @@ export interface KeypomInitializeOptions {
 export interface KeypomParams {
     networkId: NetworkId;
     signInContractId: string;
+    trialBaseUrl: string;
     iconUrl?: string;
     deprecated?: boolean;
-    desiredUrl?: string;
-    delimiter?: string;
-    modalOptions?: any;
+    trialSplitDelim?: string;
+    modalOptions?: {
+        wallets: OffboardingWallet[];
+        beginTrial?: BeginTrialCustomizations;
+        trialOver?: TrialOverCustomizations;
+        invalidAction?: InvalidActionCustomizations;
+        insufficientBalance?: InsufficientBalanceCustomizations;
+    };
 }
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;

@@ -25,7 +25,7 @@ type KeypomWallet = {
 const gas = '200000000000000'
 const gas300 = '300000000000000'
 const attachedGas = '100000000000000'
-const networks = {
+export const networks = {
 	mainnet: {
 		networkId: 'mainnet',
 		viewAccountId: 'near',
@@ -74,6 +74,11 @@ export const supportedLinkdropClaimPages = {
 		"mynearwallet": "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
 		"keypom": "https://testnet.keypom.xyz/claim/CONTRACT_ID#SECRET_KEY"
 	}
+}
+
+export const accountMappingContract = {
+	mainnet: `v1.mapping.keypom.near`,
+	testnet: `v1.mapping.keypom.testnet`
 }
 
 let contractBase = 'v2.keypom'

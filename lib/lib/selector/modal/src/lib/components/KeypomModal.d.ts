@@ -1,5 +1,5 @@
 import React from "react";
-import type { ModalOptions, ModalType } from "../modal.types";
+import { ModalOptions, ModalType } from "../modal.types";
 interface ModalProps {
     options: ModalOptions;
     modalType: ModalType;

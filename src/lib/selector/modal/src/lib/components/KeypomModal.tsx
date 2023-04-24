@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { renderModalType } from "../handleModalType";
 
-import type {
-  ModalOptions,
-  ModalType,
-  Theme
-} from "../modal.types";
-
+import { ModalOptions, ModalType, MODAL_TYPE_IDS, Theme } from "../modal.types";
 
 interface ModalProps {
   options: ModalOptions;
@@ -19,7 +14,7 @@ const getThemeClass = (theme?: Theme) => {
   switch (theme) {
     case "dark":
       return "dark-theme";
-    case "light": 
+    case "light":
       return "light-theme";
     default:
       return "";
@@ -30,13 +25,11 @@ export const KeypomModal: React.FC<ModalProps> = ({
   options,
   modalType,
   visible,
-  hide
+  hide,
 }) => {
-  
-
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && modalType.id !== MODAL_TYPE_IDS.BEGIN_TRIAL) {
         hide();
       }
     };
@@ -51,13 +44,16 @@ export const KeypomModal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className={`nws-modal-wrapper ${getThemeClass(options?.theme)} ${visible ? "open" : ""
-        }`}
+      className={`nws-modal-wrapper ${getThemeClass(options.theme)} ${
+        visible ? "open" : ""
+      }`}
     >
       <div
         className="nws-modal-overlay"
         onClick={() => {
-          hide();
+          if (modalType.id !== MODAL_TYPE_IDS.BEGIN_TRIAL) {
+            hide();
+          }
         }}
       />
       {renderModalType(modalType, options, hide)}

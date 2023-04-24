@@ -2,17 +2,20 @@ import { Transaction } from "@near-wallet-selector/core";
 import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import BN from 'bn.js';
 import * as nearAPI from "near-api-js";
-import { Account, KeyPair } from "near-api-js";
-import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from './checks';
-import { getEnv, supportedKeypomContracts } from "./keypom";
+import { Account, KeyPair, transactions } from "near-api-js";
+import { base_decode } from "near-api-js/lib/utils/serialize";
+import { assert, assertDropIdUnique, assertValidDropConfig, isSupportedKeypomContract, isValidAccountObj } from '../checks';
+import { accountMappingContract, getEnv, supportedKeypomContracts } from "../keypom";
 import {
-	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto, wrapParams
-} from "./keypom-utils";
-import { DropConfig } from './types/drops';
-import { FCData } from './types/fc';
-import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
-import { ProtocolReturnedDropConfig } from './types/protocol';
-import { getDropInformation, getUserBalance } from './views';
+	createAction,
+	estimateRequiredDeposit, generateKeys, getStorageBase, nearArgsToYocto
+} from "../keypom-utils";
+import { DropConfig } from '../types/drops';
+import { FCData } from '../types/fc';
+import { CreateDropProtocolArgs, CreateOrAddReturn } from '../types/params';
+import { ProtocolReturnedDropConfig } from '../types/protocol';
+import { getDropInformation, getUserBalance } from '../views';
+import { wrapTxnParamsForTrial } from "./utils";
 const {
 	utils: {
 		format: { parseNearAmount, formatNearAmount },
@@ -65,7 +68,7 @@ export const KEY_LIMIT = 50;
  * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
  * 
  * ```
- * @group Creating, And Claiming Drops
+ * @group Trial Accounts
 */
 export const createTrialAccountDrop = async ({
 	account,
@@ -102,17 +105,17 @@ export const createTrialAccountDrop = async ({
 	startingBalanceNEAR?: string | number,
 	/** How much $NEAR should the trial account start with? Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
 	startingBalanceYocto?: string,
-	/** The contracts that the trial account should be able to call. If there are multiple methods per contract, they need to be seperated by `:`. For example: ["nft_mint:nft_approve", "*"]*/
+	/** The contracts that the trial account should be able to call. */
 	callableContracts: string[],
 	/** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
 	maxAttachableNEARPerContract: (string | number)[],
 	/** The upper bound of $yocto that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $yoctoNEAR (i.e `1` = 1 $yoctoNEAR). */
 	maxAttachableYoctoPerContract: string[],
-	/** The list of methods that the trial account should be able to call on each respective contract. For multiple methods on a contract, pass in a comma separated string with no spaces (`nft_mint,nft_transfer,nft_approve`). To allow any methods to be called on the receiver contract, pass in `*`. */
-	callableMethods: string[],
-	/** Once the account balance falls below this amount (in $NEAR), the trial is over and the exit conditions must be met. */
+	/** An array that contains the list of methods that the trial account should be able to call on each respective contract. To allow any methods to be called on the receiver contract, pass in `[*]`. */
+	callableMethods: string[][],
+	/** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
 	trialEndFloorNEAR: string | number,
-	/** Once the account balance falls below this amount (in yocto), the trial is over and the exit conditions must be met. */
+	/** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
 	trialEndFloorYocto: string,
 	/** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
 	repayAmountNEAR?: number | string,
@@ -225,8 +228,22 @@ export const createTrialAccountDrop = async ({
 	// If !maxAttachableYoctoPerContract, create an array of the same size as callableMethods and fill it with "*"
 	if (!maxAttachableYoctoPerContract) maxAttachableYoctoPerContract = Array(callableMethods.length).fill("*");
 
-	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(parseNearAmount("0.3"))).toString();
 	const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
+	
+	// Account Mapping Contract Changes
+	callableContracts.push(accountMappingContract[networkId!]);
+	maxAttachableYoctoPerContract.push(parseNearAmount("0.002")!);
+	callableMethods.push(["set"]);
+	
+	// Take the storage cost into consideration for the attached deposit and trial end floor
+	const storageCost = parseNearAmount("0.3")!;
+	const attachedDeposit = new BN(startingBalanceYocto).add(new BN(storageCost)).toString();
+	trialEndFloorYocto = new BN(attachedDeposit).sub(new BN(trialEndFloorYocto)).toString();
+
+	// Generate the proper args for setup:
+	let actualContracts = callableContracts.join(",");
+	let actualAmounts = maxAttachableYoctoPerContract.join(",");
+	let actualMethods = callableMethods.map((method) => method.join(":")).join(",");
 
 	const createDropArgs: CreateDropProtocolArgs = {
 		drop_id: dropId,
@@ -261,10 +278,10 @@ export const createTrialAccountDrop = async ({
 					method_name: 'setup',
 					//@ts-ignore
 					attached_deposit: '0',
-					args: JSON.stringify(wrapParams({
-						contracts: callableContracts,
-						amounts: maxAttachableYoctoPerContract,
-						methods: callableMethods,
+					args: JSON.stringify(wrapTxnParamsForTrial({
+						contracts: actualContracts,
+						amounts: actualAmounts,
+						methods: actualMethods,
 						funder: repayTo || account!.accountId,
 						repay: repayAmountYocto,
 						floor: trialEndFloorYocto,
@@ -300,10 +317,10 @@ export const createTrialAccountDrop = async ({
 			methodName: 'setup',
 			//@ts-ignore
 			attachedDeposit: '0',
-			args: JSON.stringify(wrapParams({
-				contracts: callableContracts,
-				amounts: maxAttachableYoctoPerContract,
-				methods: callableMethods,
+			args: JSON.stringify(wrapTxnParamsForTrial({
+				contracts: actualContracts,
+				amounts: actualAmounts,
+				methods: actualMethods,
 				funder: repayTo || account!.accountId,
 				repay: repayAmountYocto,
 				floor: trialEndFloorYocto,
@@ -403,7 +420,7 @@ export const createTrialAccountDrop = async ({
  * console.log(`http://localhost:1234/keypom-url/${newAccountId}#${trialSecretKeys[0]}`)
  * 
  * ```
- * @group Creating, And Claiming Drops
+ * @group Trial Accounts
 */
 export const claimTrialAccountDrop = async ({
 	secretKey,

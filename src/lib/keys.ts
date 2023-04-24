@@ -284,9 +284,11 @@ export const addKeys = async ({
 	requiredDeposit = new BN(requiredDeposit).add(extraDepositYocto).toString();
 
 	var hasBalance = false;
-	if(useBalance) {
-		let userBal = await getUserBalance({accountId: account!.accountId});
-		assert(userBal >= requiredDeposit, `Insufficient balance on Keypom to create drop. Use attached deposit instead.`)
+	if (useBalance) {
+		let userBal = new BN(await getUserBalance({ accountId: account!.accountId }));
+		if (userBal.lt(new BN(requiredDeposit))) {
+			throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
+		}
 
 		hasBalance = true;
 	}
