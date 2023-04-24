@@ -38,11 +38,11 @@ async function fcDropNear(){
 	try {
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
 		await fundingAccount.functionCall(
-			"v1-3.keypom.testnet", 
+			"v2.keypom.testnet", 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
-				deposit_per_use: parseNearAmount("1"),
+				deposit_per_use: parseNearAmount("0.1"),
 				fc: {
 					// 2D array of function calls. In this case, there is 1 function call to make for a key use
 					// By default, if only one array of methods is present, this array of function calls will be used for all key uses
@@ -52,14 +52,14 @@ async function fcDropNear(){
 				    	    receiver_id: 'nft.examples.testnet',
 				    	    method_name: "nft_mint",
 				    	    args: JSON.stringify({
-	                		        token_id: "near-api-token-002",
-	                		        receiver_id: "keypom-docs-demo.testnet",
+	                		        token_id: "near-api-token-00--2",
 	                		        metadata: {
 				    	            title: "My Keypom NFT",
 				    	            description: "Keypom is lit fam",
 				    	            media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 				    	        }
 				    	    }),
+							account_id_field: "receiver_id",
 				    	    // Attached deposit of 1 $NEAR for when the receiver makes this function call
 				    	    attached_deposit: parseNearAmount("1"),
 				    	}]
@@ -75,10 +75,11 @@ async function fcDropNear(){
 	}
 
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey[i]}`;
+		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
+	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

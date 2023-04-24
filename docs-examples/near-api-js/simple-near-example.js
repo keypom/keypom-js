@@ -36,7 +36,7 @@ async function simpleDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		await fundingAccount.functionCall(
-			'v1-3.keypom.testnet', 
+			'v2.keypom.testnet', 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
@@ -50,10 +50,11 @@ async function simpleDropNear(){
 		console.log('error creating drop: ', e);
 	}
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey[i]}`;
+		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
+	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

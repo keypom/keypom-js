@@ -1,5 +1,6 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair, keyStores, connect } = require("near-api-js");
+const { getRecentDropId } = require("../utils/general.js")
 const path = require("path");
 const homedir = require("os").homedir();
 const { BN } = require("bn.js");
@@ -53,7 +54,7 @@ async function ftDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		await fundingAccount.functionCall(
-			"v1-3.keypom.testnet", 
+			"v2.keypom.testnet", 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
@@ -77,7 +78,7 @@ async function ftDropNear(){
 	// Pay storage deposit and trasnfer FTs to Keypom contract.
 	try {
 		await fundingAccount.functionCall(
-			FT_CONTRACT_ID, 
+			"ft.keypom.testnet", 
 			'storage_deposit',
 			{
 				account_id: "keypom-docs-demo.testnet",
@@ -89,28 +90,30 @@ async function ftDropNear(){
 		);
 
 		// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
-		let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v1-3.keypom.testnet");
-
+		let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v2.keypom.testnet");
+		
+		console.log(dropId)
 		await fundingAccount.functionCall(
 			"ft.keypom.testnet", 
 			'ft_transfer_call', 
 			{
-				receiver_id: "v1-3.keypom.testnet",
-				amount: parseNearAmount((amountToTransfer.toString())),				
+				receiver_id: "v2.keypom.testnet",
+				amount: (amountToTransfer.toString()),				
 				msg: dropId.toString()
 			},
 			"300000000000000",
 			// Attached deposit of 0.1 $NEAR
-			parseNearAmount("0.1")
+			"1"
 		);
 	} catch(e) {
 		console.log('error sending FTs', e);
 	}
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v1-3.keypom.testnet"
+	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey[i]}`;
+		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
+	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

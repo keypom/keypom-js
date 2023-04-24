@@ -48,14 +48,15 @@ async function fcDropKeypom(){
 		    	receiverId: "nft.examples.testnet",
 		    	methodName: "nft_mint",
 		    	args: JSON.stringify({
-		    	    token_id: "keypom-sdk-token-02",
-		    	    receiver_id: "keypom-docs-demo.testnet",
+					// Change this token_id if it already exists -> check explorer transaction
+		    	    token_id: "keypom-sdk-token-1234321",
 		    	    metadata: {
 		    	        title: "My Keypom NFT",
 		    	        description: "Keypom is lit fam",
 		    	        media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 		    	    }
 		    	}),
+				accountIdField: "receiver_id",
 		    	// Attached deposit of 1 $NEAR for when the receiver makes this function call
 		    	attachedDeposit: parseNearAmount("1")
 		    }]
@@ -64,18 +65,16 @@ async function fcDropKeypom(){
 	});
 	pubKeys = keys.publicKeys
 
-    	var dropInfo = {};
-	const {contractId: KEYPOM_CONTRACT} = getEnv()
-    	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
-    	for(var i = 0; i < keys.keyPairs.length; i++) {
-	    let linkdropUrl = formatLinkdropUrl({
-	    	customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
-	    	secretKeys: keys.secretKeys[i]
-	    })
-	    dropInfo[pubKeys[i]] = linkdropUrl;
-	}
+    const {contractId: KEYPOM_CONTRACT} = getEnv()
+    // Creating list of pk's and linkdrops; copied from orignal simple-create.js
+	let linkdropUrl = formatLinkdropUrl({
+		customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+		secretKeys: keys.secretKeys,
+		contractId: KEYPOM_CONTRACT
+	})
 	// Write file of all pk's and their respective linkdrops
-	console.log('Public Keys and Linkdrops: ', dropInfo)
+	console.log('Public Keys: ', pubKeys)
+	console.log('Linkdrops: ', linkdropUrl)
 	console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
 
 }
