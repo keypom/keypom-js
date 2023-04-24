@@ -10,6 +10,8 @@ async function ftDropKeypom(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const FT_CONTRACT = "ft.keypom.testnet";
 
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -23,15 +25,15 @@ async function ftDropKeypom(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account("keypom-docs-demo.testnet");
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 	let amountToTransfer = parseNearAmount("1")
 	let funderFungibleTokenBal = await fundingAccount.viewFunction(
-		"ft.keypom.testnet", 
+		FT_CONTRACT, 
 		'ft_balance_of',
 		{
-			account_id: "keypom-docs-demo.testnet"
+			account_id: YOUR_ACCOUNT
 		}
 	);
 
@@ -42,8 +44,8 @@ async function ftDropKeypom(){
 
 	// Initiate Keypom, while passing in the existing NEAR testnet connection so it does not create a new one
 	await initKeypom({
-	    near: near,
-	    network: network,
+	    near,
+	    network,
 	});
 
 	// Creates the FT drop based on data from config file. Keys are automatically generated within the function based on `NUM_KEYS`. Since there is no entropy, all keys are completely random.
@@ -52,11 +54,11 @@ async function ftDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const { keys } = await createDrop({
 	    account: fundingAccount,
-	    numKeys: 5,
+	    numKeys: 1,
 	    depositPerUseNEAR: 1,
 	    ftData: {
-	    	contractId: "ft.keypom.testnet",
-	    	senderId: "keypom-docs-demo.testnet",
+	    	contractId: FT_CONTRACT,
+	    	senderId: YOUR_ACCOUNT,
 	    	// This balance per use is balance of human readable FTs per use. 
 	    	amount: "1"
 			// Alternatively, you could use absoluteAmount, which is dependant on the decimals value of the FT

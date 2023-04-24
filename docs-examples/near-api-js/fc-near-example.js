@@ -8,6 +8,10 @@ async function fcDropNear(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const NFT_TOKEN_ID = "near-api-token-" + Date.now().toString();
+	const NFT_CONTRACT = "nft.examples.testnet";
+	const KEYPOM_CONTRACT = "v2.keypom.testnet"
 
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -21,7 +25,7 @@ async function fcDropNear(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account("keypom-docs-demo.testnet");
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// Keep track of an array of the keyPairs we create and the public keys to pass into the contract
 	let keyPairs = [];
@@ -38,7 +42,7 @@ async function fcDropNear(){
 	try {
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
 		await fundingAccount.functionCall(
-			"v2.keypom.testnet", 
+			KEYPOM_CONTRACT, 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
@@ -49,10 +53,10 @@ async function fcDropNear(){
 				    methods: [
 				    	// Array of functions for Key use 1. 
 				    	[{
-				    	    receiver_id: 'nft.examples.testnet',
+				    	    receiver_id: NFT_CONTRACT,
 				    	    method_name: "nft_mint",
 				    	    args: JSON.stringify({
-	                		        token_id: "near-api-token-00--2",
+	                		        token_id: NFT_TOKEN_ID,
 	                		        metadata: {
 				    	            title: "My Keypom NFT",
 				    	            description: "Keypom is lit fam",
@@ -75,7 +79,6 @@ async function fcDropNear(){
 	}
 
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]

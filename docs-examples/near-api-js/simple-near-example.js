@@ -8,6 +8,9 @@ async function simpleDropNear(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const KEYPOM_CONTRACT = "v2.keypom.testnet"
+
 	
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -21,7 +24,7 @@ async function simpleDropNear(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account('keypom-docs-demo.testnet');
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// Keep track of an array of the key pairs we create and the public keys we pass into the contract
 	let keyPairs = [];
@@ -36,7 +39,7 @@ async function simpleDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		await fundingAccount.functionCall(
-			'v2.keypom.testnet', 
+			KEYPOM_CONTRACT, 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
@@ -50,7 +53,6 @@ async function simpleDropNear(){
 		console.log('error creating drop: ', e);
 	}
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]

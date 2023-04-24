@@ -9,7 +9,10 @@ async function fcDropKeypom(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
-
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const NFT_TOKEN_ID = "keypom-token-" + Date.now().toString();
+	const NFT_CONTRACT = "nft.examples.testnet";
+	
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
@@ -22,13 +25,13 @@ async function fcDropKeypom(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account('keypom-docs-demo.testnet');
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 	// Here we are connecting to the testnet network
 	await initKeypom({
-	    near: near,
-	    network: "testnet"
+	    near,
+	    network
 	});
 
 	// Note that the SDK does error checks to ensure all the information passed in will succeed when creating a drop.
@@ -45,11 +48,11 @@ async function fcDropKeypom(){
 		methods: [
 			// Array of functions for Key use 1. 
 		    [{
-		    	receiverId: "nft.examples.testnet",
+		    	receiverId: NFT_CONTRACT,
 		    	methodName: "nft_mint",
 		    	args: JSON.stringify({
 					// Change this token_id if it already exists -> check explorer transaction
-		    	    token_id: "keypom-sdk-token-1234321",
+		    	    token_id: NFT_TOKEN_ID,
 		    	    metadata: {
 		    	        title: "My Keypom NFT",
 		    	        description: "Keypom is lit fam",

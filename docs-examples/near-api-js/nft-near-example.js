@@ -9,6 +9,10 @@ async function nftDropNear(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const NFT_TOKEN_ID = "near-api-token-" + Date.now().toString();
+	const NFT_CONTRACT = "nft.examples.testnet";
+	const KEYPOM_CONTRACT = "v2.keypom.testnet";
 	
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 	
@@ -22,20 +26,20 @@ async function nftDropNear(){
 	};
 	
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account("keypom-docs-demo.testnet");
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 	
 	// Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
 	await fundingAccount.functionCall(
-		"nft.examples.testnet", 
+		NFT_CONTRACT, 
 		'nft_mint', 
 		{
-			receiver_id: "keypom-docs-demo.testnet",
+			receiver_id: YOUR_ACCOUNT,
 			metadata: {
 			    title: "My Keypom NFT",
 			    description: "Keypom is lit fam :D",
 			    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 			},
-			token_id: "near-api-token-0---1",
+			token_id: NFT_TOKEN_ID,
 		},
 		"300000000000000",
 		// Attached deposit of 0.1 $NEAR
@@ -55,16 +59,16 @@ async function nftDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		await fundingAccount.functionCall(
-			"v2.keypom.testnet", 
+			KEYPOM_CONTRACT, 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount("1"),
 				nft: {
 					// Who will be sending the NFTs to the Keypom contract
-					sender_id: "keypom-docs-demo.testnet",
+					sender_id: YOUR_ACCOUNT,
 					// NFT Contract Id that the tokens will come from
-					contract_id: "nft.examples.testnet"
+					contract_id: NFT_CONTRACT
 				}
 			}, 
 			"300000000000000",
@@ -73,16 +77,16 @@ async function nftDropNear(){
 		);
 		
 		// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
-		let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v2.keypom.testnet");
+		let dropId = await getRecentDropId(fundingAccount, YOUR_ACCOUNT, KEYPOM_CONTRACT);
 		
 		// Transfer the NFT to the Keypom contract. 
 		// This gives Keypom the ownership and thus the ability to give it to the recipient when they use the linkdrop
 		await fundingAccount.functionCall(
-			"nft.examples.testnet", 
+			NFT_CONTRACT, 
 			'nft_transfer_call', 
 			{
-				receiver_id: "v2.keypom.testnet",
-				token_id: "near-api-token-0---1",
+				receiver_id: KEYPOM_CONTRACT,
+				token_id: NFT_TOKEN_ID,
 				msg: dropId.toString()
 			},
 			"300000000000000",
@@ -93,7 +97,6 @@ async function nftDropNear(){
 		console.log('error creating drop: ', e);
 	}
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]

@@ -9,6 +9,9 @@ async function nftDropKeypom(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const NFT_TOKEN_ID = "keypom-token-" + Date.now().toString();
+	const NFT_CONTRACT = "nft.examples.testnet";
 
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -22,20 +25,20 @@ async function nftDropKeypom(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account("keypom-docs-demo.testnet");
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
 	await fundingAccount.functionCall(
-		"nft.examples.testnet", 
+		NFT_CONTRACT, 
 		'nft_mint', 
 		{
-			receiver_id: "keypom-docs-demo.testnet",
+			receiver_id: YOUR_ACCOUNT,
 			metadata: {
 			    title: "My First Keypom NFT",
 			    description: "NFT from my first NFT Drop!",
 			    media: "https://bafybeiftczwrtyr3k7a2k4vutd3amkwsmaqyhrdzlhvpt33dyjivufqusq.ipfs.dweb.link/goteam-gif.gif",
 			},
-			token_id: "keypom-sdk-token-00000-1-",
+			token_id: NFT_TOKEN_ID,
 		},
 		"300000000000000",
 		// Cost to cover storage of NFT
@@ -44,8 +47,8 @@ async function nftDropKeypom(){
 
 	// Initiate Keypom using existing NEAR testnet connection
 	await initKeypom({
-	    near: near,
-	    network: network,
+	    near,
+		network,
 	});
 
 	// Create drop with nft data
@@ -58,11 +61,11 @@ async function nftDropKeypom(){
 	    depositPerUseNEAR: "1",
 	    nftData: {
 		    // NFT Contract Id that the tokens will come from
-		    contractId: "nft.examples.testnet",
+		    contractId: NFT_CONTRACT,
 		    // Who will be sending the NFTs to the Keypom contract
-		    senderId: "keypom-docs-demo.testnet",
+		    senderId: YOUR_ACCOUNT,
 		    // List of tokenIDs
-		    tokenIds: ["keypom-sdk-token-00000-1-"]
+		    tokenIds: [NFT_TOKEN_ID]
 		}
 	});
 	pubKeys = keys.publicKeys

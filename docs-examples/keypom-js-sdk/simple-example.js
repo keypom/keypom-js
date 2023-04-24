@@ -10,6 +10,7 @@ async function simpleDropKeypom(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
 	
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -23,13 +24,13 @@ async function simpleDropKeypom(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account('keypom-docs-demo.testnet');
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 	// Here we are connecting to the testnet network
 	await initKeypom({
-	    near: near,
-	    network: "testnet"
+	    near,
+	    network
 	});
 
 	// Note that the SDK does error checks to ensure all the information passed in will succeed when creating a drop.
@@ -37,7 +38,7 @@ async function simpleDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const {keys} = await createDrop({
 	    account: fundingAccount,
-	    numKeys: 5,
+	    numKeys: 1,
 	    depositPerUseNEAR: "1",
 	});
 	pubKeys = keys.publicKeys

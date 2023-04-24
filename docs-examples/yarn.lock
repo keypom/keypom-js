@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@near-wallet-selector/core@^7.1.0", "@near-wallet-selector/core@^7.9.1":
+"@near-wallet-selector/core@^7.9.1":
   version "7.9.3"
   resolved "https://registry.yarnpkg.com/@near-wallet-selector/core/-/core-7.9.3.tgz#5a51b72064c9e018c0f0eb97db06b70cd58b8358"
   integrity sha512-SNIgLnI/LeU1mwBHc5wcyOrVAqhWmFXJfVIfB1P16ziH3EKMsbs/gxcKUSPuvDagm9dZm11k+FA7bxSspavibA==
@@ -904,7 +904,7 @@ js-yaml@^3.14.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-keypom-js@^1.4.9-rc.1:
+keypom-js@^1.4.9:
   version "1.4.9"
   resolved "https://registry.yarnpkg.com/keypom-js/-/keypom-js-1.4.9.tgz#360079f2e371b971d8f2a1c5ddb1b9d5a234ec1a"
   integrity sha512-xyBmDuG8u4vD9EtL/kRIqj5eAl1wsOJ7ajAOAFiKuJAcF2zZMB/XOWMVdnkqKF3zQgSujPEu/AL0UycuBU7A+A==

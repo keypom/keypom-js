@@ -11,6 +11,9 @@ async function ftDropNear(){
 	const network = "testnet"
 	const CREDENTIALS_DIR = ".near-credentials";
 	const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
+	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
+	const FT_CONTRACT = "ft.keypom.testnet";
+	const KEYPOM_CONTRACT = "v2.keypom.testnet";
 
 	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
 
@@ -24,15 +27,15 @@ async function ftDropNear(){
 	};
 
 	let near = await connect(nearConfig);
-	const fundingAccount = await near.account("keypom-docs-demo.testnet");
+	const fundingAccount = await near.account(YOUR_ACCOUNT);
 
 	// Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 	let amountToTransfer = parseNearAmount("1")
 	let funderFungibleTokenBal = await fundingAccount.viewFunction(
-		"ft.keypom.testnet", 
+		FT_CONTRACT, 
 		'ft_balance_of',
 		{
-			account_id: "keypom-docs-demo.testnet"
+			account_id: YOUR_ACCOUNT
 		}
 	);
 
@@ -54,14 +57,14 @@ async function ftDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		await fundingAccount.functionCall(
-			"v2.keypom.testnet", 
+			KEYPOM_CONTRACT, 
 			'create_drop', 
 			{
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount("1"),
 				ft: {
-					contract_id: "ft.keypom.testnet",
-					sender_id: "keypom-docs-demo.testnet",
+					contract_id: FT_CONTRACT,
+					sender_id: YOUR_ACCOUNT,
 					// This balance per use is balance of FTs per use. 
 					// parseNearAmount is used for conveience to convert to 10^24
 					balance_per_use: parseNearAmount("1")
@@ -78,10 +81,10 @@ async function ftDropNear(){
 	// Pay storage deposit and trasnfer FTs to Keypom contract.
 	try {
 		await fundingAccount.functionCall(
-			"ft.keypom.testnet", 
+			FT_CONTRACT, 
 			'storage_deposit',
 			{
-				account_id: "keypom-docs-demo.testnet",
+				account_id: YOUR_ACCOUNT,
 			},
 			"300000000000000",
 			// We are using 0.1 $NEAR to pay the storage deposit to include our account ID in their registered list of users. 
@@ -90,14 +93,14 @@ async function ftDropNear(){
 		);
 
 		// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
-		let dropId = await getRecentDropId(fundingAccount, "keypom-docs-demo.testnet", "v2.keypom.testnet");
+		let dropId = await getRecentDropId(fundingAccount, YOUR_ACCOUNT, KEYPOM_CONTRACT);
 		
 		console.log(dropId)
 		await fundingAccount.functionCall(
-			"ft.keypom.testnet", 
+			FT_CONTRACT, 
 			'ft_transfer_call', 
 			{
-				receiver_id: "v2.keypom.testnet",
+				receiver_id: KEYPOM_CONTRACT,
 				amount: (amountToTransfer.toString()),				
 				msg: dropId.toString()
 			},
@@ -109,7 +112,6 @@ async function ftDropNear(){
 		console.log('error sending FTs', e);
 	}
 	var dropInfo = {};
-	const KEYPOM_CONTRACT = "v2.keypom.testnet"
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
