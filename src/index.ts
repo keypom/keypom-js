@@ -1,15 +1,51 @@
+export type { KeypomWallet } from "./lib/selector/core/wallet";
+export { setupKeypom } from "./lib/selector/core/setup";
+export {
+	addToBalance,
+	withdrawBalance
+} from "./lib/balances";
 export {
 	generateKeys,
 	estimateRequiredDeposit,
+	getStorageBase,
 	ftTransferCall,
 	nftTransferCall,
 	hashPassword,
+	accountExists,
+	getNFTMetadata,
+	getFTMetadata,
+	getPubFromSecret,
+	createNFTSeries,
+	formatLinkdropUrl,
 	exportedNearAPI as nearAPI
 } from "./lib/keypom-utils";
+import { exportedNearAPI } from "./lib/keypom-utils";
+export const {
+	/** @group Utility */
+	parseNearAmount,
+	/** @group Utility */
+	formatNearAmount
+} = exportedNearAPI.utils.format;
+export {
+	useKeypom,
+	KeypomContextProvider,
+} from './components/KeypomContext'
 export {
 	createDrop,
 	deleteDrops,
 } from "./lib/drops";
+export {
+	createTrialAccountDrop,
+	claimTrialAccountDrop
+} from "./lib/trial-accounts/pre-trial";
+export {
+	trialSignAndSendTxns,
+	trialCallMethod,
+	canExitTrial
+} from "./lib/trial-accounts/trial-active";
+export {
+	wrapTxnParamsForTrial
+} from "./lib/trial-accounts/utils";
 export {
 	addKeys,
 	deleteKeys
@@ -18,11 +54,16 @@ export {
 	claim,
 } from "./lib/claims";
 export {
+	/** @group Utility */
 	execute,
 	initKeypom,
 	getEnv,
+	updateKeypomContractId,
+	updateFunder,
+	supportedLinkdropClaimPages
 } from "./lib/keypom";
 export * from "./lib/views";
+export * from "./lib/sales";
 export * from "./lib/types/drops";
 export * from "./lib/types/fc";
 export * from "./lib/types/ft";
@@ -30,3 +71,4 @@ export * from "./lib/types/general";
 export * from "./lib/types/nft";
 export * from "./lib/types/params";
 export * from "./lib/types/simple";
+export * from "./lib/types/protocol";

@@ -1,4 +1,5 @@
-const { initKeypom, createDrop, getEnv } = require("keypom-js");
+const { link } = require("fs");
+const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("keypom-js");
 const { KeyPair, keyStores, connect } = require("near-api-js");
 const path = require("path");
 const homedir = require("os").homedir();
@@ -36,7 +37,7 @@ async function simpleDropKeypom(){
 	// These checks include, but are not limited to, valid configurations, enough attached deposit, and drop existence.
 	const {keys} = await createDrop({
 	    account: fundingAccount,
-	    numKeys: 1,
+	    numKeys: 5,
 	    depositPerUseNEAR: "1",
 	});
 	pubKeys = keys.publicKeys
@@ -44,15 +45,15 @@ async function simpleDropKeypom(){
     	var dropInfo = {};
 	const {contractId: KEYPOM_CONTRACT} = getEnv()
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
-    	for(var i = 0; i < keys.keyPairs.length; i++) {
 	    let linkdropUrl = formatLinkdropUrl({
-	    	customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
-	    	secretKeys: keys.secretKeys[i]
+	    	baseUrl: "https://testnet.mynearwallet.com/linkdrop",
+	    	secretKeys: keys.secretKeys,
+			contractId: KEYPOM_CONTRACT
 	    })
-	    dropInfo[pubKeys[i]] = linkdropUrl;
-	}
+	    dropInfo[pubKeys] = linkdropUrl;
 	// Write file of all pk's and their respective linkdrops
-	console.log('Public Keys and Linkdrops: ', dropInfo)
+	console.log('Public Keys: ', pubKeys)
+	console.log('Linkdrops: ', linkdropUrl)
 	console.log(`Keypom Contract Explorer Link: explorer.${network}.near.org/accounts/${KEYPOM_CONTRACT}.com`)
 
 }

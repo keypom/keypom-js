@@ -1,6 +1,6 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair, keyStores, connect } = require("near-api-js");
-const { initKeypom, createDrop, getEnv } = require("keypom-js");
+const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("keypom-js");
 const path = require("path");
 const homedir = require("os").homedir();
 

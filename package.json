@@ -1,11 +1,18 @@
 {
   "name": "keypom-js",
-  "version": "0.0.14",
+  "version": "1.4.9",
   "description": "Keypom JS SDK",
   "main": "./lib/index.js",
   "scripts": {
-    "test": "yarn build && yarn ava",
-    "ava": "ava test/ws.test.js -vs --timeout=5m",
+    "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation && yarn test:dummy-creation",
+    "test:main": "yarn build && yarn ava:main",
+    "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
+    "test:drop-creation": "yarn build && yarn ava:drop-creation",
+    "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
+    "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
+    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
+    "ava:main": "ava test/ws.test.js -vs --timeout=5m",
+    "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
     "build": "npx tsc",
     "publish": "npx tsc && npm publish",
     "fc-keypom": "node docs-examples/keypom-js-sdk/fc-example.js",
@@ -15,23 +22,32 @@
     "fc-near": "node docs-examples/near-api-js/fc-near-example.js",
     "ft-near": "node docs-examples/near-api-js/ft-near-example.js",
     "nft-near": "node docs-examples/near-api-js/nft-near-example.js",
-    "simple-near": "node docs-examples/near-api-js/simple-near-example.js"
-
+    "simple-near": "node docs-examples/near-api-js/simple-near-example.js",
+    "build-docs": "npx typedoc --options typedoc.json"
   },
-  "author": "mattlockyer",
+  "author": "benkurrek, mattlockyer",
   "license": "MIT",
   "dependencies": {
-    "@near-wallet-selector/core": "^7.1.0",
+    "@near-wallet-selector/core": "^7.9.1",
+    "@types/react": "^18.0.26",
     "ava": "^4.3.3",
     "bn.js": "^5.2.1",
     "dotenv": "^16.0.3",
-    "near-api-js": "^0.44.2",
+    "fs": "^0.0.1-security",
+    "near-api-js": "^0.45.1",
     "near-seed-phrase": "^0.2.0",
-    "typescript": "^4.8.4"
+    "path-browserify": "^1.0.1",
+    "react": "^18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "^4.8.4",
+    "util": "^0.12.5"
   },
   "ava": {
     "require": [
       "dotenv/config"
     ]
+  },
+  "devDependencies": {
+    "typedoc": "^0.23.24"
   }
 }
