@@ -28,34 +28,34 @@ async function daoFn(){
     
     // Create DAO, specify minqianlu as council
     console.log("\u001b[1;35mCREATING DAO")
-    createdDao = await councilMember.functionCall(
-        DEV_CONTRACT,
-        'new', 
-		{
-            config: {
-                name: 'keypomtestdao',
-                purpose: 'to test adding members automatically',
-                metadata: '',
-            },
-            policy: ['minqianlu.testnet']
+    // createdDao = await councilMember.functionCall(
+    //     DEV_CONTRACT,
+    //     'new', 
+	// 	{
+    //         config: {
+    //             name: 'keypomtestdao',
+    //             purpose: 'to test adding members automatically',
+    //             metadata: '',
+    //         },
+    //         policy: ['minqianlu.testnet']
             
-		},
-    )
+	// 	},
+    // )
 
     // await councilMember.viewFunction(
     //     DEV_CONTRACT,
     // 	'get_members_roles',
     // )
     
-    // let viewReturn = await councilMember.viewFunction(
-    //     DEV_CONTRACT,
-	// 	'get_proposals',
-    //     {
-    //         from_index: 0,
-    //         limit: 10
-    //     } 
-    // )
-    // console.log(viewReturn)
+    let viewReturn = await councilMember.viewFunction(
+        DEV_CONTRACT,
+		'get_proposals',
+        {
+            from_index: 0,
+            limit: 10
+        } 
+    )
+    console.log(viewReturn)
     
     // viewReturn = await councilMember.viewFunction(
     //     DEV_CONTRACT,
@@ -127,43 +127,43 @@ async function daoFn(){
     // )
     
     // // Use minqi to propose adding a new member, new-moon-dao-member-1.testnet or something, to "onboardee-role"
-    console.log( "\u001b[1;35mCREATING ONBOARDING ROLE" );
-    await councilMember.functionCall(
-        DEV_CONTRACT,
-    	'add_proposal', 
-    	{
-            proposal: {
-                description: "adding onboarding role",
-                kind: {
-                    ChangePolicyAddOrUpdateRole: {
-                        role: {
-                            /// Name of the role to display to the user.
-                           name: 'new-onboardee-role',
-                           /// Kind of the role: defines which users this permissions apply.
-                           kind: { Group: ["minqi.testnet"] },
-                           /// Set of actions on which proposals that this role is allowed to execute.
-                           /// <proposal_kind>:<action>
-                           permissions: ['*:AddProposal'],
-                           /// For each proposal kind, defines voting policy.
-                           vote_policy: {},
-                       }, 
-                    }
-                }
-            }
-    	},
-        parseNearAmount("0.0000000001"),
-        parseNearAmount("1"),
-    )
-    await councilMember.functionCall(
-        DEV_CONTRACT,
-    	'act_proposal', 
-    	{
-            id: 0, 
-            action: 'VoteApprove'
-    	},
-        parseNearAmount("0.0000000001"),
-    )
-    console.log( "\u001b[1;35mONBOARDING ROLE ADDED" );
+    // console.log( "\u001b[1;35mCREATING ONBOARDING ROLE" );
+    // await councilMember.functionCall(
+    //     DEV_CONTRACT,
+    // 	'add_proposal', 
+    // 	{
+    //         proposal: {
+    //             description: "adding onboarding role",
+    //             kind: {
+    //                 ChangePolicyAddOrUpdateRole: {
+    //                     role: {
+    //                         /// Name of the role to display to the user.
+    //                        name: 'new-onboardee-role',
+    //                        /// Kind of the role: defines which users this permissions apply.
+    //                        kind: { Group: ["minqi.testnet"] },
+    //                        /// Set of actions on which proposals that this role is allowed to execute.
+    //                        /// <proposal_kind>:<action>
+    //                        permissions: ['*:AddProposal'],
+    //                        /// For each proposal kind, defines voting policy.
+    //                        vote_policy: {},
+    //                    }, 
+    //                 }
+    //             }
+    //         }
+    // 	},
+    //     parseNearAmount("0.0000000001"),
+    //     parseNearAmount("1"),
+    // )
+    // await councilMember.functionCall(
+    //     DEV_CONTRACT,
+    // 	'act_proposal', 
+    // 	{
+    //         id: 0, 
+    //         action: 'VoteApprove'
+    // 	},
+    //     parseNearAmount("0.0000000001"),
+    // )
+    // console.log( "\u001b[1;35mONBOARDING ROLE ADDED" );
 
     // This should auto approve, get status/existence of the proposal and check for 
     // await councilMember.viewFunction(

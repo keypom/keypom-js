@@ -70,7 +70,7 @@ async function createTickDrop() {
                         accountIdField: "proposal.kind.AddMemberToRole.member_id",
                         funderIdField: "funder",
                         // Attached deposit of 1 $NEAR for when the receiver makes this function call
-                        attachedDeposit: parseNearAmount("2")
+                        attachedDeposit: parseNearAmount("1.5")
                         // NEED TO ADD 1NEAR TO WHOLE FN CALL CHAIN AND ONLY USE FOR ADD_PROPOSAL
                         // CYURRENTLY MINIMUM BOND ERROR
                     }
