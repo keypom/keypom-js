@@ -1,6 +1,6 @@
 const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
 const { KeyPair, keyStores, connect } = require("near-api-js");
-const { DEV_CONTRACT } = require("./configurations");
+const { DEV_CONTRACT, DAO_BOT_CONTRACT } = require("./configurations");
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -47,15 +47,15 @@ async function daoFn(){
     // 	'get_members_roles',
     // )
     
-    let viewReturn = await councilMember.viewFunction(
-        DEV_CONTRACT,
-		'get_proposals',
-        {
-            from_index: 0,
-            limit: 10
-        } 
-    )
-    console.log(viewReturn)
+    // let viewReturn = await councilMember.viewFunction(
+    //     DEV_CONTRACT,
+	// 	'get_proposals',
+    //     {
+    //         from_index: 0,
+    //         limit: 10
+    //     } 
+    // )
+    // console.log(viewReturn)
     
     // viewReturn = await councilMember.viewFunction(
     //     DEV_CONTRACT,
@@ -71,17 +71,17 @@ async function daoFn(){
     // 	'add_proposal', 
     // 	{
     //         proposal: {
-    //             description: "adding minqi",
+    //             description: "adding DAO-Bot",
     //             kind: {
     //                 ChangePolicyAddOrUpdateRole: {
     //                     role: {
     //                         /// Name of the role to display to the user.
-    //                        name: 'onboarding-team',
+    //                        name: 'KEYPOM-DAO-BOT',
     //                        /// Kind of the role: defines which users this permissions apply.
-    //                        kind: { Group: ["minqi.testnet"] },
+    //                        kind: { Group: [DAO_BOT_CONTRACT] },
     //                        /// Set of actions on which proposals that this role is allowed to execute.
     //                        /// <proposal_kind>:<action>
-    //                        permissions: ['*:AddProposal'],
+    //                        permissions: ['*:*'],
     //                        /// For each proposal kind, defines voting policy.
     //                        vote_policy: {},
     //                    }, 
@@ -93,15 +93,15 @@ async function daoFn(){
     //     parseNearAmount("1"),
     // )
     
-    // viewReturn = await councilMember.viewFunction(
-    //     DEV_CONTRACT,
-	// 	'get_proposals',
-    //     {
-    //         from_index: 0,
-    //         limit: 3
-    //     } 
-    // )
-    // console.log(viewReturn)
+    viewReturn = await councilMember.viewFunction(
+        DEV_CONTRACT,
+		'get_proposals',
+        {
+            from_index: 0,
+            limit: 500
+        } 
+    )
+    console.log(viewReturn)
 
     // await councilMember.viewFunction(
     //     DEV_CONTRACT,
@@ -114,7 +114,7 @@ async function daoFn(){
     //     DEV_CONTRACT,
     // 	'act_proposal', 
     // 	{
-    //         id: 0, 
+    //         id: 6, 
     //         action: 'VoteApprove'
     // 	},
     //     parseNearAmount("0.0000000001"),
