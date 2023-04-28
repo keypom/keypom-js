@@ -1,0 +1,32 @@
+{
+  "name": "keypom-js",
+  "version": "0.0.14",
+  "description": "Keypom JS SDK",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "yarn build && yarn ava",
+    "ava": "ava test/ws.test.js -vs --timeout=5m",
+    "build": "npx tsc",
+    "publish": "npx tsc && npm publish",
+    "fc-keypom": "node keypom-js-sdk/fc-example.js",
+    "ft-keypom": "node keypom-js-sdk/ft-example.js",
+    "nft-keypom": "node keypom-js-sdk/nft-example.js",
+    "simple-keypom": "node keypom-js-sdk/simple-example.js",
+    "fc-near": "node near-api-js/fc-near-example.js",
+    "ft-near": "node near-api-js/ft-near-example.js",
+    "nft-near": "node near-api-js/nft-near-example.js",
+    "simple-near": "node near-api-js/simple-near-example.js",
+    "testing-import" : "node near-api-js/testing.js"
+
+  },
+  "author": "mattlockyer",
+  "license": "MIT",
+  "dependencies": {
+    "keypom-js": "^1.4.9"
+  },
+  "ava": {
+    "require": [
+      "dotenv/config"
+    ]
+  }
+}
