@@ -212,7 +212,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     private parseUrl = () => {
+        console.log('this.trialBaseUrl: ', this.trialBaseUrl)
         const split = window.location.href.split(this.trialBaseUrl);
+        console.log('split: ', split)
 
         if (split.length != 2) {
             return;

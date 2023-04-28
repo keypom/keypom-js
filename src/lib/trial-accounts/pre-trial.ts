@@ -228,7 +228,7 @@ export const createTrialAccountDrop = async ({
 	// If !maxAttachableYoctoPerContract, create an array of the same size as callableMethods and fill it with "*"
 	if (!maxAttachableYoctoPerContract) maxAttachableYoctoPerContract = Array(callableMethods.length).fill("*");
 
-	const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "mainnet");
+	const rootReceiverId = finalConfig.root_account_id ?? (networkId == "testnet" ? "testnet" : "near");
 	
 	// Account Mapping Contract Changes
 	callableContracts.push(accountMappingContract[networkId!]);

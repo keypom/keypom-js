@@ -128,7 +128,7 @@ export const claim = async ({
 	fcArgs?: Array<Maybe<string>>
 }) => {
 	const {
-		networkId, keyStore, attachedGas, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
+		networkId, keyStore, contractId, contractAccount, receiverId, execute, fundingAccountDetails, near,
 	} = getEnv()
 
 	const keyPair = KeyPair.fromString(secretKey)
@@ -138,6 +138,7 @@ export const claim = async ({
 	assert(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.')
 
 	const dropInfo = await getDropInformation({ secretKey });
+	const attachedGas = dropInfo.required_gas;
 
 	if (dropInfo.fc) {
 		var curMethodData = await getCurMethodData({ secretKey });
