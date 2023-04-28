@@ -83,7 +83,7 @@ function App() {
   else if(curUse==2){
     // Direct user to claim POAP
     let link = formatLinkdropUrl({
-      customURL: "https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY",
+      customURL: "http://localhost:1234/keypom-url#CONTRACT_ID/SECRET_KEY",
       secretKeys: privKey
     });
     return (

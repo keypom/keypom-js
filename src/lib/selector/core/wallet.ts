@@ -25,6 +25,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     modal: KeypomTrialModal;
 
+    isMappingTxn: boolean;
+
     public constructor({
         signInContractId,
         networkId,
@@ -45,6 +47,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.trialSplitDelim = trialSplitDelim
         
         this.modal = setupModal(modalOptions);
+        this.isMappingTxn = false;
         console.log("finished constructor");
     }
 
@@ -174,7 +177,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         console.log('transactions: ', transactions)
 
         try {
-            addUserToMappingContract(this.trialAccountId!, this.trialSecretKey!);
+            console.log('is mapping txn', this.isMappingTxn)
+            if (!this.isMappingTxn) {
+                addUserToMappingContract(this.trialAccountId!, this.trialSecretKey!);
+            }
+
             var res = await trialSignAndSendTxns({
                 trialAccountId: this.trialAccountId!,
                 trialAccountSecretKey: this.trialSecretKey!,
@@ -280,7 +287,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         // Check if the account exists in the mapping contract. If they do, don't do anything. If they
         // Don't, add them to the mapping contract
-        addUserToMappingContract(accountId, secretKey);
+        const isAdding = await addUserToMappingContract(accountId, secretKey);
+
+        if (isAdding) {
+            this.isMappingTxn = true;
+        }
 
         const accountObj = new Account(this.near.connection, this.trialAccountId!);
         return [accountObj];

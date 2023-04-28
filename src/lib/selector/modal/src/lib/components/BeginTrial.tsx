@@ -1,9 +1,11 @@
 import React, { createRef, useState } from "react";
-import { accountExists } from "../../../../../keypom-utils";
+import { accountExists, getPubFromSecret } from "../../../../../keypom-utils";
 import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
 import { getEnv } from "../../../../../keypom";
+import { getCurMethodData } from "../../../../../views";
+import { claim } from "../../../../../claims";
 
 const ACCOUNT_ID_REGEX =
   /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
@@ -67,7 +69,20 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
     setBorderColor("green");
     setIsClaimingTrial(true);
 
-    await claimTrialAccountDrop({ desiredAccountId: accountId, secretKey });
+    const curMethodData = await getCurMethodData({secretKey})
+    console.log('curMethodData: ', curMethodData);
+
+    // create an array of null with the length of cur method data
+    const fcArgs = Array(curMethodData!.length).fill(null);
+
+    let userFcArgs = {
+      "INSERT_NEW_ACCOUNT": accountId,
+      "INSERT_TRIAL_PUBLIC_KEY": getPubFromSecret(secretKey)
+    }
+
+    fcArgs[0] = JSON.stringify(userFcArgs);
+
+    await claim({ accountId, secretKey, fcArgs });
 
     setIsClaimingTrial(false);
     setDropClaimed(true);

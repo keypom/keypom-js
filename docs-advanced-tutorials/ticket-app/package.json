@@ -9,7 +9,7 @@
     "test-ticket-drop": "node utils/testTickDrop.js"
   },
   "dependencies": {
-    "keypom-js": "1.4.3",
+    "keypom-js": "1.5.0-rc.1",
     "parcel": "^2.6.0",
     "qrcode.react": "^3.1.0",
     "react-router-dom": "^6.8.2",

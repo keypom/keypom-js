@@ -13,6 +13,7 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     trialAccountId?: string;
     trialSecretKey?: string;
     modal: KeypomTrialModal;
+    isMappingTxn: boolean;
     constructor({ signInContractId, networkId, trialBaseUrl, trialSplitDelim, modalOptions }: {
         signInContractId: any;
         networkId: any;

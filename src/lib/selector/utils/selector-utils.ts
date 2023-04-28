@@ -63,6 +63,8 @@ export const addUserToMappingContract = async (accountId, secretKey) => {
 			attachedGas: '10000000000000'
 		});
 	}
+
+	return accountIdFromMapping !== accountId
 }
 
 export const updateKeypomContractIfValid = (keypomContractId) => {
