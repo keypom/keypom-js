@@ -306,7 +306,7 @@ export const createTrialAccountDrop = async ({
 						public_key: "INSERT_TRIAL_PUBLIC_KEY",
 						allowance: "0",
 						receiver_id: "INSERT_NEW_ACCOUNT",
-						method_names: 'execute',
+						method_names: 'execute,create_account_and_claim',
 					}],
 				}
 			}),
