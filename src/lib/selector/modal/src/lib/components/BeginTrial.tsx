@@ -149,7 +149,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
                   borderColor: borderColor,
                 }}
               />
-              <span>{accountIdSuffix}</span>
+              <span>.{accountIdSuffix}</span>
             </div>
             <div
               style={{
@@ -163,20 +163,21 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             </div>
           </div>
           <div style={{ marginBottom: "32px" }} />
+          <div className="nws-modal-body wallet-info-wrapper what-wallet-hide ">
           <button
             disabled={borderColor === "red"}
-            className="middleButton wallet-info-wrapper what-wallet-hide nws-modal-body"
+            className="middleButton"
             onClick={handleSubmit}
             style={{
               width: "100%",
               padding: "8px",
-              border: "1px solid",
               borderRadius: "8px",
             }}
           >
             {customizations?.landing?.buttonText ||
               MODAL_DEFAULTS.beginTrial.landing.buttonText}
           </button>
+          </div>
         </div>
       </div>
     );
