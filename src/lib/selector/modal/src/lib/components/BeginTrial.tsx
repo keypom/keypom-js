@@ -1,12 +1,15 @@
-import React, { createRef, useState } from "react";
-import { accountExists } from "../../../../../keypom-utils";
-import { claimTrialAccountDrop } from "../../../../../trial-accounts/pre-trial";
+import React, { useState } from "react";
+import { claim } from "../../../../../claims";
+import { getEnv } from "../../../../../keypom";
+import { accountExists, getPubFromSecret } from "../../../../../keypom-utils";
+import { getCurMethodData } from "../../../../../views";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
-import { getEnv } from "../../../../../keypom";
 
-const ACCOUNT_ID_REGEX =
-  /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
+/**
+ * regex for the body of an account not including TLA and not allowing subaccount
+ */
+export const accountAddressPatternNoSubaccount = /^([a-z\d]+[-_])*[a-z\d]+$/;
 
 interface BeginTrialProps {
   customizations?: BeginTrialCustomizations;
@@ -28,46 +31,69 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   const [isClaimingTrial, setIsClaimingTrial] = useState(false);
   const [dropClaimed, setDropClaimed] = useState(false);
 
-  const [borderColor, setBorderColor] = useState("");
-  const [validAccountName, setValidAccountName] = useState(true);
-  const [doesAccountExist, setDoesAccountExist] = useState(false);
+  const [borderColor, setBorderColor] = useState("grey");
+  const [messageText, setMessageText] = useState<string>(
+    customizations?.landing?.subText?.landing ||
+    MODAL_DEFAULTS.beginTrial.landing.subText.landing
+  );
 
   const { networkId } = getEnv();
-  const accountIdSuffix = networkId == "testnet" ? ".testnet" : ".near";
+  const accountIdSuffix = networkId == "testnet" ? "testnet" : "near";
+  
+  const handleChangeInput = async (e) => {
+    let userInput = (e.target.value).toLowerCase();
+    setUserInput(userInput);
+    const actualAccountId = `${userInput}.${accountIdSuffix}`
+    setAccountId(actualAccountId);
 
-  const handleChangeInput = (e) => {
-    setDoesAccountExist(false);
-    let userInput = e.target.value;
-
-    let validInput = ACCOUNT_ID_REGEX.test(userInput) || userInput.length === 0;
-
-    if (!validInput) {
-      setValidAccountName(false);
-      setBorderColor("red");
+    if (!userInput.length) {
+      setMessageText(customizations?.landing?.subText?.landing ||
+        MODAL_DEFAULTS.beginTrial.landing.subText.landing);
+      setBorderColor("grey");
       return;
     }
 
-    setUserInput(userInput);
-    setAccountId(`${userInput}${accountIdSuffix}`);
+    const isValid = accountAddressPatternNoSubaccount.test(
+      userInput
+    );
+    if (!isValid) {
+      setMessageText(customizations?.landing?.subText?.invalidAccountId ||
+        MODAL_DEFAULTS.beginTrial.landing.subText.invalidAccountId);
+      setBorderColor("red");
+      return
+    };
 
-    setBorderColor("");
-    setValidAccountName(true);
+    const exists = await accountExists(actualAccountId);
+    if (exists) {
+      setMessageText(`${actualAccountId} is taken, try something else.`);
+      setBorderColor("red");
+      return;
+    }
+    
+    setMessageText(`${actualAccountId} is available!`);
+    setBorderColor("green");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const exists = await accountExists(accountId);
-    setDoesAccountExist(exists);
 
-    if (exists) {
-      setBorderColor("red");
-      return;
-    }
-
-    setBorderColor("green");
+    if (borderColor === "red") return
     setIsClaimingTrial(true);
 
-    await claimTrialAccountDrop({ desiredAccountId: accountId, secretKey });
+    const curMethodData = await getCurMethodData({secretKey})
+    console.log('curMethodData: ', curMethodData);
+
+    // create an array of null with the length of cur method data
+    const fcArgs = Array(curMethodData!.length).fill(null);
+
+    let userFcArgs = {
+      "INSERT_NEW_ACCOUNT": accountId,
+      "INSERT_TRIAL_PUBLIC_KEY": getPubFromSecret(secretKey)
+    }
+
+    fcArgs[0] = JSON.stringify(userFcArgs);
+
+    await claim({ accountId, secretKey, fcArgs });
 
     setIsClaimingTrial(false);
     setDropClaimed(true);
@@ -123,34 +149,35 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
                   borderColor: borderColor,
                 }}
               />
-              <span>{accountIdSuffix}</span>
+              <span>.{accountIdSuffix}</span>
             </div>
             <div
               style={{
                 position: "absolute",
                 top: "42px",
                 left: 0,
-                color: "red",
+                color: borderColor,
               }}
             >
-              {!validAccountName && <sub>Invalid character</sub>}
-              {doesAccountExist && <sub>Account already exists</sub>}
+              <sub>{messageText}</sub>
             </div>
           </div>
           <div style={{ marginBottom: "32px" }} />
+          <div className="nws-modal-body wallet-info-wrapper what-wallet-hide ">
           <button
+            disabled={borderColor === "red"}
             className="middleButton"
             onClick={handleSubmit}
             style={{
               width: "100%",
               padding: "8px",
-              border: "1px solid",
               borderRadius: "8px",
             }}
           >
             {customizations?.landing?.buttonText ||
               MODAL_DEFAULTS.beginTrial.landing.buttonText}
           </button>
+          </div>
         </div>
       </div>
     );

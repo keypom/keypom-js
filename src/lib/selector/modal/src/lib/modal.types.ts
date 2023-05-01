@@ -21,6 +21,12 @@ export interface BeginTrialCustomizations {
     body?: string;
     fieldPlaceholder?: string;
     buttonText?: string;
+    subText?: {
+      landing?: string;
+      invalidAccountId?: string;
+      accountIdTaken?: string;
+      accountIdAvailable?: string;
+    }
   },
   claiming?: {
       title?: string;
@@ -101,8 +107,12 @@ export const MODAL_DEFAULTS = {
     landing: {
       title: "Create an Account",
       body: "To start, enter a username.",
-      fieldPlaceholder: "Account ID",
+      fieldPlaceholder: "Account Name",
       buttonText: "Create",
+      subText: {
+        landing: "Customize your account name.",
+        invalidAccountId: "Invalid Character in Account Name."
+      }
     },
     claiming: {
         title: "Creating Account",
