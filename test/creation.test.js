@@ -1,3 +1,6 @@
+const path = require("path");
+const homedir = require("os").homedir();
+const { writeFile, mkdir, readFile } = require('fs/promises');
 const test = require('ava');
 const BN = require('bn.js');
 const nearAPI = require("near-api-js");
@@ -12,6 +15,7 @@ const {
 } = nearAPI;
 
 const keypom = require("../lib");
+const { connect, Account } = require("near-api-js");
 const {
 	execute,
 	initKeypom,
@@ -27,64 +31,34 @@ const {
 	addToBalance
 } = keypom
 
-/// funding account
-const accountId = process.env.TEST_ACCOUNT_ID
-const secretKey = process.env.TEST_ACCOUNT_PRVKEY
-const testKeyPair = KeyPair.fromString(secretKey)
-
-console.log('accountId', accountId)
-
-/// mocking browser for tests
-
-const _ls = {}
-window = {
-	localStorage: {
-		getItem: (k) => _ls[k],
-		setItem: (k, v) => _ls[k] = v,
-		removeItem: (k) => delete _ls[k],
-	},
-}
-localStorage = window.localStorage
-
-/// for testing of init NEAR here and pass in to initKeypom
-const networks = {
-	mainnet: {
-		networkId: 'mainnet',
-		viewAccountId: 'near',
-		nodeUrl: 'https://rpc.mainnet.near.org',
-		walletUrl: 'https://wallet.near.org',
-		helperUrl: 'https://helper.mainnet.near.org'
-	},
-	testnet: {
-		networkId: 'testnet',
-		viewAccountId: 'testnet',
-		nodeUrl: 'https://rpc.testnet.near.org',
-		walletUrl: 'https://wallet.testnet.near.org',
-		helperUrl: 'https://helper.testnet.near.org'
-	}
-}
-const network = 'testnet'
-const networkConfig = typeof network === 'string' ? networks[network] : network
-const keyStore = new InMemoryKeyStore()
-const near = new Near({
-	...networkConfig,
-	deps: { keyStore },
-});
+const NETWORK_ID = 'testnet'
+const funderAccountId = 'benjiman.testnet'
+const viewAccountId = NETWORK_ID == "mainnet" ? "near" : "testnet"
 
 /// all tests
-let fundingAccount, drops
+let fundingAccount;
 test('init', async (t) => {
-	await initKeypom({
-		// near,
-		network: 'testnet',
-		funder: {
-			accountId,
-			secretKey,
-		}
-	})
+    // Initiate connection to the NEAR blockchain.
+    const CREDENTIALS_DIR = ".near-credentials";
+    const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-	const { fundingAccount: keypomFundingAccount } = getEnv()
-	fundingAccount = keypomFundingAccount
+    let keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+
+    let nearConfig = {
+        networkId: NETWORK_ID,
+        keyStore: keyStore,
+        nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
+        walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
+        helperUrl: `https://helper.${NETWORK_ID}.near.org`,
+        explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
+    };  
+
+    let near = await connect(nearConfig);
+    fundingAccount = new Account(near.connection, funderAccountId)
+
+	await initKeypom({
+		near
+	})
 
 	t.true(true)
 });
@@ -97,6 +71,7 @@ test('token drop', async (t) => {
     const masterKey = "MASTER_KEY";
 
     const {dropId} = await createDrop({
+        account: fundingAccount,
         numKeys: 0,
         metadata: JSON.stringify({
             dropName,
@@ -116,6 +91,7 @@ test('token drop', async (t) => {
             autoMetaNonceStart: keysAdded
         })
         await addKeys({
+            account: fundingAccount,
             dropId,
             publicKeys
         })
@@ -126,12 +102,19 @@ test('token drop', async (t) => {
 
     const {contractId} = getEnv();
 
-    let URLs = keypom.formatLinkdropUrl({
-        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
-        contractId,
-        secretKeys: allSecretKeys
-    })
-    console.log('TOKEN DROP URLS: ', URLs)
+    const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
+
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
+
+    let stringToWrite = ""
+    // Loop through each secret key
+    var i = 0;
+    for (const sk of secretKeysStripped) {
+        stringToWrite += sk + "\n";
+        i++;
+    }
+
+    await writeFile(path.resolve(__dirname, `token_links.json`), stringToWrite);
     
 	t.true(true);
 });
@@ -148,6 +131,7 @@ test('NFT drop', async (t) => {
     const nftMediaIPFSHash = "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq";
 
     const {dropId} = await createDrop({
+        account: fundingAccount,
         numKeys: 0,
         metadata: JSON.stringify({
             dropName,
@@ -157,12 +141,12 @@ test('NFT drop', async (t) => {
         fcData: {
             methods: [[
                 {
-                    receiverId: `nft-v2.keypom.testnet`,
+                    receiverId: `nft-v2.keypom.${viewAccountId}`,
                     methodName: "nft_mint",
                     args: "",
                     dropIdField: "mint_id",
                     accountIdField: "receiver_id",
-                    attachedDeposit: parseNearAmount("0.1")
+                    attachedDeposit: parseNearAmount("0.008")
                 }
             ]]
         }
@@ -179,6 +163,7 @@ test('NFT drop', async (t) => {
             autoMetaNonceStart: keysAdded
         })
         await addKeys({
+            account: fundingAccount,
             dropId,
             publicKeys
         })
@@ -188,6 +173,7 @@ test('NFT drop', async (t) => {
     }
 
     await keypom.createNFTSeries({
+        account: fundingAccount,
         dropId,
         metadata: {
             title: nftTitle,
@@ -198,12 +184,19 @@ test('NFT drop', async (t) => {
 
     const {contractId} = getEnv();
 
-    let URLs = keypom.formatLinkdropUrl({
-        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
-        contractId,
-        secretKeys: allSecretKeys
-    })
-    console.log('NFT DROP URLS: ', URLs)
+    const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
+
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
+
+    let stringToWrite = ""
+    // Loop through each secret key
+    var i = 0;
+    for (const sk of secretKeysStripped) {
+        stringToWrite += sk + "\n";
+        i++;
+    }
+
+    await writeFile(path.resolve(__dirname, `nft_links.json`), stringToWrite);
 
 	t.true(true);
 });
@@ -221,6 +214,7 @@ test('Ticket drops', async (t) => {
     const nftMediaIPFSHash = "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq";
 
     const {dropId} = await createDrop({
+        account: fundingAccount,
         numKeys: 0,
         metadata: JSON.stringify({
             dropName,
@@ -236,12 +230,12 @@ test('Ticket drops', async (t) => {
                 null,
                 [
                     {
-                        receiverId: `nft-v2.keypom.testnet`,
+                        receiverId: `nft-v2.keypom.${viewAccountId}`,
                         methodName: "nft_mint",
                         args: "",
                         dropIdField: "mint_id",
                         accountIdField: "receiver_id",
-                        attachedDeposit: parseNearAmount("0.1")
+                        attachedDeposit: parseNearAmount("0.008")
                     }
                 ]
             ]
@@ -259,9 +253,10 @@ test('Ticket drops', async (t) => {
             autoMetaNonceStart: keysAdded
         })
         await addKeys({
+            account: fundingAccount,
             dropId,
             publicKeys,
-            basePassword: "event-password",
+            basePassword: eventPassword,
             passwordProtectedUses: [2]
         })
         keysAdded += keysToAdd;
@@ -270,6 +265,7 @@ test('Ticket drops', async (t) => {
     }
 
     await keypom.createNFTSeries({
+        account: fundingAccount,
         dropId,
         metadata: {
             title: nftTitle,
@@ -280,12 +276,19 @@ test('Ticket drops', async (t) => {
 
     const {contractId} = getEnv();
 
-    let URLs = keypom.formatLinkdropUrl({
-        customURL: "https://testnet.keypom-airfoil.pages.dev/claim/CONTRACT_ID#SECRET_KEY",
-        contractId,
-        secretKeys: allSecretKeys
-    })
-    console.log('TICKET DROP URLS: ', URLs)
+    const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
+
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
+
+    let stringToWrite = ""
+    // Loop through each secret key
+    var i = 0;
+    for (const sk of secretKeysStripped) {
+        stringToWrite += sk + "\n";
+        i++;
+    }
+
+    await writeFile(path.resolve(__dirname, `ticket_links.json`), stringToWrite);
 
 	t.true(true);
 });
