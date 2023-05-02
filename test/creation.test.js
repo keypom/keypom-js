@@ -67,12 +67,16 @@ test('token drop', async (t) => {
     const wallets = ["mynearwallet", "herewallet"];
     const dropName = "My Cool Drop Name";
     const depositPerUseNEAR = 0.1;
-    const numKeys = 50;
+    const numKeys = 10;
+    const usesPerKey = 50;
     const masterKey = "MASTER_KEY";
 
     const {dropId} = await createDrop({
         account: fundingAccount,
         numKeys: 0,
+        config: {
+            usesPerKey
+        },
         metadata: JSON.stringify({
             dropName,
             wallets
@@ -124,6 +128,7 @@ test('NFT drop', async (t) => {
     const dropName = "My Cool Drop Name";
     const depositPerUseNEAR = 0.1;
     const numKeys = 50;
+    const usesPerKey = 1;
     const masterKey = "MASTER_KEY";
     
     const nftTitle = "Moon NFT!";
@@ -137,6 +142,9 @@ test('NFT drop', async (t) => {
             dropName,
             wallets
         }),
+        config: {
+            usesPerKey
+        },
         depositPerUseNEAR,
         fcData: {
             methods: [[
@@ -206,6 +214,7 @@ test('Ticket drops', async (t) => {
     const dropName = "My Cool Drop Name";
     const depositPerUseNEAR = 0.1;
     const numKeys = 50;
+    const usesPerKey = 3;
     const masterKey = "MASTER_KEY";
     
     const eventPassword = "event-password";
@@ -221,7 +230,7 @@ test('Ticket drops', async (t) => {
             wallets
         }),
         config: {
-            usesPerKey: 3
+            usesPerKey
         },
         depositPerUseNEAR,
         fcData: {
