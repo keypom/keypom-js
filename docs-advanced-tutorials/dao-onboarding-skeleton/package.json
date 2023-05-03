@@ -1,0 +1,14 @@
+{
+  "name": "dao-onboarding",
+  "version": "1.0.0",
+  "description": "Keypom DAO onboarding",
+  "main": "index.js",
+  "author": "Min Qian Lu",
+  "license": "MIT",
+  "dependencies": {
+    "keypom-js": "^1.4.3"
+  },
+  "scripts": {
+    "daotest": "node sputnikPreTest && node daoScript"
+  }
+}
