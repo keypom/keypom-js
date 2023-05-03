@@ -14,7 +14,7 @@ const {
 } = keypom
 
 // Change this to your account ID
-const FUNDER_ACCOUNT_ID = "minqianlu.testnet";
+const FUNDER_ACCOUNT_ID = "minqi.testnet";
 const NETWORK_ID = "testnet";
 async function createTickDrop() {
     // Initiate connection to the NEAR blockchain.
@@ -54,7 +54,7 @@ async function createTickDrop() {
             methods: [
                 [
                     {
-                        receiverId: DAO_BOT_CONTRACT,
+                        receiverId: "keypom-dao-bot.testnet",
                         methodName: "new_proposal",
                         args: JSON.stringify({
                             dao_contract: DEV_CONTRACT,
