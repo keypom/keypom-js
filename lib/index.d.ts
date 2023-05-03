@@ -4,9 +4,9 @@ export { addToBalance, withdrawBalance } from "./lib/balances";
 export { generateKeys, estimateRequiredDeposit, getStorageBase, ftTransferCall, nftTransferCall, hashPassword, accountExists, getNFTMetadata, getFTMetadata, getPubFromSecret, createNFTSeries, formatLinkdropUrl, exportedNearAPI as nearAPI } from "./lib/keypom-utils";
 export declare const 
 /** @group Utility */
-parseNearAmount: typeof import("near-api-js/lib/utils/format").parseNearAmount, 
+parseNearAmount: typeof import("@near-js/utils").parseNearAmount, 
 /** @group Utility */
-formatNearAmount: typeof import("near-api-js/lib/utils/format").formatNearAmount;
+formatNearAmount: typeof import("@near-js/utils").formatNearAmount;
 export { useKeypom, KeypomContextProvider, } from './components/KeypomContext';
 export { createDrop, deleteDrops, } from "./lib/drops";
 export { createTrialAccountDrop, claimTrialAccountDrop } from "./lib/trial-accounts/pre-trial";

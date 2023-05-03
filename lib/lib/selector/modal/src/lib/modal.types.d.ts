@@ -17,6 +17,12 @@ export interface BeginTrialCustomizations {
         body?: string;
         fieldPlaceholder?: string;
         buttonText?: string;
+        subText?: {
+            landing?: string;
+            invalidAccountId?: string;
+            accountIdTaken?: string;
+            accountIdAvailable?: string;
+        };
     };
     claiming?: {
         title?: string;
@@ -87,6 +93,10 @@ export declare const MODAL_DEFAULTS: {
             body: string;
             fieldPlaceholder: string;
             buttonText: string;
+            subText: {
+                landing: string;
+                invalidAccountId: string;
+            };
         };
         claiming: {
             title: string;
