@@ -1,11 +1,5 @@
 import { FinalExecutionOutcome, InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
 import BN from "bn.js";
-import { Account, KeyPair, Near } from "near-api-js";
-import { BrowserLocalStorageKeyStore } from "near-api-js/lib/key_stores/browser_local_storage_key_store";
-import { initKeypom, networks } from "../../keypom";
-import { viewAccessKeyData } from "../../keypom-utils";
-import { trialSignAndSendTxns } from "../../trial-accounts/trial-active";
-import { isUnclaimedTrialDrop, TRIAL_ERRORS } from "../../trial-accounts/utils";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
 import { addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, KEYPOM_LOCAL_STORAGE_KEY, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";

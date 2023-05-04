@@ -1,8 +1,4 @@
 import React, { useState } from "react";
-import { claim } from "../../../../../claims";
-import { getEnv } from "../../../../../keypom";
-import { accountExists, getPubFromSecret } from "../../../../../keypom-utils";
-import { getCurMethodData } from "../../../../../views";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
 

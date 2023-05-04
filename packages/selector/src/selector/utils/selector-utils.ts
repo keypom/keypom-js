@@ -1,24 +1,4 @@
-import * as nearAPI from "near-api-js";
-const {
-	Near,
-	KeyPair,
-	keyStores: { BrowserLocalStorageKeyStore },
-	transactions: { addKey, deleteKey, functionCallAccessKey },
-	utils,
-	transactions: nearTransactions,
-	utils: {
-		PublicKey,
-		format: { parseNearAmount, formatNearAmount },
-	},
-} = nearAPI;
-
-
 import { BN } from "bn.js";
-import { accountMappingContract, getEnv, updateKeypomContractId } from "../../keypom";
-import { getKeyInformation } from "../../views";
-import { isValidKeypomContract } from "../../checks";
-import { trialCallMethod } from "../../trial-accounts/trial-active";
-import { getPubFromSecret } from "../../keypom-utils";
 
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 

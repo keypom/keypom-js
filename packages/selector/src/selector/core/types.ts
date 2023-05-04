@@ -1,6 +1,5 @@
 import { InstantLinkWallet, NetworkId, Transaction } from "@near-wallet-selector/core";
 import BN from "bn.js";
-import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { BeginTrialCustomizations, InsufficientBalanceCustomizations, InvalidActionCustomizations, OffboardingWallet, TrialOverCustomizations } from "../modal/src/lib/modal.types";
 import { KeypomWallet } from "./wallet";
 

@@ -1,7 +1,7 @@
 {
   "name": "@keypom-js/monorepo",
   "author": "benkurrek, mattlockyer",
-  "private": "true",
+  "private": true,
   "engines": {
     "node": ">=16.14.0",
     "pnpm": ">=7"

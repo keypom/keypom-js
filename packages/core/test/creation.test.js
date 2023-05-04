@@ -1,45 +1,45 @@
-const path = require("path");
-const homedir = require("os").homedir();
+const path = require('path');
+const homedir = require('os').homedir();
 const { writeFile, mkdir, readFile } = require('fs/promises');
 const test = require('ava');
 const BN = require('bn.js');
-const nearAPI = require("near-api-js");
+const nearAPI = require('near-api-js');
 const { getUserBalance, getCurMethodData, canUserAddKeys, addToSaleAllowlist, removeFromSaleAllowlist, addToSaleBlocklist, removeFromSaleBlocklist, updateSale, getDropSupplyForOwner } = require('../lib');
 const {
-	Near,
-	KeyPair,
-	utils: { format: {
-		parseNearAmount
-	} },
-	keyStores: { InMemoryKeyStore },
+    Near,
+    KeyPair,
+    utils: { format: {
+        parseNearAmount
+    } },
+    keyStores: { InMemoryKeyStore },
 } = nearAPI;
 
-const keypom = require("../lib");
-const { connect, Account } = require("near-api-js");
+const keypom = require('../lib');
+const { connect, Account } = require('near-api-js');
 const {
-	execute,
-	initKeypom,
-	getEnv,
-	createDrop,
-	getDrops,
-	claim,
-	deleteKeys,
-	deleteDrops,
-	addKeys,
-	generateKeys,
-	withdrawBalance,
-	addToBalance
-} = keypom
+    execute,
+    initKeypom,
+    getEnv,
+    createDrop,
+    getDrops,
+    claim,
+    deleteKeys,
+    deleteDrops,
+    addKeys,
+    generateKeys,
+    withdrawBalance,
+    addToBalance
+} = keypom;
 
-const NETWORK_ID = 'testnet'
-const funderAccountId = 'foo.benjiman.testnet'
-const viewAccountId = NETWORK_ID == "mainnet" ? "near" : "testnet"
+const NETWORK_ID = 'testnet';
+const funderAccountId = 'foo.benjiman.testnet';
+const viewAccountId = NETWORK_ID == 'mainnet' ? 'near' : 'testnet';
 
 /// all tests
 let fundingAccount;
 test('init', async (t) => {
     // Initiate connection to the NEAR blockchain.
-    const CREDENTIALS_DIR = ".near-credentials";
+    const CREDENTIALS_DIR = '.near-credentials';
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
     let keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
@@ -54,27 +54,27 @@ test('init', async (t) => {
     };  
 
     let near = await connect(nearConfig);
-    fundingAccount = new Account(near.connection, funderAccountId)
+    fundingAccount = new Account(near.connection, funderAccountId);
 
-	await initKeypom({
-		near
-	})
+    await initKeypom({
+        near
+    });
 
-	t.true(true)
+    t.true(true);
 });
 
 test('token drop', async (t) => {
-    const wallets = ["mynearwallet", "herewallet"];
-    const dropName = "My Cool Drop Name";
+    const wallets = ['mynearwallet', 'herewallet'];
+    const dropName = 'My Cool Drop Name';
     const depositPerUseNEAR = 0.1;
     const numKeys = 1;
     const usesPerKey = 1;
-    const masterKey = "MASTER_KEY";
+    const masterKey = 'MASTER_KEY';
 
     await deleteDrops({
         account: fundingAccount,
-        dropIds: ["1683121703062"]
-    })
+        dropIds: ['1683121703062']
+    });
 
     const {dropId} = await createDrop({
         account: fundingAccount,
@@ -91,7 +91,7 @@ test('token drop', async (t) => {
             wallets
         }),
         depositPerUseNEAR,
-    })
+    });
 
     let allSecretKeys = [];
     // Loop through in intervals of 50 until numKeys is reached
@@ -102,12 +102,12 @@ test('token drop', async (t) => {
             numKeys: keysToAdd,
             rootEntropy: `${masterKey}-${dropId}`,
             autoMetaNonceStart: keysAdded
-        })
+        });
         await addKeys({
             account: fundingAccount,
             dropId,
             publicKeys
-        })
+        });
         keysAdded += keysToAdd;
 
         allSecretKeys = allSecretKeys.concat(secretKeys);
@@ -115,37 +115,37 @@ test('token drop', async (t) => {
 
     const {contractId} = getEnv();
 
-    const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
+    const baseUrl = NETWORK_ID === 'testnet' ? 'https://testnet.keypom-airfoil.pages.dev/claim' : 'https://keypom.xyz/claim';
 
-    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(':')[1]}`);
 
-    let stringToWrite = ""
+    let stringToWrite = '';
     // Loop through each secret key
     var i = 0;
     for (const sk of secretKeysStripped) {
-        stringToWrite += sk + "\n";
+        stringToWrite += sk + '\n';
         i++;
     }
     
     let userBal = await getUserBalance({
         accountId: funderAccountId
-    })
-    console.log('userBal before: ', userBal)
+    });
+    console.log('userBal before: ', userBal);
     
     await claim({
         secretKey: allSecretKeys[0],
-        accountId: "benjiman.testnet"
-    })
+        accountId: 'benjiman.testnet'
+    });
 
     userBal = await getUserBalance({
         accountId: funderAccountId
-    })
-    console.log('userBal after: ', userBal)
+    });
+    console.log('userBal after: ', userBal);
 
 
-    await writeFile(path.resolve(__dirname, `token_links.json`), stringToWrite);
+    await writeFile(path.resolve(__dirname, 'token_links.json'), stringToWrite);
     
-	t.true(true);
+    t.true(true);
 });
 
 // test('NFT drop', async (t) => {

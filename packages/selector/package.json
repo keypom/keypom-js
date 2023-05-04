@@ -27,10 +27,9 @@
   "author": "benkurrek, mattlockyer",
   "license": "MIT",
   "dependencies": {
-    "bn.js": "^5.2.1",
-    "near-seed-phrase": "^0.2.0",
-    "util": "^0.12.5",
-    "@near-wallet-selector/core": "^7.9.1"
+    "@keypom/core": "workspace:*",
+    "@near-wallet-selector/core": "^8.0.3",
+    "bn.js": "^5.2.1"
   },
   "ava": {
     "require": [
