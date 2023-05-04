@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteKeys = exports.addKeys = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
-//import { Account } from "near-api-js";
+const utils_1 = require("@near-js/utils");
 const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 const keypom_utils_1 = require("./keypom-utils");
@@ -197,7 +197,7 @@ const addKeys = ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenI
         numKeys,
         usesPerKey: uses_per_key,
         attachedGas: parseInt(required_gas),
-        storage: parseNearAmount("0.2"),
+        storage: (0, utils_1.parseNearAmount)("0.2"),
         fcData: camelFCData,
         ftData: camelFTData,
     });
@@ -206,7 +206,7 @@ const addKeys = ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenI
         ? new bn_js_1.default(extraDepositYocto)
         : new bn_js_1.default("0");
     if (extraDepositNEAR) {
-        extraDepositYocto = new bn_js_1.default(parseNearAmount(extraDepositNEAR.toString()));
+        extraDepositYocto = new bn_js_1.default((0, utils_1.parseNearAmount)(extraDepositNEAR.toString()));
     }
     requiredDeposit = new bn_js_1.default(requiredDeposit).add(extraDepositYocto).toString();
     var hasBalance = false;

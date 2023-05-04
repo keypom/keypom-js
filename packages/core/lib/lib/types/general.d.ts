@@ -1,6 +1,9 @@
-import { Account, Connection, Near } from "near-api-js";
-import { KeyStore } from "near-api-js/lib/key_stores";
-import { KeyPair } from "near-api-js/lib/utils";
+import { Connection } from "@near-js/accounts";
+import { KeyPair } from "@near-js/crypto";
+import { KeyStore } from "@near-js/keystores";
+import { Action } from "@near-js/transactions";
+import { Near } from "@near-js/wallet-account";
+import { Account } from "@near-wallet-selector/core";
 export declare type NearKeyPair = KeyPair;
 /**
  * For each generated KeyPair (either through `createDrop`, `addKeys` or `generateKeys`), the public and private keys are returned.
@@ -91,4 +94,9 @@ export interface ContractSourceMetadata {
     version: string;
     /** Link to the specific commit and code on GitHub that is deployed to the Keypom account */
     link: string;
+}
+export interface BasicTransaction {
+    receiverId: string;
+    signerId: string;
+    actions: Action[];
 }

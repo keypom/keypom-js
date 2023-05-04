@@ -15,7 +15,7 @@ exports.updateSale = exports.removeFromSaleBlocklist = exports.addToSaleBlocklis
 // } from "near-api-js/lib/utils/format";
 const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
-//import { Account } from "near-api-js";
+const utils_1 = require("@near-js/utils");
 const views_1 = require("./views");
 /**
  * Add a list of account IDs to a drop's sale allowlist. If the allowlist is empty, anyone can purchase keys. The sale object must exist in the drop's config for this to go through.
@@ -297,7 +297,7 @@ const updateSale = ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pric
                 drop_id: dropId,
                 max_num_keys: maxNumKeys,
                 price_per_key: pricePerKeyYocto || pricePerKeyNEAR
-                    ? parseNearAmount(pricePerKeyNEAR.toString())
+                    ? (0, utils_1.parseNearAmount)(pricePerKeyNEAR.toString())
                     : undefined,
                 auto_withdraw_funds: autoWithdrawFunds,
                 start,

@@ -1,47 +1,50 @@
 import BN from "bn.js";
 //import * as nearAPI from "near-api-js";
 
-import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import {
-	BrowserWalletBehaviour,
-	Wallet
+    BrowserWalletBehaviour,
+    Wallet
 } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 //import { Account } from "near-api-js";
+import { Account } from "@near-js/accounts";
+import { Transaction, stringifyJsonOrBytes } from "@near-js/transactions";
+import { parseNearAmount } from "@near-js/utils";
 import {
-	assert,
-	assertDropIdUnique,
-	assertValidDropConfig,
-	assertValidFCData,
-	isSupportedKeypomContract,
-	isValidAccountObj
+    assert,
+    assertDropIdUnique,
+    assertValidDropConfig,
+    assertValidFCData,
+    isSupportedKeypomContract,
+    isValidAccountObj
 } from "./checks";
 import { getEnv } from "./keypom";
 import {
-	estimateRequiredDeposit,
-	ftTransferCall,
-	generateKeys,
-	generatePerUsePasswords,
-	getStorageBase,
-	key2str,
-	keypomView,
-	nearArgsToYocto,
-	nftTransferCall,
-	parseFTAmount
+    convertBasicTransaction,
+    estimateRequiredDeposit,
+    ftTransferCall,
+    generateKeys,
+    generatePerUsePasswords,
+    getStorageBase,
+    key2str,
+    keypomView,
+    nearArgsToYocto,
+    nftTransferCall,
+    parseFTAmount
 } from "./keypom-utils";
 import { DropConfig } from "./types/drops";
 import { FCData } from "./types/fc";
 import { FTData } from "./types/ft";
+import { BasicTransaction } from "./types/general";
 import { NFTData } from "./types/nft";
 import { CreateDropProtocolArgs, CreateOrAddReturn } from "./types/params";
 import {
-	ProtocolReturnedDrop,
-	ProtocolReturnedDropConfig,
-	ProtocolReturnedMethod
+    ProtocolReturnedDrop,
+    ProtocolReturnedDropConfig,
+    ProtocolReturnedMethod
 } from "./types/protocol";
 import { SimpleData } from "./types/simple";
 import { getDropInformation, getUserBalance } from "./views";
-import { Account } from "@near-js/accounts";
-import { parseNearAmount } from "@near-js/utils";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const KEY_LIMIT = 50;
@@ -478,21 +481,24 @@ export const createDrop = async ({
 
     let transactions: Transaction[] = [];
 
-    transactions.push({
+    const pk = await account.connection.signer.getPublicKey();
+    const txnInfo: BasicTransaction = {
         receiverId: receiverId!,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "create_drop",
-                    args: createDropArgs,
+                    args: stringifyJsonOrBytes(createDropArgs),
                     gas: gas!,
                     deposit,
-                },
+                }
             },
         ],
-    });
+    }
+
+    transactions.push(await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk}));
 
     if (ftData?.contractId && publicKeys?.length) {
         transactions.push(

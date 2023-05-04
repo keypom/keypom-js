@@ -1,4 +1,5 @@
 import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
+import { Account } from "@near-js/accounts";
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 declare type AnyWallet = BrowserWalletBehaviour | Wallet;

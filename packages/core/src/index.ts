@@ -6,7 +6,7 @@ export {
 	execute, getEnv, initKeypom, supportedLinkdropClaimPages, updateFunder, updateKeypomContractId
 } from "./lib/keypom";
 export {
-	accountExists, createNFTSeries, estimateRequiredDeposit, exportedNearAPI as nearAPI, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall
+	accountExists, createNFTSeries, estimateRequiredDeposit, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall
 } from "./lib/keypom-utils";
 export { addKeys, deleteKeys } from "./lib/keys";
 export * from "./lib/sales";
@@ -26,11 +26,4 @@ export * from "./lib/types/params";
 export * from "./lib/types/protocol";
 export * from "./lib/types/simple";
 export * from "./lib/views";
-import { exportedNearAPI } from "./lib/keypom-utils";
-export const {
-    /** @group Utility */
-    parseNearAmount,
-    /** @group Utility */
-    formatNearAmount,
-} = exportedNearAPI.utils.format;
 

@@ -1,4 +1,3 @@
-import { Transaction } from "@near-wallet-selector/core";
 import {
     BrowserWalletBehaviour,
     Wallet,
@@ -15,6 +14,7 @@ import {
     ProtocolReturnedSimpleData,
 } from "./protocol";
 import { Account } from "@near-js/accounts";
+import { Transaction } from "@near-js/transactions";
 
 export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 

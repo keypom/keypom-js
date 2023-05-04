@@ -1,5 +1,4 @@
 //import { SignAndSendTransactionOptions } from "@near-api-js/lib/account";
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import {
     BrowserWalletBehaviour,
     Wallet
@@ -25,6 +24,7 @@ import { KeyPair, PublicKey } from "@near-js/crypto";
 import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
 import { parseNearAmount } from "@near-js/utils";
 import { Near } from "@near-js/wallet-account";
+import { FinalExecutionOutcome } from "@near-js/types";
 import { actionCreators, Action, Transaction, stringifyJsonOrBytes, createTransaction } from "@near-js/transactions";
 import { baseDecode } from 'borsh';
 
@@ -268,27 +268,31 @@ export const createNFTSeries = async ({
     const nftSeriesAccount =
         networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
 
-    const tx: Transaction = {
+    const pk = await account.connection.signer.getPublicKey();
+    const txnInfo: BasicTransaction = {
         receiverId: nftSeriesAccount,
-        signerId: account!.accountId,
+        signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "create_series",
-                    args: {
+                    args: stringifyJsonOrBytes({
                         mint_id: parseInt(dropId),
                         metadata: actualMetadata,
                         royalty,
-                    },
+                    }),
                     gas: "50000000000000",
                     deposit: parseNearAmount("0.25")!,
-                },
+                }
             },
         ],
-    };
+    }
 
-    return execute({ account: account!, transactions: [tx] }) as Promise<
+    const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
+
+
+    return execute({ account: account!, transactions: [transaction] }) as Promise<
         void | FinalExecutionOutcome[]
     >;
 };
@@ -808,28 +812,31 @@ export const ftTransferCall = async ({
         absoluteAmount = parseFTAmount(amount, metadata.decimals);
     }
 
-    const tx: Transaction = {
+    const pk = await account.connection.signer.getPublicKey();
+    const txnInfo: BasicTransaction = {
         receiverId: contractId,
-        signerId: account!.accountId,
+        signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "ft_transfer_call",
-                    args: {
+                    args: stringifyJsonOrBytes({
                         receiver_id: keypomContractId,
                         amount: absoluteAmount,
                         msg: dropId.toString(),
-                    },
+                    }),
                     gas: "50000000000000",
                     deposit: "1",
-                },
+                }
             },
         ],
-    };
+    }
 
-    if (returnTransaction) return tx;
-    return execute({ account: account!, transactions: [tx] }) as Promise<
+    const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
+
+    if (returnTransaction) return transaction;
+    return execute({ account: account!, transactions: [transaction] }) as Promise<
         void | FinalExecutionOutcome[]
     >;
 };
@@ -904,9 +911,10 @@ export const nftTransferCall = async ({
 
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const tx: Transaction = {
+        const pk = await account.connection.signer.getPublicKey();
+        const txnInfo: BasicTransaction = {
             receiverId: contractId,
-            signerId: account!.accountId,
+            signerId: account!.accountId, // We know this is not undefined since getAccount throws
             actions: [
                 {
                     enum: "FunctionCall",
@@ -922,8 +930,11 @@ export const nftTransferCall = async ({
                     }
                 },
             ],
-        };
-        transactions.push(tx);
+        }
+
+        const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
+
+        transactions.push(transaction);
         if (returnTransactions) continue;
 
         responses.push(
@@ -1402,6 +1413,35 @@ export const nearArgsToYocto = (
     return yoctoToReturn;
 };
 
+export const convertBasicTransaction = async ({ 
+    txnInfo, 
+    signerId, 
+    signerPk 
+}: {
+    txnInfo: BasicTransaction;
+    signerId: string;
+    signerPk: PublicKey;
+}) => {
+    const { near } = getEnv();
+
+    const account = new Account(near!.connection, signerId);
+    const { provider } = account.connection;
+
+    const actions = txnInfo.actions.map((action) =>
+        createAction(action)
+    );
+
+    const block = await provider.block({ finality: "final" });
+
+    const accessKey: any = await provider.query(
+        `access_key/${signerId}/${signerPk}`,
+        ""
+    );
+
+    return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + 1, actions, baseDecode(block.header.hash))
+};
+
+
 export const createTransactions = ({ 
     txnInfos, 
     signerId, 
@@ -1413,11 +1453,11 @@ export const createTransactions = ({
 }) => {
     const { near } = getEnv();
 
-    const account = new Account(near!.connection, signerId);
-    const { provider } = account.connection;
-
     return Promise.all(
         txnInfos.map(async (txnInfo, index) => {
+            const account = new Account(near!.connection, signerId);
+            const { provider } = account.connection;
+
             const actions = txnInfo.actions.map((action) =>
                 createAction(action)
             );

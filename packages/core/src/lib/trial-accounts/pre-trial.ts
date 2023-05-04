@@ -1,10 +1,13 @@
-import { Transaction } from "@near-wallet-selector/core";
 import {
     BrowserWalletBehaviour,
     Wallet,
 } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 import BN from "bn.js";
 //import { Account, KeyPair } from "near-api-js";
+import { Account } from "@near-js/accounts";
+import { KeyPair } from "@near-js/crypto";
+import { stringifyJsonOrBytes } from "@near-js/transactions";
+import { parseNearAmount } from "@near-js/utils";
 import {
     assert,
     assertDropIdUnique,
@@ -14,6 +17,7 @@ import {
 } from "../checks";
 import { accountMappingContract, getEnv } from "../keypom";
 import {
+    convertBasicTransaction,
     estimateRequiredDeposit,
     generateKeys,
     getStorageBase,
@@ -21,13 +25,11 @@ import {
 } from "../keypom-utils";
 import { DropConfig } from "../types/drops";
 import { FCData } from "../types/fc";
+import { BasicTransaction } from "../types/general";
 import { CreateDropProtocolArgs, CreateOrAddReturn } from "../types/params";
 import { ProtocolReturnedDropConfig } from "../types/protocol";
 import { getDropInformation, getUserBalance } from "../views";
 import { wrapTxnParamsForTrial } from "./utils";
-import { Account } from "@near-js/accounts";
-import { parseNearAmount } from "@near-js/utils";
-import { KeyPair } from "@near-js/crypto";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const KEY_LIMIT = 50;
@@ -426,23 +428,23 @@ export const createTrialAccountDrop = async ({
 
     const deposit = !hasBalance ? requiredDeposit : "0";
 
-    let transactions: Transaction[] = [];
-
-    transactions.push({
-        receiverId: receiverId!,
+    const pk = await account.connection.signer.getPublicKey();
+    const txnInfo: BasicTransaction = {
+        receiverId,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "create_drop",
-                    args: createDropArgs,
+                    args: stringifyJsonOrBytes(createDropArgs),
                     gas: gas!,
                     deposit,
-                },
+                }
             },
         ],
-    });
+    }
+    const transactions = [await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk})];
 
     if (returnTransactions) {
         return { keys, dropId, transactions, requiredDeposit };

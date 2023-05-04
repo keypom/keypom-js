@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.assertDropIdUnique = exports.assertValidFCData = exports.assertValidDropConfig = exports.assert = exports.isValidFunderObject = exports.isValidNearObject = exports.isValidAccountObj = exports.isSupportedKeypomContract = exports.isValidKeypomContract = void 0;
-//import { Account, Near } from "near-api-js";
 const keypom_1 = require("./keypom");
 function isValidKeypomContract(keypomContractId) {
     const { networkId } = (0, keypom_1.getEnv)();

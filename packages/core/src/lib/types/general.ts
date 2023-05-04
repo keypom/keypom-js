@@ -104,6 +104,6 @@ export interface ContractSourceMetadata {
 
 export interface BasicTransaction {
     receiverId: string;
-    methodName: string;
+    signerId: string;
     actions: Action[];
 }

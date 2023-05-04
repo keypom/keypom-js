@@ -14,6 +14,7 @@ exports.canExitTrial = exports.trialCallMethod = exports.trialSignAndSendTxns = 
 const keypom_1 = require("../keypom");
 const keypom_utils_1 = require("../keypom-utils");
 const utils_1 = require("./utils");
+const crypto_1 = require("@near-js/crypto");
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
  * cannot be executed by the trial account (e.g. the attached deposit exceeds the trial account's restrictions), this will throw an error.
@@ -128,7 +129,7 @@ const trialSignAndSendTxns = ({ trialAccountId, trialAccountSecretKey, txns, }) 
     if (hasBal == false) {
         throw utils_1.TRIAL_ERRORS.INSUFFICIENT_BALANCE;
     }
-    const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);
+    const trialKeyPair = crypto_1.KeyPair.fromString(trialAccountSecretKey);
     const pubKey = trialKeyPair.getPublicKey();
     yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
     const account = yield near.account(trialAccountId);
@@ -260,7 +261,7 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
     if (hasBal == false) {
         throw utils_1.TRIAL_ERRORS.INSUFFICIENT_BALANCE;
     }
-    const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);
+    const trialKeyPair = crypto_1.KeyPair.fromString(trialAccountSecretKey);
     const pubKey = trialKeyPair.getPublicKey();
     yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
     const account = yield near.account(trialAccountId);

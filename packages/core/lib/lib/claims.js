@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.claim = void 0;
 //import * as nearAPI from "near-api-js";
+const crypto_1 = require("@near-js/crypto");
 const checks_1 = require("./checks");
 //const { KeyPair } = nearAPI;
 const keypom_1 = require("./keypom");
@@ -116,7 +117,7 @@ const views_1 = require("./views");
  */
 const claim = ({ secretKey, accountId, newAccountId, newPublicKey, password, fcArgs, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { networkId, keyStore, contractId, contractAccount, receiverId, execute, } = (0, keypom_1.getEnv)();
-    const keyPair = KeyPair.fromString(secretKey);
+    const keyPair = crypto_1.KeyPair.fromString(secretKey);
     yield keyStore.setKey(networkId, contractId, keyPair);
     (0, checks_1.assert)(secretKey, "A secretKey must be passed in.");
     (0, checks_1.assert)(!newAccountId || newPublicKey, "If creating a new account, a newPublicKey must be passed in.");

@@ -17,6 +17,7 @@ const bn_js_1 = __importDefault(require("bn.js"));
 //import { Account } from "near-api-js";
 const keypom_1 = require("../keypom");
 const views_1 = require("../views");
+const accounts_1 = require("@near-js/accounts");
 // helpers for keypom account contract args
 const RECEIVER_HEADER = "|kR|";
 const ACTION_HEADER = "|kA|";
@@ -183,7 +184,7 @@ const isUnclaimedTrialDrop = ({ keypomContractId, secretKey }) => __awaiter(void
 exports.isUnclaimedTrialDrop = isUnclaimedTrialDrop;
 const hasEnoughBalance = ({ trialAccountId, totalGasForTxns, totalAttachedYocto, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { near } = (0, keypom_1.getEnv)();
-    const trialAccountObj = new Account(near.connection, trialAccountId);
+    const trialAccountObj = new accounts_1.Account(near.connection, trialAccountId);
     const accountState = yield trialAccountObj.state();
     const storageCostPerByte = new bn_js_1.default("10000000000000000000");
     const totalStorage = new bn_js_1.default(accountState.storage_usage).mul(storageCostPerByte);

@@ -15,6 +15,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateKeypomContractId = exports.updateFunder = exports.initKeypom = exports.execute = exports.getEnv = exports.accountMappingContract = exports.supportedLinkdropClaimPages = exports.supportedKeypomContracts = exports.networks = void 0;
+const accounts_1 = require("@near-js/accounts");
+const crypto_1 = require("@near-js/crypto");
+const keystores_1 = require("@near-js/keystores");
+const keystores_browser_1 = require("@near-js/keystores-browser");
+const wallet_account_1 = require("@near-js/wallet-account");
 //import { Account, Connection, Near } from "near-api-js";
 //import { KeyStore } from "near-api-js/lib/key_stores";
 const near_seed_phrase_1 = require("near-seed-phrase");
@@ -211,9 +216,9 @@ const initKeypom = ({ near: _near, network, funder, keypomContractId, }) => __aw
     else {
         const networkConfig = typeof network === "string" ? exports.networks[network] : network;
         keyStore = ((_a = process === null || process === void 0 ? void 0 : process.versions) === null || _a === void 0 ? void 0 : _a.node)
-            ? new InMemoryKeyStore()
-            : new BrowserLocalStorageKeyStore();
-        near = new Near(Object.assign(Object.assign({}, networkConfig), { keyStore }));
+            ? new keystores_1.InMemoryKeyStore()
+            : new keystores_browser_1.BrowserLocalStorageKeyStore();
+        near = new wallet_account_1.Near(Object.assign(Object.assign({}, networkConfig), { keyStore }));
     }
     connection = near.connection;
     networkId = near.config.networkId;
@@ -230,9 +235,9 @@ const initKeypom = ({ near: _near, network, funder, keypomContractId, }) => __aw
         }
         contractId = receiverId = keypomContractId;
     }
-    viewAccount = new Account(connection, exports.networks[networkId].viewAccountId);
+    viewAccount = new accounts_1.Account(connection, exports.networks[networkId].viewAccountId);
     viewCall = viewAccount.viewFunction2 = ({ contractId, methodName, args }) => viewAccount.viewFunction({ contractId, methodName, args });
-    contractAccount = new Account(connection, contractId);
+    contractAccount = new accounts_1.Account(connection, contractId);
     if (funder) {
         yield (0, exports.updateFunder)({ funder });
     }
@@ -283,10 +288,10 @@ const updateFunder = ({ funder }) => __awaiter(void 0, void 0, void 0, function*
     if (seedPhrase) {
         secretKey = (0, near_seed_phrase_1.parseSeedPhrase)(seedPhrase).secretKey;
     }
-    funder.fundingKeyPair = KeyPair.fromString(secretKey);
+    funder.fundingKeyPair = crypto_1.KeyPair.fromString(secretKey);
     yield keyStore.setKey(networkId, accountId, funder.fundingKeyPair);
     fundingAccountDetails = funder;
-    fundingAccount = new Account(connection, accountId);
+    fundingAccount = new accounts_1.Account(connection, accountId);
     return null;
 });
 exports.updateFunder = updateFunder;
@@ -328,7 +333,7 @@ const updateKeypomContractId = ({ keypomContractId, }) => {
         console.warn("The Keypom contract you are using is not the latest version. Most methods will be unavailable. Please use the latest contract: v1-3.keypom.near or v1-3.keypom.testnet");
     }
     contractId = receiverId = keypomContractId;
-    contractAccount = new Account(connection, contractId);
+    contractAccount = new accounts_1.Account(connection, contractId);
     return null;
 };
 exports.updateKeypomContractId = updateKeypomContractId;

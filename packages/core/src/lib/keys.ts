@@ -6,7 +6,6 @@ import BN from "bn.js";
 //     },
 // } = nearAPI;
 
-import { Transaction } from "@near-wallet-selector/core";
 import {
     BrowserWalletBehaviour,
     Wallet
@@ -387,7 +386,7 @@ export const addKeys = async ({
             tokenIds,
             dropId: dropId!.toString(),
             returnTransactions: true,
-        })) as Transaction[];
+        }));
         transactions = transactions.concat(nftTXs);
     }
 

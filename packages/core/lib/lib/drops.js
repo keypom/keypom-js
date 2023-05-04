@@ -14,13 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteDrops = exports.createDrop = exports.KEY_LIMIT = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
-//import * as nearAPI from "near-api-js";
-const { utils: { format: { parseNearAmount }, }, } = nearAPI;
 //import { Account } from "near-api-js";
 const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 const keypom_utils_1 = require("./keypom-utils");
 const views_1 = require("./views");
+const utils_1 = require("@near-js/utils");
 exports.KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're
@@ -180,7 +179,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
                 max_num_keys: (_o = config === null || config === void 0 ? void 0 : config.sale) === null || _o === void 0 ? void 0 : _o.maxNumKeys,
                 price_per_key: ((_p = config === null || config === void 0 ? void 0 : config.sale) === null || _p === void 0 ? void 0 : _p.pricePerKeyYocto) ||
                     ((_q = config === null || config === void 0 ? void 0 : config.sale) === null || _q === void 0 ? void 0 : _q.pricePerKeyNEAR)
-                    ? parseNearAmount((_s = (_r = config === null || config === void 0 ? void 0 : config.sale) === null || _r === void 0 ? void 0 : _r.pricePerKeyNEAR) === null || _s === void 0 ? void 0 : _s.toString())
+                    ? (0, utils_1.parseNearAmount)((_s = (_r = config === null || config === void 0 ? void 0 : config.sale) === null || _r === void 0 ? void 0 : _r.pricePerKeyNEAR) === null || _s === void 0 ? void 0 : _s.toString())
                     : undefined,
                 allowlist: (_t = config === null || config === void 0 ? void 0 : config.sale) === null || _t === void 0 ? void 0 : _t.allowlist,
                 blocklist: (_u = config === null || config === void 0 ? void 0 : config.sale) === null || _u === void 0 ? void 0 : _u.blocklist,

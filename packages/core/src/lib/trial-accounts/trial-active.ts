@@ -10,6 +10,7 @@ import {
 	validateDesiredMethods
 } from "./utils";
 import { KeyPair } from "@near-js/crypto";
+import { stringifyJsonOrBytes } from "@near-js/transactions";
 
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
@@ -177,14 +178,16 @@ export const trialSignAndSendTxns = async ({
         txnInfos: [
             {
                 receiverId: account.accountId,
+                signerId: trialAccountId,
                 actions: [
                     {
-                        type: "FunctionCall",
-                        params: {
+                        enum: "FunctionCall",
+                        functionCall: {
                             methodName: "execute",
-                            args: executeArgs,
+                            args: stringifyJsonOrBytes(executeArgs),
                             gas: gasToAttach,
-                        },
+                            deposit: '0',
+                        }
                     },
                 ],
             },
@@ -347,14 +350,16 @@ export const trialCallMethod = async ({
         txnInfos: [
             {
                 receiverId: account.accountId,
+                signerId: trialAccountId,
                 actions: [
                     {
-                        type: "FunctionCall",
-                        params: {
+                        enum: "FunctionCall",
+                        functionCall: {
                             methodName: "execute",
-                            args: executeArgs,
+                            args: stringifyJsonOrBytes(executeArgs),
                             gas: gasToAttach,
-                        },
+                            deposit: '0',
+                        }
                     },
                 ],
             },

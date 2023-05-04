@@ -4,7 +4,7 @@ export { createDrop, deleteDrops } from "./lib/drops";
 export { 
 /** @group Utility */
 execute, getEnv, initKeypom, supportedLinkdropClaimPages, updateFunder, updateKeypomContractId } from "./lib/keypom";
-export { accountExists, createNFTSeries, estimateRequiredDeposit, exportedNearAPI as nearAPI, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall } from "./lib/keypom-utils";
+export { accountExists, createNFTSeries, estimateRequiredDeposit, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall } from "./lib/keypom-utils";
 export { addKeys, deleteKeys } from "./lib/keys";
 export * from "./lib/sales";
 export { claimTrialAccountDrop, createTrialAccountDrop } from "./lib/trial-accounts/pre-trial";
@@ -19,8 +19,3 @@ export * from "./lib/types/params";
 export * from "./lib/types/protocol";
 export * from "./lib/types/simple";
 export * from "./lib/views";
-export declare const 
-/** @group Utility */
-parseNearAmount: any, 
-/** @group Utility */
-formatNearAmount: any;

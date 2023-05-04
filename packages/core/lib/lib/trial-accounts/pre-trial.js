@@ -20,7 +20,8 @@ const keypom_1 = require("../keypom");
 const keypom_utils_1 = require("../keypom-utils");
 const views_1 = require("../views");
 const utils_1 = require("./utils");
-const { utils: { format: { parseNearAmount }, }, } = nearAPI;
+const utils_2 = require("@near-js/utils");
+const crypto_1 = require("@near-js/crypto");
 exports.KEY_LIMIT = 50;
 /**
  * Creates a new trial account drop which can be used to instantly sign users into decentralized applications that support the Keypom wallet selector plugin.
@@ -97,7 +98,7 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
                 max_num_keys: (_e = config === null || config === void 0 ? void 0 : config.sale) === null || _e === void 0 ? void 0 : _e.maxNumKeys,
                 price_per_key: ((_f = config === null || config === void 0 ? void 0 : config.sale) === null || _f === void 0 ? void 0 : _f.pricePerKeyYocto) ||
                     ((_g = config === null || config === void 0 ? void 0 : config.sale) === null || _g === void 0 ? void 0 : _g.pricePerKeyNEAR)
-                    ? parseNearAmount((_j = (_h = config === null || config === void 0 ? void 0 : config.sale) === null || _h === void 0 ? void 0 : _h.pricePerKeyNEAR) === null || _j === void 0 ? void 0 : _j.toString())
+                    ? (0, utils_2.parseNearAmount)((_j = (_h = config === null || config === void 0 ? void 0 : config.sale) === null || _h === void 0 ? void 0 : _h.pricePerKeyNEAR) === null || _j === void 0 ? void 0 : _j.toString())
                     : undefined,
                 allowlist: (_k = config === null || config === void 0 ? void 0 : config.sale) === null || _k === void 0 ? void 0 : _k.allowlist,
                 blocklist: (_l = config === null || config === void 0 ? void 0 : config.sale) === null || _l === void 0 ? void 0 : _l.blocklist,
@@ -142,7 +143,7 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
         maxAttachableYoctoPerContract = maxAttachableNEARPerContract.map((deposit) => {
             if (deposit == "*")
                 return "*";
-            return parseNearAmount(deposit.toString()) || "0";
+            return (0, utils_2.parseNearAmount)(deposit.toString()) || "0";
         });
     }
     // If !maxAttachableYoctoPerContract, create an array of the same size as callableMethods and fill it with "*"
@@ -151,10 +152,10 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
     const rootReceiverId = (_q = finalConfig.root_account_id) !== null && _q !== void 0 ? _q : (networkId == "testnet" ? "testnet" : "near");
     // Account Mapping Contract Changes
     callableContracts.push(keypom_1.accountMappingContract[networkId]);
-    maxAttachableYoctoPerContract.push(parseNearAmount("0.002"));
+    maxAttachableYoctoPerContract.push((0, utils_2.parseNearAmount)("0.002"));
     callableMethods.push(["set"]);
     // Take the storage cost into consideration for the attached deposit and trial end floor
-    const storageCost = parseNearAmount("0.3");
+    const storageCost = (0, utils_2.parseNearAmount)("0.3");
     const attachedDeposit = new bn_js_1.default(startingBalanceYocto)
         .add(new bn_js_1.default(storageCost))
         .toString();
@@ -352,7 +353,7 @@ exports.createTrialAccountDrop = createTrialAccountDrop;
  */
 const claimTrialAccountDrop = ({ secretKey, desiredAccountId, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { networkId, keyStore, contractId, contractAccount, receiverId, execute } = (0, keypom_1.getEnv)();
-    const keyPair = KeyPair.fromString(secretKey);
+    const keyPair = crypto_1.KeyPair.fromString(secretKey);
     const pubKey = keyPair.getPublicKey().toString();
     yield keyStore.setKey(networkId, contractId, keyPair);
     const dropInfo = yield (0, views_1.getDropInformation)({ secretKey });

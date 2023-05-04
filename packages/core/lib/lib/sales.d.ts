@@ -1,4 +1,5 @@
 import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
+import { Account } from "@near-js/accounts";
 declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 /**
  * Add a list of account IDs to a drop's sale allowlist. If the allowlist is empty, anyone can purchase keys. The sale object must exist in the drop's config for this to go through.

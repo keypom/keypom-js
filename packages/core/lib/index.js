@@ -13,9 +13,8 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatNearAmount = exports.parseNearAmount = exports.wrapTxnParamsForTrial = exports.trialSignAndSendTxns = exports.trialCallMethod = exports.canExitTrial = exports.createTrialAccountDrop = exports.claimTrialAccountDrop = exports.deleteKeys = exports.addKeys = exports.nftTransferCall = exports.hashPassword = exports.getStorageBase = exports.getPubFromSecret = exports.getNFTMetadata = exports.getFTMetadata = exports.generateKeys = exports.ftTransferCall = exports.formatLinkdropUrl = exports.nearAPI = exports.estimateRequiredDeposit = exports.createNFTSeries = exports.accountExists = exports.updateKeypomContractId = exports.updateFunder = exports.supportedLinkdropClaimPages = exports.initKeypom = exports.getEnv = exports.execute = exports.deleteDrops = exports.createDrop = exports.claim = exports.withdrawBalance = exports.addToBalance = void 0;
+exports.wrapTxnParamsForTrial = exports.trialSignAndSendTxns = exports.trialCallMethod = exports.canExitTrial = exports.createTrialAccountDrop = exports.claimTrialAccountDrop = exports.deleteKeys = exports.addKeys = exports.nftTransferCall = exports.hashPassword = exports.getStorageBase = exports.getPubFromSecret = exports.getNFTMetadata = exports.getFTMetadata = exports.generateKeys = exports.ftTransferCall = exports.formatLinkdropUrl = exports.estimateRequiredDeposit = exports.createNFTSeries = exports.accountExists = exports.updateKeypomContractId = exports.updateFunder = exports.supportedLinkdropClaimPages = exports.initKeypom = exports.getEnv = exports.execute = exports.deleteDrops = exports.createDrop = exports.claim = exports.withdrawBalance = exports.addToBalance = void 0;
 var balances_1 = require("./lib/balances");
 Object.defineProperty(exports, "addToBalance", { enumerable: true, get: function () { return balances_1.addToBalance; } });
 Object.defineProperty(exports, "withdrawBalance", { enumerable: true, get: function () { return balances_1.withdrawBalance; } });
@@ -36,7 +35,6 @@ var keypom_utils_1 = require("./lib/keypom-utils");
 Object.defineProperty(exports, "accountExists", { enumerable: true, get: function () { return keypom_utils_1.accountExists; } });
 Object.defineProperty(exports, "createNFTSeries", { enumerable: true, get: function () { return keypom_utils_1.createNFTSeries; } });
 Object.defineProperty(exports, "estimateRequiredDeposit", { enumerable: true, get: function () { return keypom_utils_1.estimateRequiredDeposit; } });
-Object.defineProperty(exports, "nearAPI", { enumerable: true, get: function () { return keypom_utils_1.exportedNearAPI; } });
 Object.defineProperty(exports, "formatLinkdropUrl", { enumerable: true, get: function () { return keypom_utils_1.formatLinkdropUrl; } });
 Object.defineProperty(exports, "ftTransferCall", { enumerable: true, get: function () { return keypom_utils_1.ftTransferCall; } });
 Object.defineProperty(exports, "generateKeys", { enumerable: true, get: function () { return keypom_utils_1.generateKeys; } });
@@ -68,9 +66,3 @@ __exportStar(require("./lib/types/params"), exports);
 __exportStar(require("./lib/types/protocol"), exports);
 __exportStar(require("./lib/types/simple"), exports);
 __exportStar(require("./lib/views"), exports);
-const keypom_utils_2 = require("./lib/keypom-utils");
-_a = keypom_utils_2.exportedNearAPI.utils.format, 
-/** @group Utility */
-exports.parseNearAmount = _a.parseNearAmount, 
-/** @group Utility */
-exports.formatNearAmount = _a.formatNearAmount;

@@ -7,6 +7,7 @@ import { NFTData } from "./types/nft";
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 import { SimpleData } from "./types/simple";
+import { Account } from "@near-js/accounts";
 declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
