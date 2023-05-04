@@ -10,11 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.claim = void 0;
-//import * as nearAPI from "near-api-js";
 const crypto_1 = require("@near-js/crypto");
 const checks_1 = require("./checks");
-//const { KeyPair } = nearAPI;
+const transactions_1 = require("@near-js/transactions");
 const keypom_1 = require("./keypom");
+const keypom_utils_1 = require("./keypom-utils");
 const views_1 = require("./views");
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
@@ -134,37 +134,46 @@ const claim = ({ secretKey, accountId, newAccountId, newPublicKey, password, fcA
         (0, checks_1.assert)((curMethodData || []).length === fcArgs.length, "The number of fcArgs must match the number of methods being executed.");
     }
     (0, checks_1.assert)(newAccountId || accountId, "Either an accountId or newAccountId must be passed in.");
-    const transactions = [
-        {
+    const fcAction = newAccountId
+        ? {
+            methodName: "create_account_and_claim",
+            args: (0, transactions_1.stringifyJsonOrBytes)({
+                new_account_id: newAccountId,
+                new_public_key: newPublicKey,
+                password,
+                fc_args: fcArgs,
+            }),
+            gas: attachedGas,
+            deposit: "0",
+        }
+        : {
+            methodName: "claim",
+            args: (0, transactions_1.stringifyJsonOrBytes)({
+                account_id: accountId,
+                password,
+                fc_args: fcArgs,
+            }),
+            gas: attachedGas,
+            deposit: "0",
+        };
+    const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+        txnInfo: {
             receiverId,
+            signerId: contractId,
             actions: [
                 {
-                    type: "FunctionCall",
-                    params: newAccountId
-                        ? {
-                            methodName: "create_account_and_claim",
-                            args: {
-                                new_account_id: newAccountId,
-                                new_public_key: newPublicKey,
-                                password,
-                                fc_args: fcArgs,
-                            },
-                            gas: attachedGas,
-                        }
-                        : {
-                            methodName: "claim",
-                            args: {
-                                account_id: accountId,
-                                password,
-                                fc_args: fcArgs,
-                            },
-                            gas: attachedGas,
-                        },
+                    enum: "FunctionCall",
+                    functionCall: fcAction,
                 },
             ],
         },
-    ];
-    const result = yield execute({ transactions, account: contractAccount });
+        signerId: contractId,
+        signerPk: keyPair.getPublicKey(),
+    });
+    const result = yield execute({
+        transactions: [txn],
+        account: contractAccount,
+    });
     return result;
 });
 exports.claim = claim;

@@ -687,7 +687,7 @@ export const deleteDrops = async ({
                 registered_uses !== 0 &&
                 (ft !== undefined || nft !== undefined)
             ) {
-                const txn = convertBasicTransaction({
+                const txn = await convertBasicTransaction({
                     txnInfo: {
                         receiverId,
                         signerId: account!.accountId,
@@ -719,7 +719,7 @@ export const deleteDrops = async ({
             }
 
             const deleteKeys = async () => {
-                const txn = convertBasicTransaction({
+                const txn = await convertBasicTransaction({
                     txnInfo: {
                         receiverId,
                         signerId: account!.accountId,
@@ -758,7 +758,7 @@ export const deleteDrops = async ({
             await deleteKeys();
 
             if (withdrawBalance) {
-                const txn = convertBasicTransaction({
+                const txn = await convertBasicTransaction({
                     txnInfo: {
                         receiverId,
                         signerId: account!.accountId,

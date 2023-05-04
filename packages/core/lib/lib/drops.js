@@ -418,6 +418,7 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
     (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
     (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
     account = yield getAccount({ account, wallet });
+    const pubKey = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {
         if (!dropIds) {
@@ -460,21 +461,27 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
         const responses = [];
         if (registered_uses !== 0 &&
             (ft !== undefined || nft !== undefined)) {
-            const txn = {
-                receiverId,
-                actions: [
-                    {
-                        type: "FunctionCall",
-                        params: {
-                            methodName: "refund_assets",
-                            args: {
-                                drop_id,
+            const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+                txnInfo: {
+                    receiverId,
+                    signerId: account.accountId,
+                    actions: [
+                        {
+                            enum: "FunctionCall",
+                            functionCall: {
+                                methodName: "refund_assets",
+                                args: (0, transactions_1.stringifyJsonOrBytes)({
+                                    drop_id,
+                                }),
+                                gas: gas300,
+                                deposit: '0'
                             },
-                            gas: gas300,
                         },
-                    },
-                ],
-            };
+                    ],
+                },
+                signerId: account.accountId,
+                signerPk: pubKey
+            });
             responses.push(...(yield execute({
                 account,
                 wallet,
@@ -482,22 +489,28 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
             })));
         }
         const deleteKeys = () => __awaiter(void 0, void 0, void 0, function* () {
-            const txn = {
-                receiverId,
-                actions: [
-                    {
-                        type: "FunctionCall",
-                        params: {
-                            methodName: "delete_keys",
-                            args: {
-                                drop_id,
-                                public_keys: keys.map(keypom_utils_1.key2str),
+            const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+                txnInfo: {
+                    receiverId,
+                    signerId: account.accountId,
+                    actions: [
+                        {
+                            enum: "FunctionCall",
+                            functionCall: {
+                                methodName: "delete_keys",
+                                args: (0, transactions_1.stringifyJsonOrBytes)({
+                                    drop_id,
+                                    public_keys: keys.map(keypom_utils_1.key2str),
+                                }),
+                                gas: gas300,
+                                deposit: '0'
                             },
-                            gas: gas300,
                         },
-                    },
-                ],
-            };
+                    ],
+                },
+                signerId: account.accountId,
+                signerPk: pubKey
+            });
             responses.push(...(yield execute({
                 account,
                 wallet,
@@ -510,19 +523,25 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
         });
         yield deleteKeys();
         if (withdrawBalance) {
-            const txn = {
-                receiverId,
-                actions: [
-                    {
-                        type: "FunctionCall",
-                        params: {
-                            methodName: "withdraw_from_balance",
-                            args: {},
-                            gas: "50000000000000",
+            const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+                txnInfo: {
+                    receiverId,
+                    signerId: account.accountId,
+                    actions: [
+                        {
+                            enum: "FunctionCall",
+                            functionCall: {
+                                methodName: "withdraw_from_balance",
+                                args: (0, transactions_1.stringifyJsonOrBytes)({}),
+                                gas: '50000000000000',
+                                deposit: '0'
+                            },
                         },
-                    },
-                ],
-            };
+                    ],
+                },
+                signerId: account.accountId,
+                signerPk: pubKey
+            });
             responses.push(...(yield execute({
                 account,
                 wallet,

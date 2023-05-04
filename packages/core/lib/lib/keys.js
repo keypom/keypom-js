@@ -19,6 +19,7 @@ const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 const keypom_utils_1 = require("./keypom-utils");
 const views_1 = require("./views");
+const transactions_1 = require("@near-js/transactions");
 /**
  * Add keys that are manually generated and passed in, or automatically generated to an existing drop. If they're
  * automatically generated, they can be based off a set of entropy. For NFT and FT drops, assets can automatically be sent to Keypom to register keys as part of the payload.
@@ -140,6 +141,7 @@ const addKeys = ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenI
     (0, checks_1.assert)(numKeys || (publicKeys === null || publicKeys === void 0 ? void 0 : publicKeys.length), "Either pass in publicKeys or set numKeys to a positive non-zero value.");
     (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
     account = yield getAccount({ account, wallet });
+    const pubKey = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const { drop_id, owner_id, required_gas, deposit_per_use, config, ft: ftData, nft: nftData, fc: fcData, next_key_id, } = drop || (yield (0, views_1.getDropInformation)({ dropId: dropId }));
     dropId = drop_id;
     const uses_per_key = (config === null || config === void 0 ? void 0 : config.uses_per_key) || 1;
@@ -218,24 +220,30 @@ const addKeys = ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenI
         hasBalance = true;
     }
     let transactions = [];
-    transactions.push({
-        receiverId,
-        actions: [
-            {
-                type: "FunctionCall",
-                params: {
-                    methodName: "add_keys",
-                    args: {
-                        drop_id,
-                        public_keys: publicKeys,
-                        passwords_per_use: passwords,
+    const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+        txnInfo: {
+            receiverId,
+            signerId: account.accountId,
+            actions: [
+                {
+                    enum: "FunctionCall",
+                    functionCall: {
+                        methodName: "add_keys",
+                        args: (0, transactions_1.stringifyJsonOrBytes)({
+                            drop_id,
+                            public_keys: publicKeys,
+                            passwords_per_use: passwords,
+                        }),
+                        gas,
+                        deposit: !hasBalance ? requiredDeposit : undefined,
                     },
-                    gas,
-                    deposit: !hasBalance ? requiredDeposit : undefined,
                 },
-            },
-        ],
+            ],
+        },
+        signerId: account.accountId,
+        signerPk: pubKey
     });
+    transactions.push(txn);
     if (ftData === null || ftData === void 0 ? void 0 : ftData.contract_id) {
         transactions.push(yield (0, keypom_utils_1.ftTransferCall)({
             account: account,
@@ -307,13 +315,14 @@ const deleteKeys = ({ account, wallet, publicKeys, dropId, withdrawBalance = fal
     const actions = [];
     if ((ft || nft) && registered_uses > 0) {
         actions.push({
-            type: "FunctionCall",
-            params: {
+            enum: "FunctionCall",
+            functionCall: {
                 methodName: "refund_assets",
-                args: {
+                args: (0, transactions_1.stringifyJsonOrBytes)({
                     drop_id,
-                },
+                }),
                 gas: "100000000000000",
+                deposit: '0'
             },
         });
     }
@@ -322,24 +331,26 @@ const deleteKeys = ({ account, wallet, publicKeys, dropId, withdrawBalance = fal
         publicKeys = [publicKeys];
     }
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "delete_keys",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id,
                 // @ts-ignore - publicKeys is always an array here
                 public_keys: publicKeys.map(keypom_utils_1.key2str),
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     if (withdrawBalance) {
         actions.push({
-            type: "FunctionCall",
-            params: {
+            enum: "FunctionCall",
+            functionCall: {
                 methodName: "withdraw_from_balance",
-                args: {},
+                args: (0, transactions_1.stringifyJsonOrBytes)({}),
                 gas: "100000000000000",
+                deposit: '0'
             },
         });
     }

@@ -230,22 +230,29 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
     if (exitExpected == true) {
         throw utils_1.TRIAL_ERRORS.EXIT_EXPECTED;
     }
-    const txns = [
-        {
-            receiverId: contractId,
-            actions: [
-                {
-                    type: "FunctionCall",
-                    params: {
-                        methodName,
-                        args,
-                        gas: attachedGas,
-                        deposit: attachedDeposit,
+    const trialKeyPair = crypto_1.KeyPair.fromString(trialAccountSecretKey);
+    const pubKey = trialKeyPair.getPublicKey();
+    yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
+    const account = yield near.account(trialAccountId);
+    const txns = [yield (0, keypom_utils_1.convertBasicTransaction)({
+            txnInfo: {
+                receiverId: trialAccountId,
+                signerId: trialAccountId,
+                actions: [
+                    {
+                        enum: "FunctionCall",
+                        functionCall: {
+                            methodName,
+                            args: (0, transactions_1.stringifyJsonOrBytes)(args),
+                            gas: attachedGas,
+                            deposit: attachedDeposit,
+                        }
                     },
-                },
-            ],
-        },
-    ];
+                ],
+            },
+            signerId: trialAccountId,
+            signerPk: pubKey,
+        })];
     console.log(`txns: ${JSON.stringify(txns)}`);
     const { methodDataToValidate, executeArgs, totalAttachedYocto, totalGasForTxns, } = yield (0, utils_1.generateExecuteArgs)({ desiredTxns: txns });
     const isValidTxn = yield (0, utils_1.validateDesiredMethods)({
@@ -264,10 +271,6 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
     if (hasBal == false) {
         throw utils_1.TRIAL_ERRORS.INSUFFICIENT_BALANCE;
     }
-    const trialKeyPair = crypto_1.KeyPair.fromString(trialAccountSecretKey);
-    const pubKey = trialKeyPair.getPublicKey();
-    yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
-    const account = yield near.account(trialAccountId);
     const gasToAttach = (0, utils_1.estimateTrialGas)({ executeArgs });
     const transformedTransactions = yield (0, keypom_utils_1.createTransactions)({
         signerId: trialAccountId,

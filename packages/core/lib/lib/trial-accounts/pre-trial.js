@@ -364,24 +364,29 @@ const claimTrialAccountDrop = ({ secretKey, desiredAccountId, }) => __awaiter(vo
         INSERT_NEW_ACCOUNT: desiredAccountId,
         INSERT_TRIAL_PUBLIC_KEY: pubKey,
     };
-    const transactions = [
-        {
+    const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
+        txnInfo: {
             receiverId,
+            signerId: receiverId,
             actions: [
                 {
-                    type: "FunctionCall",
-                    params: {
+                    enum: "FunctionCall",
+                    functionCall: {
                         methodName: "claim",
-                        args: {
+                        args: (0, transactions_1.stringifyJsonOrBytes)({
                             account_id: desiredAccountId,
                             fc_args: [JSON.stringify(userFcArgs), null],
-                        },
+                        }),
                         gas: attachedGas,
-                    },
+                        deposit: '0',
+                    }
                 },
             ],
         },
-    ];
+        signerId: receiverId,
+        signerPk: keyPair.getPublicKey(),
+    });
+    const transactions = [txn];
     const result = yield execute({ transactions, account: contractAccount });
     return result;
 });

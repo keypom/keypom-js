@@ -14,6 +14,7 @@ const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 //import { Account } from "near-api-js";
 const keypom_utils_1 = require("./keypom-utils");
+const transactions_1 = require("@near-js/transactions");
 /**
  * Deposit some amount of $NEAR or yoctoNEAR$ into the Keypom contract. This amount can then be used to create drops or add keys without
  * Having to explicitly attach a deposit everytime. It can be thought of like a bank account.
@@ -44,10 +45,10 @@ const addToBalance = ({ account, wallet, amountNear, amountYocto, successUrl, })
     (0, checks_1.assert)(amountYocto != "0", "Amount to add to balance cannot be 0.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_balance",
-            args: {},
+            args: (0, transactions_1.stringifyJsonOrBytes)({}),
             gas: "100000000000000",
             deposit,
         },
@@ -90,11 +91,12 @@ const withdrawBalance = ({ account, wallet, }) => __awaiter(void 0, void 0, void
     account = yield getAccount({ account, wallet });
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "withdraw_from_balance",
-            args: {},
+            args: (0, transactions_1.stringifyJsonOrBytes)({}),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [

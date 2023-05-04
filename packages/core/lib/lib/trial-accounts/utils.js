@@ -99,23 +99,24 @@ const generateExecuteArgs = ({ desiredTxns, }) => {
     };
     desiredTxns.forEach((tx) => {
         const newTx = {};
-        newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId;
+        newTx[RECEIVER_HEADER] = tx.receiverId;
         newTx.actions = [];
         console.log("newTx: ", newTx);
         tx.actions.forEach((action) => {
+            const fcAction = action.functionCall;
             console.log("action: ", action);
             methodDataToValidate.push({
-                receiverId: tx.contractId || tx.receiverId,
-                methodName: action.params.methodName,
-                deposit: action.params.deposit,
+                receiverId: tx.receiverId,
+                methodName: fcAction.methodName,
+                deposit: fcAction.deposit,
             });
-            totalGasBN = totalGasBN.add(new bn_js_1.default(action.params.gas));
-            totalDepositsBN = totalDepositsBN.add(new bn_js_1.default(action.params.deposit));
+            totalGasBN = totalGasBN.add(new bn_js_1.default(fcAction.gas));
+            totalDepositsBN = totalDepositsBN.add(new bn_js_1.default(fcAction.deposit));
             const newAction = {};
             console.log("newAction 1: ", newAction);
-            newAction[ACTION_HEADER] = action.type;
+            newAction[ACTION_HEADER] = action.enum;
             console.log("newAction 2: ", newAction);
-            newAction.params = (0, exports.wrapTxnParamsForTrial)(action.params);
+            newAction.params = (0, exports.wrapTxnParamsForTrial)(fcAction);
             console.log("newAction 3: ", newAction);
             newTx.actions.push(newAction);
         });

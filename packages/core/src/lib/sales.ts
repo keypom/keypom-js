@@ -12,6 +12,7 @@ import {
 import { Account } from "@near-js/accounts";
 import { parseNearAmount } from "@near-js/utils";
 import { getDropInformation } from "./views";
+import { Action, stringifyJsonOrBytes } from "@near-js/transactions";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -79,14 +80,15 @@ export const addToSaleAllowlist = async ({
 
     const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_sale_allowlist",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 
@@ -172,14 +174,15 @@ export const removeFromSaleAllowlist = async ({
 
     const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "remove_from_sale_allowlist",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 
@@ -257,14 +260,15 @@ export const addToSaleBlocklist = async ({
 
     const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_sale_blocklist",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 
@@ -346,14 +350,15 @@ export const removeFromSaleBlocklist = async ({
 
     const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "remove_from_sale_blocklist",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 
@@ -462,10 +467,10 @@ export const updateSale = async ({
 
     const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "update_sale",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 max_num_keys: maxNumKeys,
                 price_per_key:
@@ -475,8 +480,9 @@ export const updateSale = async ({
                 auto_withdraw_funds: autoWithdrawFunds,
                 start,
                 end,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 

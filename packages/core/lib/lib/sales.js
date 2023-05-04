@@ -17,6 +17,7 @@ const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 const utils_1 = require("@near-js/utils");
 const views_1 = require("./views");
+const transactions_1 = require("@near-js/transactions");
 /**
  * Add a list of account IDs to a drop's sale allowlist. If the allowlist is empty, anyone can purchase keys. The sale object must exist in the drop's config for this to go through.
  *
@@ -53,14 +54,15 @@ const addToSaleAllowlist = ({ account, wallet, dropId, accountIds, }) => __await
     (0, checks_1.assert)((_a = dropInfo.config) === null || _a === void 0 ? void 0 : _a.sale, "The drop config must have a sale in order to add accounts to the sale allowlist.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_sale_allowlist",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [
@@ -116,14 +118,15 @@ const removeFromSaleAllowlist = ({ account, wallet, dropId, accountIds, }) => __
     (0, checks_1.assert)((_b = dropInfo.config) === null || _b === void 0 ? void 0 : _b.sale, "The drop config must have a sale in order to remove accounts from the sale allowlist.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "remove_from_sale_allowlist",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [
@@ -171,14 +174,15 @@ const addToSaleBlocklist = ({ account, wallet, dropId, accountIds, }) => __await
     (0, checks_1.assert)((_c = dropInfo.config) === null || _c === void 0 ? void 0 : _c.sale, "The drop config must have a sale in order to add accounts to the sale blocklist.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_sale_blocklist",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [
@@ -230,14 +234,15 @@ const removeFromSaleBlocklist = ({ account, wallet, dropId, accountIds, }) => __
     (0, checks_1.assert)((_d = dropInfo.config) === null || _d === void 0 ? void 0 : _d.sale, "The drop config must have a sale in order to remove accounts from the sale blocklist.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "remove_from_sale_blocklist",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [
@@ -290,10 +295,10 @@ const updateSale = ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pric
     (0, checks_1.assert)((_e = dropInfo.config) === null || _e === void 0 ? void 0 : _e.sale, "The drop config must have a sale in order to be updated.");
     const actions = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "update_sale",
-            args: {
+            args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 max_num_keys: maxNumKeys,
                 price_per_key: pricePerKeyYocto || pricePerKeyNEAR
@@ -302,8 +307,9 @@ const updateSale = ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pric
                 auto_withdraw_funds: autoWithdrawFunds,
                 start,
                 end,
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
     const transactions = [

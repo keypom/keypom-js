@@ -16,6 +16,7 @@ import { parseNearAmount } from "@near-js/utils";
 import { assert, isSupportedKeypomContract, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 import {
+    convertBasicTransaction,
     estimateRequiredDeposit,
     ftTransferCall,
     generateKeys,
@@ -26,7 +27,7 @@ import {
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 import { canUserAddKeys, getDropInformation, getUserBalance } from "./views";
-import { Transaction } from "@near-js/transactions";
+import { Action, Transaction, stringifyJsonOrBytes } from "@near-js/transactions";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -222,6 +223,7 @@ export const addKeys = async ({
     );
 
     account = await getAccount({ account, wallet });
+    const pubKey = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
 
     const {
         drop_id,
@@ -340,24 +342,31 @@ export const addKeys = async ({
 
     let transactions: Transaction[] = [];
 
-    transactions.push({
-        receiverId,
-        actions: [
-            {
-                type: "FunctionCall",
-                params: {
-                    methodName: "add_keys",
-                    args: {
-                        drop_id,
-                        public_keys: publicKeys,
-                        passwords_per_use: passwords,
+    const txn = await convertBasicTransaction({
+        txnInfo: {
+            receiverId,
+            signerId: account!.accountId,
+            actions: [
+                {
+                    enum: "FunctionCall",
+                    functionCall: {
+                        methodName: "add_keys",
+                        args: stringifyJsonOrBytes({
+                            drop_id,
+                            public_keys: publicKeys,
+                            passwords_per_use: passwords,
+                        }),
+                        gas,
+                        deposit: !hasBalance ? requiredDeposit : undefined,
                     },
-                    gas,
-                    deposit: !hasBalance ? requiredDeposit : undefined,
                 },
-            },
-        ],
-    });
+            ],
+        },
+        signerId: account!.accountId,
+        signerPk: pubKey
+    })
+
+    transactions.push(txn);
 
     if (ftData?.contract_id) {
         transactions.push(
@@ -370,7 +379,7 @@ export const addKeys = async ({
                     .toString(),
                 dropId: drop_id,
                 returnTransaction: true,
-            })
+            }) as Transaction
         );
     }
 
@@ -387,7 +396,7 @@ export const addKeys = async ({
             tokenIds,
             dropId: dropId!.toString(),
             returnTransactions: true,
-        }));
+        })) as Transaction[];
         transactions = transactions.concat(nftTXs);
     }
 
@@ -469,13 +478,14 @@ export const deleteKeys = async ({
     const actions: Action[] = [];
     if ((ft || nft) && registered_uses > 0) {
         actions.push({
-            type: "FunctionCall",
-            params: {
+            enum: "FunctionCall",
+            functionCall: {
                 methodName: "refund_assets",
-                args: {
+                args: stringifyJsonOrBytes({
                     drop_id,
-                },
+                }),
                 gas: "100000000000000",
+                deposit: '0'
             },
         });
     }
@@ -486,25 +496,27 @@ export const deleteKeys = async ({
     }
 
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "delete_keys",
-            args: {
+            args: stringifyJsonOrBytes({
                 drop_id,
                 // @ts-ignore - publicKeys is always an array here
                 public_keys: publicKeys.map(key2str),
-            },
+            }),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 
     if (withdrawBalance) {
         actions.push({
-            type: "FunctionCall",
-            params: {
+            enum: "FunctionCall",
+            functionCall: {
                 methodName: "withdraw_from_balance",
-                args: {},
+                args: stringifyJsonOrBytes({}),
                 gas: "100000000000000",
+                deposit: '0'
             },
         });
     }

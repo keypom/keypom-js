@@ -1,3 +1,4 @@
+import { Transaction } from "@near-js/transactions";
 export declare const TRIAL_ERRORS: {
     EXIT_EXPECTED: string;
     INVALID_ACTION: string;
