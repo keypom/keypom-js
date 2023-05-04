@@ -1001,7 +1001,6 @@ export const transformTransactions = (
     });
 
 export const createAction = (action: Action): Action => {
-    console.log('action: ', action)
     if (action.createAccount) {
         return actionCreators.createAccount();
     }
