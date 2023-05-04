@@ -4,17 +4,20 @@
 //     keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
 // } = nearAPI;
 
-import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
-import { Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
+import { Account, Connection } from "@near-js/accounts";
+import { KeyPair } from "@near-js/crypto";
+import { KeyStore, InMemoryKeyStore } from "@near-js/keystores";
+import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
+import { Near } from "@near-js/wallet-account";
 //import { Account, Connection, Near } from "near-api-js";
 //import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from "near-seed-phrase";
 import {
-	assert,
-	isSupportedKeypomContract,
-	isValidFunderObject,
-	isValidKeypomContract,
-	isValidNearObject
+    assert,
+    isSupportedKeypomContract,
+    isValidFunderObject,
+    isValidKeypomContract,
+    isValidNearObject
 } from "./checks";
 import { execute as _execute } from "./keypom-utils";
 import { EnvVars, Funder } from "./types/general";

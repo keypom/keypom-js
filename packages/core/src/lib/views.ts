@@ -1,7 +1,3 @@
-import {
-	BrowserWalletBehaviour,
-	Wallet
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
 import { assert } from "./checks";
 import { KEY_LIMIT } from "./drops";
 import { getEnv, Maybe } from "./keypom";

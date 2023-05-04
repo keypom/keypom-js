@@ -5,10 +5,12 @@ import { assert, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 
 import {
-	BrowserWalletBehaviour,
-	Wallet
+    BrowserWalletBehaviour,
+    Wallet
 } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 //import { Account } from "near-api-js";
+import { Account } from "@near-js/accounts";
+import { parseNearAmount } from "@near-js/utils";
 import { getDropInformation } from "./views";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;

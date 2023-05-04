@@ -1,7 +1,5 @@
 //import { SignAndSendTransactionOptions } from "@near-api-js/lib/account";
-import type { Action } from "@near-wallet-selector/core";
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { Transaction } from "@near-wallet-selector/core/lib/wallet";
 import {
     BrowserWalletBehaviour,
     Wallet
@@ -16,17 +14,19 @@ import { getEnv, supportedLinkdropClaimPages } from "./keypom";
 import { PasswordPerUse } from "./types/drops";
 import { FCData } from "./types/fc";
 import { FTData, FungibleTokenMetadata } from "./types/ft";
-import { GeneratedKeyPairs, NearKeyPair } from "./types/general";
+import { BasicTransaction, GeneratedKeyPairs, NearKeyPair } from "./types/general";
 import {
     NonFungibleTokenMetadata,
     ProtocolReturnedNonFungibleTokenMetadata,
     ProtocolReturnedNonFungibleTokenObject
 } from "./types/nft";
 import { CreateDropProtocolArgs } from "./types/params";
-import { KeyPair } from "@near-js/crypto";
+import { KeyPair, PublicKey } from "@near-js/crypto";
 import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
-import { parseNearAmount, base_decode } from "@near-js/utils";
+import { parseNearAmount } from "@near-js/utils";
 import { Near } from "@near-js/wallet-account";
+import { actionCreators, Action, Transaction, stringifyJsonOrBytes, createTransaction } from "@near-js/transactions";
+import { baseDecode } from 'borsh';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -89,7 +89,7 @@ export const accountExists = async (accountId): Promise<boolean> => {
     const { connection } = getEnv();
 
     try {
-        const account = new nearAPI.Account(connection!, accountId);
+        const account = new Account(connection!, accountId);
         await account.state();
         return true;
     } catch (e) {
@@ -909,17 +909,17 @@ export const nftTransferCall = async ({
             signerId: account!.accountId,
             actions: [
                 {
-                    type: "FunctionCall",
-                    params: {
+                    enum: "FunctionCall",
+                    functionCall: {
                         methodName: "nft_transfer_call",
-                        args: {
+                        args: stringifyJsonOrBytes({
                             receiver_id: receiverId,
                             token_id: tokenIds[i],
                             msg: dropId.toString(),
-                        },
+                        }),
                         gas: "50000000000000",
                         deposit: "1",
-                    },
+                    }
                 },
             ],
         };
@@ -983,52 +983,50 @@ export const transformTransactions = (
         return txnOption;
     });
 
-// reference: https://github.com/near/wallet-selector/blob/d09f69e50df05c8e5f972beab4f336d7cfa08c65/packages/wallet-utils/src/lib/create-action.ts
 export const createAction = (action: Action): Action => {
-    switch (action.type) {
-        case "CreateAccount":
-            return transactions.createAccount();
-        case "DeployContract": {
-            const { code } = action.params;
-
-            return transactions.deployContract(code);
-        }
-        case "FunctionCall": {
-            const { methodName, args, gas, deposit } = action.params;
-
-            return transactions.functionCall(
-                methodName,
-                args,
-                new BN(gas),
-                new BN(deposit)
-            );
-        }
-        case "Transfer": {
-            const { deposit } = action.params;
-
-            return transactions.transfer(new BN(deposit));
-        }
-        case "Stake": {
-            const { stake, publicKey } = action.params;
-
-            return transactions.stake(
-                new BN(stake),
-                utils.PublicKey.from(publicKey)
-            );
-        }
-        case "DeleteKey": {
-            const { publicKey } = action.params;
-
-            return transactions.deleteKey(utils.PublicKey.from(publicKey));
-        }
-        case "DeleteAccount": {
-            const { beneficiaryId } = action.params;
-
-            return transactions.deleteAccount(beneficiaryId);
-        }
-        default:
-            throw new Error("Invalid action type");
+    if (action.createAccount) {
+        return actionCreators.createAccount();
     }
+
+    if (action.deployContract) {
+        const { code } = action.deployContract;
+        return actionCreators.deployContract(code);
+    }
+
+    if (action.functionCall) {
+        const { methodName, args, gas, deposit } = action.functionCall;
+        return actionCreators.functionCall(
+            methodName,
+            args,
+            new BN(gas),
+            new BN(deposit)
+        );
+    }
+
+    if (action.transfer) {
+        const { deposit } = action.transfer;
+        return actionCreators.transfer(new BN(deposit));
+    }
+
+    if (action.stake) {
+        const { stake, publicKey } = action.stake;
+        return actionCreators.stake(
+            new BN(stake),
+            PublicKey.from(publicKey)
+        );
+    }
+
+    if (action.deleteKey) {
+        const { publicKey } = action.deleteKey;
+        return actionCreators.deleteKey(PublicKey.from(publicKey));
+    }
+
+    if (action.deleteAccount) {
+        const { beneficiaryId } = action.deleteAccount;
+        return actionCreators.deleteAccount(beneficiaryId);
+    }
+
+    throw new Error("Unknown action");
 };
 
 /** @group Utility */
@@ -1404,7 +1402,15 @@ export const nearArgsToYocto = (
     return yoctoToReturn;
 };
 
-export const createTransactions = ({ txnInfos, signerId, signerPk }) => {
+export const createTransactions = ({ 
+    txnInfos, 
+    signerId, 
+    signerPk 
+}: {
+    txnInfos: BasicTransaction[];
+    signerId: string;
+    signerPk: PublicKey;
+}) => {
     const { near } = getEnv();
 
     const account = new Account(near!.connection, signerId);
@@ -1423,14 +1429,7 @@ export const createTransactions = ({ txnInfos, signerId, signerPk }) => {
                 ""
             );
 
-            return transactions.createTransaction(
-                signerId,
-                signerPk,
-                txnInfo.receiverId,
-                accessKey.nonce + index + 1,
-                actions,
-                base_decode(block.header.hash)
-            );
+            return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + index + 1, actions, baseDecode(block.header.hash))
         })
     );
 };

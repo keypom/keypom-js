@@ -8,19 +8,21 @@ import BN from "bn.js";
 
 import { Transaction } from "@near-wallet-selector/core";
 import {
-	BrowserWalletBehaviour,
-	Wallet
+    BrowserWalletBehaviour,
+    Wallet
 } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 //import { Account } from "near-api-js";
+import { Account } from "@near-js/accounts";
+import { parseNearAmount } from "@near-js/utils";
 import { assert, isSupportedKeypomContract, isValidAccountObj } from "./checks";
 import { getEnv } from "./keypom";
 import {
-	estimateRequiredDeposit,
-	ftTransferCall,
-	generateKeys,
-	generatePerUsePasswords,
-	key2str, nftTransferCall,
-	toCamel
+    estimateRequiredDeposit,
+    ftTransferCall,
+    generateKeys,
+    generatePerUsePasswords,
+    key2str, nftTransferCall,
+    toCamel
 } from "./keypom-utils";
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";

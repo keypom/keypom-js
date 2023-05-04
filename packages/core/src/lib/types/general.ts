@@ -5,6 +5,7 @@
 import { Connection } from "@near-js/accounts";
 import { KeyPair } from "@near-js/crypto";
 import { KeyStore } from "@near-js/keystores";
+import { Action } from "@near-js/transactions";
 import { Near } from "@near-js/wallet-account";
 import { Account } from "@near-wallet-selector/core";
 
@@ -99,4 +100,10 @@ export interface ContractSourceMetadata {
     version: string;
     /** Link to the specific commit and code on GitHub that is deployed to the Keypom account */
     link: string;
+}
+
+export interface BasicTransaction {
+    receiverId: string;
+    methodName: string;
+    actions: Action[];
 }

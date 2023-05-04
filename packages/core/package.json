@@ -1,5 +1,5 @@
 {
-  "name": "@keypom-js/core",
+  "name": "@keypom/core",
   "version": "1.0.0-rc.1",
   "description": "Core library for interacting with the Keypom Protocol",
   "main": "lib/index.js",
@@ -30,7 +30,8 @@
     "bn.js": "^5.2.1",
     "near-seed-phrase": "^0.2.0",
     "util": "^0.12.5",
-    "@near-wallet-selector/core": "^7.9.1"
+    "@near-wallet-selector/core": "^8.0.3",
+    "borsh": "^0.7.0"
   },
   "ava": {
     "require": [
@@ -43,6 +44,7 @@
     "ava": "^4.3.3",
     "@near-js/transactions": "^0.2.0",
     "@near-js/keystores": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
     "@near-js/accounts": "^0.1.3",
     "@near-js/types": "^0.0.4",
     "@near-js/wallet-account": "^0.0.6",
@@ -52,6 +54,7 @@
   "peerDependencies": {
     "@near-js/transactions": "^0.2.0",
     "@near-js/keystores": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
     "@near-js/accounts": "^0.1.3",
     "@near-js/types": "^0.0.4",
     "@near-js/wallet-account": "^0.0.6",

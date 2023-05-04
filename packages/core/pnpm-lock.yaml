@@ -2,11 +2,14 @@ lockfileVersion: '6.0'
 
 dependencies:
   '@near-wallet-selector/core':
-    specifier: ^7.9.1
-    version: 7.9.1(near-api-js@1.1.0)
+    specifier: ^8.0.3
+    version: 8.0.3(near-api-js@1.1.0)
   bn.js:
     specifier: ^5.2.1
     version: 5.2.1
+  borsh:
+    specifier: ^0.7.0
+    version: 0.7.0
   near-seed-phrase:
     specifier: ^0.2.0
     version: 0.2.0
@@ -22,6 +25,9 @@ devDependencies:
     specifier: ^0.0.4
     version: 0.0.4
   '@near-js/keystores':
+    specifier: ^0.0.4
+    version: 0.0.4
+  '@near-js/keystores-browser':
     specifier: ^0.0.4
     version: 0.0.4
   '@near-js/transactions':
@@ -74,6 +80,13 @@ packages:
       bn.js: 5.2.1
       borsh: 0.7.0
       tweetnacl: 1.0.3
+    dev: true
+
+  /@near-js/keystores-browser@0.0.4:
+    resolution: {integrity: sha512-bzwClm3jNlWJrb8wqMunP3rrcG1hS3rD58KKhDvHXy8Dtg9VVUgrfr3Csu9oTnjG+rAPZGOynunaoOQVqju/Aw==}
+    dependencies:
+      '@near-js/crypto': 0.0.4
+      '@near-js/keystores': 0.0.4
     dev: true
 
   /@near-js/keystores@0.0.4:
@@ -149,10 +162,10 @@ packages:
       - encoding
     dev: true
 
-  /@near-wallet-selector/core@7.9.1(near-api-js@1.1.0):
-    resolution: {integrity: sha512-BJGsTK0snZAU1Je+W9TFJG5KW+jk+Ots9LuxsALZ/wZpqSeGT+w4xw36TZt3QsEm+I84im1+L+PIIW/bM2A9rQ==}
+  /@near-wallet-selector/core@8.0.3(near-api-js@1.1.0):
+    resolution: {integrity: sha512-AYb1wfBCEXMle+IC6aDLbgEHy6gEmM7d+jHXJ3W0BWPL3Buc6m+UgBFc660zNsZ0JspE02BIXQCiggrIxyHb7w==}
     peerDependencies:
-      near-api-js: ^0.44.2 || ^1.0.0
+      near-api-js: ^1.0.0 || ^2.0.0
     dependencies:
       near-api-js: 1.1.0
       rxjs: 7.8.1
