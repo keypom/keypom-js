@@ -4,7 +4,7 @@ import { KeyStore } from "@near-js/keystores";
 import { Action } from "@near-js/transactions";
 import { Near } from "@near-js/wallet-account";
 import { Account } from "@near-wallet-selector/core";
-export declare type NearKeyPair = KeyPair;
+export type NearKeyPair = KeyPair;
 /**
  * For each generated KeyPair (either through `createDrop`, `addKeys` or `generateKeys`), the public and private keys are returned.
  * In addition, the actual KeyPair objects are returned as well.

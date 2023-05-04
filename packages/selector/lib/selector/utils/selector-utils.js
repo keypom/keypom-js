@@ -37,6 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
+var core_1 = require("@keypom/core");
+var utils_1 = require("@near-js/utils");
 exports.KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 var getLocalStorageKeypomEnv = function () {
     var localStorageDataJson = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"));
@@ -54,10 +56,10 @@ var getAccountFromMap = function (secretKey) { return __awaiter(void 0, void 0, 
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                viewCall = getEnv().viewCall;
-                pk = getPubFromSecret(secretKey);
+                viewCall = (0, core_1.getEnv)().viewCall;
+                pk = (0, core_1.getPubFromSecret)(secretKey);
                 return [4 /*yield*/, viewCall({
-                        contractId: accountMappingContract[getEnv().networkId],
+                        contractId: core_1.accountMappingContract[(0, core_1.getEnv)().networkId],
                         methodName: 'get_account_id',
                         args: { pk: pk }
                     })];
@@ -78,13 +80,13 @@ var addUserToMappingContract = function (accountId, secretKey) { return __awaite
                 accountIdFromMapping = _a.sent();
                 if (accountIdFromMapping !== accountId) {
                     console.log("No Account ID found from mapping contract: ".concat(JSON.stringify(accountIdFromMapping), " Adding now."));
-                    trialCallMethod({
+                    (0, core_1.trialCallMethod)({
                         trialAccountId: accountId,
                         trialAccountSecretKey: secretKey,
-                        contractId: accountMappingContract[getEnv().networkId],
+                        contractId: core_1.accountMappingContract[(0, core_1.getEnv)().networkId],
                         methodName: 'set',
                         args: {},
-                        attachedDeposit: parseNearAmount('0.002'),
+                        attachedDeposit: (0, utils_1.parseNearAmount)('0.002'),
                         attachedGas: '10000000000000'
                     });
                 }
@@ -93,9 +95,13 @@ var addUserToMappingContract = function (accountId, secretKey) { return __awaite
     });
 }); };
 exports.addUserToMappingContract = addUserToMappingContract;
+var isValidKeypomContract = function (keypomContractId) {
+    var networkId = (0, core_1.getEnv)().networkId;
+    return core_1.supportedKeypomContracts[networkId][keypomContractId] !== undefined;
+};
 var updateKeypomContractIfValid = function (keypomContractId) {
     if (isValidKeypomContract(keypomContractId) === true) {
-        updateKeypomContractId({
+        (0, core_1.updateKeypomContractId)({
             keypomContractId: keypomContractId
         });
         return true;

@@ -2,7 +2,7 @@ import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/w
 import { Account } from "@near-js/accounts";
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 /**
  * Add keys that are manually generated and passed in, or automatically generated to an existing drop. If they're
  * automatically generated, they can be based off a set of entropy. For NFT and FT drops, assets can automatically be sent to Keypom to register keys as part of the payload.

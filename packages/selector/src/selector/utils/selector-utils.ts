@@ -1,3 +1,5 @@
+import { accountMappingContract, getEnv, getPubFromSecret, supportedKeypomContracts, trialCallMethod, updateKeypomContractId } from "@keypom/core";
+import { parseNearAmount } from "@near-js/utils";
 import { BN } from "bn.js";
 
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
@@ -45,6 +47,11 @@ export const addUserToMappingContract = async (accountId, secretKey) => {
 	}
 
 	return accountIdFromMapping !== accountId
+}
+
+const isValidKeypomContract = (keypomContractId: string) => {
+    const { networkId } = getEnv();
+    return supportedKeypomContracts[networkId!][keypomContractId] !== undefined;
 }
 
 export const updateKeypomContractIfValid = (keypomContractId) => {

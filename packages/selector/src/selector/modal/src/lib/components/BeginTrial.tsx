@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
+import { accountExists, claim, getCurMethodData, getEnv, getPubFromSecret } from "@keypom/core";
 
 /**
  * regex for the body of an account not including TLA and not allowing subaccount

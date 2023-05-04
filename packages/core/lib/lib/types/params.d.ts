@@ -5,7 +5,7 @@ import { GeneratedKeyPairs } from "./general";
 import { ProtocolReturnedDropConfig, ProtocolReturnedFCData, ProtocolReturnedFTData, ProtocolReturnedNFTData, ProtocolReturnedSimpleData } from "./protocol";
 import { Account } from "@near-js/accounts";
 import { Transaction } from "@near-js/transactions";
-export declare type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
+export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 /**
  * Information returned when creating a drop or adding keys via `createDrop` and `addKeys` respectively.
  */

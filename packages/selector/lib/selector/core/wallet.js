@@ -51,11 +51,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeypomWallet = void 0;
+var accounts_1 = require("@near-js/accounts");
+var crypto_1 = require("@near-js/crypto");
+var keystores_browser_1 = require("@near-js/keystores-browser");
+var wallet_account_1 = require("@near-js/wallet-account");
 var bn_js_1 = __importDefault(require("bn.js"));
 var src_1 = require("../modal/src");
 var modal_types_1 = require("../modal/src/lib/modal.types");
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
+var core_1 = require("@keypom/core");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
         var signInContractId = _a.signInContractId, networkId = _a.networkId, trialBaseUrl = _a.trialBaseUrl, trialSplitDelim = _a.trialSplitDelim, modalOptions = _a.modalOptions;
@@ -88,8 +93,8 @@ var KeypomWallet = /** @class */ (function () {
         console.log('Keypom constructor called.');
         this.networkId = networkId;
         this.signInContractId = signInContractId;
-        this.keyStore = new BrowserLocalStorageKeyStore();
-        this.near = new Near(__assign(__assign({}, networks[networkId]), { deps: { keyStore: this.keyStore } }));
+        this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
+        this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
         this.trialBaseUrl = trialBaseUrl;
         this.trialSplitDelim = trialSplitDelim;
         this.isMappingAccount = false;
@@ -117,7 +122,7 @@ var KeypomWallet = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         console.log("IM SIGNING IN");
-                        return [4 /*yield*/, initKeypom({
+                        return [4 /*yield*/, (0, core_1.initKeypom)({
                                 network: this.networkId
                             })];
                     case 1:
@@ -131,7 +136,7 @@ var KeypomWallet = /** @class */ (function () {
                         _b.label = 2;
                     case 2:
                         _b.trys.push([2, 7, , 8]);
-                        return [4 /*yield*/, isUnclaimedTrialDrop({ keypomContractId: accountId, secretKey: secretKey })];
+                        return [4 /*yield*/, (0, core_1.isUnclaimedTrialDrop)({ keypomContractId: accountId, secretKey: secretKey })];
                     case 3:
                         isUnclaimed = _b.sent();
                         console.log("isUnclaimed: ", isUnclaimed);
@@ -159,7 +164,7 @@ var KeypomWallet = /** @class */ (function () {
                         return [3 /*break*/, 8];
                     case 8:
                         _b.trys.push([8, 10, , 11]);
-                        return [4 /*yield*/, viewAccessKeyData({ accountId: accountId, secretKey: secretKey })];
+                        return [4 /*yield*/, (0, core_1.viewAccessKeyData)({ accountId: accountId, secretKey: secretKey })];
                     case 9:
                         keyInfo = _b.sent();
                         keyPerms = keyInfo.permission.FunctionCall;
@@ -255,7 +260,7 @@ var KeypomWallet = /** @class */ (function () {
                         if (!this.isMappingAccount) {
                             (0, selector_utils_1.addUserToMappingContract)(this.trialAccountId, this.trialSecretKey);
                         }
-                        return [4 /*yield*/, trialSignAndSendTxns({
+                        return [4 /*yield*/, (0, core_1.trialSignAndSendTxns)({
                                 trialAccountId: this.trialAccountId,
                                 trialAccountSecretKey: this.trialSecretKey,
                                 txns: transactions
@@ -267,7 +272,7 @@ var KeypomWallet = /** @class */ (function () {
                         e_4 = _a.sent();
                         console.log("e: ".concat(JSON.stringify(e_4)));
                         switch (e_4) {
-                            case TRIAL_ERRORS.EXIT_EXPECTED: {
+                            case core_1.TRIAL_ERRORS.EXIT_EXPECTED: {
                                 this.modal.show({
                                     id: modal_types_1.MODAL_TYPE_IDS.TRIAL_OVER,
                                     meta: {
@@ -277,11 +282,11 @@ var KeypomWallet = /** @class */ (function () {
                                 });
                                 break;
                             }
-                            case TRIAL_ERRORS.INVALID_ACTION: {
+                            case core_1.TRIAL_ERRORS.INVALID_ACTION: {
                                 this.modal.show({ id: modal_types_1.MODAL_TYPE_IDS.ACTION_ERROR });
                                 break;
                             }
-                            case TRIAL_ERRORS.INSUFFICIENT_BALANCE: {
+                            case core_1.TRIAL_ERRORS.INSUFFICIENT_BALANCE: {
                                 this.modal.show({ id: modal_types_1.MODAL_TYPE_IDS.INSUFFICIENT_BALANCE });
                                 break;
                             }
@@ -316,7 +321,7 @@ var KeypomWallet = /** @class */ (function () {
             var accountObj;
             return __generator(this, function (_a) {
                 if (this.trialAccountId != undefined && this.trialAccountId != null) {
-                    accountObj = new Account(this.near.connection, this.trialAccountId);
+                    accountObj = new accounts_1.Account(this.near.connection, this.trialAccountId);
                     return [2 /*return*/, [accountObj]];
                 }
                 return [2 /*return*/, []];
@@ -344,7 +349,7 @@ var KeypomWallet = /** @class */ (function () {
                             secretKey: secretKey
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
-                        return [4 /*yield*/, this.keyStore.setKey(this.networkId, accountId, KeyPair.fromString(secretKey))];
+                        return [4 /*yield*/, this.keyStore.setKey(this.networkId, accountId, crypto_1.KeyPair.fromString(secretKey))];
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, (0, selector_utils_1.addUserToMappingContract)(accountId, secretKey)];
@@ -353,7 +358,7 @@ var KeypomWallet = /** @class */ (function () {
                         if (isAdding) {
                             this.isMappingAccount = true;
                         }
-                        accountObj = new Account(this.near.connection, this.trialAccountId);
+                        accountObj = new accounts_1.Account(this.near.connection, this.trialAccountId);
                         return [2 /*return*/, [accountObj]];
                 }
             });

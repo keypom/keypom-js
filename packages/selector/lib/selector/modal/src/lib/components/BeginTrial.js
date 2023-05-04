@@ -63,6 +63,7 @@ exports.BeginTrial = exports.accountAddressPatternNoSubaccount = void 0;
 var react_1 = __importStar(require("react"));
 var modal_types_1 = require("../modal.types");
 var MainBody_1 = require("./MainBody");
+var core_1 = require("@keypom/core");
 /**
  * regex for the body of an account not including TLA and not allowing subaccount
  */
@@ -77,7 +78,7 @@ var BeginTrial = function (_a) {
     var _s = (0, react_1.useState)("grey"), borderColor = _s[0], setBorderColor = _s[1];
     var _t = (0, react_1.useState)(((_c = (_b = customizations === null || customizations === void 0 ? void 0 : customizations.landing) === null || _b === void 0 ? void 0 : _b.subText) === null || _c === void 0 ? void 0 : _c.landing) ||
         modal_types_1.MODAL_DEFAULTS.beginTrial.landing.subText.landing), messageText = _t[0], setMessageText = _t[1];
-    var networkId = getEnv().networkId;
+    var networkId = (0, core_1.getEnv)().networkId;
     var accountIdSuffix = networkId == "testnet" ? "testnet" : "near";
     var handleChangeInput = function (e) { return __awaiter(void 0, void 0, void 0, function () {
         var userInput, actualAccountId, isValid, exists;
@@ -102,7 +103,7 @@ var BeginTrial = function (_a) {
                         setBorderColor("red");
                         return [2 /*return*/];
                     }
-                    return [4 /*yield*/, accountExists(actualAccountId)];
+                    return [4 /*yield*/, (0, core_1.accountExists)(actualAccountId)];
                 case 1:
                     exists = _e.sent();
                     if (exists) {
@@ -125,17 +126,17 @@ var BeginTrial = function (_a) {
                     if (borderColor === "red")
                         return [2 /*return*/];
                     setIsClaimingTrial(true);
-                    return [4 /*yield*/, getCurMethodData({ secretKey: secretKey })];
+                    return [4 /*yield*/, (0, core_1.getCurMethodData)({ secretKey: secretKey })];
                 case 1:
                     curMethodData = _a.sent();
                     console.log("curMethodData: ", curMethodData);
                     fcArgs = Array(curMethodData.length).fill(null);
                     userFcArgs = {
                         INSERT_NEW_ACCOUNT: accountId,
-                        INSERT_TRIAL_PUBLIC_KEY: getPubFromSecret(secretKey),
+                        INSERT_TRIAL_PUBLIC_KEY: (0, core_1.getPubFromSecret)(secretKey),
                     };
                     fcArgs[0] = JSON.stringify(userFcArgs);
-                    return [4 /*yield*/, claim({ accountId: accountId, secretKey: secretKey, fcArgs: fcArgs })];
+                    return [4 /*yield*/, (0, core_1.claim)({ accountId: accountId, secretKey: secretKey, fcArgs: fcArgs })];
                 case 2:
                     _a.sent();
                     setIsClaimingTrial(false);

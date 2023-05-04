@@ -2,7 +2,7 @@ import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/w
 import { Account } from "@near-js/accounts";
 import { DropConfig } from "../types/drops";
 import { CreateOrAddReturn } from "../types/params";
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new trial account drop which can be used to instantly sign users into decentralized applications that support the Keypom wallet selector plugin.

@@ -2,6 +2,7 @@ import { InstantLinkWallet, NetworkId, Transaction } from "@near-wallet-selector
 import BN from "bn.js";
 import { BeginTrialCustomizations, InsufficientBalanceCustomizations, InvalidActionCustomizations, OffboardingWallet, TrialOverCustomizations } from "../modal/src/lib/modal.types";
 import { KeypomWallet } from "./wallet";
+import { FinalExecutionOutcome } from "@near-js/types";
 
 export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
     status: {

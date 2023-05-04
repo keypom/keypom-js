@@ -8,7 +8,7 @@ import { NFTData } from "./types/nft";
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 import { SimpleData } from "./types/simple";
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're

@@ -51,7 +51,7 @@ export declare const accountMappingContract: {
     mainnet: string;
     testnet: string;
 };
-export declare type Maybe<T> = T | undefined;
+export type Maybe<T> = T | undefined;
 declare let near: Maybe<Near>;
 /**
  *

@@ -10,7 +10,7 @@ import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
 import { Near } from "@near-js/wallet-account";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { Action, Transaction } from "@near-js/transactions";
-declare type AnyWallet = BrowserWalletBehaviour | Wallet;
+type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const ATTACHED_GAS_FROM_WALLET: number;
 export declare const key2str: (v: any) => any;
 /**
