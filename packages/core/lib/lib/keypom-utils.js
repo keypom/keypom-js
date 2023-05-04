@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransactions = exports.nearArgsToYocto = exports.toCamel = exports.snakeToCamel = exports.generatePerUsePasswords = exports.estimateRequiredDeposit = exports.getStorageBase = exports.createAction = exports.transformTransactions = exports.parseFTAmount = exports.nftTransferCall = exports.ftTransferCall = exports.execute = exports.viewAccessKeyData = exports.keypomView = exports.generateKeys = exports.hashPassword = exports.formatLinkdropUrl = exports.createNFTSeries = exports.getFTMetadata = exports.getNFTMetadata = exports.accountExists = exports.getPubFromSecret = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
+exports.createTransactions = exports.convertBasicTransaction = exports.nearArgsToYocto = exports.toCamel = exports.snakeToCamel = exports.generatePerUsePasswords = exports.estimateRequiredDeposit = exports.getStorageBase = exports.createAction = exports.transformTransactions = exports.parseFTAmount = exports.nftTransferCall = exports.ftTransferCall = exports.execute = exports.viewAccessKeyData = exports.keypomView = exports.generateKeys = exports.hashPassword = exports.formatLinkdropUrl = exports.createNFTSeries = exports.getFTMetadata = exports.getNFTMetadata = exports.accountExists = exports.getPubFromSecret = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
 //import * as nearAPI from "near-api-js";
 //import { Account, Near, transactions } from "near-api-js";
@@ -26,11 +26,13 @@ const utils_1 = require("@near-js/utils");
 const transactions_1 = require("@near-js/transactions");
 const borsh_1 = require("borsh");
 let sha256Hash;
+// @ts-ignore
 if (typeof crypto === "undefined") {
     const nodeCrypto = require("crypto");
     sha256Hash = (ab) => nodeCrypto.createHash("sha256").update(ab).digest();
 }
 else {
+    // @ts-ignore
     sha256Hash = (ab) => crypto.subtle.digest("SHA-256", ab);
 }
 /// How much Gas each each cross contract call with cost to be converted to a receipt
@@ -221,26 +223,28 @@ const createNFTSeries = ({ account, wallet, dropId, metadata, royalty, }) => __a
         reference_hash: metadata.referenceHash,
     };
     const nftSeriesAccount = networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
-    const tx = {
+    const pk = yield account.connection.signer.getPublicKey();
+    const txnInfo = {
         receiverId: nftSeriesAccount,
         signerId: account.accountId,
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "create_series",
-                    args: {
+                    args: (0, transactions_1.stringifyJsonOrBytes)({
                         mint_id: parseInt(dropId),
                         metadata: actualMetadata,
                         royalty,
-                    },
+                    }),
                     gas: "50000000000000",
                     deposit: (0, utils_1.parseNearAmount)("0.25"),
-                },
+                }
             },
         ],
     };
-    return (0, exports.execute)({ account: account, transactions: [tx] });
+    const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
+    return (0, exports.execute)({ account: account, transactions: [transaction] });
 });
 exports.createNFTSeries = createNFTSeries;
 /**
@@ -574,14 +578,19 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
         console.log("needsRedirect: ", needsRedirect);
         console.log("transactions: ", transactions);
         if (needsRedirect)
+            // @ts-ignore
             return yield wallet.signAndSendTransactions({
+                // @ts-ignore
                 transactions,
                 callbackUrl: successUrl,
             });
         // sign txs in serial without redirect
         const responses = [];
         for (const tx of transactions) {
-            responses.push(yield wallet.signAndSendTransaction({
+            responses.push(
+            // @ts-ignore
+            yield wallet.signAndSendTransaction({
+                // @ts-ignore
                 actions: tx.actions,
             }));
         }
@@ -629,28 +638,30 @@ const ftTransferCall = ({ account, wallet, contractId, absoluteAmount, amount, d
         });
         absoluteAmount = (0, exports.parseFTAmount)(amount, metadata.decimals);
     }
-    const tx = {
+    const pk = yield account.connection.signer.getPublicKey();
+    const txnInfo = {
         receiverId: contractId,
         signerId: account.accountId,
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "ft_transfer_call",
-                    args: {
+                    args: (0, transactions_1.stringifyJsonOrBytes)({
                         receiver_id: keypomContractId,
                         amount: absoluteAmount,
                         msg: dropId.toString(),
-                    },
+                    }),
                     gas: "50000000000000",
                     deposit: "1",
-                },
+                }
             },
         ],
     };
+    const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
     if (returnTransaction)
-        return tx;
-    return (0, exports.execute)({ account: account, transactions: [tx] });
+        return transaction;
+    return (0, exports.execute)({ account: account, transactions: [transaction] });
 });
 exports.ftTransferCall = ftTransferCall;
 /**
@@ -693,33 +704,28 @@ const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, return
     const transactions = [];
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const txnInfos = [{
-                receiverId: contractId,
-                signerId: account.accountId,
-                actions: [
-                    {
-                        enum: "FunctionCall",
-                        functionCall: {
-                            methodName: "nft_transfer_call",
-                            args: (0, transactions_1.stringifyJsonOrBytes)({
-                                receiver_id: receiverId,
-                                token_id: tokenIds[i],
-                                msg: dropId.toString(),
-                            }),
-                            gas: "50000000000000",
-                            deposit: "1",
-                        }
-                    },
-                ],
-            }];
-        const txn = (0, exports.createTransactions)({
-            txnInfos,
-        });
-        const tx = {
+        const pk = yield account.connection.signer.getPublicKey();
+        const txnInfo = {
             receiverId: contractId,
             signerId: account.accountId,
+            actions: [
+                {
+                    enum: "FunctionCall",
+                    functionCall: {
+                        methodName: "nft_transfer_call",
+                        args: (0, transactions_1.stringifyJsonOrBytes)({
+                            receiver_id: receiverId,
+                            token_id: tokenIds[i],
+                            msg: dropId.toString(),
+                        }),
+                        gas: "50000000000000",
+                        deposit: "1",
+                    }
+                },
+            ],
         };
-        transactions.push(tx);
+        const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
+        transactions.push(transaction);
         if (returnTransactions)
             continue;
         responses.push(yield (0, exports.execute)({
@@ -1056,6 +1062,16 @@ const nearArgsToYocto = (nearAmount, yoctoAmount) => {
     return yoctoToReturn;
 };
 exports.nearArgsToYocto = nearArgsToYocto;
+const convertBasicTransaction = ({ txnInfo, signerId, signerPk }) => __awaiter(void 0, void 0, void 0, function* () {
+    const { near } = (0, keypom_1.getEnv)();
+    const account = new accounts_1.Account(near.connection, signerId);
+    const { provider } = account.connection;
+    const actions = txnInfo.actions.map((action) => (0, exports.createAction)(action));
+    const block = yield provider.block({ finality: "final" });
+    const accessKey = yield provider.query(`access_key/${signerId}/${signerPk}`, "");
+    return (0, transactions_1.createTransaction)(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + 1, actions, (0, borsh_1.baseDecode)(block.header.hash));
+});
+exports.convertBasicTransaction = convertBasicTransaction;
 const createTransactions = ({ txnInfos, signerId, signerPk }) => {
     const { near } = (0, keypom_1.getEnv)();
     return Promise.all(txnInfos.map((txnInfo, index) => __awaiter(void 0, void 0, void 0, function* () {

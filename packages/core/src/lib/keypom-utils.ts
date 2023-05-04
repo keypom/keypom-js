@@ -31,10 +31,12 @@ import { baseDecode } from 'borsh';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 let sha256Hash;
+// @ts-ignore
 if (typeof crypto === "undefined") {
     const nodeCrypto = require("crypto");
     sha256Hash = (ab) => nodeCrypto.createHash("sha256").update(ab).digest();
 } else {
+    // @ts-ignore
     sha256Hash = (ab) => crypto.subtle.digest("SHA-256", ab);
 }
 
@@ -709,7 +711,9 @@ export const execute = async ({
         console.log("needsRedirect: ", needsRedirect);
         console.log("transactions: ", transactions);
         if (needsRedirect)
+        // @ts-ignore
             return await wallet.signAndSendTransactions({
+                // @ts-ignore
                 transactions,
                 callbackUrl: successUrl,
             });
@@ -717,7 +721,9 @@ export const execute = async ({
         const responses: Array<void | FinalExecutionOutcome> = [];
         for (const tx of transactions) {
             responses.push(
+                // @ts-ignore
                 await wallet.signAndSendTransaction({
+                    // @ts-ignore
                     actions: tx.actions,
                 })
             );

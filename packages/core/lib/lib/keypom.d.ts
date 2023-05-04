@@ -60,7 +60,7 @@ declare let near: Maybe<Near>;
  */
 export declare const getEnv: () => EnvVars;
 /** @group Utility */
-export declare const execute: (args: any) => Promise<void | import("@near-wallet-selector/core").FinalExecutionOutcome[] | (void | import("@near-wallet-selector/core").FinalExecutionOutcome)[]>;
+export declare const execute: (args: any) => Promise<void | import("@near-js/types").FinalExecutionOutcome[] | (void | import("@near-js/types").FinalExecutionOutcome)[]>;
 /**
  * Initializes the SDK to allow for interactions with the Keypom Protocol. By default, a new NEAR connection will be established but this can be overloaded by
  * passing in an existing connection object. In either case, if a funder is passed in, the credentials will be added to the keystore to sign transactions.

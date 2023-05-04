@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteDrops = exports.createDrop = exports.KEY_LIMIT = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
-//import { Account } from "near-api-js";
+const transactions_1 = require("@near-js/transactions");
+const utils_1 = require("@near-js/utils");
 const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
 const keypom_utils_1 = require("./keypom-utils");
 const views_1 = require("./views");
-const utils_1 = require("@near-js/utils");
 exports.KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're
@@ -314,21 +314,23 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     }
     const deposit = !hasBalance ? requiredDeposit : "0";
     let transactions = [];
-    transactions.push({
+    const pk = yield account.connection.signer.getPublicKey();
+    const txnInfo = {
         receiverId: receiverId,
         signerId: account.accountId,
         actions: [
             {
-                type: "FunctionCall",
-                params: {
+                enum: "FunctionCall",
+                functionCall: {
                     methodName: "create_drop",
-                    args: createDropArgs,
+                    args: (0, transactions_1.stringifyJsonOrBytes)(createDropArgs),
                     gas: gas,
                     deposit,
-                },
+                }
             },
         ],
-    });
+    };
+    transactions.push(yield (0, keypom_utils_1.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk }));
     if ((ftData === null || ftData === void 0 ? void 0 : ftData.contractId) && (publicKeys === null || publicKeys === void 0 ? void 0 : publicKeys.length)) {
         transactions.push((yield (0, keypom_utils_1.ftTransferCall)({
             account: account,

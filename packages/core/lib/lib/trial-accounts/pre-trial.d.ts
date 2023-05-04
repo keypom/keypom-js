@@ -1,7 +1,7 @@
 import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
+import { Account } from "@near-js/accounts";
 import { DropConfig } from "../types/drops";
 import { CreateOrAddReturn } from "../types/params";
-import { Account } from "@near-js/accounts";
 declare type AnyWallet = BrowserWalletBehaviour | Wallet;
 export declare const KEY_LIMIT = 50;
 /**

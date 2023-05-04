@@ -15,6 +15,7 @@ const keypom_1 = require("../keypom");
 const keypom_utils_1 = require("../keypom-utils");
 const utils_1 = require("./utils");
 const crypto_1 = require("@near-js/crypto");
+const transactions_1 = require("@near-js/transactions");
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
  * cannot be executed by the trial account (e.g. the attached deposit exceeds the trial account's restrictions), this will throw an error.
@@ -140,14 +141,16 @@ const trialSignAndSendTxns = ({ trialAccountId, trialAccountSecretKey, txns, }) 
         txnInfos: [
             {
                 receiverId: account.accountId,
+                signerId: trialAccountId,
                 actions: [
                     {
-                        type: "FunctionCall",
-                        params: {
+                        enum: "FunctionCall",
+                        functionCall: {
                             methodName: "execute",
-                            args: executeArgs,
+                            args: (0, transactions_1.stringifyJsonOrBytes)(executeArgs),
                             gas: gasToAttach,
-                        },
+                            deposit: '0',
+                        }
                     },
                 ],
             },
@@ -272,14 +275,16 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
         txnInfos: [
             {
                 receiverId: account.accountId,
+                signerId: trialAccountId,
                 actions: [
                     {
-                        type: "FunctionCall",
-                        params: {
+                        enum: "FunctionCall",
+                        functionCall: {
                             methodName: "execute",
-                            args: executeArgs,
+                            args: (0, transactions_1.stringifyJsonOrBytes)(executeArgs),
                             gas: gasToAttach,
-                        },
+                            deposit: '0',
+                        }
                     },
                 ],
             },
