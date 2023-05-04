@@ -1,10 +1,10 @@
 // DAO
-const DEV_CONTRACT = "dev-1682299128062-34098852204866";
+const DAO_CONTRACT = "moondao.sputnikv2.testnet";
 
 // DAO BOT
-const DAO_BOT_CONTRACT = "dev-1682481900002-78543887295736";
+const DAO_BOT_CONTRACT = "keypom-dao-bot.testnet";
 
 module.exports = {
-    DEV_CONTRACT,
+    DAO_CONTRACT,
     DAO_BOT_CONTRACT
 };

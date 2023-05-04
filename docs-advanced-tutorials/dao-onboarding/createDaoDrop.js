@@ -4,7 +4,7 @@ const { KeyPair, keyStores, connect, Account } = require("near-api-js");
 var assert = require('assert');
 
 const keypom = require("keypom-js");
-const { DEV_CONTRACT, DAO_BOT_CONTRACT } = require("./configurations");
+const { DAO_CONTRACT, DAO_BOT_CONTRACT } = require("./configurations");
 const {
 	initKeypom,
 	getEnv,
@@ -54,10 +54,10 @@ async function createTickDrop() {
             methods: [
                 [
                     {
-                        receiverId: "keypom-dao-bot.testnet",
+                        receiverId: DAO_BOT_CONTRACT,
                         methodName: "new_proposal",
                         args: JSON.stringify({
-                            dao_contract: DEV_CONTRACT,
+                            dao_contract: DAO_CONTRACT,
                             proposal: {
                                 description: "mooooooooon",
                                 kind: {
