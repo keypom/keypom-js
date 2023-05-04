@@ -45,7 +45,8 @@
     "prop-types": "^15.8.1",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "regenerator-runtime": "^0.13.9"
+    "regenerator-runtime": "^0.13.9",
+    "@keypom/selector": "workspace:*"
   },
   "resolutions": {
     "@babel/preset-env": "7.13.8"

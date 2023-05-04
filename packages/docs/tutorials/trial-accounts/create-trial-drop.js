@@ -2,22 +2,18 @@ require('dotenv').config()
 const path = require("path");
 const homedir = require("os").homedir();
 const { readFileSync } = require('fs');
-const { keyStores, connect, Account } = require('near-api-js');
-
-const keypom = require("../../lib");
-const {
-	initKeypom,
-	createTrialAccountDrop
-} = keypom
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { connect, Near } = require("@near-js/wallet-account");
+const { initKeypom, createTrialAccountDrop } = require('@keypom/core');
 
 const funderAccountId = 'benjiman.testnet';
 const NETWORK_ID = 'testnet';
 async function createTrialAccount() {
 	// Initiate connection to the NEAR blockchain.
-    const CREDENTIALS_DIR = ".near-credentials";
+    const CREDENTIALS_DIR = '.near-credentials';
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-    let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+    let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
 
     let nearConfig = {
         networkId: NETWORK_ID,
@@ -28,8 +24,8 @@ async function createTrialAccount() {
         explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
     };  
 
-    let near = await connect(nearConfig);
-    const fundingAccount = new Account(near.connection, funderAccountId)
+    let near = new Near(nearConfig);
+    fundingAccount = new Account(near.connection, funderAccountId);
 
 	// Initialize the SDK and point it to the custom NEAR object that was created.
     await initKeypom({

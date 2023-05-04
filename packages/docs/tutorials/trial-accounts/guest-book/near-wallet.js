@@ -11,9 +11,9 @@ import MyNearIconUrl from '@near-wallet-selector/my-near-wallet/assets/my-near-w
 
 // wallet selector options
 import { setupWalletSelector } from '@near-wallet-selector/core';
+import { setupKeypom } from '@keypom/selector';
 import { setupLedger } from '@near-wallet-selector/ledger';
 import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';
-import { setupKeypom } from '../../../lib';
 import { setupModal } from '@near-wallet-selector/modal-ui';
 import { KEYPOM_OPTIONS } from './keypom-data';
 

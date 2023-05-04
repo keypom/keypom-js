@@ -1,0 +1,66 @@
+{
+  "name": "@keypom/docs",
+  "version": "1.0.0-rc.1",
+  "description": "Wallet selector plugin for the Keypom SDK",
+  "main": "lib/index.js",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "pnpm compile",
+    "compile": "tsc -p tsconfig.json",
+    "lint:js": "eslint -c ../../.eslintrc.js.yml test/**/*.js --no-eslintrc",
+    "lint:js:fix": "eslint -c ../../.eslintrc.js.yml test/**/*.js --no-eslintrc --fix",
+    "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
+    "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
+
+    "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation && yarn test:dummy-creation",
+    "test:main": "yarn build && yarn ava:main",
+    "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
+    "test:drop-creation": "yarn build && yarn ava:drop-creation",
+    "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
+    "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
+    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
+    "ava:main": "ava test/ws.test.js -vs --timeout=5m",
+    "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
+    "publish": "npx tsc && npm publish",
+    "build-docs": "npx typedoc --options typedoc.json"
+  },
+  "author": "benkurrek, mattlockyer",
+  "license": "MIT",
+  "dependencies": {
+    "@keypom/core": "workspace:*",
+    "bn.js": "^5.2.1"
+  },
+  "ava": {
+    "require": [
+      "dotenv/config"
+    ]
+  },
+  "devDependencies": {
+    "typedoc": "^0.23.24",
+    "typescript": "^4.8.4",
+    "ava": "^4.3.3",
+    "dotenv": "^10.0.0",
+    "@near-js/accounts": "^0.1.3",
+    "@near-js/crypto": "^0.0.4",
+    "@near-js/types": "^0.0.4",
+    "@near-js/wallet-account": "^0.0.6",
+    "@near-js/utils": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
+    "@near-wallet-selector/core": "^8.0.3",
+    "react": "^18.2.0",
+    "react-dom": "18.2.0",
+    "@types/react": "^18.0.26"
+  },
+  "peerDependencies": {
+    "@near-js/accounts": "^0.1.3",
+    "@near-js/crypto": "^0.0.4",
+    "@near-js/types": "^0.0.4",
+    "@near-js/wallet-account": "^0.0.6",
+    "@near-js/utils": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
+    "@near-wallet-selector/core": "^8.0.3",
+    "react": "^18.2.0",
+    "react-dom": "18.2.0",
+    "@types/react": "^18.0.26"
+  }
+}

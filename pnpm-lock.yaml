@@ -99,6 +99,55 @@ importers:
         specifier: ^4.8.4
         version: 4.9.4
 
+  packages/docs:
+    dependencies:
+      '@keypom/core':
+        specifier: workspace:*
+        version: link:../core
+      bn.js:
+        specifier: ^5.2.1
+        version: 5.2.1
+    devDependencies:
+      '@near-js/accounts':
+        specifier: ^0.1.3
+        version: 0.1.3
+      '@near-js/crypto':
+        specifier: ^0.0.4
+        version: 0.0.4
+      '@near-js/keystores-browser':
+        specifier: ^0.0.4
+        version: 0.0.4
+      '@near-js/types':
+        specifier: ^0.0.4
+        version: 0.0.4
+      '@near-js/utils':
+        specifier: ^0.0.4
+        version: 0.0.4
+      '@near-js/wallet-account':
+        specifier: ^0.0.6
+        version: 0.0.6
+      '@near-wallet-selector/core':
+        specifier: ^8.0.3
+        version: 8.0.3(near-api-js@2.1.3)
+      '@types/react':
+        specifier: ^18.0.26
+        version: 18.0.26
+      ava:
+        specifier: ^4.3.3
+        version: 4.3.3
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      typedoc:
+        specifier: ^0.23.24
+        version: 0.23.24(typescript@4.9.4)
+      typescript:
+        specifier: ^4.8.4
+        version: 4.9.4
+
   packages/selector:
     dependencies:
       '@keypom/core':
