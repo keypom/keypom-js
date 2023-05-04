@@ -776,6 +776,7 @@ const transformTransactions = (transactions) => transactions.map(({ receiverId, 
 });
 exports.transformTransactions = transformTransactions;
 const createAction = (action) => {
+    console.log('action: ', action);
     if (action.createAccount) {
         return transactions_1.actionCreators.createAccount();
     }

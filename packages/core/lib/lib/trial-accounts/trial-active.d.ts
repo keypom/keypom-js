@@ -96,26 +96,7 @@ export declare const trialSignAndSendTxns: ({ trialAccountId, trialAccountSecret
     /** The trial account secret key to use */
     trialAccountSecretKey: string;
     /** The transactions to execute */
-    txns: {
-        /** The contract ID to execute the transaction on */
-        receiverId: string;
-        /** The actions to execute */
-        actions: {
-            /** The type of action to execute */
-            type: "FunctionCall";
-            /** The parameters for the action */
-            params: {
-                /** The method name to execute */
-                methodName: string;
-                /** The arguments to pass to the method */
-                args: Object;
-                /** The amount of gas to attach to the transaction */
-                gas: string;
-                /** The amount of NEAR to attach to the transaction */
-                deposit: string;
-            };
-        }[];
-    }[];
+    txns: Transaction[];
 }) => Promise<FinalExecutionOutcome[]>;
 /**
  * Execute a method using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if the given method data

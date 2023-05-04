@@ -42,6 +42,7 @@
     "@near-js/crypto": "^0.0.4",
     "@near-js/keystores": "^0.0.4",
     "@near-js/keystores-browser": "^0.0.4",
+    "@near-js/keystores-node": "^0.0.4",
     "@near-js/transactions": "^0.2.0",
     "@near-js/types": "^0.0.4",
     "@near-js/utils": "^0.0.4",

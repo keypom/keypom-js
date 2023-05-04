@@ -3,6 +3,7 @@ import BN from "bn.js";
 import { getEnv } from "../keypom";
 import { getKeyInformation } from "../views";
 import { Account } from "@near-js/accounts";
+import { Transaction } from "@near-js/transactions";
 
 // helpers for keypom account contract args
 const RECEIVER_HEADER = "|kR|";
@@ -115,27 +116,7 @@ export const generateExecuteArgs = ({
     desiredTxns,
 }: {
     /** The transactions to execute */
-    desiredTxns: {
-        contractId?: string;
-        /** The contract ID to execute the transaction on */
-        receiverId: string;
-        /** The actions to execute */
-        actions: {
-            /** The type of action to execute */
-            type: string;
-            /** The parameters for the action */
-            params: {
-                /** The method name to execute */
-                methodName: string;
-                /** The arguments to pass to the method */
-                args: Object;
-                /** The amount of gas to attach to the transaction */
-                gas: string;
-                /** The amount of NEAR to attach to the transaction */
-                deposit: string;
-            };
-        }[];
-    }[];
+    desiredTxns: Transaction[];
 }) => {
     const methodDataToValidate: any = [];
     let totalGasBN = new BN(0);
@@ -146,27 +127,29 @@ export const generateExecuteArgs = ({
 
     desiredTxns.forEach((tx) => {
         const newTx: any = {};
-        newTx[RECEIVER_HEADER] = tx.contractId || tx.receiverId;
+        newTx[RECEIVER_HEADER] =  tx.receiverId;
         newTx.actions = [];
         console.log("newTx: ", newTx);
 
         tx.actions.forEach((action) => {
+            const fcAction = action.functionCall!;
+
             console.log("action: ", action);
             methodDataToValidate.push({
-                receiverId: tx.contractId || tx.receiverId,
-                methodName: action.params.methodName,
-                deposit: action.params.deposit,
+                receiverId: tx.receiverId,
+                methodName: fcAction.methodName,
+                deposit: fcAction.deposit,
             });
-            totalGasBN = totalGasBN.add(new BN(action.params.gas));
+            totalGasBN = totalGasBN.add(new BN(fcAction.gas));
             totalDepositsBN = totalDepositsBN.add(
-                new BN(action.params.deposit)
+                new BN(fcAction.deposit)
             );
 
             const newAction: any = {};
             console.log("newAction 1: ", newAction);
-            newAction[ACTION_HEADER] = action.type;
+            newAction[ACTION_HEADER] = action.enum;
             console.log("newAction 2: ", newAction);
-            newAction.params = wrapTxnParamsForTrial(action.params);
+            newAction.params = wrapTxnParamsForTrial(fcAction);
             console.log("newAction 3: ", newAction);
             newTx.actions.push(newAction);
         });

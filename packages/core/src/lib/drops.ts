@@ -481,7 +481,11 @@ export const createDrop = async ({
 
     let transactions: Transaction[] = [];
 
-    const pk = await account.connection.signer.getPublicKey();
+    const pk = await account.connection.signer.getPublicKey(
+        account.accountId,
+        account.connection.networkId
+    );
+
     const txnInfo: BasicTransaction = {
         receiverId: receiverId!,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -621,6 +625,7 @@ export const deleteDrops = async ({
         "Passed in account is not a valid account object."
     );
     account = await getAccount({ account, wallet });
+    const pubKey = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
 
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {
@@ -682,54 +687,66 @@ export const deleteDrops = async ({
                 registered_uses !== 0 &&
                 (ft !== undefined || nft !== undefined)
             ) {
+                const txn = convertBasicTransaction({
+                    txnInfo: {
+                        receiverId,
+                        signerId: account!.accountId,
+                        actions: [
+                            {
+                                enum: "FunctionCall",
+                                functionCall: {
+                                    methodName: "refund_assets",
+                                    args: stringifyJsonOrBytes({
+                                        drop_id,
+                                    }),
+                                    gas: gas300,
+                                    deposit: '0'
+                                },
+                            },
+                        ],
+                    },
+                    signerId: account!.accountId,
+                    signerPk: pubKey
+                })
+
                 responses.push(
                     ...(await execute({
                         account,
                         wallet,
-                        transactions: [
-                            {
-                                receiverId,
-                                actions: [
-                                    {
-                                        type: "FunctionCall",
-                                        params: {
-                                            methodName: "refund_assets",
-                                            args: {
-                                                drop_id,
-                                            },
-                                            gas: gas300,
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
+                        transactions: [txn],
                     }))
                 );
             }
 
             const deleteKeys = async () => {
+                const txn = convertBasicTransaction({
+                    txnInfo: {
+                        receiverId,
+                        signerId: account!.accountId,
+                        actions: [
+                            {
+                                enum: "FunctionCall",
+                                functionCall: {
+                                    methodName: "delete_keys",
+                                    args: stringifyJsonOrBytes({
+                                        drop_id,
+                                        public_keys: keys!.map(key2str),
+                                    }),
+                                    gas: gas300,
+                                    deposit: '0'
+                                },
+                            },
+                        ],
+                    },
+                    signerId: account!.accountId,
+                    signerPk: pubKey
+                })
+
                 responses.push(
                     ...(await execute({
                         account,
                         wallet,
-                        transactions: [
-                            {
-                                receiverId,
-                                actions: [
-                                    {
-                                        type: "FunctionCall",
-                                        params: {
-                                            methodName: "delete_keys",
-                                            args: {
-                                                drop_id,
-                                                public_keys: keys!.map(key2str),
-                                            },
-                                            gas: gas300,
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
+                        transactions: [txn],
                     }))
                 );
 
@@ -741,25 +758,31 @@ export const deleteDrops = async ({
             await deleteKeys();
 
             if (withdrawBalance) {
+                const txn = convertBasicTransaction({
+                    txnInfo: {
+                        receiverId,
+                        signerId: account!.accountId,
+                        actions: [
+                            {
+                                enum: "FunctionCall",
+                                functionCall: {
+                                    methodName: "withdraw_from_balance",
+                                    args: stringifyJsonOrBytes({}),
+                                    gas: '50000000000000',
+                                    deposit: '0'
+                                },
+                            },
+                        ],
+                    },
+                    signerId: account!.accountId,
+                    signerPk: pubKey
+                })
+
                 responses.push(
                     ...(await execute({
                         account,
                         wallet,
-                        transactions: [
-                            {
-                                receiverId,
-                                actions: [
-                                    {
-                                        type: "FunctionCall",
-                                        params: {
-                                            methodName: "withdraw_from_balance",
-                                            args: {},
-                                            gas: "50000000000000",
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
+                        transactions: [txn],
                     }))
                 );
             }

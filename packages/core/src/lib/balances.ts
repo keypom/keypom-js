@@ -8,6 +8,7 @@ import {
 //import { Account } from "near-api-js";
 import { nearArgsToYocto } from "./keypom-utils";
 import { Account } from "@near-js/accounts";
+import { Action, stringifyJsonOrBytes } from "@near-js/transactions";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -70,12 +71,12 @@ export const addToBalance = async ({
     let deposit = nearArgsToYocto(amountNear, amountYocto);
     assert(amountYocto != "0", "Amount to add to balance cannot be 0.");
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "add_to_balance",
-            args: {},
+            args: stringifyJsonOrBytes({}),
             gas: "100000000000000",
             deposit,
         },
@@ -131,13 +132,14 @@ export const withdrawBalance = async ({
     );
     account = await getAccount({ account, wallet });
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
-        type: "FunctionCall",
-        params: {
+        enum: "FunctionCall",
+        functionCall: {
             methodName: "withdraw_from_balance",
-            args: {},
+            args: stringifyJsonOrBytes({}),
             gas: "100000000000000",
+            deposit: '0'
         },
     });
 

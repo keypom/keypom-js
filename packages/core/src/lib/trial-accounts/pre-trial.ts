@@ -3,10 +3,9 @@ import {
     Wallet,
 } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 import BN from "bn.js";
-//import { Account, KeyPair } from "near-api-js";
 import { Account } from "@near-js/accounts";
 import { KeyPair } from "@near-js/crypto";
-import { stringifyJsonOrBytes } from "@near-js/transactions";
+import { Transaction, stringifyJsonOrBytes } from "@near-js/transactions";
 import { parseNearAmount } from "@near-js/utils";
 import {
     assert,
@@ -533,25 +532,31 @@ export const claimTrialAccountDrop = async ({
         INSERT_NEW_ACCOUNT: desiredAccountId,
         INSERT_TRIAL_PUBLIC_KEY: pubKey,
     };
-
-    const transactions: any[] = [
-        {
+ 
+    const txn = await convertBasicTransaction({
+        txnInfo: {
             receiverId,
+            signerId: receiverId,
             actions: [
                 {
-                    type: "FunctionCall",
-                    params: {
+                    enum: "FunctionCall",
+                    functionCall: {
                         methodName: "claim",
-                        args: {
+                        args: stringifyJsonOrBytes({
                             account_id: desiredAccountId,
                             fc_args: [JSON.stringify(userFcArgs), null],
-                        },
+                        }),
                         gas: attachedGas,
-                    },
+                        deposit: '0',
+                    }
                 },
             ],
         },
-    ];
+        signerId: receiverId,
+        signerPk: keyPair.getPublicKey(),
+    })
+
+    const transactions: Transaction[] = [txn];
 
     const result = await execute({ transactions, account: contractAccount });
 

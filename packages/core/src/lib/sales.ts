@@ -77,7 +77,7 @@ export const addToSaleAllowlist = async ({
         "The drop config must have a sale in order to add accounts to the sale allowlist."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
         type: "FunctionCall",
         params: {
@@ -170,7 +170,7 @@ export const removeFromSaleAllowlist = async ({
         "The drop config must have a sale in order to remove accounts from the sale allowlist."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
         type: "FunctionCall",
         params: {
@@ -255,7 +255,7 @@ export const addToSaleBlocklist = async ({
         "The drop config must have a sale in order to add accounts to the sale blocklist."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
         type: "FunctionCall",
         params: {
@@ -344,7 +344,7 @@ export const removeFromSaleBlocklist = async ({
         "The drop config must have a sale in order to remove accounts from the sale blocklist."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
         type: "FunctionCall",
         params: {
@@ -460,7 +460,7 @@ export const updateSale = async ({
         "The drop config must have a sale in order to be updated."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     actions.push({
         type: "FunctionCall",
         params: {

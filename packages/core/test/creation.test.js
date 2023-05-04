@@ -3,19 +3,12 @@ const homedir = require('os').homedir();
 const { writeFile, mkdir, readFile } = require('fs/promises');
 const test = require('ava');
 const BN = require('bn.js');
-const nearAPI = require('near-api-js');
 const { getUserBalance, getCurMethodData, canUserAddKeys, addToSaleAllowlist, removeFromSaleAllowlist, addToSaleBlocklist, removeFromSaleBlocklist, updateSale, getDropSupplyForOwner } = require('../lib');
-const {
-    Near,
-    KeyPair,
-    utils: { format: {
-        parseNearAmount
-    } },
-    keyStores: { InMemoryKeyStore },
-} = nearAPI;
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { connect, Near } = require("@near-js/wallet-account");
 
 const keypom = require('../lib');
-const { connect, Account } = require('near-api-js');
+const { Account } = require('@near-js/accounts');
 const {
     execute,
     initKeypom,
@@ -42,7 +35,7 @@ test('init', async (t) => {
     const CREDENTIALS_DIR = '.near-credentials';
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-    let keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+    let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
 
     let nearConfig = {
         networkId: NETWORK_ID,
@@ -53,7 +46,7 @@ test('init', async (t) => {
         explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
     };  
 
-    let near = await connect(nearConfig);
+    let near = new Near(nearConfig);
     fundingAccount = new Account(near.connection, funderAccountId);
 
     await initKeypom({

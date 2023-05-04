@@ -1,7 +1,7 @@
 import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 //import { KeyPair } from "near-api-js";
 import { getEnv } from "../keypom";
-import { createTransactions } from "../keypom-utils";
+import { convertBasicTransaction, createTransactions } from "../keypom-utils";
 import {
 	estimateTrialGas,
 	generateExecuteArgs,
@@ -10,7 +10,7 @@ import {
 	validateDesiredMethods
 } from "./utils";
 import { KeyPair } from "@near-js/crypto";
-import { stringifyJsonOrBytes } from "@near-js/transactions";
+import { stringifyJsonOrBytes, Transaction } from "@near-js/transactions";
 
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
@@ -113,26 +113,7 @@ export const trialSignAndSendTxns = async ({
     /** The trial account secret key to use */
     trialAccountSecretKey: string;
     /** The transactions to execute */
-    txns: {
-        /** The contract ID to execute the transaction on */
-        receiverId: string;
-        /** The actions to execute */
-        actions: {
-            /** The type of action to execute */
-            type: "FunctionCall";
-            /** The parameters for the action */
-            params: {
-                /** The method name to execute */
-                methodName: string;
-                /** The arguments to pass to the method */
-                args: Object;
-                /** The amount of gas to attach to the transaction */
-                gas: string;
-                /** The amount of NEAR to attach to the transaction */
-                deposit: string;
-            };
-        }[];
-    }[];
+    txns: Transaction[];
 }): Promise<FinalExecutionOutcome[]> => {
     const { near, keyStore, networkId } = getEnv();
     const exitExpected = await canExitTrial({ trialAccountId });
@@ -294,22 +275,31 @@ export const trialCallMethod = async ({
         throw TRIAL_ERRORS.EXIT_EXPECTED;
     }
 
-    const txns = [
-        {
-            receiverId: contractId,
+    const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);
+    const pubKey = trialKeyPair.getPublicKey();
+    await keyStore!.setKey(networkId!, trialAccountId, trialKeyPair);
+    const account = await near!.account(trialAccountId);
+
+    const txns = [await convertBasicTransaction({
+        txnInfo: {
+            receiverId: trialAccountId,
+            signerId: trialAccountId,
             actions: [
                 {
-                    type: "FunctionCall",
-                    params: {
+                    enum: "FunctionCall",
+                    functionCall: {
                         methodName,
-                        args,
+                        args: stringifyJsonOrBytes(args),
                         gas: attachedGas,
                         deposit: attachedDeposit,
-                    },
+                    }
                 },
             ],
         },
-    ];
+        signerId: trialAccountId,
+        signerPk: pubKey,
+    })]
+
     console.log(`txns: ${JSON.stringify(txns)}`);
 
     const {
@@ -337,11 +327,6 @@ export const trialCallMethod = async ({
     if (hasBal == false) {
         throw TRIAL_ERRORS.INSUFFICIENT_BALANCE;
     }
-
-    const trialKeyPair = KeyPair.fromString(trialAccountSecretKey);
-    const pubKey = trialKeyPair.getPublicKey();
-    await keyStore!.setKey(networkId!, trialAccountId, trialKeyPair);
-    const account = await near!.account(trialAccountId);
 
     const gasToAttach = estimateTrialGas({ executeArgs });
     const transformedTransactions = await createTransactions({

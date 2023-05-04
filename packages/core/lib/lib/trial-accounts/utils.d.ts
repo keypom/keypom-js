@@ -14,27 +14,7 @@ export declare const validateDesiredMethods: ({ methodData, trialAccountId, }: {
 export declare const wrapTxnParamsForTrial: (params: any, newParams?: {}) => {};
 export declare const generateExecuteArgs: ({ desiredTxns, }: {
     /** The transactions to execute */
-    desiredTxns: {
-        contractId?: string;
-        /** The contract ID to execute the transaction on */
-        receiverId: string;
-        /** The actions to execute */
-        actions: {
-            /** The type of action to execute */
-            type: string;
-            /** The parameters for the action */
-            params: {
-                /** The method name to execute */
-                methodName: string;
-                /** The arguments to pass to the method */
-                args: Object;
-                /** The amount of gas to attach to the transaction */
-                gas: string;
-                /** The amount of NEAR to attach to the transaction */
-                deposit: string;
-            };
-        }[];
-    }[];
+    desiredTxns: Transaction[];
 }) => {
     totalAttachedYocto: any;
     totalGasForTxns: any;

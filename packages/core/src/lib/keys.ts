@@ -26,6 +26,7 @@ import {
 import { CreateOrAddReturn } from "./types/params";
 import { ProtocolReturnedDrop } from "./types/protocol";
 import { canUserAddKeys, getDropInformation, getUserBalance } from "./views";
+import { Transaction } from "@near-js/transactions";
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -337,7 +338,7 @@ export const addKeys = async ({
         hasBalance = true;
     }
 
-    let transactions: any[] = [];
+    let transactions: Transaction[] = [];
 
     transactions.push({
         receiverId,
@@ -465,7 +466,7 @@ export const deleteKeys = async ({
         "Only the owner of the drop can delete keys."
     );
 
-    const actions: any[] = [];
+    const actions: Action[] = [];
     if ((ft || nft) && registered_uses > 0) {
         actions.push({
             type: "FunctionCall",

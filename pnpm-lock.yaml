@@ -71,6 +71,9 @@ importers:
       '@near-js/keystores-browser':
         specifier: ^0.0.4
         version: 0.0.4
+      '@near-js/keystores-node':
+        specifier: ^0.0.4
+        version: 0.0.4
       '@near-js/transactions':
         specifier: ^0.2.0
         version: 0.2.0
