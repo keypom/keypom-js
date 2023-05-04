@@ -71,11 +71,6 @@ test('token drop', async (t) => {
     const usesPerKey = 1;
     const masterKey = 'MASTER_KEY';
 
-    await deleteDrops({
-        account: fundingAccount,
-        dropIds: ['1683121703062']
-    });
-
     const {dropId} = await createDrop({
         account: fundingAccount,
         numKeys: 0,
