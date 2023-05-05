@@ -1,5 +1,4 @@
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
-import { Transaction } from "@near-js/transactions";
+import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
  * cannot be executed by the trial account (e.g. the attached deposit exceeds the trial account's restrictions), this will throw an error.

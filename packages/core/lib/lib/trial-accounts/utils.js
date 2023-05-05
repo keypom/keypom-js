@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hasEnoughBalance = exports.isUnclaimedTrialDrop = exports.estimateTrialGas = exports.generateExecuteArgs = exports.wrapTxnParamsForTrial = exports.validateDesiredMethods = exports.TRIAL_ERRORS = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
-//import { Account } from "near-api-js";
 const keypom_1 = require("../keypom");
 const views_1 = require("../views");
 const accounts_1 = require("@near-js/accounts");
@@ -103,21 +102,23 @@ const generateExecuteArgs = ({ desiredTxns, }) => {
         newTx.actions = [];
         console.log("newTx: ", newTx);
         tx.actions.forEach((action) => {
-            const fcAction = action.functionCall;
-            console.log("action: ", action);
+            console.log('action: ', action);
+            if (action.type !== "FunctionCall") {
+                throw new Error("Only FunctionCall actions are supported");
+            }
             methodDataToValidate.push({
                 receiverId: tx.receiverId,
-                methodName: fcAction.methodName,
-                deposit: fcAction.deposit,
+                methodName: action.params.methodName,
+                deposit: action.params.deposit
             });
-            totalGasBN = totalGasBN.add(new bn_js_1.default(fcAction.gas));
-            totalDepositsBN = totalDepositsBN.add(new bn_js_1.default(fcAction.deposit));
+            totalGasBN = totalGasBN.add(new bn_js_1.default(action.params.gas));
+            totalDepositsBN = totalDepositsBN.add(new bn_js_1.default(action.params.deposit));
             const newAction = {};
-            console.log("newAction 1: ", newAction);
-            newAction[ACTION_HEADER] = action.enum;
-            console.log("newAction 2: ", newAction);
-            newAction.params = (0, exports.wrapTxnParamsForTrial)(fcAction);
-            console.log("newAction 3: ", newAction);
+            console.log('newAction 1: ', newAction);
+            newAction[ACTION_HEADER] = action.type;
+            console.log('newAction 2: ', newAction);
+            newAction.params = (0, exports.wrapTxnParamsForTrial)(action.params);
+            console.log('newAction 3: ', newAction);
             newTx.actions.push(newAction);
         });
         executeArgs.transactions.push(newTx);

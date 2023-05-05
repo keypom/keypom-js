@@ -3,7 +3,7 @@ import { KeyPair } from "@near-js/crypto";
 import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { Near } from "@near-js/wallet-account";
-import { InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
+import { InstantLinkWalletBehaviour, Transaction } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { KeypomTrialModal, setupModal } from "../modal/src";
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
@@ -158,6 +158,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             res = await this.signAndSendTransactions({
                 transactions: [
                     {
+                        signerId: this.trialAccountId!,
                         receiverId,
                         actions,
                     },
@@ -171,11 +172,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return res[0] as FinalExecutionOutcome;
     }
 
-    async signAndSendTransactions(params) {
+    async signAndSendTransactions(params: {transactions: Transaction[]}) {
         console.log('sign and send txns params inner: ', params)
         this.assertSignedIn();
         const { transactions } = params;
-        console.log('transactions: ', transactions)
 
         try {
             console.log('is mapping txn', this.isMappingAccount)

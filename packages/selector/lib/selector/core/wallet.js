@@ -225,6 +225,7 @@ var KeypomWallet = /** @class */ (function () {
                         return [4 /*yield*/, this.signAndSendTransactions({
                                 transactions: [
                                     {
+                                        signerId: this.trialAccountId,
                                         receiverId: receiverId,
                                         actions: actions,
                                     },
@@ -252,7 +253,6 @@ var KeypomWallet = /** @class */ (function () {
                         console.log('sign and send txns params inner: ', params);
                         this.assertSignedIn();
                         transactions = params.transactions;
-                        console.log('transactions: ', transactions);
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);

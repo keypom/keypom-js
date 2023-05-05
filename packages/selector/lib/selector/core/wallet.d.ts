@@ -2,7 +2,7 @@ import { Account } from "@near-js/accounts";
 import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { Near } from "@near-js/wallet-account";
-import { InstantLinkWalletBehaviour } from "@near-wallet-selector/core";
+import { InstantLinkWalletBehaviour, Transaction } from "@near-wallet-selector/core";
 import BN from "bn.js";
 import { KeypomTrialModal } from "../modal/src";
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -29,7 +29,9 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     signIn(): Promise<Account[]>;
     signOut(): Promise<void>;
     signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;
-    signAndSendTransactions(params: any): Promise<FinalExecutionOutcome[]>;
+    signAndSendTransactions(params: {
+        transactions: Transaction[];
+    }): Promise<FinalExecutionOutcome[]>;
     private parseUrl;
     showModal: (modalType?: {
         id: string;

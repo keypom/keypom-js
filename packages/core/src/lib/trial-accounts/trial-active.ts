@@ -1,7 +1,7 @@
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 //import { KeyPair } from "near-api-js";
 import { getEnv } from "../keypom";
-import { convertBasicTransaction, createTransactions } from "../keypom-utils";
+import { createTransactions } from "../keypom-utils";
 import {
 	estimateTrialGas,
 	generateExecuteArgs,
@@ -10,7 +10,7 @@ import {
 	validateDesiredMethods
 } from "./utils";
 import { KeyPair } from "@near-js/crypto";
-import { stringifyJsonOrBytes, Transaction } from "@near-js/transactions";
+import { stringifyJsonOrBytes } from "@near-js/transactions";
 
 /**
  * Execute a transaction that can contain multiple actions using a trial account. If the trial account is in the exit state, this will throw an error. Similarly, if any action
@@ -280,25 +280,21 @@ export const trialCallMethod = async ({
     await keyStore!.setKey(networkId!, trialAccountId, trialKeyPair);
     const account = await near!.account(trialAccountId);
 
-    const txns = [await convertBasicTransaction({
-        txnInfo: {
-            receiverId: trialAccountId,
-            signerId: trialAccountId,
-            actions: [
-                {
-                    enum: "FunctionCall",
-                    functionCall: {
-                        methodName,
-                        args: stringifyJsonOrBytes(args),
-                        gas: attachedGas,
-                        deposit: attachedDeposit,
-                    }
-                },
-            ],
-        },
+    const txns: Transaction[] = [{
         signerId: trialAccountId,
-        signerPk: pubKey,
-    })]
+		receiverId: contractId,
+		actions: [
+			{
+				type: 'FunctionCall',
+				params: {
+					methodName,
+					args,
+					gas: attachedGas,
+					deposit: attachedDeposit
+				},
+			},
+		],
+	}];
 
     console.log(`txns: ${JSON.stringify(txns)}`);
 

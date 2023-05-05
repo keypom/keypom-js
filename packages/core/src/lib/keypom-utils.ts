@@ -700,30 +700,59 @@ export const execute = async ({
         console.log("wallet: ", wallet);
         // might be able to sign transactions with app key
         let needsRedirect = false;
+        let selectorTxns = [];
         transactions.forEach((tx) => {
+            let selectorActions = [];
+            
             if (tx.receiverId !== contractId) needsRedirect = true;
             tx.actions.forEach((a) => {
+                selectorActions.push({
+                    type: "FunctionCall",
+                    params: {   
+                        methodName: a.functionCall.methodName,
+                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        deposit: a.functionCall.deposit,
+                        gas: a.functionCall.gas
+                    }
+                })
                 const { deposit } = (a as any)?.params;
                 if (deposit && deposit !== "0") needsRedirect = true;
             });
+
+            selectorTxns.push({
+                signerId: tx.signerId,
+                receiverId: tx.receiverId,
+                actions: selectorActions
+            })
         });
 
         console.log("needsRedirect: ", needsRedirect);
         console.log("transactions: ", transactions);
+
         if (needsRedirect)
-        // @ts-ignore
             return await wallet.signAndSendTransactions({
-                transactions,
-                callbackUrl: successUrl,
+                transactions: selectorTxns,
+                callbackUrl: successUrl
             });
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = [];
         for (const tx of transactions) {
+            let selectorActions = [];
+            tx.actions.forEach((a) => {
+                selectorActions.push({
+                    type: "FunctionCall",
+                    params: {   
+                        methodName: a.functionCall.methodName,
+                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        deposit: a.functionCall.deposit,
+                        gas: a.functionCall.gas
+                    }
+                })
+            });
+
             responses.push(
-                // @ts-ignore
                 await wallet.signAndSendTransaction({
-                    // @ts-ignore
-                    actions: tx.actions,
+                    actions: selectorActions,
                 })
             );
         }

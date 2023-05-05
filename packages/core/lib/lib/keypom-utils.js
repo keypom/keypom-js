@@ -566,32 +566,55 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
         console.log("wallet: ", wallet);
         // might be able to sign transactions with app key
         let needsRedirect = false;
+        let selectorTxns = [];
         transactions.forEach((tx) => {
+            let selectorActions = [];
             if (tx.receiverId !== contractId)
                 needsRedirect = true;
             tx.actions.forEach((a) => {
+                selectorActions.push({
+                    type: "FunctionCall",
+                    params: {
+                        methodName: a.functionCall.methodName,
+                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        deposit: a.functionCall.deposit,
+                        gas: a.functionCall.gas
+                    }
+                });
                 const { deposit } = a === null || a === void 0 ? void 0 : a.params;
                 if (deposit && deposit !== "0")
                     needsRedirect = true;
+            });
+            selectorTxns.push({
+                signerId: tx.signerId,
+                receiverId: tx.receiverId,
+                actions: selectorActions
             });
         });
         console.log("needsRedirect: ", needsRedirect);
         console.log("transactions: ", transactions);
         if (needsRedirect)
-            // @ts-ignore
             return yield wallet.signAndSendTransactions({
-                // @ts-ignore
-                transactions,
-                callbackUrl: successUrl,
+                transactions: selectorTxns,
+                callbackUrl: successUrl
             });
         // sign txs in serial without redirect
         const responses = [];
         for (const tx of transactions) {
-            responses.push(
-            // @ts-ignore
-            yield wallet.signAndSendTransaction({
-                // @ts-ignore
-                actions: tx.actions,
+            let selectorActions = [];
+            tx.actions.forEach((a) => {
+                selectorActions.push({
+                    type: "FunctionCall",
+                    params: {
+                        methodName: a.functionCall.methodName,
+                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        deposit: a.functionCall.deposit,
+                        gas: a.functionCall.gas
+                    }
+                });
+            });
+            responses.push(yield wallet.signAndSendTransaction({
+                actions: selectorActions,
             }));
         }
         console.log("responses: ", responses);

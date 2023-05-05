@@ -1,4 +1,4 @@
-import { Transaction } from "@near-js/transactions";
+import { Transaction } from "@near-wallet-selector/core";
 export declare const TRIAL_ERRORS: {
     EXIT_EXPECTED: string;
     INVALID_ACTION: string;

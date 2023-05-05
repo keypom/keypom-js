@@ -234,25 +234,21 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
     const pubKey = trialKeyPair.getPublicKey();
     yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
     const account = yield near.account(trialAccountId);
-    const txns = [yield (0, keypom_utils_1.convertBasicTransaction)({
-            txnInfo: {
-                receiverId: trialAccountId,
-                signerId: trialAccountId,
-                actions: [
-                    {
-                        enum: "FunctionCall",
-                        functionCall: {
-                            methodName,
-                            args: (0, transactions_1.stringifyJsonOrBytes)(args),
-                            gas: attachedGas,
-                            deposit: attachedDeposit,
-                        }
-                    },
-                ],
-            },
+    const txns = [{
             signerId: trialAccountId,
-            signerPk: pubKey,
-        })];
+            receiverId: contractId,
+            actions: [
+                {
+                    type: 'FunctionCall',
+                    params: {
+                        methodName,
+                        args,
+                        gas: attachedGas,
+                        deposit: attachedDeposit
+                    },
+                },
+            ],
+        }];
     console.log(`txns: ${JSON.stringify(txns)}`);
     const { methodDataToValidate, executeArgs, totalAttachedYocto, totalGasForTxns, } = yield (0, utils_1.generateExecuteArgs)({ desiredTxns: txns });
     const isValidTxn = yield (0, utils_1.validateDesiredMethods)({

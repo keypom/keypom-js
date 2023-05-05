@@ -1,9 +1,8 @@
 import BN from "bn.js";
-//import { Account } from "near-api-js";
+import { Transaction } from "@near-wallet-selector/core";
 import { getEnv } from "../keypom";
 import { getKeyInformation } from "../views";
 import { Account } from "@near-js/accounts";
-import { Transaction } from "@near-js/transactions";
 
 // helpers for keypom account contract args
 const RECEIVER_HEADER = "|kR|";
@@ -132,27 +131,27 @@ export const generateExecuteArgs = ({
         console.log("newTx: ", newTx);
 
         tx.actions.forEach((action) => {
-            const fcAction = action.functionCall!;
-
-            console.log("action: ", action);
+            console.log('action: ', action)
+            if (action.type !== "FunctionCall") {
+                throw new Error("Only FunctionCall actions are supported");
+            }
+            
             methodDataToValidate.push({
                 receiverId: tx.receiverId,
-                methodName: fcAction.methodName,
-                deposit: fcAction.deposit,
-            });
-            totalGasBN = totalGasBN.add(new BN(fcAction.gas));
-            totalDepositsBN = totalDepositsBN.add(
-                new BN(fcAction.deposit)
-            );
+                methodName: action.params.methodName,
+                deposit: action.params.deposit
+            })
+			totalGasBN = totalGasBN.add(new BN(action.params.gas))
+			totalDepositsBN = totalDepositsBN.add(new BN(action.params.deposit))
 
-            const newAction: any = {};
-            console.log("newAction 1: ", newAction);
-            newAction[ACTION_HEADER] = action.enum;
-            console.log("newAction 2: ", newAction);
-            newAction.params = wrapTxnParamsForTrial(fcAction);
-            console.log("newAction 3: ", newAction);
-            newTx.actions.push(newAction);
-        });
+            const newAction: any = {}
+            console.log('newAction 1: ', newAction)
+            newAction[ACTION_HEADER] = action.type
+            console.log('newAction 2: ', newAction)
+            newAction.params = wrapTxnParamsForTrial(action.params)
+            console.log('newAction 3: ', newAction)
+            newTx.actions.push(newAction)
+        })
         executeArgs.transactions.push(newTx);
     });
     return {
