@@ -4,6 +4,7 @@ import type {
 import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
 import { KeypomParams, KeypomWalletInstant } from "./types";
 import { KeypomWallet } from "./wallet";
+import icon from "../../icon";
 
 interface KeypomInitializeOptions {
 	keypomWallet: KeypomWallet;
@@ -82,6 +83,7 @@ const Keypom: WalletBehaviourFactory<
 export function setupKeypom({
 	trialSplitDelim = "/",
 	deprecated = false,
+	iconUrl = icon,
 	trialBaseUrl,
 	networkId,
 	signInContractId,
@@ -111,7 +113,7 @@ export function setupKeypom({
 			metadata: {
 				name: "Keypom Account",
 				description: null,
-				iconUrl: "",
+				iconUrl,
 				deprecated,
 				available: true,
 				contractId: signInContractId,
