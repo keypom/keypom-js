@@ -104,6 +104,9 @@ importers:
       '@keypom/core':
         specifier: workspace:*
         version: link:../core
+      '@keypom/selector':
+        specifier: workspace:*
+        version: link:../selector
       bn.js:
         specifier: ^5.2.1
         version: 5.2.1

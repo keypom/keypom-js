@@ -28,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@keypom/core": "workspace:*",
+    "@keypom/selector": "workspace:*",
     "bn.js": "^5.2.1"
   },
   "ava": {

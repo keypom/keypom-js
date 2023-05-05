@@ -713,7 +713,6 @@ export const execute = async ({
         if (needsRedirect)
         // @ts-ignore
             return await wallet.signAndSendTransactions({
-                // @ts-ignore
                 transactions,
                 callbackUrl: successUrl,
             });
