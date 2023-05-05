@@ -3,6 +3,7 @@ const path = require("path");
 const homedir = require("os").homedir();
 const { readFileSync } = require('fs');
 const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { Account } = require('@near-js/accounts');
 const { connect, Near } = require("@near-js/wallet-account");
 const { initKeypom, createTrialAccountDrop } = require('@keypom/core');
 

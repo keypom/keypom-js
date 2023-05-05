@@ -223,7 +223,7 @@ const createNFTSeries = ({ account, wallet, dropId, metadata, royalty, }) => __a
         reference_hash: metadata.referenceHash,
     };
     const nftSeriesAccount = networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
-    const pk = yield account.connection.signer.getPublicKey();
+    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo = {
         receiverId: nftSeriesAccount,
         signerId: account.accountId,
@@ -638,7 +638,7 @@ const ftTransferCall = ({ account, wallet, contractId, absoluteAmount, amount, d
         });
         absoluteAmount = (0, exports.parseFTAmount)(amount, metadata.decimals);
     }
-    const pk = yield account.connection.signer.getPublicKey();
+    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo = {
         receiverId: contractId,
         signerId: account.accountId,
@@ -704,7 +704,7 @@ const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, return
     const transactions = [];
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const pk = yield account.connection.signer.getPublicKey();
+        const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
         const txnInfo = {
             receiverId: contractId,
             signerId: account.accountId,

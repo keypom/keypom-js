@@ -270,7 +270,7 @@ export const createNFTSeries = async ({
     const nftSeriesAccount =
         networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
 
-    const pk = await account.connection.signer.getPublicKey();
+    const pk = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo: BasicTransaction = {
         receiverId: nftSeriesAccount,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -818,7 +818,7 @@ export const ftTransferCall = async ({
         absoluteAmount = parseFTAmount(amount, metadata.decimals);
     }
 
-    const pk = await account.connection.signer.getPublicKey();
+    const pk = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo: BasicTransaction = {
         receiverId: contractId,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -917,7 +917,7 @@ export const nftTransferCall = async ({
 
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const pk = await account.connection.signer.getPublicKey();
+        const pk = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
         const txnInfo: BasicTransaction = {
             receiverId: contractId,
             signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -1429,7 +1429,6 @@ export const convertBasicTransaction = async ({
     signerPk: PublicKey;
 }) => {
     const { near } = getEnv();
-
     const account = new Account(near!.connection, signerId);
     const { provider } = account.connection;
 
