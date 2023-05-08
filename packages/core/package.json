@@ -7,21 +7,16 @@
     "preinstall": "npx only-allow pnpm",
     "build": "pnpm compile",
     "compile": "tsc -p tsconfig.json",
-    "lint:js": "eslint -c ../../.eslintrc.js.yml test/**/*.js --no-eslintrc",
-    "lint:js:fix": "eslint -c ../../.eslintrc.js.yml test/**/*.js --no-eslintrc --fix",
+    "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
+    "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
     "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
     "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
+    
     "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation && yarn test:dummy-creation",
-    "test:main": "yarn build && yarn ava:main",
-    "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
     "test:drop-creation": "yarn build && yarn ava:drop-creation",
     "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
     "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
-    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
-    "ava:main": "ava test/ws.test.js -vs --timeout=5m",
-    "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
-    "publish": "npx tsc && npm publish",
-    "build-docs": "npx typedoc --options typedoc.json"
+    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m"
   },
   "author": "benkurrek, mattlockyer",
   "license": "MIT",
@@ -61,5 +56,8 @@
     "@near-js/types": "^0.0.4",
     "@near-js/utils": "^0.0.4",
     "@near-js/wallet-account": "^0.0.6"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

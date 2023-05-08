@@ -1,19 +1,19 @@
-import { InstantLinkWallet, NetworkId, Transaction } from "@near-wallet-selector/core";
-import BN from "bn.js";
-import { BeginTrialCustomizations, InsufficientBalanceCustomizations, InvalidActionCustomizations, OffboardingWallet, TrialOverCustomizations } from "../modal/src/lib/modal.types";
-import { KeypomWallet } from "./wallet";
-import { FinalExecutionOutcome } from "@near-js/types";
+import { InstantLinkWallet, NetworkId, Transaction } from '@near-wallet-selector/core';
+import BN from 'bn.js';
+import { BeginTrialCustomizations, InsufficientBalanceCustomizations, InvalidActionCustomizations, OffboardingWallet, TrialOverCustomizations } from '../modal/src/lib/modal.types';
+import { KeypomWallet } from './wallet';
+import { FinalExecutionOutcome } from '@near-js/types';
 
 export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
     status: {
         Failure: {
-            error_message: "Invalid Trial Action",
-            error_type: "keypom-trial-error"
+            error_message: 'Invalid Trial Action',
+            error_type: 'keypom-trial-error'
         }
     },
     transaction: {},
     transaction_outcome: {
-        id: "",
+        id: '',
         outcome: {
             logs: [],
             receipt_ids: [],
@@ -22,14 +22,14 @@ export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
             gas_burnt: 0,
             status: {
                 Failure: {
-                    error_message: "Invalid Trial Action",
-                    error_type: "keypom-trial-error"
+                    error_message: 'Invalid Trial Action',
+                    error_type: 'keypom-trial-error'
                 }
             },
         }
     },
     receipts_outcome: [{
-        id: "",
+        id: '',
         outcome: {
             logs: [],
             receipt_ids: [],
@@ -38,13 +38,13 @@ export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
             executor_id: '',
             status: {
                 Failure: {
-                    error_message: "Invalid Trial Action",
-                    error_type: "keypom-trial-error"
+                    error_message: 'Invalid Trial Action',
+                    error_type: 'keypom-trial-error'
                 }
             },
         }
     }]
-}
+};
 
 export interface SignInOptions {
     contractId?: string;
@@ -55,7 +55,7 @@ export interface SignInOptions {
 export declare type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export interface SignAndSendTransactionsParams {
-    transactions: Array<Optional<Transaction, "signerId">>;
+    transactions: Array<Optional<Transaction, 'signerId'>>;
 }
 
 export interface KeypomInitializeOptions {

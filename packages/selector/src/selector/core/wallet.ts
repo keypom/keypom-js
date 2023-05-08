@@ -1,15 +1,15 @@
-import { Account } from "@near-js/accounts";
-import { KeyPair } from "@near-js/crypto";
-import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Near } from "@near-js/wallet-account";
-import { InstantLinkWalletBehaviour, Transaction } from "@near-wallet-selector/core";
-import BN from "bn.js";
-import { KeypomTrialModal, setupModal } from "../modal/src";
-import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
-import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from "../utils/selector-utils";
-import { FAILED_EXECUTION_OUTCOME } from "./types";
-import { TRIAL_ERRORS, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from "@keypom/core";
+import { Account } from '@near-js/accounts';
+import { KeyPair } from '@near-js/crypto';
+import { BrowserLocalStorageKeyStore } from '@near-js/keystores-browser';
+import { FinalExecutionOutcome } from '@near-js/types';
+import { Near } from '@near-js/wallet-account';
+import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/core';
+import BN from 'bn.js';
+import { KeypomTrialModal, setupModal } from '../modal/src';
+import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
+import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
+import { FAILED_EXECUTION_OUTCOME } from './types';
+import { TRIAL_ERRORS, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     networkId: string;
@@ -35,21 +35,21 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         modalOptions
     }) {
         console.log('Keypom constructor called.');
-        this.networkId = networkId
-        this.signInContractId = signInContractId
+        this.networkId = networkId;
+        this.signInContractId = signInContractId;
 
         this.keyStore = new BrowserLocalStorageKeyStore();
         this.near = new Near({
             ...networks[networkId],
             deps: { keyStore: this.keyStore },
         });
-        this.trialBaseUrl = trialBaseUrl
-        this.trialSplitDelim = trialSplitDelim
+        this.trialBaseUrl = trialBaseUrl;
+        this.trialSplitDelim = trialSplitDelim;
 
         this.isMappingAccount = false;
         
         this.modal = setupModal(modalOptions);
-        console.log("finished constructor");
+        console.log('finished constructor');
     }
 
     getContractId(): string {
@@ -58,19 +58,19 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     getAccountId(): string {
         this.assertSignedIn();
-        return this.trialAccountId!
+        return this.trialAccountId!;
     }
 
     async isSignedIn() {
-        return this.trialAccountId != undefined && this.trialAccountId != null
+        return this.trialAccountId != undefined && this.trialAccountId != null;
     }
 
     async signIn(): Promise<Account[]> {
-        console.log("IM SIGNING IN")
+        console.log('IM SIGNING IN');
         
         await initKeypom({
             network: this.networkId
-        })
+        });
 
         const parsedData = this.parseUrl();
 
@@ -80,13 +80,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
             // Check if this is an existing keypom drop that is claimable (case 1)
             const isOriginalLink = updateKeypomContractIfValid(accountId);
-            console.log(`isOriginalLink: `, isOriginalLink)
+            console.log('isOriginalLink: ', isOriginalLink);
             
             // If the drop is from keypom, it is either unclaimed or claimed
             if (isOriginalLink) {
                 try {
                     const isUnclaimed = await isUnclaimedTrialDrop({keypomContractId: accountId, secretKey});
-                    console.log(`isUnclaimed: `, isUnclaimed)
+                    console.log('isUnclaimed: ', isUnclaimed);
                     
                     // If the drop is unclaimed, we should show the unclaimed drop modal
                     if (isUnclaimed === true) {
@@ -101,11 +101,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                         return [];
                     } else {
                         // If the drop is claimed, we should attempt to recover the drop
-                        console.log("DROP IS CLAIMED. RECOVERY TODO");
+                        console.log('DROP IS CLAIMED. RECOVERY TODO');
                         accountId = await getAccountFromMap(secretKey);
                     }
                 } catch(e) {
-                    console.log('e checking if drop is from keypom: ', e)
+                    console.log('e checking if drop is from keypom: ', e);
                 }
             }
             
@@ -113,20 +113,20 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             try {
                 const keyInfo = await viewAccessKeyData({accountId, secretKey});
 
-                let keyPerms = keyInfo.permission.FunctionCall;
-                console.log('keyPerms: ', keyPerms)
+                const keyPerms = keyInfo.permission.FunctionCall;
+                console.log('keyPerms: ', keyPerms);
                 // Check if accountKeys's length is 1 and it has a `public_key` field
                 if (keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute')) {
                     return this.internalSignIn(accountId, secretKey);
                 }
             } catch (e) {
-                console.log('e: ', e)
+                console.log('e: ', e);
             }
         }
 
         // The URL is invalid or the trial info is incorrect. We should check local storage:
         const curEnvData = getLocalStorageKeypomEnv();
-        console.log('trial info invalid. Cur env data: ', curEnvData)
+        console.log('trial info invalid. Cur env data: ', curEnvData);
 
         // If there is any
         if (curEnvData != null) {
@@ -135,12 +135,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         // Invalid local storage info so return nothing
-        return []
+        return [];
     }
 
     async signOut() {
         if (this.trialAccountId == undefined || this.trialAccountId == null) {
-            throw new Error("Wallet is already signed out");
+            throw new Error('Wallet is already signed out');
         }
 
         this.trialAccountId = this.trialAccountId = this.trialSecretKey = undefined;
@@ -150,7 +150,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     async signAndSendTransaction(params) {
         this.assertSignedIn();
-        console.log('sign and send txn params: ', params)
+        console.log('sign and send txn params: ', params);
         const { receiverId, actions } = params;
 
         let res;
@@ -173,12 +173,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     async signAndSendTransactions(params: {transactions: Transaction[]}) {
-        console.log('sign and send txns params inner: ', params)
+        console.log('sign and send txns params inner: ', params);
         this.assertSignedIn();
         const { transactions } = params;
 
         try {
-            console.log('is mapping txn', this.isMappingAccount)
+            console.log('is mapping txn', this.isMappingAccount);
             if (!this.isMappingAccount) {
                 addUserToMappingContract(this.trialAccountId!, this.trialSecretKey!);
             }
@@ -186,9 +186,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 trialAccountId: this.trialAccountId!,
                 trialAccountSecretKey: this.trialSecretKey!,
                 txns: transactions
-            })
+            });
         } catch(e) {
-            console.log(`e: ${JSON.stringify(e)}`)
+            console.log(`e: ${JSON.stringify(e)}`);
             switch (e) {
                 case TRIAL_ERRORS.EXIT_EXPECTED: {
                     this.modal.show({
@@ -209,26 +209,26 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                     break;
                 }
                 default: {
-                    console.log('Unidentified error when signing txn: ', e)
+                    console.log('Unidentified error when signing txn: ', e);
                     break;
                 }
             }
             return [FAILED_EXECUTION_OUTCOME];
         }
-        return res
+        return res;
     }
 
     private parseUrl = () => {
-        console.log('this.trialBaseUrl: ', this.trialBaseUrl)
+        console.log('this.trialBaseUrl: ', this.trialBaseUrl);
         const split = window.location.href.split(this.trialBaseUrl);
-        console.log('split: ', split)
+        console.log('split: ', split);
 
         if (split.length != 2) {
             return;
         }
 
         const trialInfo = split[1];
-        const [accountId, secretKey] = trialInfo.split(this.trialSplitDelim)
+        const [accountId, secretKey] = trialInfo.split(this.trialSplitDelim);
 
         if (!accountId || !secretKey) {
             return;
@@ -237,21 +237,21 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return {
             accountId,
             secretKey
-        }
-    }
+        };
+    };
 
     public showModal = (modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) => {
-        console.log('modalType for show modal: ', modalType)
-        this.modal.show(modalType)
-    }
+        console.log('modalType for show modal: ', modalType);
+        this.modal.show(modalType);
+    };
 
     public checkValidTrialInfo = () => {
         return this.parseUrl() !== undefined || getLocalStorageKeypomEnv() != null;
-    }
+    };
 
     async verifyOwner() {
         throw Error(
-            "KeypomWallet:verifyOwner is deprecated"
+            'KeypomWallet:verifyOwner is deprecated'
         );
     }
 
@@ -266,7 +266,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             return [accountObj];
         }
 
-        return []
+        return [];
     }
 
     async switchAccount(id: string) {
@@ -274,14 +274,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     private async internalSignIn (accountId, secretKey) {
-        console.log("internal sign in: ", accountId, " ", secretKey)
+        console.log('internal sign in: ', accountId, ' ', secretKey);
         this.trialAccountId = accountId;
         this.trialSecretKey = secretKey;
 
         const dataToWrite = {
             accountId,
             secretKey
-        }
+        };
         setLocalStorageKeypomEnv(dataToWrite);
         await this.keyStore.setKey(this.networkId, accountId, KeyPair.fromString(secretKey));
 
@@ -299,7 +299,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     private assertSignedIn() {
         if (!this.trialAccountId) {
-            throw new Error("Wallet not signed in");
+            throw new Error('Wallet not signed in');
         }
     }
 }
