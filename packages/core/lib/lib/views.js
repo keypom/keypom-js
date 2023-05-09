@@ -51,12 +51,12 @@ const keypom_utils_1 = require("./keypom-utils");
  */
 const getKeyBalance = ({ publicKey, secretKey, }) => __awaiter(void 0, void 0, void 0, function* () {
     // Assert that either a secretKey or public key is passed in
-    (0, checks_1.assert)(secretKey || publicKey, "Must pass in either a publicKey or a secretKey");
+    (0, checks_1.assert)(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
     if (secretKey) {
         publicKey = (0, keypom_utils_1.getPubFromSecret)(secretKey);
     }
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_key_balance",
+        methodName: 'get_key_balance',
         args: {
             key: publicKey,
         },
@@ -86,7 +86,7 @@ exports.getKeyBalance = getKeyBalance;
  */
 const getKeyTotalSupply = () => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_key_total_supply",
+        methodName: 'get_key_total_supply',
         args: {},
     });
 });
@@ -120,7 +120,7 @@ exports.getKeyTotalSupply = getKeyTotalSupply;
  */
 const getKeys = ({ start, limit, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_keys",
+        methodName: 'get_keys',
         args: {
             from_index: start === null || start === void 0 ? void 0 : start.toString(),
             limit,
@@ -165,12 +165,12 @@ exports.getKeys = getKeys;
  */
 const getKeyInformation = ({ publicKey, secretKey, }) => __awaiter(void 0, void 0, void 0, function* () {
     // Assert that either a secretKey or public key is passed in
-    (0, checks_1.assert)(secretKey || publicKey, "Must pass in either a publicKey or a secretKey");
+    (0, checks_1.assert)(secretKey || publicKey, 'Must pass in either a publicKey or a secretKey');
     if (secretKey) {
         publicKey = (0, keypom_utils_1.getPubFromSecret)(secretKey);
     }
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_key_information",
+        methodName: 'get_key_information',
         args: {
             key: publicKey,
         },
@@ -214,7 +214,7 @@ exports.getKeyInformation = getKeyInformation;
  */
 const getKeyInformationBatch = ({ publicKeys, secretKeys, }) => __awaiter(void 0, void 0, void 0, function* () {
     // Assert that either secretKeys or public keys are passed in
-    (0, checks_1.assert)(secretKeys || publicKeys, "Must pass in either publicKeys or secretKeys");
+    (0, checks_1.assert)(secretKeys || publicKeys, 'Must pass in either publicKeys or secretKeys');
     if (secretKeys) {
         // Map the secret keys into public keys by calling getPubFromSecret
         publicKeys = secretKeys.map((secretKey) => {
@@ -222,7 +222,7 @@ const getKeyInformationBatch = ({ publicKeys, secretKeys, }) => __awaiter(void 0
         });
     }
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_key_information_batch",
+        methodName: 'get_key_information_batch',
         args: {
             keys: publicKeys,
         },
@@ -305,13 +305,13 @@ exports.getKeyInformationBatch = getKeyInformationBatch;
 const getDropInformation = ({ dropId, secretKey, publicKey, withKeys = false, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { contractId, viewCall } = (0, keypom_1.getEnv)();
     // Assert that either a dropId or a secretKey is passed in
-    (0, checks_1.assert)(dropId || secretKey || publicKey, "Must pass in either a dropId, publicKey or a secretKey to getDropInformation");
+    (0, checks_1.assert)(dropId || secretKey || publicKey, 'Must pass in either a dropId, publicKey or a secretKey to getDropInformation');
     if (secretKey) {
         publicKey = (0, keypom_utils_1.getPubFromSecret)(secretKey);
     }
     const dropInfo = yield viewCall({
         contractId,
-        methodName: "get_drop_information",
+        methodName: 'get_drop_information',
         args: {
             drop_id: dropId,
             key: publicKey,
@@ -319,10 +319,10 @@ const getDropInformation = ({ dropId, secretKey, publicKey, withKeys = false, })
     });
     if (withKeys) {
         dropInfo.keys = yield (0, keypom_utils_1.keypomView)({
-            methodName: "get_keys_for_drop",
+            methodName: 'get_keys_for_drop',
             args: {
                 drop_id: dropInfo.drop_id,
-                from_index: "0",
+                from_index: '0',
                 limit: drops_1.KEY_LIMIT,
             },
         });
@@ -366,7 +366,7 @@ exports.getDropInformation = getDropInformation;
  */
 const getKeySupplyForDrop = ({ dropId, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_key_supply_for_drop",
+        methodName: 'get_key_supply_for_drop',
         args: {
             drop_id: dropId,
         },
@@ -411,7 +411,7 @@ exports.getKeySupplyForDrop = getKeySupplyForDrop;
  */
 const getKeysForDrop = ({ dropId, start, limit, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_keys_for_drop",
+        methodName: 'get_keys_for_drop',
         args: {
             drop_id: dropId,
             from_index: start === null || start === void 0 ? void 0 : start.toString(),
@@ -455,7 +455,7 @@ exports.getKeysForDrop = getKeysForDrop;
  */
 const getDropSupplyForOwner = ({ accountId, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_drop_supply_for_owner",
+        methodName: 'get_drop_supply_for_owner',
         args: {
             account_id: accountId,
         },
@@ -496,7 +496,7 @@ exports.getDropSupplyForOwner = getDropSupplyForOwner;
  */
 const getDrops = ({ accountId, start, limit, withKeys = false, }) => __awaiter(void 0, void 0, void 0, function* () {
     const drops = yield (0, keypom_utils_1.keypomView)({
-        methodName: "get_drops_for_owner",
+        methodName: 'get_drops_for_owner',
         args: {
             account_id: accountId,
             from_index: start ? start.toString() : undefined,
@@ -504,14 +504,14 @@ const getDrops = ({ accountId, start, limit, withKeys = false, }) => __awaiter(v
         },
     });
     if (withKeys) {
-        (0, checks_1.assert)(drops.length <= 20, `Too many RPC requests in parallel. Use 'limit' arg 20 or less.`);
+        (0, checks_1.assert)(drops.length <= 20, 'Too many RPC requests in parallel. Use \'limit\' arg 20 or less.');
         yield Promise.all(drops.map((drop, i) => __awaiter(void 0, void 0, void 0, function* () {
             const { drop_id } = drop;
             drop.keys = yield (0, keypom_utils_1.keypomView)({
-                methodName: "get_keys_for_drop",
+                methodName: 'get_keys_for_drop',
                 args: {
                     drop_id,
-                    from_index: "0",
+                    from_index: '0',
                     limit: drops_1.KEY_LIMIT,
                 },
             });
@@ -546,7 +546,7 @@ exports.getDrops = getDrops;
  */
 const getNftSupplyForDrop = ({ dropId, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_nft_supply_for_drop",
+        methodName: 'get_nft_supply_for_drop',
         args: {
             drop_id: dropId,
         },
@@ -581,7 +581,7 @@ exports.getNftSupplyForDrop = getNftSupplyForDrop;
  */
 const getNftTokenIDsForDrop = ({ dropId, start, limit, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_nft_token_ids_for_drop",
+        methodName: 'get_nft_token_ids_for_drop',
         args: {
             drop_id: dropId,
             from_index: start,
@@ -616,7 +616,7 @@ exports.getNftTokenIDsForDrop = getNftTokenIDsForDrop;
  */
 const getUserBalance = ({ accountId, }) => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "get_user_balance",
+        methodName: 'get_user_balance',
         args: {
             account_id: accountId,
         },
@@ -695,13 +695,13 @@ const getCurMethodData = ({ secretKey, publicKey, keyUse, }) => __awaiter(void 0
     var _a;
     const keyInfo = yield (0, exports.getKeyInformation)({ publicKey, secretKey });
     const dropInfo = yield (0, exports.getDropInformation)({ publicKey, secretKey });
-    (0, checks_1.assert)(dropInfo.fc, "No FC drop found");
-    let methodDataArray = dropInfo.fc.methods;
+    (0, checks_1.assert)(dropInfo.fc, 'No FC drop found');
+    const methodDataArray = dropInfo.fc.methods;
     let startingIdx = methodDataArray.length > 1
         ? (((_a = dropInfo.config) === null || _a === void 0 ? void 0 : _a.uses_per_key) || 1) - keyInfo.remaining_uses
         : 0;
     if (keyUse) {
-        (0, checks_1.assert)(keyUse > 0 && keyUse <= methodDataArray.length, "Invalid key use passed in - out of bounds");
+        (0, checks_1.assert)(keyUse > 0 && keyUse <= methodDataArray.length, 'Invalid key use passed in - out of bounds');
         startingIdx = keyUse - 1;
     }
     return methodDataArray[startingIdx];
@@ -735,9 +735,9 @@ exports.getCurMethodData = getCurMethodData;
  * @group View Functions
  */
 const canUserAddKeys = ({ dropId, accountId, }) => __awaiter(void 0, void 0, void 0, function* () {
-    (0, checks_1.assert)(dropId && accountId, "Must pass in a drop ID and account ID");
+    (0, checks_1.assert)(dropId && accountId, 'Must pass in a drop ID and account ID');
     const canAddKeys = yield (0, keypom_utils_1.keypomView)({
-        methodName: "can_user_add_keys",
+        methodName: 'can_user_add_keys',
         args: {
             drop_id: dropId,
             account_id: accountId,
@@ -769,7 +769,7 @@ exports.canUserAddKeys = canUserAddKeys;
  */
 const getContractSourceMetadata = () => __awaiter(void 0, void 0, void 0, function* () {
     return (0, keypom_utils_1.keypomView)({
-        methodName: "contract_source_metadata",
+        methodName: 'contract_source_metadata',
         args: {},
     });
 });

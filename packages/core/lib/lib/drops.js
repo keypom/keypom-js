@@ -148,14 +148,14 @@ exports.KEY_LIMIT = 50;
 const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntropy, depositPerUseNEAR, depositPerUseYocto, metadata, requiredGas, config = {}, ftData, nftData, simpleData = {}, fcData, basePassword, passwordProtectedUses, useBalance = false, returnTransactions = false, successUrl, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
     const { near, viewCall, gas, attachedGas, contractId, receiverId, getAccount, execute, fundingAccountDetails, } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
-    (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
-    (0, checks_1.assert)(publicKeys != undefined || numKeys != undefined, "Must pass in either publicKeys or numKeys to create a drop.");
+    (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, 'Only the latest Keypom contract can be used to call this methods. Please update the contract.');
+    (0, checks_1.assert)(publicKeys != undefined || numKeys != undefined, 'Must pass in either publicKeys or numKeys to create a drop.');
     /// parse args
     depositPerUseYocto = (0, keypom_utils_1.nearArgsToYocto)(depositPerUseNEAR, depositPerUseYocto);
     // Ensure that if the dropID is passed in, it's greater than 1 billion
-    (0, checks_1.assert)(parseInt(dropId || "1000000000") >= 1000000000, "All custom drop IDs must be greater than 1_000_000_000");
+    (0, checks_1.assert)(parseInt(dropId || '1000000000') >= 1000000000, 'All custom drop IDs must be greater than 1_000_000_000');
     if (!dropId)
         dropId = Date.now().toString();
     yield (0, checks_1.assertDropIdUnique)(dropId);
@@ -192,8 +192,8 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     };
     (0, checks_1.assertValidDropConfig)(finalConfig);
     // If there are no publicKeys being passed in, we should generate our own based on the number of keys
+    let keys;
     if (!publicKeys) {
-        var keys;
         // Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
         const rootEntropyUsed = rootEntropy || (fundingAccountDetails === null || fundingAccountDetails === void 0 ? void 0 : fundingAccountDetails.rootEntropy);
         // If either root entropy was passed into the function or the funder has some set, we should use that.
@@ -217,7 +217,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     numKeys = publicKeys.length;
     let passwords;
     if (basePassword) {
-        (0, checks_1.assert)(numKeys <= 50, "Cannot add 50 keys at once with passwords");
+        (0, checks_1.assert)(numKeys <= 50, 'Cannot add 50 keys at once with passwords');
         // Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
         passwords = yield (0, keypom_utils_1.generatePerUsePasswords)({
             publicKeys: publicKeys,
@@ -226,12 +226,13 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
                 Array.from({ length: (config === null || config === void 0 ? void 0 : config.usesPerKey) || 1 }, (_, i) => i + 1),
         });
     }
+    let ftBalancePerUse;
     if (ftData) {
-        var ftBalancePerUse = (ftData === null || ftData === void 0 ? void 0 : ftData.absoluteAmount) || "0";
+        ftBalancePerUse = (ftData === null || ftData === void 0 ? void 0 : ftData.absoluteAmount) || '0';
         if (ftData.amount) {
             const metadata = viewCall({
                 contractId: ftData.contractId,
-                methodName: "ft_metadata",
+                methodName: 'ft_metadata',
             });
             ftBalancePerUse = (0, keypom_utils_1.parseFTAmount)(ftData.amount.toString(), metadata.decimals);
         }
@@ -261,7 +262,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
             ? {
                 methods: fcData.methods.map((useMethods) => useMethods
                     ? useMethods.map((method) => {
-                        let ret = {
+                        const ret = {
                             receiver_id: method.receiverId,
                             method_name: method.methodName,
                             args: method.args,
@@ -290,11 +291,11 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     if (createDropArgs.fc === undefined &&
         createDropArgs.ft === undefined &&
         createDropArgs.nft === undefined) {
-        (0, checks_1.assert)(depositPerUseYocto != "0", "Deposit per use must be greater than 0 for simple drops");
+        (0, checks_1.assert)(depositPerUseYocto != '0', 'Deposit per use must be greater than 0 for simple drops');
     }
     /// estimate required deposit
     const storageCalculated = (0, keypom_utils_1.getStorageBase)(createDropArgs);
-    let requiredDeposit = yield (0, keypom_utils_1.estimateRequiredDeposit)({
+    const requiredDeposit = yield (0, keypom_utils_1.estimateRequiredDeposit)({
         near: near,
         depositPerUse: depositPerUseYocto,
         numKeys,
@@ -304,15 +305,15 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
         ftData,
         fcData,
     });
-    var hasBalance = false;
+    let hasBalance = false;
     if (useBalance) {
-        let userBal = new bn_js_1.default(yield (0, views_1.getUserBalance)({ accountId: account.accountId }));
+        const userBal = new bn_js_1.default(yield (0, views_1.getUserBalance)({ accountId: account.accountId }));
         if (userBal.lt(new bn_js_1.default(requiredDeposit))) {
-            throw new Error(`Insufficient balance on Keypom to create drop. Use attached deposit instead.`);
+            throw new Error('Insufficient balance on Keypom to create drop. Use attached deposit instead.');
         }
         hasBalance = true;
     }
-    const deposit = !hasBalance ? requiredDeposit : "0";
+    const deposit = !hasBalance ? requiredDeposit : '0';
     let transactions = [];
     const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo = {
@@ -320,9 +321,9 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
         signerId: account.accountId,
         actions: [
             {
-                enum: "FunctionCall",
+                enum: 'FunctionCall',
                 functionCall: {
-                    methodName: "create_drop",
+                    methodName: 'create_drop',
                     args: (0, transactions_1.stringifyJsonOrBytes)(createDropArgs),
                     gas: gas,
                     deposit,
@@ -343,10 +344,10 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
             returnTransaction: true,
         })));
     }
-    let tokenIds = nftData === null || nftData === void 0 ? void 0 : nftData.tokenIds;
+    const tokenIds = nftData === null || nftData === void 0 ? void 0 : nftData.tokenIds;
     if (nftData && tokenIds && (tokenIds === null || tokenIds === void 0 ? void 0 : tokenIds.length) > 0) {
         if (tokenIds.length > 2) {
-            throw new Error(`You can only automatically register 2 NFTs with 'createDrop'. If you need to register more NFTs you can use the method 'nftTransferCall' after you create the drop.`);
+            throw new Error('You can only automatically register 2 NFTs with \'createDrop\'. If you need to register more NFTs you can use the method \'nftTransferCall\' after you create the drop.');
         }
         const nftTXs = (yield (0, keypom_utils_1.nftTransferCall)({
             account: account,
@@ -360,7 +361,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     if (returnTransactions) {
         return { keys, dropId, transactions, requiredDeposit };
     }
-    let responses = yield execute({
+    const responses = yield execute({
         transactions,
         account,
         wallet,
@@ -415,14 +416,14 @@ exports.createDrop = createDrop;
  */
 const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { gas300, receiverId, execute, getAccount, contractId } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, 'Only the latest Keypom contract can be used to call this methods. Please update the contract.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const pubKey = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {
         if (!dropIds) {
-            throw new Error("Must pass in either drops or dropIds");
+            throw new Error('Must pass in either drops or dropIds');
         }
         // For each drop ID in drop IDs, get the drop information
         drops = [];
@@ -431,14 +432,14 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
         })));
     }
     const responses = yield Promise.all(drops.map(({ owner_id, drop_id, registered_uses, ft, nft }) => __awaiter(void 0, void 0, void 0, function* () {
-        (0, checks_1.assert)(owner_id == account.accountId, "Only the owner of the drop can delete drops.");
+        (0, checks_1.assert)(owner_id == account.accountId, 'Only the owner of the drop can delete drops.');
         let keySupply;
         let keys;
         const updateKeys = () => __awaiter(void 0, void 0, void 0, function* () {
-            let keyPromises = [
+            const keyPromises = [
                 (() => __awaiter(void 0, void 0, void 0, function* () {
                     keySupply = yield (0, keypom_utils_1.keypomView)({
-                        methodName: "get_key_supply_for_drop",
+                        methodName: 'get_key_supply_for_drop',
                         args: {
                             drop_id: drop_id.toString(),
                         },
@@ -447,10 +448,10 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
             ];
             keyPromises.push((() => __awaiter(void 0, void 0, void 0, function* () {
                 keys = yield (0, keypom_utils_1.keypomView)({
-                    methodName: "get_keys_for_drop",
+                    methodName: 'get_keys_for_drop',
                     args: {
                         drop_id: drop_id.toString(),
-                        from_index: "0",
+                        from_index: '0',
                         limit: exports.KEY_LIMIT,
                     },
                 });
@@ -467,9 +468,9 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
                     signerId: account.accountId,
                     actions: [
                         {
-                            enum: "FunctionCall",
+                            enum: 'FunctionCall',
                             functionCall: {
-                                methodName: "refund_assets",
+                                methodName: 'refund_assets',
                                 args: (0, transactions_1.stringifyJsonOrBytes)({
                                     drop_id,
                                 }),
@@ -495,9 +496,9 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
                     signerId: account.accountId,
                     actions: [
                         {
-                            enum: "FunctionCall",
+                            enum: 'FunctionCall',
                             functionCall: {
-                                methodName: "delete_keys",
+                                methodName: 'delete_keys',
                                 args: (0, transactions_1.stringifyJsonOrBytes)({
                                     drop_id,
                                     public_keys: keys.map(keypom_utils_1.key2str),
@@ -529,9 +530,9 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
                     signerId: account.accountId,
                     actions: [
                         {
-                            enum: "FunctionCall",
+                            enum: 'FunctionCall',
                             functionCall: {
-                                methodName: "withdraw_from_balance",
+                                methodName: 'withdraw_from_balance',
                                 args: (0, transactions_1.stringifyJsonOrBytes)({}),
                                 gas: '50000000000000',
                                 deposit: '0'

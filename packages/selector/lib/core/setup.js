@@ -72,7 +72,7 @@ var Keypom = function (_a) {
                     getAccounts: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                logger.log("Keypom:account");
+                                logger.log('Keypom:account');
                                 return [2 /*return*/, keypomWallet.getAccounts()];
                             });
                         });
@@ -88,7 +88,7 @@ var Keypom = function (_a) {
                         });
                     },
                     getAccountId: function () {
-                        logger.log("Keypom:getAccountId");
+                        logger.log('Keypom:getAccountId');
                         return keypomWallet.getAccountId();
                     },
                     isSignedIn: function () {
@@ -96,7 +96,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log("Keypom:isSignedIn");
+                                        logger.log('Keypom:isSignedIn');
                                         return [4 /*yield*/, keypomWallet.isSignedIn()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -108,7 +108,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log("Keypom:isSignedIn");
+                                        logger.log('Keypom:isSignedIn');
                                         return [4 /*yield*/, keypomWallet.getAvailableBalance()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -118,7 +118,7 @@ var Keypom = function (_a) {
                     verifyOwner: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                throw Error("KeypomWallet:verifyOwner is deprecated");
+                                throw Error('KeypomWallet:verifyOwner is deprecated');
                             });
                         });
                     },
@@ -127,7 +127,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log("Keypom:signIn");
+                                        logger.log('Keypom:signIn');
                                         return [4 /*yield*/, keypomWallet.signIn()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -139,7 +139,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log("Keypom:signOut");
+                                        logger.log('Keypom:signOut');
                                         return [4 /*yield*/, keypomWallet.signOut()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -158,11 +158,15 @@ var Keypom = function (_a) {
                     },
                     signAndSendTransactions: function (params) {
                         return __awaiter(this, void 0, void 0, function () {
+                            var transactions;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log("Keypom:signAndSendTransactions", params);
-                                        return [4 /*yield*/, keypomWallet.signAndSendTransactions(params)];
+                                        transactions = params.transactions.map(function (tx) {
+                                            return __assign(__assign({}, tx), { signerId: tx.signerId || keypomWallet.getAccountId() });
+                                        });
+                                        logger.log('Keypom:signAndSendTransactions', params);
+                                        return [4 /*yield*/, keypomWallet.signAndSendTransactions({ transactions: transactions })];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
                             });
@@ -174,13 +178,13 @@ var Keypom = function (_a) {
 };
 function setupKeypom(_a) {
     var _this = this;
-    var _b = _a.trialSplitDelim, trialSplitDelim = _b === void 0 ? "/" : _b, _c = _a.deprecated, deprecated = _c === void 0 ? false : _c, trialBaseUrl = _a.trialBaseUrl, networkId = _a.networkId, signInContractId = _a.signInContractId, modalOptions = _a.modalOptions;
+    var _b = _a.trialSplitDelim, trialSplitDelim = _b === void 0 ? '/' : _b, _c = _a.deprecated, deprecated = _c === void 0 ? false : _c, trialBaseUrl = _a.trialBaseUrl, networkId = _a.networkId, signInContractId = _a.signInContractId, modalOptions = _a.modalOptions;
     return function () { return __awaiter(_this, void 0, void 0, function () {
         var keypomWallet, shouldSignIn;
         var _this = this;
         return __generator(this, function (_a) {
             if (!signInContractId || !networkId || !trialBaseUrl) {
-                console.warn("KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.");
+                console.warn('KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.');
                 return [2 /*return*/, null];
             }
             keypomWallet = new wallet_1.KeypomWallet({
@@ -193,12 +197,12 @@ function setupKeypom(_a) {
             shouldSignIn = keypomWallet.checkValidTrialInfo();
             console.log('shouldSignIn: ', shouldSignIn);
             return [2 /*return*/, {
-                    id: "keypom",
-                    type: "instant-link",
+                    id: 'keypom',
+                    type: 'instant-link',
                     metadata: {
-                        name: "Keypom Account",
+                        name: 'Keypom Account',
                         description: null,
-                        iconUrl: "",
+                        iconUrl: '',
                         deprecated: deprecated,
                         available: true,
                         contractId: signInContractId,

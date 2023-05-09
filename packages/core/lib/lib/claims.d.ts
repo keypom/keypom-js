@@ -1,4 +1,4 @@
-import { Maybe } from "./keypom";
+import { Maybe } from './keypom';
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
  *

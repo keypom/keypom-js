@@ -39,17 +39,17 @@ const transactions_1 = require("@near-js/transactions");
  */
 const addToBalance = ({ account, wallet, amountNear, amountYocto, successUrl, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
-    let deposit = (0, keypom_utils_1.nearArgsToYocto)(amountNear, amountYocto);
-    (0, checks_1.assert)(amountYocto != "0", "Amount to add to balance cannot be 0.");
+    const deposit = (0, keypom_utils_1.nearArgsToYocto)(amountNear, amountYocto);
+    (0, checks_1.assert)(amountYocto != '0', 'Amount to add to balance cannot be 0.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "add_to_balance",
+            methodName: 'add_to_balance',
             args: (0, transactions_1.stringifyJsonOrBytes)({}),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit,
         },
     });
@@ -87,15 +87,15 @@ exports.addToBalance = addToBalance;
  */
 const withdrawBalance = ({ account, wallet, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "withdraw_from_balance",
+            methodName: 'withdraw_from_balance',
             args: (0, transactions_1.stringifyJsonOrBytes)({}),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });

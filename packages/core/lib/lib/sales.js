@@ -46,22 +46,22 @@ const transactions_1 = require("@near-js/transactions");
 const addToSaleAllowlist = ({ account, wallet, dropId, accountIds, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)(dropId && accountIds, "Must pass in a drop ID and a list of account IDs to add to the sale allowlist.");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to add to the sale allowlist.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const dropInfo = yield (0, views_1.getDropInformation)({ dropId });
-    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, "Only the owner of the drop can add accounts to the sale allowlist.");
-    (0, checks_1.assert)((_a = dropInfo.config) === null || _a === void 0 ? void 0 : _a.sale, "The drop config must have a sale in order to add accounts to the sale allowlist.");
+    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, 'Only the owner of the drop can add accounts to the sale allowlist.');
+    (0, checks_1.assert)((_a = dropInfo.config) === null || _a === void 0 ? void 0 : _a.sale, 'The drop config must have a sale in order to add accounts to the sale allowlist.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "add_to_sale_allowlist",
+            methodName: 'add_to_sale_allowlist',
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -110,22 +110,22 @@ exports.addToSaleAllowlist = addToSaleAllowlist;
 const removeFromSaleAllowlist = ({ account, wallet, dropId, accountIds, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)(dropId && accountIds, "Must pass in a drop ID and a list of account IDs to remove from the sale allowlist.");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to remove from the sale allowlist.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const dropInfo = yield (0, views_1.getDropInformation)({ dropId });
-    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, "Only the owner of the drop can remove accounts from the sale allowlist.");
-    (0, checks_1.assert)((_b = dropInfo.config) === null || _b === void 0 ? void 0 : _b.sale, "The drop config must have a sale in order to remove accounts from the sale allowlist.");
+    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, 'Only the owner of the drop can remove accounts from the sale allowlist.');
+    (0, checks_1.assert)((_b = dropInfo.config) === null || _b === void 0 ? void 0 : _b.sale, 'The drop config must have a sale in order to remove accounts from the sale allowlist.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "remove_from_sale_allowlist",
+            methodName: 'remove_from_sale_allowlist',
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -166,22 +166,22 @@ exports.removeFromSaleAllowlist = removeFromSaleAllowlist;
 const addToSaleBlocklist = ({ account, wallet, dropId, accountIds, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _c;
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)(dropId && accountIds, "Must pass in a drop ID and a list of account IDs to add to the sale blocklist.");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to add to the sale blocklist.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const dropInfo = yield (0, views_1.getDropInformation)({ dropId });
-    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, "Only the owner of the drop can add accounts to the sale blocklist.");
-    (0, checks_1.assert)((_c = dropInfo.config) === null || _c === void 0 ? void 0 : _c.sale, "The drop config must have a sale in order to add accounts to the sale blocklist.");
+    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, 'Only the owner of the drop can add accounts to the sale blocklist.');
+    (0, checks_1.assert)((_c = dropInfo.config) === null || _c === void 0 ? void 0 : _c.sale, 'The drop config must have a sale in order to add accounts to the sale blocklist.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "add_to_sale_blocklist",
+            methodName: 'add_to_sale_blocklist',
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -226,22 +226,22 @@ exports.addToSaleBlocklist = addToSaleBlocklist;
 const removeFromSaleBlocklist = ({ account, wallet, dropId, accountIds, }) => __awaiter(void 0, void 0, void 0, function* () {
     var _d;
     const { receiverId, execute, getAccount } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)(dropId && accountIds, "Must pass in a drop ID and a list of account IDs to remove from the sale blocklist.");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+    (0, checks_1.assert)(dropId && accountIds, 'Must pass in a drop ID and a list of account IDs to remove from the sale blocklist.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const dropInfo = yield (0, views_1.getDropInformation)({ dropId });
-    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, "Only the owner of the drop can remove accounts from the sale blocklist.");
-    (0, checks_1.assert)((_d = dropInfo.config) === null || _d === void 0 ? void 0 : _d.sale, "The drop config must have a sale in order to remove accounts from the sale blocklist.");
+    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, 'Only the owner of the drop can remove accounts from the sale blocklist.');
+    (0, checks_1.assert)((_d = dropInfo.config) === null || _d === void 0 ? void 0 : _d.sale, 'The drop config must have a sale in order to remove accounts from the sale blocklist.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "remove_from_sale_blocklist",
+            methodName: 'remove_from_sale_blocklist',
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -287,17 +287,17 @@ const updateSale = ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pric
             pricePerKeyYocto ||
             autoWithdrawFunds ||
             start ||
-            end), "Must pass in a drop ID and at least one of the other sale parameters to update");
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
+            end), 'Must pass in a drop ID and at least one of the other sale parameters to update');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
     account = yield getAccount({ account, wallet });
     const dropInfo = yield (0, views_1.getDropInformation)({ dropId });
-    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, "Only the owner of the drop can update the sale.");
-    (0, checks_1.assert)((_e = dropInfo.config) === null || _e === void 0 ? void 0 : _e.sale, "The drop config must have a sale in order to be updated.");
+    (0, checks_1.assert)(account.accountId == dropInfo.owner_id, 'Only the owner of the drop can update the sale.');
+    (0, checks_1.assert)((_e = dropInfo.config) === null || _e === void 0 ? void 0 : _e.sale, 'The drop config must have a sale in order to be updated.');
     const actions = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "update_sale",
+            methodName: 'update_sale',
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 drop_id: dropId,
                 max_num_keys: maxNumKeys,
@@ -308,7 +308,7 @@ const updateSale = ({ account, wallet, dropId, maxNumKeys, pricePerKeyNEAR, pric
                 start,
                 end,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });

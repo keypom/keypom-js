@@ -4,13 +4,13 @@ exports.FAILED_EXECUTION_OUTCOME = void 0;
 exports.FAILED_EXECUTION_OUTCOME = {
     status: {
         Failure: {
-            error_message: "Invalid Trial Action",
-            error_type: "keypom-trial-error"
+            error_message: 'Invalid Trial Action',
+            error_type: 'keypom-trial-error'
         }
     },
     transaction: {},
     transaction_outcome: {
-        id: "",
+        id: '',
         outcome: {
             logs: [],
             receipt_ids: [],
@@ -19,14 +19,14 @@ exports.FAILED_EXECUTION_OUTCOME = {
             gas_burnt: 0,
             status: {
                 Failure: {
-                    error_message: "Invalid Trial Action",
-                    error_type: "keypom-trial-error"
+                    error_message: 'Invalid Trial Action',
+                    error_type: 'keypom-trial-error'
                 }
             },
         }
     },
     receipts_outcome: [{
-            id: "",
+            id: '',
             outcome: {
                 logs: [],
                 receipt_ids: [],
@@ -35,8 +35,8 @@ exports.FAILED_EXECUTION_OUTCOME = {
                 executor_id: '',
                 status: {
                     Failure: {
-                        error_message: "Invalid Trial Action",
-                        error_type: "keypom-trial-error"
+                        error_message: 'Invalid Trial Action',
+                        error_type: 'keypom-trial-error'
                     }
                 },
             }

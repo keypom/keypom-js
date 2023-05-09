@@ -1,4 +1,5 @@
 import type {
+    Transaction,
     WalletBehaviourFactory, WalletModuleFactory
 } from '@near-wallet-selector/core';
 import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
@@ -73,8 +74,17 @@ const Keypom: WalletBehaviourFactory<
         },
 
         async signAndSendTransactions(params) {
+            // Convert the params to Array<Transaction>
+
+            const transactions: Transaction[] = params.transactions.map((tx) => {
+                return {
+                    ...tx,
+                    signerId: tx.signerId || keypomWallet.getAccountId(),
+                };
+            });
+
             logger.log('Keypom:signAndSendTransactions', params);
-            return await keypomWallet.signAndSendTransactions(params);
+            return await keypomWallet.signAndSendTransactions({transactions});
         },
     };
 };

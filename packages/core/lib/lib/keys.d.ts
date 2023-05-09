@@ -1,7 +1,7 @@
-import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
-import { Account } from "@near-js/accounts";
-import { CreateOrAddReturn } from "./types/params";
-import { ProtocolReturnedDrop } from "./types/protocol";
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import { Account } from '@near-js/accounts';
+import { CreateOrAddReturn } from './types/params';
+import { ProtocolReturnedDrop } from './types/protocol';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 /**
  * Add keys that are manually generated and passed in, or automatically generated to an existing drop. If they're

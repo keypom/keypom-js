@@ -1,17 +1,17 @@
-import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
-import { PasswordPerUse } from "./types/drops";
-import { FCData } from "./types/fc";
-import { FTData, FungibleTokenMetadata } from "./types/ft";
-import { BasicTransaction, GeneratedKeyPairs } from "./types/general";
-import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from "./types/nft";
-import { CreateDropProtocolArgs } from "./types/params";
-import { PublicKey } from "@near-js/crypto";
-import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
-import { Near } from "@near-js/wallet-account";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Action, Transaction } from "@near-js/transactions";
+import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import { PasswordPerUse } from './types/drops';
+import { FCData } from './types/fc';
+import { FTData, FungibleTokenMetadata } from './types/ft';
+import { BasicTransaction, GeneratedKeyPairs } from './types/general';
+import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from './types/nft';
+import { CreateDropProtocolArgs } from './types/params';
+import { PublicKey } from '@near-js/crypto';
+import { Account, SignAndSendTransactionOptions } from '@near-js/accounts';
+import { Near } from '@near-js/wallet-account';
+import { FinalExecutionOutcome } from '@near-js/types';
+import { Action, Transaction } from '@near-js/transactions';
 type AnyWallet = BrowserWalletBehaviour | Wallet;
-export declare const ATTACHED_GAS_FROM_WALLET: number;
+export declare const ATTACHED_GAS_FROM_WALLET = 100000000000000;
 export declare const key2str: (v: any) => any;
 /**
  * Get the public key from a given secret key.

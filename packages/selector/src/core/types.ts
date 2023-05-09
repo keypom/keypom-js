@@ -52,11 +52,11 @@ export interface SignInOptions {
     methodNames?: string[];
 }
 
-export declare type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+// export declare type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-export interface SignAndSendTransactionsParams {
-    transactions: Array<Optional<Transaction, 'signerId'>>;
-}
+// export interface SignAndSendTransactionsParams {
+//     transactions: Array<Optional<Transaction, 'signerId'>>;
+// }
 
 export interface KeypomInitializeOptions {
     keypomWallet: KeypomWallet

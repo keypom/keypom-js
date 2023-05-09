@@ -1,4 +1,4 @@
-export type Theme = "dark" | "light" | "auto";
+export type Theme = 'dark' | 'light' | 'auto';
 export interface ModalOptions {
     accountId: string;
     secretKey: string;
@@ -9,7 +9,7 @@ export interface ModalOptions {
     invalidAction?: InvalidActionCustomizations;
     insufficientBalance?: InsufficientBalanceCustomizations;
     theme?: Theme;
-    onHide?: (hideReason: "user-triggered" | "wallet-navigation") => void;
+    onHide?: (hideReason: 'user-triggered' | 'wallet-navigation') => void;
 }
 export interface BeginTrialCustomizations {
     landing?: {

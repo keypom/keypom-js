@@ -1,8 +1,8 @@
-import { Account } from "@near-js/accounts";
+import { Account } from '@near-js/accounts';
 import { Near } from '@near-js/wallet-account';
-import { FCData } from "./types/fc";
-import { Funder } from "./types/general";
-import { ProtocolReturnedDropConfig } from "./types/protocol";
+import { FCData } from './types/fc';
+import { Funder } from './types/general';
+import { ProtocolReturnedDropConfig } from './types/protocol';
 export declare function isValidKeypomContract(keypomContractId: string): boolean;
 export declare function isSupportedKeypomContract(keypomContractId: string): boolean;
 export declare function isValidAccountObj(o: Account | undefined): o is Account;
