@@ -16,7 +16,7 @@ const {
 // Change this to your account ID
 const FUNDER_ACCOUNT_ID = "minqi.testnet";
 const NETWORK_ID = "testnet";
-async function createTickDrop() {
+async function createDaoDrop() {
     // Initiate connection to the NEAR blockchain.
     const CREDENTIALS_DIR = ".near-credentials";
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
@@ -71,8 +71,6 @@ async function createTickDrop() {
                         funderIdField: "funder",
                         // Attached deposit of 1 $NEAR for when the receiver makes this function call
                         attachedDeposit: parseNearAmount("1.5")
-                        // NEED TO ADD 1NEAR TO WHOLE FN CALL CHAIN AND ONLY USE FOR ADD_PROPOSAL
-                        // CYURRENTLY MINIMUM BOND ERROR
                     }
                 ],
             ]   
@@ -97,8 +95,8 @@ async function createTickDrop() {
     return keys
 }
 
-createTickDrop()
+createDaoDrop()
 
 module.exports = {
-    createTickDrop,
+    createDaoDrop,
 }

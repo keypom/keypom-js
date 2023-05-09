@@ -12,6 +12,8 @@
     "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
     "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
     "ava:main": "ava test/ws.test.js -vs --timeout=5m",
+    "ava:dao": "ava test/dao.test.js -vs --timeout=5m",
+
     "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
     "build": "npx tsc",
     "publish": "npx tsc && npm publish",

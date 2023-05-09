@@ -63,7 +63,7 @@ async function viewRoles(){
     let near = await connect(nearConfig);
     const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
     
-    
+    // get policy and parse
     let viewReturn = await fundingAccount.viewFunction(
         DAO_CONTRACT,
 		'get_policy'
