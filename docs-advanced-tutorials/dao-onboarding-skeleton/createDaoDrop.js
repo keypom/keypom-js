@@ -16,12 +16,12 @@ const {
 // Change this to your account ID
 const FUNDER_ACCOUNT_ID = "minqi.testnet";
 const NETWORK_ID = "testnet";
-async function createTickDrop() {
+async function createDaoDrop() {
 
 }
 
-createTickDrop()
+createDaoDrop()
 
 module.exports = {
-    createTickDrop,
+    createDaoDrop,
 }
