@@ -2,57 +2,57 @@
 import {
     BrowserWalletBehaviour,
     Wallet
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
-import BN from "bn.js";
+} from '@near-wallet-selector/core/lib/wallet/wallet.types';
+import BN from 'bn.js';
 //import * as nearAPI from "near-api-js";
 //import { Account, Near, transactions } from "near-api-js";
 //import { base_decode } from "near-api-js/lib/utils/serialize";
-import { generateSeedPhrase } from "near-seed-phrase";
-import { assert, isValidAccountObj } from "./checks";
-import { getEnv, supportedLinkdropClaimPages } from "./keypom";
-import { PasswordPerUse } from "./types/drops";
-import { FCData } from "./types/fc";
-import { FTData, FungibleTokenMetadata } from "./types/ft";
-import { BasicTransaction, GeneratedKeyPairs, NearKeyPair } from "./types/general";
+import { generateSeedPhrase } from 'near-seed-phrase';
+import { assert, isValidAccountObj } from './checks';
+import { getEnv, supportedLinkdropClaimPages } from './keypom';
+import { PasswordPerUse } from './types/drops';
+import { FCData } from './types/fc';
+import { FTData, FungibleTokenMetadata } from './types/ft';
+import { BasicTransaction, GeneratedKeyPairs, NearKeyPair } from './types/general';
 import {
     NonFungibleTokenMetadata,
     ProtocolReturnedNonFungibleTokenMetadata,
     ProtocolReturnedNonFungibleTokenObject
-} from "./types/nft";
-import { CreateDropProtocolArgs } from "./types/params";
-import { KeyPair, PublicKey } from "@near-js/crypto";
-import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
-import { parseNearAmount } from "@near-js/utils";
-import { Near } from "@near-js/wallet-account";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { actionCreators, Action, Transaction, stringifyJsonOrBytes, createTransaction } from "@near-js/transactions";
+} from './types/nft';
+import { CreateDropProtocolArgs } from './types/params';
+import { KeyPair, KeyPairEd25519, PublicKey } from '@near-js/crypto';
+import { Account, SignAndSendTransactionOptions } from '@near-js/accounts';
+import { parseNearAmount } from '@near-js/utils';
+import { Near } from '@near-js/wallet-account';
+import { FinalExecutionOutcome } from '@near-js/types';
+import { actionCreators, Action, Transaction, stringifyJsonOrBytes, createTransaction } from '@near-js/transactions';
 import { baseDecode } from 'borsh';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
 let sha256Hash;
 // @ts-ignore
-if (typeof crypto === "undefined") {
-    const nodeCrypto = require("crypto");
-    sha256Hash = (ab) => nodeCrypto.createHash("sha256").update(ab).digest();
+if (typeof crypto === 'undefined') {
+    const nodeCrypto = require('crypto');
+    sha256Hash = (ab) => nodeCrypto.createHash('sha256').update(ab).digest();
 } else {
     // @ts-ignore
-    sha256Hash = (ab) => crypto.subtle.digest("SHA-256", ab);
+    sha256Hash = (ab) => crypto.subtle.digest('SHA-256', ab);
 }
 
 /// How much Gas each each cross contract call with cost to be converted to a receipt
-const GAS_PER_CCC: number = 5000000000000; // 5 TGas
-const RECEIPT_GAS_COST: number = 2500000000000; // 2.5 TGas
-const YOCTO_PER_GAS: number = 100000000; // 100 million
-export const ATTACHED_GAS_FROM_WALLET: number = 100000000000000; // 100 TGas
+const GAS_PER_CCC = 5000000000000; // 5 TGas
+const RECEIPT_GAS_COST = 2500000000000; // 2.5 TGas
+const YOCTO_PER_GAS = 100000000; // 100 million
+export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 
 /// How much yoctoNEAR it costs to store 1 access key
-const ACCESS_KEY_STORAGE: BN = new BN("1000000000000000000000");
+const ACCESS_KEY_STORAGE: BN = new BN('1000000000000000000000');
 
-export const key2str = (v) => (typeof v === "string" ? v : v.pk);
+export const key2str = (v) => (typeof v === 'string' ? v : v.pk);
 
 const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> =>
-    sha256Hash(Buffer.from(str, fromHex ? "hex" : "utf8"));
+    sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
 
 /**
  * Get the public key from a given secret key.
@@ -69,7 +69,7 @@ const hashBuf = (str: string, fromHex = false): Promise<ArrayBuffer> =>
  * @group Utility
  */
 export const getPubFromSecret = (secretKey: string): string => {
-    var keyPair = KeyPair.fromString(secretKey);
+    const keyPair = KeyPair.fromString(secretKey);
     return keyPair.getPublicKey().toString();
 };
 
@@ -131,7 +131,7 @@ export const getNFTMetadata = async ({
 
     const res: ProtocolReturnedNonFungibleTokenObject = await viewCall({
         contractId,
-        methodName: "nft_token",
+        methodName: 'nft_token',
         args: {
             token_id: tokenId,
         },
@@ -165,7 +165,7 @@ export const getFTMetadata = async ({
 
     const res: FungibleTokenMetadata = await viewCall({
         contractId,
-        methodName: "ft_metadata",
+        methodName: 'ft_metadata',
         args: {},
     });
 
@@ -248,7 +248,7 @@ export const createNFTSeries = async ({
     const { getAccount, networkId } = getEnv();
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
@@ -268,7 +268,7 @@ export const createNFTSeries = async ({
     };
 
     const nftSeriesAccount =
-        networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
+        networkId == 'testnet' ? 'nft-v2.keypom.testnet' : 'nft-v2.keypom.near';
 
     const pk = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo: BasicTransaction = {
@@ -276,20 +276,20 @@ export const createNFTSeries = async ({
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                enum: "FunctionCall",
+                enum: 'FunctionCall',
                 functionCall: {
-                    methodName: "create_series",
+                    methodName: 'create_series',
                     args: stringifyJsonOrBytes({
                         mint_id: parseInt(dropId),
                         metadata: actualMetadata,
                         royalty,
                     }),
-                    gas: "50000000000000",
-                    deposit: parseNearAmount("0.25")!,
+                    gas: '50000000000000',
+                    deposit: parseNearAmount('0.25')!,
                 }
             },
         ],
-    }
+    };
 
     const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
 
@@ -403,29 +403,30 @@ export const formatLinkdropUrl = ({
 
     assert(
         secretKeys,
-        "Secret keys must be passed in as either an array or a single string"
+        'Secret keys must be passed in as either an array or a single string'
     );
+
     assert(
         customURL ||
-            supportedLinkdropClaimPages[networkId!].hasOwnProperty(claimPage),
-        `Either a custom base URL or a supported claim page must be passed in.`
+        Object.prototype.hasOwnProperty.call(supportedLinkdropClaimPages[networkId!], claimPage),
+        'Either a custom base URL or a supported claim page must be passed in.'
     );
     customURL =
         customURL || supportedLinkdropClaimPages[networkId!][claimPage!];
 
     // If the secret key is a single string, convert it to an array
-    if (typeof secretKeys === "string") {
+    if (typeof secretKeys === 'string') {
         secretKeys = [secretKeys];
     }
 
     // insert the contractId and secret key into the base URL based on the CONTRACT_ID and SECRET_KEY field
-    let returnedURLs: Array<string> = [];
+    const returnedURLs: Array<string> = [];
     // loop through all secret keys
     secretKeys.forEach((secretKey) => {
         // insert the secret key into the base URL
-        let url = customURL!.replace("SECRET_KEY", secretKey);
+        let url = customURL!.replace('SECRET_KEY', secretKey);
         // insert the contract ID into the base URL
-        url = url.replace("CONTRACT_ID", contractId!);
+        url = url.replace('CONTRACT_ID', contractId!);
         // add the URL to the array of URLs
         returnedURLs.push(url);
     });
@@ -454,8 +455,8 @@ export const hashPassword = async (
     str: string,
     fromHex = false
 ): Promise<string> => {
-    let buf = await hashBuf(str, fromHex);
-    return Buffer.from(buf).toString("hex");
+    const buf = await hashBuf(str, fromHex);
+    return Buffer.from(buf).toString('hex');
 };
 
 /**
@@ -559,12 +560,12 @@ export const generateKeys = async ({
     const numEntropy = metaEntropy?.length || numKeys;
     assert(
         numEntropy == numKeys,
-        `You must provide the same number of meta entropy values as the number of keys`
+        'You must provide the same number of meta entropy values as the number of keys'
     );
 
-    var keyPairs: NearKeyPair[] = [];
-    var publicKeys: string[] = [];
-    var secretKeys: string[] = [];
+    const keyPairs: NearKeyPair[] = [];
+    const publicKeys: string[] = [];
+    const secretKeys: string[] = [];
 
     if (metaEntropy === undefined && autoMetaNonceStart !== undefined) {
         metaEntropy = Array(numKeys)
@@ -580,15 +581,14 @@ export const generateKeys = async ({
             const hash: ArrayBuffer = await hashBuf(stringToHash);
 
             const { secretKey, publicKey } = generateSeedPhrase(hash);
-            var keyPair = KeyPair.fromString(secretKey);
+            const keyPair = KeyPair.fromString(secretKey);
             keyPairs.push(keyPair);
             publicKeys.push(publicKey);
             secretKeys.push(secretKey);
         } else {
-            var keyPair = KeyPair.fromRandom("ed25519");
+            const keyPair = KeyPairEd25519.fromRandom();
             keyPairs.push(keyPair);
             publicKeys.push(keyPair.getPublicKey().toString());
-            // @ts-ignore - not sure why it's saying secret key isn't property of keypair
             secretKeys.push(keyPair.secretKey);
         }
     }
@@ -643,9 +643,9 @@ export const viewAccessKeyData = async ({
         publicKey = getPubFromSecret(secretKey);
     }
 
-    let res: any = await provider.query({
-        request_type: "view_access_key",
-        finality: "final",
+    const res: any = await provider.query({
+        request_type: 'view_access_key',
+        finality: 'final',
         account_id: accountId,
         public_key: publicKey!,
     });
@@ -697,37 +697,37 @@ export const execute = async ({
     if (wallet) {
         // wallet might be Promise<Wallet> or value, either way doesn't matter
         wallet = await wallet;
-        console.log("wallet: ", wallet);
+        console.log('wallet: ', wallet);
         // might be able to sign transactions with app key
         let needsRedirect = false;
-        let selectorTxns = [];
+        const selectorTxns = [];
         transactions.forEach((tx) => {
-            let selectorActions = [];
+            const selectorActions = [];
             
             if (tx.receiverId !== contractId) needsRedirect = true;
             tx.actions.forEach((a) => {
                 selectorActions.push({
-                    type: "FunctionCall",
+                    type: 'FunctionCall',
                     params: {   
                         methodName: a.functionCall.methodName,
                         args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
-                })
-                const { deposit } = (a as any)?.params;
-                if (deposit && deposit !== "0") needsRedirect = true;
+                });
+                const { deposit } = (a as any).params;
+                if (deposit && deposit !== '0') needsRedirect = true;
             });
 
             selectorTxns.push({
                 signerId: tx.signerId,
                 receiverId: tx.receiverId,
                 actions: selectorActions
-            })
+            });
         });
 
-        console.log("needsRedirect: ", needsRedirect);
-        console.log("transactions: ", transactions);
+        console.log('needsRedirect: ', needsRedirect);
+        console.log('transactions: ', transactions);
 
         if (needsRedirect)
             return await wallet.signAndSendTransactions({
@@ -737,17 +737,17 @@ export const execute = async ({
         // sign txs in serial without redirect
         const responses: Array<void | FinalExecutionOutcome> = [];
         for (const tx of transactions) {
-            let selectorActions = [];
+            const selectorActions = [];
             tx.actions.forEach((a) => {
                 selectorActions.push({
-                    type: "FunctionCall",
+                    type: 'FunctionCall',
                     params: {   
                         methodName: a.functionCall.methodName,
                         args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
-                })
+                });
             });
 
             responses.push(
@@ -756,7 +756,7 @@ export const execute = async ({
                 })
             );
         }
-        console.log("responses: ", responses);
+        console.log('responses: ', responses);
         return responses;
     }
 
@@ -764,7 +764,7 @@ export const execute = async ({
     const nearAccount = account || fundingAccount;
     assert(
         nearAccount,
-        `Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'`
+        'Call with either a NEAR Account argument \'account\' or initialize Keypom with a \'fundingAccount\''
     );
 
     return await signAndSendTransactions(
@@ -833,14 +833,14 @@ export const ftTransferCall = async ({
     } = getEnv();
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     if (amount) {
         const metadata = await viewCall({
             contractId,
-            methodName: "ft_metadata",
+            methodName: 'ft_metadata',
         });
 
         absoluteAmount = parseFTAmount(amount, metadata.decimals);
@@ -852,20 +852,20 @@ export const ftTransferCall = async ({
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                enum: "FunctionCall",
+                enum: 'FunctionCall',
                 functionCall: {
-                    methodName: "ft_transfer_call",
+                    methodName: 'ft_transfer_call',
                     args: stringifyJsonOrBytes({
                         receiver_id: keypomContractId,
                         amount: absoluteAmount,
                         msg: dropId.toString(),
                     }),
-                    gas: "50000000000000",
-                    deposit: "1",
+                    gas: '50000000000000',
+                    deposit: '1',
                 }
             },
         ],
-    }
+    };
 
     const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
 
@@ -930,13 +930,13 @@ export const nftTransferCall = async ({
     const { getAccount, receiverId } = getEnv();
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     assert(
         tokenIds.length < 6,
-        `This method can only transfer 6 NFTs in 1 batch transaction.`
+        'This method can only transfer 6 NFTs in 1 batch transaction.'
     );
 
     const responses: Array<FinalExecutionOutcome[]> = [];
@@ -951,20 +951,20 @@ export const nftTransferCall = async ({
             signerId: account!.accountId, // We know this is not undefined since getAccount throws
             actions: [
                 {
-                    enum: "FunctionCall",
+                    enum: 'FunctionCall',
                     functionCall: {
-                        methodName: "nft_transfer_call",
+                        methodName: 'nft_transfer_call',
                         args: stringifyJsonOrBytes({
                             receiver_id: receiverId,
                             token_id: tokenIds[i],
                             msg: dropId.toString(),
                         }),
-                        gas: "50000000000000",
-                        deposit: "1",
+                        gas: '50000000000000',
+                        deposit: '1',
                     }
                 },
             ],
-        }
+        };
 
         const transaction = await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk});
 
@@ -983,20 +983,20 @@ export const nftTransferCall = async ({
 
 /// https://github.com/near/near-api-js/blob/7f16b10ece3c900aebcedf6ebc660cc9e604a242/packages/near-api-js/src/utils/format.ts#L53
 export const parseFTAmount = (amt: string, decimals: number): string => {
-    amt = amt.replace(/,/g, "").trim();
-    const split = amt.split(".");
+    amt = amt.replace(/,/g, '').trim();
+    const split = amt.split('.');
     const wholePart = split[0];
-    const fracPart = split[1] || "";
+    const fracPart = split[1] || '';
     if (split.length > 2 || fracPart.length > decimals) {
         throw new Error(`Cannot parse '${amt}' as NEAR amount`);
     }
-    return trimLeadingZeroes(wholePart + fracPart.padEnd(decimals, "0"));
+    return trimLeadingZeroes(wholePart + fracPart.padEnd(decimals, '0'));
 };
 
 const trimLeadingZeroes = (value: string): string => {
-    value = value.replace(/^0+/, "");
-    if (value === "") {
-        return "0";
+    value = value.replace(/^0+/, '');
+    if (value === '') {
+        return '0';
     }
     return value;
 };
@@ -1008,8 +1008,6 @@ const signAndSendTransactions = async (
 ): Promise<FinalExecutionOutcome[]> => {
     const responses: FinalExecutionOutcome[] = [];
     for (let i = 0; i < txs.length; i++) {
-        // @ts-ignore
-        // near-api-js marks this method as protected.
         // Reference: https://github.com/near/wallet-selector/blob/7f9f8598459cffb80583c2a83c387c3d5c2f4d5d/packages/my-near-wallet/src/lib/my-near-wallet.spec.ts#L31
         responses.push(await account.signAndSendTransaction(txs[i]));
     }
@@ -1021,7 +1019,7 @@ export const transformTransactions = (
 ): SignAndSendTransactionOptions[] =>
     transactions.map(({ receiverId, actions: _actions }) => {
         const actions = _actions.map((action) => createAction(action));
-        let txnOption: SignAndSendTransactionOptions = {
+        const txnOption: SignAndSendTransactionOptions = {
             receiverId: receiverId as string,
             actions,
         };
@@ -1071,7 +1069,7 @@ export const createAction = (action: Action): Action => {
         return actionCreators.deleteAccount(beneficiaryId);
     }
 
-    throw new Error("Unknown action");
+    throw new Error('Unknown action');
 };
 
 /** @group Utility */
@@ -1091,40 +1089,40 @@ export const getStorageBase = ({
     let totalBytes = 0;
 
     // Get the bytes per public key, multiply it by number of keys, and add it to the total
-    let bytesPerKey = Buffer.from(
-        "ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim"
+    const bytesPerKey = Buffer.from(
+        'ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim'
     ).length;
-    let totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
+    const totalBytesForKeys = bytesPerKey * (public_keys?.length || 0);
     // console.log('totalBytesForKeys: ', totalBytesForKeys)
     // Bytes for the deposit per use
-    let bytesForDeposit = Buffer.from(deposit_per_use.toString()).length + 40;
+    const bytesForDeposit = Buffer.from(deposit_per_use.toString()).length + 40;
     // console.log('bytesForDeposit: ', bytesForDeposit)
     // Bytes for the drop ID
-    let bytesForDropId = Buffer.from(drop_id || "").length + 40;
+    const bytesForDropId = Buffer.from(drop_id || '').length + 40;
     // console.log('bytesForDropId: ', bytesForDropId)
     // Bytes for the config
-    let bytesForConfig = Buffer.from(JSON.stringify(config || "")).length + 40;
+    const bytesForConfig = Buffer.from(JSON.stringify(config || '')).length + 40;
     // console.log('bytesForConfig: ', bytesForConfig)
     // Bytes for the metadata. 66 comes from collection initialization
-    let bytesForMetadata = Buffer.from(metadata || "").length + 66;
+    const bytesForMetadata = Buffer.from(metadata || '').length + 66;
     // console.log('bytesForMetadata: ', bytesForMetadata)
     // Bytes for the simple data
-    let bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length + 40;
+    const bytesForSimple = Buffer.from(JSON.stringify(simple || '')).length + 40;
     // console.log('bytesForSimple: ', bytesForSimple)
     // Bytes for the FT data
-    let bytesForFT = Buffer.from(JSON.stringify(ft || "")).length + 40;
+    const bytesForFT = Buffer.from(JSON.stringify(ft || '')).length + 40;
     // console.log('bytesForFT: ', bytesForFT)
     // Bytes for the NFT data
-    let bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length + 40;
+    const bytesForNFT = Buffer.from(JSON.stringify(nft || '')).length + 40;
     // console.log('bytesForNFT: ', bytesForNFT)
     // Bytes for the FC data
-    let bytesForFC = Buffer.from(JSON.stringify(fc || "")).length + 40;
+    const bytesForFC = Buffer.from(JSON.stringify(fc || '')).length + 40;
     // console.log('bytesForFC: ', bytesForFC)
 
     // Bytes for the passwords per use
     // Magic numbers come from plotting SDK data against protocol data and finding the best fit
-    let bytesForPasswords =
-        Buffer.from(JSON.stringify(passwords_per_use || "")).length * 4;
+    const bytesForPasswords =
+        Buffer.from(JSON.stringify(passwords_per_use || '')).length * 4;
 
     // console.log('bytesForPasswords: ', bytesForPasswords)
     totalBytes +=
@@ -1170,8 +1168,8 @@ export const estimateRequiredDeposit = async ({
     numKeys,
     usesPerKey,
     attachedGas,
-    storage = parseNearAmount("0.034"),
-    keyStorage = parseNearAmount("0.0065"),
+    storage = parseNearAmount('0.034'),
+    keyStorage = parseNearAmount('0.0065'),
     fcData,
     ftData,
 }: {
@@ -1197,30 +1195,30 @@ export const estimateRequiredDeposit = async ({
     const numKeysBN: BN = new BN(numKeys.toString());
     const usesPerKeyBN: BN = new BN(usesPerKey.toString());
 
-    let totalRequiredStorage = new BN(storage).add(
+    const totalRequiredStorage = new BN(storage).add(
         new BN(keyStorage).mul(numKeysBN)
     );
     // console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
 
-    let actualAllowance =
+    const actualAllowance =
         estimatePessimisticAllowance(attachedGas).mul(usesPerKeyBN);
     // console.log('actualAllowance: ', actualAllowance.toString())
 
-    let totalAllowance: BN = actualAllowance.mul(numKeysBN);
+    const totalAllowance: BN = actualAllowance.mul(numKeysBN);
     // console.log('totalAllowance: ', totalAllowance.toString())
 
-    let totalAccessKeyStorage: BN = ACCESS_KEY_STORAGE.mul(numKeysBN);
+    const totalAccessKeyStorage: BN = ACCESS_KEY_STORAGE.mul(numKeysBN);
     // console.log('totalAccessKeyStorage: ', totalAccessKeyStorage.toString())
 
-    let { numNoneFcs, depositRequiredForFcDrops } =
+    const { numNoneFcs, depositRequiredForFcDrops } =
         getNoneFcsAndDepositRequired(fcData, usesPerKey);
 
-    let totalDeposits = new BN(depositPerUse)
+    const totalDeposits = new BN(depositPerUse)
         .mul(new BN(usesPerKey - numNoneFcs))
         .mul(numKeysBN);
     // console.log('totalDeposits: ', totalDeposits.toString())
 
-    let totalDepositsForFc = depositRequiredForFcDrops.mul(numKeysBN);
+    const totalDepositsForFc = depositRequiredForFcDrops.mul(numKeysBN);
 
     // console.log('totalDepositsForFc: ', totalDepositsForFc.toString())
 
@@ -1233,7 +1231,7 @@ export const estimateRequiredDeposit = async ({
     // console.log('requiredDeposit B4 FT costs: ', requiredDeposit.toString())
 
     if (ftData?.contractId) {
-        let extraFtCosts = await getFtCosts(
+        const extraFtCosts = await getFtCosts(
             near,
             numKeys,
             usesPerKey,
@@ -1244,23 +1242,23 @@ export const estimateRequiredDeposit = async ({
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
     }
 
-    return requiredDeposit.toString() || "0";
+    return requiredDeposit.toString() || '0';
 };
 
 // Estimate the amount of allowance required for a given attached gas.
 const estimatePessimisticAllowance = (attachedGas: number): BN => {
-    if (typeof attachedGas !== "number") attachedGas = parseInt(attachedGas);
+    if (typeof attachedGas !== 'number') attachedGas = parseInt(attachedGas);
     // Get the number of CCCs you can make with the attached GAS
-    let numCCCs = Math.floor(attachedGas / GAS_PER_CCC);
+    const numCCCs = Math.floor(attachedGas / GAS_PER_CCC);
     // console.log('numCCCs: ', numCCCs)
     // Get the constant used to pessimistically calculate the required allowance
-    let powOutcome = Math.pow(1.03, numCCCs);
+    const powOutcome = Math.pow(1.03, numCCCs);
     // console.log('powOutcome: ', powOutcome)
 
-    let requiredGas =
+    const requiredGas =
         (attachedGas + RECEIPT_GAS_COST) * powOutcome + RECEIPT_GAS_COST;
     // console.log('requiredGas: ', requiredGas)
-    let requiredAllowance: BN = new BN(requiredGas).mul(new BN(YOCTO_PER_GAS));
+    const requiredAllowance: BN = new BN(requiredGas).mul(new BN(YOCTO_PER_GAS));
     // console.log('requiredAllowance: ', requiredAllowance.toString())
     return requiredAllowance;
 };
@@ -1276,12 +1274,12 @@ const getNoneFcsAndDepositRequired = (
         return { numNoneFcs, depositRequiredForFcDrops };
     }
 
-    let numMethodData = fcData.methods.length;
+    const numMethodData = fcData.methods.length;
 
     // If there's one method data specified and more than 1 claim per key, that data is to be used
     // For all the claims. In this case, we need to tally all the deposits for each method in all method data.
     if (usesPerKey > 1 && numMethodData == 1) {
-        let methodData = fcData.methods[0];
+        const methodData = fcData.methods[0];
 
         // Keep track of the total attached deposit across all methods in the method data
         let attachedDeposit = new BN(0);
@@ -1303,8 +1301,8 @@ const getNoneFcsAndDepositRequired = (
     // In the case where either there's 1 claim per key or the number of FCs is not 1,
     // We can simply loop through and manually get this data
     for (let i = 0; i < numMethodData; i++) {
-        let methodData = fcData.methods[i];
-        let isNoneFc = methodData == null;
+        const methodData = fcData.methods[i];
+        const isNoneFc = methodData == null;
         numNoneFcs += isNoneFc ? 1 : 0;
 
         if (!isNoneFc) {
@@ -1334,19 +1332,19 @@ const getFtCosts = async (
     usesPerKey: number,
     ftContract: string
 ): Promise<string> => {
-    const viewAccount = await near.account("foo");
+    const viewAccount = await near.account('foo');
     const { min } = await viewAccount.viewFunction({
         contractId: ftContract,
-        methodName: "storage_balance_bounds",
+        methodName: 'storage_balance_bounds',
         args: {},
     });
     // console.log('storageBalanceBounds: ', storageBalanceBounds)
-    let costs: BN = new BN(min)
+    const costs: BN = new BN(min)
         .mul(new BN(numKeys))
         .mul(new BN(usesPerKey))
         .add(new BN(min));
     // console.log('costs: ', costs.toString());
-    return costs.toString() || "0";
+    return costs.toString() || '0';
 };
 
 /**
@@ -1369,24 +1367,24 @@ export async function generatePerUsePasswords({
     uses: number[];
     basePassword: string;
 }): Promise<Array<Array<PasswordPerUse>>> {
-    let passwords: Array<Array<PasswordPerUse>> = [];
+    const passwords: Array<Array<PasswordPerUse>> = [];
 
     // Loop through each pubKey to generate either the passwords
-    for (var i = 0; i < publicKeys.length; i++) {
+    for (let i = 0; i < publicKeys.length; i++) {
         // For each public key, we need to generate a password for each use
-        let passwordsPerUse: Array<{ pw: string; key_use: number }> = [];
-        for (var j = 0; j < uses.length; j++) {
+        const passwordsPerUse: Array<{ pw: string; key_use: number }> = [];
+        for (let j = 0; j < uses.length; j++) {
             // First inner hash takes in utf8 and returns hash
-            let innerHashBuff = await hashBuf(
+            const innerHashBuff = await hashBuf(
                 basePassword + publicKeys[i] + uses[j].toString()
             );
-            let innerHash = Buffer.from(innerHashBuff).toString("hex");
+            const innerHash = Buffer.from(innerHashBuff).toString('hex');
 
             // Outer hash takes in hex and returns hex
-            let outerHashBuff = await hashBuf(innerHash, true);
-            let outerHash = Buffer.from(outerHashBuff).toString("hex");
+            const outerHashBuff = await hashBuf(innerHash, true);
+            const outerHash = Buffer.from(outerHashBuff).toString('hex');
 
-            let jsonPw = {
+            const jsonPw = {
                 pw: outerHash,
                 key_use: uses[j],
             };
@@ -1403,15 +1401,15 @@ export const snakeToCamel = (str) =>
     str
         .toLowerCase()
         .replace(/([-_][a-z])/g, (group) =>
-            group.toUpperCase().replace("-", "").replace("_", "")
+            group.toUpperCase().replace('-', '').replace('_', '')
         );
 
 // Taken from https://stackoverflow.com/a/26215431/16441367
 export const toCamel = (o) => {
-    var newO, origKey, newKey, value;
+    let newO, origKey, newKey, value;
     if (o instanceof Array) {
         return o.map(function (value) {
-            if (typeof value === "object") {
+            if (typeof value === 'object') {
                 value = toCamel(value);
             }
             return value;
@@ -1419,7 +1417,7 @@ export const toCamel = (o) => {
     } else {
         newO = {};
         for (origKey in o) {
-            if (o.hasOwnProperty(origKey)) {
+            if (Object.prototype.hasOwnProperty.call(o, origKey)) {
                 newKey = snakeToCamel(origKey);
                 value = o[origKey];
                 if (
@@ -1439,9 +1437,9 @@ export const nearArgsToYocto = (
     nearAmount?: string | number,
     yoctoAmount?: string
 ) => {
-    let yoctoToReturn: string = yoctoAmount || "0";
+    let yoctoToReturn: string = yoctoAmount || '0';
     if (nearAmount) {
-        yoctoToReturn = parseNearAmount(nearAmount.toString()) || "0";
+        yoctoToReturn = parseNearAmount(nearAmount.toString()) || '0';
     }
 
     return yoctoToReturn;
@@ -1464,14 +1462,14 @@ export const convertBasicTransaction = async ({
         createAction(action)
     );
 
-    const block = await provider.block({ finality: "final" });
+    const block = await provider.block({ finality: 'final' });
 
     const accessKey: any = await provider.query(
         `access_key/${signerId}/${signerPk}`,
-        ""
+        ''
     );
 
-    return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + 1, actions, baseDecode(block.header.hash))
+    return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + 1, actions, baseDecode(block.header.hash));
 };
 
 
@@ -1495,14 +1493,14 @@ export const createTransactions = ({
                 createAction(action)
             );
 
-            const block = await provider.block({ finality: "final" });
+            const block = await provider.block({ finality: 'final' });
 
             const accessKey: any = await provider.query(
                 `access_key/${signerId}/${signerPk}`,
-                ""
+                ''
             );
 
-            return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + index + 1, actions, baseDecode(block.header.hash))
+            return createTransaction(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + index + 1, actions, baseDecode(block.header.hash));
         })
     );
 };

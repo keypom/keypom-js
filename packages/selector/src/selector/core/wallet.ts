@@ -76,7 +76,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         // URL is valid (case 1 & 2)
         if (parsedData !== undefined) {
-            let { accountId, secretKey } = parsedData;
+            let accountId = parsedData.accountId;
+            const secretKey = parsedData.secretKey;
 
             // Check if this is an existing keypom drop that is claimable (case 1)
             const isOriginalLink = updateKeypomContractIfValid(accountId);
@@ -177,12 +178,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.assertSignedIn();
         const { transactions } = params;
 
+        let res;
         try {
             console.log('is mapping txn', this.isMappingAccount);
             if (!this.isMappingAccount) {
                 addUserToMappingContract(this.trialAccountId!, this.trialSecretKey!);
             }
-            var res = await trialSignAndSendTxns({
+            res = await trialSignAndSendTxns({
                 trialAccountId: this.trialAccountId!,
                 trialAccountSecretKey: this.trialSecretKey!,
                 txns: transactions

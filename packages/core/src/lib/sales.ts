@@ -1,18 +1,18 @@
 // import {
 // 	parseNearAmount
 // } from "near-api-js/lib/utils/format";
-import { assert, isValidAccountObj } from "./checks";
-import { getEnv } from "./keypom";
+import { assert, isValidAccountObj } from './checks';
+import { getEnv } from './keypom';
 
 import {
     BrowserWalletBehaviour,
     Wallet
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
+} from '@near-wallet-selector/core/lib/wallet/wallet.types';
 //import { Account } from "near-api-js";
-import { Account } from "@near-js/accounts";
-import { parseNearAmount } from "@near-js/utils";
-import { getDropInformation } from "./views";
-import { Action, stringifyJsonOrBytes } from "@near-js/transactions";
+import { Account } from '@near-js/accounts';
+import { parseNearAmount } from '@near-js/utils';
+import { getDropInformation } from './views';
+import { Action, stringifyJsonOrBytes } from '@near-js/transactions';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 
@@ -60,34 +60,34 @@ export const addToSaleAllowlist = async ({
 
     assert(
         dropId && accountIds,
-        "Must pass in a drop ID and a list of account IDs to add to the sale allowlist."
+        'Must pass in a drop ID and a list of account IDs to add to the sale allowlist.'
     );
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     const dropInfo = await getDropInformation({ dropId });
     assert(
         account!.accountId == dropInfo.owner_id,
-        "Only the owner of the drop can add accounts to the sale allowlist."
+        'Only the owner of the drop can add accounts to the sale allowlist.'
     );
     assert(
         dropInfo.config?.sale,
-        "The drop config must have a sale in order to add accounts to the sale allowlist."
+        'The drop config must have a sale in order to add accounts to the sale allowlist.'
     );
 
     const actions: Action[] = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "add_to_sale_allowlist",
+            methodName: 'add_to_sale_allowlist',
             args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -154,34 +154,34 @@ export const removeFromSaleAllowlist = async ({
 
     assert(
         dropId && accountIds,
-        "Must pass in a drop ID and a list of account IDs to remove from the sale allowlist."
+        'Must pass in a drop ID and a list of account IDs to remove from the sale allowlist.'
     );
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     const dropInfo = await getDropInformation({ dropId });
     assert(
         account!.accountId == dropInfo.owner_id,
-        "Only the owner of the drop can remove accounts from the sale allowlist."
+        'Only the owner of the drop can remove accounts from the sale allowlist.'
     );
     assert(
         dropInfo.config?.sale,
-        "The drop config must have a sale in order to remove accounts from the sale allowlist."
+        'The drop config must have a sale in order to remove accounts from the sale allowlist.'
     );
 
     const actions: Action[] = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "remove_from_sale_allowlist",
+            methodName: 'remove_from_sale_allowlist',
             args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -240,34 +240,34 @@ export const addToSaleBlocklist = async ({
 
     assert(
         dropId && accountIds,
-        "Must pass in a drop ID and a list of account IDs to add to the sale blocklist."
+        'Must pass in a drop ID and a list of account IDs to add to the sale blocklist.'
     );
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     const dropInfo = await getDropInformation({ dropId });
     assert(
         account!.accountId == dropInfo.owner_id,
-        "Only the owner of the drop can add accounts to the sale blocklist."
+        'Only the owner of the drop can add accounts to the sale blocklist.'
     );
     assert(
         dropInfo.config?.sale,
-        "The drop config must have a sale in order to add accounts to the sale blocklist."
+        'The drop config must have a sale in order to add accounts to the sale blocklist.'
     );
 
     const actions: Action[] = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "add_to_sale_blocklist",
+            methodName: 'add_to_sale_blocklist',
             args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -330,34 +330,34 @@ export const removeFromSaleBlocklist = async ({
 
     assert(
         dropId && accountIds,
-        "Must pass in a drop ID and a list of account IDs to remove from the sale blocklist."
+        'Must pass in a drop ID and a list of account IDs to remove from the sale blocklist.'
     );
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     const dropInfo = await getDropInformation({ dropId });
     assert(
         account!.accountId == dropInfo.owner_id,
-        "Only the owner of the drop can remove accounts from the sale blocklist."
+        'Only the owner of the drop can remove accounts from the sale blocklist.'
     );
     assert(
         dropInfo.config?.sale,
-        "The drop config must have a sale in order to remove accounts from the sale blocklist."
+        'The drop config must have a sale in order to remove accounts from the sale blocklist.'
     );
 
     const actions: Action[] = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "remove_from_sale_blocklist",
+            methodName: 'remove_from_sale_blocklist',
             args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 account_ids: accountIds,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });
@@ -447,29 +447,29 @@ export const updateSale = async ({
                 autoWithdrawFunds ||
                 start ||
                 end),
-        "Must pass in a drop ID and at least one of the other sale parameters to update"
+        'Must pass in a drop ID and at least one of the other sale parameters to update'
     );
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
 
     const dropInfo = await getDropInformation({ dropId });
     assert(
         account!.accountId == dropInfo.owner_id,
-        "Only the owner of the drop can update the sale."
+        'Only the owner of the drop can update the sale.'
     );
     assert(
         dropInfo.config?.sale,
-        "The drop config must have a sale in order to be updated."
+        'The drop config must have a sale in order to be updated.'
     );
 
     const actions: Action[] = [];
     actions.push({
-        enum: "FunctionCall",
+        enum: 'FunctionCall',
         functionCall: {
-            methodName: "update_sale",
+            methodName: 'update_sale',
             args: stringifyJsonOrBytes({
                 drop_id: dropId,
                 max_num_keys: maxNumKeys,
@@ -481,7 +481,7 @@ export const updateSale = async ({
                 start,
                 end,
             }),
-            gas: "100000000000000",
+            gas: '100000000000000',
             deposit: '0'
         },
     });

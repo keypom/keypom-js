@@ -1,15 +1,15 @@
-import BN from "bn.js";
+import BN from 'bn.js';
 //import * as nearAPI from "near-api-js";
 
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { FinalExecutionOutcome } from '@near-wallet-selector/core';
 import {
     BrowserWalletBehaviour,
     Wallet
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
+} from '@near-wallet-selector/core/lib/wallet/wallet.types';
 //import { Account } from "near-api-js";
-import { Account } from "@near-js/accounts";
-import { Transaction, stringifyJsonOrBytes } from "@near-js/transactions";
-import { parseNearAmount } from "@near-js/utils";
+import { Account } from '@near-js/accounts';
+import { Transaction, stringifyJsonOrBytes } from '@near-js/transactions';
+import { parseNearAmount } from '@near-js/utils';
 import {
     assert,
     assertDropIdUnique,
@@ -17,8 +17,8 @@ import {
     assertValidFCData,
     isSupportedKeypomContract,
     isValidAccountObj
-} from "./checks";
-import { getEnv } from "./keypom";
+} from './checks';
+import { getEnv } from './keypom';
 import {
     convertBasicTransaction,
     estimateRequiredDeposit,
@@ -31,20 +31,20 @@ import {
     nearArgsToYocto,
     nftTransferCall,
     parseFTAmount
-} from "./keypom-utils";
-import { DropConfig } from "./types/drops";
-import { FCData } from "./types/fc";
-import { FTData } from "./types/ft";
-import { BasicTransaction } from "./types/general";
-import { NFTData } from "./types/nft";
-import { CreateDropProtocolArgs, CreateOrAddReturn } from "./types/params";
+} from './keypom-utils';
+import { DropConfig } from './types/drops';
+import { FCData } from './types/fc';
+import { FTData } from './types/ft';
+import { BasicTransaction } from './types/general';
+import { NFTData } from './types/nft';
+import { CreateDropProtocolArgs, CreateOrAddReturn } from './types/params';
 import {
     ProtocolReturnedDrop,
     ProtocolReturnedDropConfig,
     ProtocolReturnedMethod
-} from "./types/protocol";
-import { SimpleData } from "./types/simple";
-import { getDropInformation, getUserBalance } from "./views";
+} from './types/protocol';
+import { SimpleData } from './types/simple';
+import { getDropInformation, getUserBalance } from './views';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const KEY_LIMIT = 50;
@@ -254,16 +254,16 @@ export const createDrop = async ({
 
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
     assert(
         isSupportedKeypomContract(contractId!) === true,
-        "Only the latest Keypom contract can be used to call this methods. Please update the contract."
+        'Only the latest Keypom contract can be used to call this methods. Please update the contract.'
     );
     assert(
         publicKeys != undefined || numKeys != undefined,
-        "Must pass in either publicKeys or numKeys to create a drop."
+        'Must pass in either publicKeys or numKeys to create a drop.'
     );
 
     /// parse args
@@ -271,8 +271,8 @@ export const createDrop = async ({
 
     // Ensure that if the dropID is passed in, it's greater than 1 billion
     assert(
-        parseInt(dropId || "1000000000") >= 1000000000,
-        "All custom drop IDs must be greater than 1_000_000_000"
+        parseInt(dropId || '1000000000') >= 1000000000,
+        'All custom drop IDs must be greater than 1_000_000_000'
     );
     if (!dropId) dropId = Date.now().toString();
 
@@ -298,20 +298,20 @@ export const createDrop = async ({
         },
         sale: config?.sale
             ? {
-                  max_num_keys: config?.sale?.maxNumKeys,
-                  price_per_key:
+                max_num_keys: config?.sale?.maxNumKeys,
+                price_per_key:
                       config?.sale?.pricePerKeyYocto ||
                       config?.sale?.pricePerKeyNEAR
                           ? parseNearAmount(
-                                config?.sale?.pricePerKeyNEAR?.toString()
-                            )!
+                              config?.sale?.pricePerKeyNEAR?.toString()
+                          )!
                           : undefined,
-                  allowlist: config?.sale?.allowlist,
-                  blocklist: config?.sale?.blocklist,
-                  auto_withdraw_funds: config?.sale?.autoWithdrawFunds,
-                  start: config?.sale?.start,
-                  end: config?.sale?.end,
-              }
+                allowlist: config?.sale?.allowlist,
+                blocklist: config?.sale?.blocklist,
+                auto_withdraw_funds: config?.sale?.autoWithdrawFunds,
+                start: config?.sale?.start,
+                end: config?.sale?.end,
+            }
             : undefined,
         root_account_id: config?.dropRoot,
     };
@@ -319,9 +319,8 @@ export const createDrop = async ({
     assertValidDropConfig(finalConfig);
 
     // If there are no publicKeys being passed in, we should generate our own based on the number of keys
+    let keys;
     if (!publicKeys) {
-        var keys;
-
         // Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
         const rootEntropyUsed =
             rootEntropy || fundingAccountDetails?.rootEntropy;
@@ -350,7 +349,7 @@ export const createDrop = async ({
     numKeys = publicKeys!.length;
     let passwords;
     if (basePassword) {
-        assert(numKeys <= 50, "Cannot add 50 keys at once with passwords");
+        assert(numKeys <= 50, 'Cannot add 50 keys at once with passwords');
 
         // Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
         passwords = await generatePerUsePasswords({
@@ -365,13 +364,14 @@ export const createDrop = async ({
         });
     }
 
+    let ftBalancePerUse;
     if (ftData) {
-        var ftBalancePerUse = ftData?.absoluteAmount || "0";
+        ftBalancePerUse = ftData?.absoluteAmount || '0';
 
         if (ftData.amount) {
             const metadata = viewCall({
                 contractId: ftData.contractId,
-                methodName: "ft_metadata",
+                methodName: 'ft_metadata',
             });
             ftBalancePerUse = parseFTAmount(
                 ftData.amount.toString(),
@@ -394,46 +394,46 @@ export const createDrop = async ({
         required_gas: requiredGas,
         ft: ftData?.contractId
             ? {
-                  contract_id: ftData.contractId,
-                  sender_id: ftData.senderId,
-                  balance_per_use: ftBalancePerUse!,
-              }
+                contract_id: ftData.contractId,
+                sender_id: ftData.senderId,
+                balance_per_use: ftBalancePerUse!,
+            }
             : undefined,
         nft: nftData?.contractId
             ? {
-                  contract_id: nftData.contractId,
-                  sender_id: nftData.senderId,
-              }
+                contract_id: nftData.contractId,
+                sender_id: nftData.senderId,
+            }
             : undefined,
         fc: fcData?.methods
             ? {
-                  methods: fcData.methods.map((useMethods) =>
-                      useMethods
-                          ? useMethods.map((method) => {
-                                let ret: ProtocolReturnedMethod = {
-                                    receiver_id: method.receiverId,
-                                    method_name: method.methodName,
-                                    args: method.args,
-                                    attached_deposit: method.attachedDeposit,
-                                    attached_gas: method.attachedGas,
-                                    account_id_field: method.accountIdField,
-                                    drop_id_field: method.dropIdField,
-                                    key_id_field: method.keyIdField,
-                                    funder_id_field: method.funderIdField,
-                                    receiver_to_claimer:
+                methods: fcData.methods.map((useMethods) =>
+                    useMethods
+                        ? useMethods.map((method) => {
+                            const ret: ProtocolReturnedMethod = {
+                                receiver_id: method.receiverId,
+                                method_name: method.methodName,
+                                args: method.args,
+                                attached_deposit: method.attachedDeposit,
+                                attached_gas: method.attachedGas,
+                                account_id_field: method.accountIdField,
+                                drop_id_field: method.dropIdField,
+                                key_id_field: method.keyIdField,
+                                funder_id_field: method.funderIdField,
+                                receiver_to_claimer:
                                         method.receiverToClaimer,
-                                    user_args_rule: method.userArgsRule,
-                                };
-                                return ret;
-                            })
-                          : undefined
-                  ),
-              }
+                                user_args_rule: method.userArgsRule,
+                            };
+                            return ret;
+                        })
+                        : undefined
+                ),
+            }
             : undefined,
         simple: simpleData?.lazyRegister
             ? {
-                  lazy_register: simpleData.lazyRegister,
-              }
+                lazy_register: simpleData.lazyRegister,
+            }
             : undefined,
         passwords_per_use: passwords,
     };
@@ -445,14 +445,14 @@ export const createDrop = async ({
         createDropArgs.nft === undefined
     ) {
         assert(
-            depositPerUseYocto != "0",
-            "Deposit per use must be greater than 0 for simple drops"
+            depositPerUseYocto != '0',
+            'Deposit per use must be greater than 0 for simple drops'
         );
     }
 
     /// estimate required deposit
     const storageCalculated = getStorageBase(createDropArgs);
-    let requiredDeposit = await estimateRequiredDeposit({
+    const requiredDeposit = await estimateRequiredDeposit({
         near: near!,
         depositPerUse: depositPerUseYocto,
         numKeys,
@@ -463,21 +463,21 @@ export const createDrop = async ({
         fcData,
     });
 
-    var hasBalance = false;
+    let hasBalance = false;
     if (useBalance) {
-        let userBal = new BN(
+        const userBal = new BN(
             await getUserBalance({ accountId: account!.accountId })
         );
         if (userBal.lt(new BN(requiredDeposit))) {
             throw new Error(
-                `Insufficient balance on Keypom to create drop. Use attached deposit instead.`
+                'Insufficient balance on Keypom to create drop. Use attached deposit instead.'
             );
         }
 
         hasBalance = true;
     }
 
-    const deposit = !hasBalance ? requiredDeposit : "0";
+    const deposit = !hasBalance ? requiredDeposit : '0';
 
     let transactions: Transaction[] = [];
 
@@ -491,16 +491,16 @@ export const createDrop = async ({
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
         actions: [
             {
-                enum: "FunctionCall",
+                enum: 'FunctionCall',
                 functionCall: {
-                    methodName: "create_drop",
+                    methodName: 'create_drop',
                     args: stringifyJsonOrBytes(createDropArgs),
                     gas: gas!,
                     deposit,
                 }
             },
         ],
-    }
+    };
 
     transactions.push(await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk}));
 
@@ -519,11 +519,11 @@ export const createDrop = async ({
         );
     }
 
-    let tokenIds = nftData?.tokenIds;
+    const tokenIds = nftData?.tokenIds;
     if (nftData && tokenIds && tokenIds?.length > 0) {
         if (tokenIds.length > 2) {
             throw new Error(
-                `You can only automatically register 2 NFTs with 'createDrop'. If you need to register more NFTs you can use the method 'nftTransferCall' after you create the drop.`
+                'You can only automatically register 2 NFTs with \'createDrop\'. If you need to register more NFTs you can use the method \'nftTransferCall\' after you create the drop.'
             );
         }
         const nftTXs = (await nftTransferCall({
@@ -540,7 +540,7 @@ export const createDrop = async ({
         return { keys, dropId, transactions, requiredDeposit };
     }
 
-    let responses = await execute({
+    const responses = await execute({
         transactions,
         account,
         wallet,
@@ -617,12 +617,12 @@ export const deleteDrops = async ({
 
     assert(
         isSupportedKeypomContract(contractId!) === true,
-        "Only the latest Keypom contract can be used to call this methods. Please update the contract."
+        'Only the latest Keypom contract can be used to call this methods. Please update the contract.'
     );
 
     assert(
         isValidAccountObj(account),
-        "Passed in account is not a valid account object."
+        'Passed in account is not a valid account object.'
     );
     account = await getAccount({ account, wallet });
     const pubKey = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
@@ -630,7 +630,7 @@ export const deleteDrops = async ({
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {
         if (!dropIds) {
-            throw new Error("Must pass in either drops or dropIds");
+            throw new Error('Must pass in either drops or dropIds');
         }
 
         // For each drop ID in drop IDs, get the drop information
@@ -646,17 +646,17 @@ export const deleteDrops = async ({
         drops!.map(async ({ owner_id, drop_id, registered_uses, ft, nft }) => {
             assert(
                 owner_id == account!.accountId,
-                "Only the owner of the drop can delete drops."
+                'Only the owner of the drop can delete drops.'
             );
 
             let keySupply;
             let keys;
 
             const updateKeys = async () => {
-                let keyPromises = [
+                const keyPromises = [
                     (async () => {
                         keySupply = await keypomView({
-                            methodName: "get_key_supply_for_drop",
+                            methodName: 'get_key_supply_for_drop',
                             args: {
                                 drop_id: drop_id.toString(),
                             },
@@ -667,10 +667,10 @@ export const deleteDrops = async ({
                 keyPromises.push(
                     (async () => {
                         keys = await keypomView({
-                            methodName: "get_keys_for_drop",
+                            methodName: 'get_keys_for_drop',
                             args: {
                                 drop_id: drop_id.toString(),
-                                from_index: "0",
+                                from_index: '0',
                                 limit: KEY_LIMIT,
                             },
                         });
@@ -693,9 +693,9 @@ export const deleteDrops = async ({
                         signerId: account!.accountId,
                         actions: [
                             {
-                                enum: "FunctionCall",
+                                enum: 'FunctionCall',
                                 functionCall: {
-                                    methodName: "refund_assets",
+                                    methodName: 'refund_assets',
                                     args: stringifyJsonOrBytes({
                                         drop_id,
                                     }),
@@ -707,7 +707,7 @@ export const deleteDrops = async ({
                     },
                     signerId: account!.accountId,
                     signerPk: pubKey
-                })
+                });
 
                 responses.push(
                     ...(await execute({
@@ -725,9 +725,9 @@ export const deleteDrops = async ({
                         signerId: account!.accountId,
                         actions: [
                             {
-                                enum: "FunctionCall",
+                                enum: 'FunctionCall',
                                 functionCall: {
-                                    methodName: "delete_keys",
+                                    methodName: 'delete_keys',
                                     args: stringifyJsonOrBytes({
                                         drop_id,
                                         public_keys: keys!.map(key2str),
@@ -740,7 +740,7 @@ export const deleteDrops = async ({
                     },
                     signerId: account!.accountId,
                     signerPk: pubKey
-                })
+                });
 
                 responses.push(
                     ...(await execute({
@@ -764,9 +764,9 @@ export const deleteDrops = async ({
                         signerId: account!.accountId,
                         actions: [
                             {
-                                enum: "FunctionCall",
+                                enum: 'FunctionCall',
                                 functionCall: {
-                                    methodName: "withdraw_from_balance",
+                                    methodName: 'withdraw_from_balance',
                                     args: stringifyJsonOrBytes({}),
                                     gas: '50000000000000',
                                     deposit: '0'
@@ -776,7 +776,7 @@ export const deleteDrops = async ({
                     },
                     signerId: account!.accountId,
                     signerPk: pubKey
-                })
+                });
 
                 responses.push(
                     ...(await execute({
