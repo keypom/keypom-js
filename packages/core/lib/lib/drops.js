@@ -164,7 +164,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
         time: config === null || config === void 0 ? void 0 : config.time,
         usage: {
             auto_delete_drop: ((_a = config === null || config === void 0 ? void 0 : config.usage) === null || _a === void 0 ? void 0 : _a.autoDeleteDrop) || false,
-            auto_withdraw: ((_b = config === null || config === void 0 ? void 0 : config.usage) === null || _b === void 0 ? void 0 : _b.autoWithdraw) || true,
+            auto_withdraw: (((_b = config === null || config === void 0 ? void 0 : config.usage) === null || _b === void 0 ? void 0 : _b.autoWithdraw) === true) || false,
             permissions: (_c = config === null || config === void 0 ? void 0 : config.usage) === null || _c === void 0 ? void 0 : _c.permissions,
             refund_deposit: (_d = config === null || config === void 0 ? void 0 : config.usage) === null || _d === void 0 ? void 0 : _d.refundDeposit,
             account_creation_fields: {

@@ -283,7 +283,7 @@ export const createDrop = async ({
         time: config?.time,
         usage: {
             auto_delete_drop: config?.usage?.autoDeleteDrop || false,
-            auto_withdraw: config?.usage?.autoWithdraw || true,
+            auto_withdraw: (config?.usage?.autoWithdraw === true) || false,
             permissions: config?.usage?.permissions,
             refund_deposit: config?.usage?.refundDeposit,
             account_creation_fields: {
