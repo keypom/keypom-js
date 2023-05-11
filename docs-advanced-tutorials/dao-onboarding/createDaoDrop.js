@@ -55,14 +55,14 @@ async function createDaoDrop() {
                 [
                     {
                         receiverId: DAO_BOT_CONTRACT,
-                        methodName: "new_proposal",
+                        methodName: "new_auto_registration",
                         args: JSON.stringify({
                             dao_contract: DAO_CONTRACT,
                             proposal: {
                                 description: "mooooooooon",
                                 kind: {
                                     AddMemberToRole:{
-                                        role: "new-onboardee-role"
+                                        role: "second-round-onboardee"
                                     }
                                 }
                             }
