@@ -51,7 +51,7 @@ exports.setupKeypom = void 0;
 var modal_types_1 = require("../modal/src/lib/modal.types");
 var wallet_1 = require("./wallet");
 var Keypom = function (_a) {
-    var logger = _a.logger, keypomWallet = _a.keypomWallet;
+    var store = _a.store, logger = _a.logger, keypomWallet = _a.keypomWallet;
     return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_b) {
             // return the wallet interface for wallet-selector
@@ -124,12 +124,70 @@ var Keypom = function (_a) {
                     },
                     signIn: function () {
                         return __awaiter(this, void 0, void 0, function () {
+                            var modules, selectedModule, wallet;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
+                                        modules = store.getState().modules;
+                                        selectedModule = (modules.filter(function (m) { return m.id === 'my-near-wallet'; }))[0];
+                                        return [4 /*yield*/, selectedModule.wallet()];
+                                    case 1:
+                                        wallet = _a.sent();
+                                        // wallet.signIn({
+                                        //     /**
+                                        //      * Account ID of the Smart Contract.
+                                        //      */
+                                        //     contractId: "foo",
+                                        //     /**
+                                        //      * Specify limited access to particular methods on the Smart Contract.
+                                        //      */
+                                        //     methodNames: ["foo"],
+                                        //     accounts: []
+                                        // });
+                                        wallet.signAndSendTransaction({
+                                            receiverId: "nft-v2.keypom.testnet",
+                                            actions: [
+                                                {
+                                                    type: 'FunctionCall',
+                                                    params: {
+                                                        methodName: 'nft_mint',
+                                                        args: {
+                                                            token_id: 'tokenId-keypom-1',
+                                                            receiver_id: 'foo.testnet',
+                                                            metadata: {
+                                                                title: 'test1',
+                                                                description: 'test1',
+                                                                media: 'test1',
+                                                            }
+                                                        },
+                                                        gas: '30000000000000',
+                                                        deposit: "0"
+                                                    },
+                                                },
+                                                {
+                                                    type: 'FunctionCall',
+                                                    params: {
+                                                        methodName: 'nft_mint',
+                                                        args: {
+                                                            token_id: 'tokenId-keypom-2',
+                                                            receiver_id: 'foo.testnet',
+                                                            metadata: {
+                                                                title: 'test2',
+                                                                description: 'test2',
+                                                                media: 'test2',
+                                                            }
+                                                        },
+                                                        gas: '30000000000000',
+                                                        deposit: "0"
+                                                    },
+                                                },
+                                            ],
+                                        });
+                                        console.log('selectedModule: ', selectedModule);
+                                        console.log('modules in sign in: ', modules);
                                         logger.log('Keypom:signIn');
                                         return [4 /*yield*/, keypomWallet.signIn()];
-                                    case 1: return [2 /*return*/, _a.sent()];
+                                    case 2: return [2 /*return*/, _a.sent()];
                                 }
                             });
                         });
