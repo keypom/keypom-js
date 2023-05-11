@@ -79,7 +79,7 @@ async function createTrialAccount() {
     //     desiredAccountId
     // })
 
-    const alphaInstance = "http://localhost:3000/#"
+    const alphaInstance = "http://localhost:3000/#trial-url/"
     const mnwInstance = "https://testnet-preview.mynearwallet.com/linkdrop/"
 
     console.log(`

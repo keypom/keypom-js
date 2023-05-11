@@ -110,8 +110,6 @@ const assertDropIdUnique = (dropId) => __awaiter(void 0, void 0, void 0, functio
         });
         (0, exports.assert)(!dropInfo, `Drop with ID ${dropId} already exists. Please use a different drop ID.`);
     }
-    catch (e) {
-        console.log(e);
-    }
+    catch (e) { }
 });
 exports.assertDropIdUnique = assertDropIdUnique;

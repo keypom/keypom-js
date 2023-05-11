@@ -165,5 +165,5 @@ export const assertDropIdUnique = async (dropId: string) => {
             !dropInfo,
             `Drop with ID ${dropId} already exists. Please use a different drop ID.`
         );
-    } catch (e) {console.log(e);}
+    } catch (e) {}
 };
