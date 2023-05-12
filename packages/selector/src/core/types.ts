@@ -46,6 +46,25 @@ export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
     }]
 };
 
+export const KEYPOM_MODULE_ID = 'keypom';
+
+export interface InternalInstantSignInSpecs extends InstantSignInSpecs {
+    moduleId?: string;
+}
+
+export interface InstantSignInSpecs extends BaseSignInSpecs {
+    moduleDelimiter: string;
+}
+
+export interface TrialSignInSpecs extends BaseSignInSpecs {
+    isMappingAccount: boolean;
+}
+
+export interface BaseSignInSpecs {
+    baseUrl: string;
+    delimiter: string;
+}
+
 export interface SignInOptions {
     contractId?: string;
     allowance?: string;
@@ -69,7 +88,7 @@ export interface KeypomParams {
     iconUrl?: string;
     deprecated?: boolean;
     trialSplitDelim?: string;
-    modalOptions?: {
+    modalOptions: {
         wallets: OffboardingWallet[];
         beginTrial?: BeginTrialCustomizations,
         trialOver?: TrialOverCustomizations,

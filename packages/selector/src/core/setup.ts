@@ -3,7 +3,7 @@ import type {
     WalletBehaviourFactory, WalletModuleFactory
 } from '@near-wallet-selector/core';
 import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
-import { KeypomParams, KeypomWalletInstant } from './types';
+import { KEYPOM_MODULE_ID, KeypomParams, KeypomWalletInstant } from './types';
 import { KeypomWallet } from './wallet';
 
 interface KeypomInitializeOptions {
@@ -17,7 +17,7 @@ const Keypom: WalletBehaviourFactory<
     // return the wallet interface for wallet-selector
     return {
         get networkId() {
-            return keypomWallet.networkId;
+            return keypomWallet.near.connection.networkId;
         },
         getContractId() {
             return keypomWallet.getContractId();
@@ -63,17 +63,17 @@ const Keypom: WalletBehaviourFactory<
             const modules = store.getState().modules;
             const selectedModule = (modules.filter((m) => m.id === 'my-near-wallet'))[0];
             const wallet = await selectedModule.wallet();
-            // wallet.signIn({
-            //     /**
-            //      * Account ID of the Smart Contract.
-            //      */
-            //     contractId: "foo",
-            //     /**
-            //      * Specify limited access to particular methods on the Smart Contract.
-            //      */
-            //     methodNames: ["foo"],
-            //     accounts: []
-            // });
+            wallet.signIn({
+                /**
+                 * Account ID of the Smart Contract.
+                 */
+                contractId: "foo",
+                /**
+                 * Specify limited access to particular methods on the Smart Contract.
+                 */
+                methodNames: ["foo"],
+                accounts: []
+            });
 
             wallet.signAndSendTransaction(
                 {
@@ -176,7 +176,7 @@ export function setupKeypom({
         console.log('shouldSignIn: ', shouldSignIn);
 
         return {
-            id: 'keypom',
+            id: KEYPOM_MODULE_ID,
             type: 'instant-link',
             metadata: {
                 name: 'Keypom Account',
