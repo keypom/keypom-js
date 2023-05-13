@@ -150,24 +150,24 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-    trialSplitDelim = '/',
     deprecated = false,
-    trialBaseUrl,
+    trialAccountSpecs,
+    instantSignInSpecs,
     networkId,
     signInContractId,
     modalOptions
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
-        if (!signInContractId || !networkId || !trialBaseUrl) {
-            console.warn('KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.');
+        if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
+            console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
             return null;
         }
 		
         const keypomWallet = new KeypomWallet({
             signInContractId,
             networkId,
-            trialBaseUrl,
-            trialSplitDelim,
+            trialAccountSpecs,
+            instantSignInSpecs,
             modalOptions
         });
 

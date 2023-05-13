@@ -6,7 +6,7 @@ import { Near } from '@near-js/wallet-account';
 import { FunctionCallAction, InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/core';
 import BN from 'bn.js';
 import { KeypomTrialModal, setupModal } from '../modal/src';
-import { MODAL_TYPE_IDS, ModalOptions } from '../modal/src/lib/modal.types';
+import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.types';
 import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { BaseSignInSpecs, FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
 import { TRIAL_ERRORS, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
@@ -38,7 +38,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         networkId: string;
         trialAccountSpecs?: BaseSignInSpecs;
         instantSignInSpecs?: InstantSignInSpecs;
-        modalOptions: ModalOptions;
+        modalOptions: ModalCustomizations;
     }) {
         console.log('Keypom constructor called.');
         this.signInContractId = signInContractId;

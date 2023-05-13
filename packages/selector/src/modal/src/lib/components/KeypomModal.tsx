@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { renderModalType } from "../handleModalType";
 
-import { ModalOptions, ModalType, MODAL_TYPE_IDS, Theme } from "../modal.types";
+import { ModalType, MODAL_TYPE_IDS, Theme, ModalCustomizations } from "../modal.types";
 
 interface ModalProps {
-  options: ModalOptions;
+  options: ModalCustomizations;
   modalType: ModalType;
   visible: boolean;
   hide: () => void;

@@ -1,18 +1,12 @@
 export type Theme = 'dark' | 'light' | 'auto';
 
-export interface ModalOptions {
-  accountId: string;
-  secretKey: string;
-  delimiter: string;
+export interface ModalCustomizations {
   wallets: OffboardingWallet[];
-  
+  theme?: Theme;
   beginTrial?: BeginTrialCustomizations,
   trialOver?: TrialOverCustomizations,
   invalidAction?: InvalidActionCustomizations,
   insufficientBalance?: InsufficientBalanceCustomizations,
-
-  theme?: Theme;
-  onHide?: (hideReason: 'user-triggered' | 'wallet-navigation') => void;
 }
 
 export interface BeginTrialCustomizations {
