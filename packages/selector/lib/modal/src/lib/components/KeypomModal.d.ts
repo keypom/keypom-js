@@ -1,7 +1,7 @@
 import React from "react";
-import { ModalOptions, ModalType } from "../modal.types";
+import { ModalType, ModalCustomizations } from "../modal.types";
 interface ModalProps {
-    options: ModalOptions;
+    options: ModalCustomizations;
     modalType: ModalType;
     visible: boolean;
     hide: () => void;

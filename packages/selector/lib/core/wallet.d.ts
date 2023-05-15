@@ -5,34 +5,36 @@ import { Near } from '@near-js/wallet-account';
 import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/core';
 import BN from 'bn.js';
 import { KeypomTrialModal } from '../modal/src';
+import { ModalCustomizations } from '../modal/src/lib/modal.types';
+import { BaseSignInSpecs, InstantSignInSpecs, InternalInstantSignInSpecs, TrialSignInSpecs } from './types';
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
-    networkId: string;
+    accountId?: string;
+    secretKey?: string;
+    moduleId?: string;
     signInContractId: string;
     near: Near;
     keyStore: BrowserLocalStorageKeyStore;
-    trialBaseUrl: string;
-    trialSplitDelim: string;
-    trialAccountId?: string;
-    trialSecretKey?: string;
-    isMappingAccount: boolean;
+    trialAccountSpecs?: TrialSignInSpecs;
+    instantSignInSpecs?: InternalInstantSignInSpecs;
     modal: KeypomTrialModal;
-    constructor({ signInContractId, networkId, trialBaseUrl, trialSplitDelim, modalOptions }: {
-        signInContractId: any;
-        networkId: any;
-        trialBaseUrl: any;
-        trialSplitDelim: any;
-        modalOptions: any;
+    constructor({ signInContractId, networkId, trialAccountSpecs, instantSignInSpecs, modalOptions }: {
+        signInContractId: string;
+        networkId: string;
+        trialAccountSpecs?: BaseSignInSpecs;
+        instantSignInSpecs?: InstantSignInSpecs;
+        modalOptions: ModalCustomizations;
     });
     getContractId(): string;
     getAccountId(): string;
     isSignedIn(): Promise<boolean>;
+    signInTrialAccount(accountId: any, secretKey: any): Promise<Account[]>;
+    signInInstantAccount(accountId: any, secretKey: any, moduleId: any): Promise<Account[]>;
     signIn(): Promise<Account[]>;
     signOut(): Promise<void>;
     signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;
     signAndSendTransactions(params: {
         transactions: Transaction[];
-    }): Promise<any>;
-    private parseUrl;
+    }): Promise<FinalExecutionOutcome[]>;
     showModal: (modalType?: {
         id: string;
     }) => void;

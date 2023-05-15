@@ -323,7 +323,7 @@ export const createDrop = async ({
     if (!publicKeys) {
         // Default root entropy is what is passed in. If there wasn't any, we should check if the funding account contains some.
         const rootEntropyUsed =
-            rootEntropy || fundingAccountDetails?.rootEntropy;
+        rootEntropy || fundingAccountDetails?.rootEntropy;
         // If either root entropy was passed into the function or the funder has some set, we should use that.
         if (rootEntropyUsed) {
             // Create an array of size numKeys with increasing strings from 0 -> numKeys - 1. Each element should also contain the dropId infront of the string
@@ -480,12 +480,13 @@ export const createDrop = async ({
     const deposit = !hasBalance ? requiredDeposit : '0';
 
     let transactions: Transaction[] = [];
-
     const pk = await account.connection.signer.getPublicKey(
         account.accountId,
         account.connection.networkId
     );
 
+    assert(pk !== null, 'Could not get public key from signer. Ensure you have the key in the key store.')
+        
     const txnInfo: BasicTransaction = {
         receiverId: receiverId!,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws

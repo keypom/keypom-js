@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
+exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
 var core_1 = require("@keypom/core");
 var utils_1 = require("@near-js/utils");
 exports.KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
@@ -109,3 +109,50 @@ var updateKeypomContractIfValid = function (keypomContractId) {
     return false;
 };
 exports.updateKeypomContractIfValid = updateKeypomContractIfValid;
+var parseTrialUrl = function (trialSpecs) {
+    var baseUrl = trialSpecs.baseUrl, delimiter = trialSpecs.delimiter;
+    console.log("Parse trial URL with base: ".concat(baseUrl, " and delim: ").concat(delimiter));
+    var split = window.location.href.split(baseUrl);
+    if (split.length !== 2) {
+        return;
+    }
+    var trialInfo = split[1];
+    var _a = trialInfo.split(delimiter), accountId = _a[0], secretKey = _a[1];
+    if (!accountId || !secretKey) {
+        return;
+    }
+    return {
+        accountId: accountId,
+        secretKey: secretKey
+    };
+};
+exports.parseTrialUrl = parseTrialUrl;
+var parseInstantSignInUrl = function (instantSignInSpecs) {
+    var baseUrl = instantSignInSpecs.baseUrl, delimiter = instantSignInSpecs.delimiter, moduleDelimiter = instantSignInSpecs.moduleDelimiter;
+    console.log("Parse instant sign in URL with base: ".concat(baseUrl, " delim: ").concat(delimiter, " and module delim: ").concat(moduleDelimiter));
+    var split = window.location.href.split(baseUrl);
+    if (split.length !== 2) {
+        return;
+    }
+    var signInInfo = split[1];
+    // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
+    var regex = new RegExp("(.*)".concat(delimiter, "(.*)").concat(moduleDelimiter, "(.*)"));
+    var matches = signInInfo.match(regex);
+    console.log('matches: ', matches);
+    var accountId = matches === null || matches === void 0 ? void 0 : matches[1];
+    console.log('accountId: ', accountId);
+    console.log('accountId: ', accountId);
+    var secretKey = matches === null || matches === void 0 ? void 0 : matches[2];
+    console.log('secretKey: ', secretKey);
+    var moduleId = matches === null || matches === void 0 ? void 0 : matches[3];
+    console.log('moduleId: ', moduleId);
+    if (!accountId || !secretKey || !moduleId) {
+        return;
+    }
+    return {
+        accountId: accountId,
+        secretKey: secretKey,
+        moduleId: moduleId
+    };
+};
+exports.parseInstantSignInUrl = parseInstantSignInUrl;

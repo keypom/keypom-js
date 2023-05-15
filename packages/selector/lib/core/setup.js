@@ -49,6 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupKeypom = void 0;
 var modal_types_1 = require("../modal/src/lib/modal.types");
+var types_1 = require("./types");
 var wallet_1 = require("./wallet");
 var Keypom = function (_a) {
     var store = _a.store, logger = _a.logger, keypomWallet = _a.keypomWallet;
@@ -57,7 +58,7 @@ var Keypom = function (_a) {
             // return the wallet interface for wallet-selector
             return [2 /*return*/, {
                     get networkId() {
-                        return keypomWallet.networkId;
+                        return keypomWallet.near.connection.networkId;
                     },
                     getContractId: function () {
                         return keypomWallet.getContractId();
@@ -144,45 +145,47 @@ var Keypom = function (_a) {
                                         //     methodNames: ["foo"],
                                         //     accounts: []
                                         // });
-                                        wallet.signAndSendTransaction({
-                                            receiverId: "nft-v2.keypom.testnet",
-                                            actions: [
-                                                {
-                                                    type: 'FunctionCall',
-                                                    params: {
-                                                        methodName: 'nft_mint',
-                                                        args: {
-                                                            token_id: 'tokenId-keypom-1',
-                                                            receiver_id: 'foo.testnet',
-                                                            metadata: {
-                                                                title: 'test1',
-                                                                description: 'test1',
-                                                                media: 'test1',
-                                                            }
-                                                        },
-                                                        gas: '30000000000000',
-                                                        deposit: "0"
-                                                    },
-                                                },
-                                                {
-                                                    type: 'FunctionCall',
-                                                    params: {
-                                                        methodName: 'nft_mint',
-                                                        args: {
-                                                            token_id: 'tokenId-keypom-2',
-                                                            receiver_id: 'foo.testnet',
-                                                            metadata: {
-                                                                title: 'test2',
-                                                                description: 'test2',
-                                                                media: 'test2',
-                                                            }
-                                                        },
-                                                        gas: '30000000000000',
-                                                        deposit: "0"
-                                                    },
-                                                },
-                                            ],
-                                        });
+                                        // wallet.signAndSendTransaction(
+                                        //     {
+                                        //             receiverId: "nft-v2.keypom.testnet",
+                                        //             actions: [
+                                        //                 {
+                                        //                     type: 'FunctionCall',
+                                        //                     params: {
+                                        //                         methodName: 'nft_mint',
+                                        //                         args: {
+                                        //                             token_id: 'tokenId-keypom-1',
+                                        //                             receiver_id: 'foo.testnet',
+                                        //                             metadata: {
+                                        //                                 title: 'test1',
+                                        //                                 description: 'test1',
+                                        //                                 media: 'test1',
+                                        //                             }
+                                        //                         },
+                                        //                         gas: '30000000000000',
+                                        //                         deposit: "0"
+                                        //                     },
+                                        //                 },
+                                        //                 {
+                                        //                     type: 'FunctionCall',
+                                        //                     params: {
+                                        //                         methodName: 'nft_mint',
+                                        //                         args: {
+                                        //                             token_id: 'tokenId-keypom-2',
+                                        //                             receiver_id: 'foo.testnet',
+                                        //                             metadata: {
+                                        //                                 title: 'test2',
+                                        //                                 description: 'test2',
+                                        //                                 media: 'test2',
+                                        //                             }
+                                        //                         },
+                                        //                         gas: '30000000000000',
+                                        //                         deposit: "0"
+                                        //                     },
+                                        //                 },
+                                        //             ],
+                                        //         }
+                                        //      )
                                         console.log('selectedModule: ', selectedModule);
                                         console.log('modules in sign in: ', modules);
                                         logger.log('Keypom:signIn');
@@ -236,26 +239,26 @@ var Keypom = function (_a) {
 };
 function setupKeypom(_a) {
     var _this = this;
-    var _b = _a.trialSplitDelim, trialSplitDelim = _b === void 0 ? '/' : _b, _c = _a.deprecated, deprecated = _c === void 0 ? false : _c, trialBaseUrl = _a.trialBaseUrl, networkId = _a.networkId, signInContractId = _a.signInContractId, modalOptions = _a.modalOptions;
+    var _b = _a.deprecated, deprecated = _b === void 0 ? false : _b, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, networkId = _a.networkId, signInContractId = _a.signInContractId, modalOptions = _a.modalOptions;
     return function () { return __awaiter(_this, void 0, void 0, function () {
         var keypomWallet, shouldSignIn;
         var _this = this;
         return __generator(this, function (_a) {
-            if (!signInContractId || !networkId || !trialBaseUrl) {
-                console.warn('KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.');
+            if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
+                console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
                 return [2 /*return*/, null];
             }
             keypomWallet = new wallet_1.KeypomWallet({
                 signInContractId: signInContractId,
                 networkId: networkId,
-                trialBaseUrl: trialBaseUrl,
-                trialSplitDelim: trialSplitDelim,
+                trialAccountSpecs: trialAccountSpecs,
+                instantSignInSpecs: instantSignInSpecs,
                 modalOptions: modalOptions
             });
             shouldSignIn = keypomWallet.checkValidTrialInfo();
             console.log('shouldSignIn: ', shouldSignIn);
             return [2 /*return*/, {
-                    id: 'keypom',
+                    id: types_1.KEYPOM_MODULE_ID,
                     type: 'instant-link',
                     metadata: {
                         name: 'Keypom Account',

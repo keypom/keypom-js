@@ -316,6 +316,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     const deposit = !hasBalance ? requiredDeposit : '0';
     let transactions = [];
     const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    (0, checks_1.assert)(pk !== null, 'Could not get public key from signer. Ensure you have the key in the key store.');
     const txnInfo = {
         receiverId: receiverId,
         signerId: account.accountId,

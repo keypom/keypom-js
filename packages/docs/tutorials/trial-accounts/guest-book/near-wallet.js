@@ -1,18 +1,19 @@
 /* A helper file that simplifies using the wallet selector */
 
 // near api js
-import { providers } from 'near-api-js';
 
 // wallet selector UI
 import '@near-wallet-selector/modal-ui/styles.css';
 //import './components/modal/src/lib/components/styles.css';
-import LedgerIconUrl from '@near-wallet-selector/ledger/assets/ledger-icon.png';
 import MyNearIconUrl from '@near-wallet-selector/my-near-wallet/assets/my-near-wallet-icon.png';
 
 // wallet selector options
 import { setupWalletSelector } from '@near-wallet-selector/core';
 import { setupKeypom } from '@keypom/selector';
-import { setupLedger } from '@near-wallet-selector/ledger';
+import { JsonRpcProvider } from '@near-js/providers';
+import {
+  getTransactionLastResult,
+} from '@near-js/utils';
 import { setupMyNearWallet } from '@near-wallet-selector/my-near-wallet';
 import { setupModal } from '@near-wallet-selector/modal-ui';
 import { KEYPOM_OPTIONS } from './keypom-data';
@@ -42,11 +43,17 @@ export class Wallet {
       network: this.network,
       modules: [
         setupMyNearWallet({ iconUrl: MyNearIconUrl }),
-        setupLedger({ iconUrl: LedgerIconUrl }),
         setupKeypom({ 
-          trialBaseUrl: "http://localhost:1234/keypom-url#", 
+          trialAccountSpecs: {
+            baseUrl: "http://localhost:1234/trial-url#",
+            delimiter: "/"
+          },
+          instantSignInSpecs: {
+            baseUrl: "http://localhost:1234/instant-url#",
+            delimiter: "/",
+            moduleDelimiter: "/"
+          },
           networkId: this.network, 
-          trialSplitDelim: "/",
           signInContractId: this.createAccessKeyFor,
           modalOptions: KEYPOM_OPTIONS
         })
@@ -80,7 +87,7 @@ export class Wallet {
   // Make a read-only call to retrieve information from the network
   async viewMethod({ contractId, method, args = {} }) {
     const { network } = this.walletSelector.options;
-    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+    const provider = new JsonRpcProvider({ url: network.nodeUrl });
 
     let res = await provider.query({
       request_type: 'call_function',
@@ -111,16 +118,16 @@ export class Wallet {
       ],
     });
 
-    return providers.getTransactionLastResult(outcome)
+    return getTransactionLastResult(outcome)
   }
 
   // Get transaction result from the network
   async getTransactionResult(txhash) {
     const { network } = this.walletSelector.options;
-    const provider = new providers.JsonRpcProvider({ url: network.nodeUrl });
+    const provider = new JsonRpcProvider({ url: network.nodeUrl });
 
     // Retrieve transaction result from the network
     const transaction = await provider.txStatus(txhash, 'unnused');
-    return providers.getTransactionLastResult(transaction);
+    return getTransactionLastResult(transaction);
   }
 }

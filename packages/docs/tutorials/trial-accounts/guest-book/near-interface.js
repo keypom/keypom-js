@@ -1,6 +1,5 @@
 /* Talking with a contract often involves transforming data, we recommend you to encapsulate that logic into a class */
-
-import { utils } from 'near-api-js';
+import { parseNearAmount } from '@near-js/utils';
 
 export class GuestBook {
 
@@ -18,7 +17,7 @@ export class GuestBook {
   }
 
   async addMessage(message, donation) {
-    const deposit = utils.format.parseNearAmount(donation);
+    const deposit = parseNearAmount(donation);
     return await this.wallet.callMethod({ contractId: this.contractId, method: "add_message", args: { text: message }, deposit });
   }
 

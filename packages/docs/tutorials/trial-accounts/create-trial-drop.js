@@ -5,7 +5,7 @@ const { readFileSync } = require('fs');
 const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
 const { Account } = require('@near-js/accounts');
 const { connect, Near } = require("@near-js/wallet-account");
-const { initKeypom, createTrialAccountDrop } = require('@keypom/core');
+const { initKeypom, createTrialAccountDrop, generateKeys } = require('@keypom/core');
 
 const funderAccountId = 'benjiman.testnet';
 const NETWORK_ID = 'testnet';
@@ -68,7 +68,7 @@ async function createTrialAccount() {
 
     
 
-    const guestBookInstance = "http://localhost:1234/keypom-url#"
+    const guestBookInstance = "http://localhost:1234/trial-url#"
     const keypomContractId = "v2.keypom.testnet"
     const delimiter = "/"
     const secretKey = keys.secretKeys[0]
@@ -82,7 +82,16 @@ async function createTrialAccount() {
     const alphaInstance = "http://localhost:3000/#trial-url/"
     const mnwInstance = "https://testnet-preview.mynearwallet.com/linkdrop/"
 
+    const res = await generateKeys({
+        numKeys: 1
+    })
+
+    await fundingAccount.addKey(res.publicKeys[0], callableContracts[0], 'add_message');
+
     console.log(`
+
+    Instant Sign In
+    http://localhost:1234/instant-url#${funderAccountId}${delimiter}${res.secretKeys[0]}${delimiter}my-near-wallet
     
     Guest-Book App:
  	${guestBookInstance}${keypomContractId}${delimiter}${secretKey}

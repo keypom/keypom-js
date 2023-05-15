@@ -10,8 +10,7 @@ import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.type
 import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { BaseSignInSpecs, FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
 import { TRIAL_ERRORS, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
-import { stringifyJsonOrBytes } from 'near-api-js/lib/transaction';
-
+import { actionCreators, stringifyJsonOrBytes } from '@near-js/transactions';
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
@@ -112,9 +111,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // Check if the account ID and secret key are valid and sign in accordingly
         try {
             const keyInfo = await viewAccessKeyData({accountId, secretKey});
+            console.log('keyInfo trial accounts: ', keyInfo)
 
             const keyPerms = keyInfo.permission.FunctionCall;
-            console.log('keyPerms: ', keyPerms);
             // Check if accountKeys's length is 1 and it has a `public_key` field
             if (keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute')) {
                 // Check if the account exists in the mapping contract. If they do, don't do anything. If they
@@ -138,9 +137,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
          // Check if the account ID and secret key are valid and sign in accordingly
          try {
             const keyInfo = await viewAccessKeyData({accountId, secretKey});
+            console.log('keyInfo instant sign in: ', keyInfo)
 
             const keyPerms = keyInfo.permission.FunctionCall;
-            console.log('keyPerms: ', keyPerms);
             if (keyPerms) {
                 return this.internalSignIn(accountId, secretKey, moduleId);
             }
@@ -151,19 +150,19 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return [];
     }
 
-    async signIn(): Promise<Account[]> {
-        console.log('IM SIGNING IN');
-        
+    async signIn(): Promise<Account[]> {        
         await initKeypom({
             network: this.near.connection.networkId
         });
 
         let instantSignInData = this.instantSignInSpecs !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
+        console.log('instantSignInData: ', instantSignInData)
         if (instantSignInData !== undefined) {
             return this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId);
         }
         
         let trialData = this.trialAccountSpecs !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
+        console.log('trialData: ', trialData)
         if (trialData !== undefined) {
             return this.signInTrialAccount(trialData.accountId, trialData.secretKey);
         }
@@ -220,8 +219,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.assertSignedIn();
         const { transactions } = params;
 
-        let res;
-
+        let res: FinalExecutionOutcome[] = [];
         if (this.moduleId === KEYPOM_MODULE_ID) {
             try {
                 if (!this.trialAccountSpecs!.isMappingAccount) {
@@ -262,27 +260,28 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             }
         } else {
             const account = new Account(this.near.connection, this.accountId!);
-            let responses: FinalExecutionOutcome[] = [];
             for (let i = 0; i < transactions.length; i++) {
                 let txn = transactions[i];
 
-                responses.push(await account.signAndSendTransaction({
+                let mappedActions = txn.actions.map((a) => {
+                    const fcAction = a as FunctionCallAction
+                    return actionCreators.functionCall(
+                        fcAction.params.methodName,
+                        stringifyJsonOrBytes(fcAction.params.args),
+                        fcAction.params.gas,
+                        fcAction.params.deposit,
+                    )
+                })
+                console.log('txn.actions: ', txn.actions)
+                console.log('mappedActions: ', mappedActions)
+
+                res.push(await account.signAndSendTransaction({
                     receiverId: txn.receiverId,
-                    actions: txn.actions.map((a) => {
-                        const fcAction = a as FunctionCallAction
-                        return {
-                            enum: fcAction.type,
-                            functionCall: {
-                                methodName: fcAction.params.methodName,
-                                args: stringifyJsonOrBytes(fcAction.params.args),
-                                gas: fcAction.params.gas,
-                                deposit: fcAction.params.deposit,
-                            }
-                        }
-                    })
+                    actions: mappedActions
                 }));
             }
         }
+        console.log('res sign & send txn: ', res)
         return res;
     }
 

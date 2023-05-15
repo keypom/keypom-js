@@ -14,9 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTransactions = exports.convertBasicTransaction = exports.nearArgsToYocto = exports.toCamel = exports.snakeToCamel = exports.generatePerUsePasswords = exports.estimateRequiredDeposit = exports.getStorageBase = exports.createAction = exports.transformTransactions = exports.parseFTAmount = exports.nftTransferCall = exports.ftTransferCall = exports.execute = exports.viewAccessKeyData = exports.keypomView = exports.generateKeys = exports.hashPassword = exports.formatLinkdropUrl = exports.createNFTSeries = exports.getFTMetadata = exports.getNFTMetadata = exports.accountExists = exports.getPubFromSecret = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
-//import * as nearAPI from "near-api-js";
-//import { Account, Near, transactions } from "near-api-js";
-//import { base_decode } from "near-api-js/lib/utils/serialize";
 const near_seed_phrase_1 = require("near-seed-phrase");
 const checks_1 = require("./checks");
 const keypom_1 = require("./keypom");
@@ -25,6 +22,7 @@ const accounts_1 = require("@near-js/accounts");
 const utils_1 = require("@near-js/utils");
 const transactions_1 = require("@near-js/transactions");
 const borsh_1 = require("borsh");
+const util_1 = require("util");
 let sha256Hash;
 // @ts-ignore
 if (typeof crypto === 'undefined') {
@@ -575,7 +573,7 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
                     type: 'FunctionCall',
                     params: {
                         methodName: a.functionCall.methodName,
-                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
@@ -606,7 +604,7 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
                     type: 'FunctionCall',
                     params: {
                         methodName: a.functionCall.methodName,
-                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
