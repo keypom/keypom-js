@@ -1,13 +1,10 @@
 import React from "react";
 import { useZxing } from "react-zxing";
-import { initKeypom, claim, hashPassword, getPubFromSecret, getKeyInformation } from "keypom-js";
-import * as nearAPI from "near-api-js";
 import { useState, useEffect } from "react";
 import logo from "../static/img/green-check.png"
 import xLogo from "../static/img/red-x.png"
 import "../styles.css";
 import { allowEntry } from "../utils/allowEntry";
-const { keyStores, connect } = nearAPI;
 
 export const Scanner = () => {
 

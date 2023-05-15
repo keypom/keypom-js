@@ -1,6 +1,9 @@
 const path = require("path");
 const homedir = require("os").homedir();
-const { KeyPair, keyStores, connect, Account } = require("near-api-js");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { Account } = require("@near-js/accounts");
+const { parseNearAmount } = require("@near-js/utils");
+const { connect, Near } = require("@near-js/wallet-account");
 var assert = require('assert');
 
 const keypom = require("keypom-js");

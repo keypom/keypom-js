@@ -1,4 +1,4 @@
-const keypom = require("keypom-js");
+const keypom = require("@keypom/core");
 const {
 	getPubFromSecret,
 	getKeyInformation,
