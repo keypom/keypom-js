@@ -1,6 +1,9 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair, keyStores, connect } = require("near-api-js");
-const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("keypom-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { connect, Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
+const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("@keypom/core");
+
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -13,7 +16,7 @@ async function nftDropKeypom(){
 	const NFT_TOKEN_ID = "keypom-token-" + Date.now().toString();
 	const NFT_CONTRACT = "nft.examples.testnet";
 
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -24,14 +27,14 @@ async function nftDropKeypom(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 
 	// Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
-	await fundingAccount.functionCall(
-		NFT_CONTRACT, 
-		'nft_mint', 
-		{
+	await fundingAccount.functionCall({
+		contractId: NFT_CONTRACT, 
+		methodName: 'nft_mint', 
+		args: {
 			receiver_id: YOUR_ACCOUNT,
 			metadata: {
 			    title: "My First Keypom NFT",
@@ -40,10 +43,10 @@ async function nftDropKeypom(){
 			},
 			token_id: NFT_TOKEN_ID,
 		},
-		"300000000000000",
+		gas: "300000000000000",
 		// Cost to cover storage of NFT
-		parseNearAmount("0.1")
-	);
+		attachedDeposit: parseNearAmount("0.1")
+	});
 
 	// Initiate Keypom using existing NEAR testnet connection
 	await initKeypom({

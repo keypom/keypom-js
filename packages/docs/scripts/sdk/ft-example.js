@@ -1,6 +1,8 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("keypom-js");
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("@keypom/core");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { connect, Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
 const path = require("path");
 const homedir = require("os").homedir();
 const { BN } = require("bn.js");
@@ -13,7 +15,7 @@ async function ftDropKeypom(){
 	const YOUR_ACCOUNT = "keypom-docs-demo.testnet";
 	const FT_CONTRACT = "ft.keypom.testnet";
 
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -24,18 +26,18 @@ async function ftDropKeypom(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = await new Account(near.connection, YOUR_ACCOUNT);
 
 	// Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 	let amountToTransfer = parseNearAmount("1")
-	let funderFungibleTokenBal = await fundingAccount.viewFunction(
-		FT_CONTRACT, 
-		'ft_balance_of',
-		{
+	let funderFungibleTokenBal = await fundingAccount.viewFunction({
+		contractId: FT_CONTRACT, 
+		methodName: 'ft_balance_of',
+		args: {
 			account_id: YOUR_ACCOUNT
 		}
-	);
+	});
 
 	// Check if the owner has enough FT balance to fund drop
 	if (new BN(funderFungibleTokenBal).lte(new BN(amountToTransfer))){

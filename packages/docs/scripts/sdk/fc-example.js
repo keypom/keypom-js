@@ -1,6 +1,8 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("keypom-js"); 
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { initKeypom, createDrop, getEnv, formatLinkdropUrl } = require("@keypom/core"); 
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { connect, Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -13,7 +15,7 @@ async function fcDropKeypom(){
 	const NFT_TOKEN_ID = "keypom-token-" + Date.now().toString();
 	const NFT_CONTRACT = "nft.examples.testnet";
 	
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -24,8 +26,8 @@ async function fcDropKeypom(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 
 	// If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
 	// Here we are connecting to the testnet network
