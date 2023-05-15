@@ -1,5 +1,8 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { KeyPair } = require("@near-js/crypto")
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -13,7 +16,7 @@ async function fcDropNear(){
 	const NFT_CONTRACT = "nft.examples.testnet";
 	const KEYPOM_CONTRACT = "v2.keypom.testnet"
 
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -24,8 +27,8 @@ async function fcDropNear(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 
 	// Keep track of an array of the keyPairs we create and the public keys to pass into the contract
 	let keyPairs = [];
@@ -41,10 +44,10 @@ async function fcDropNear(){
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
 		// With our function call for this drop, we wish to allow the user to lazy mint an NFT
-		await fundingAccount.functionCall(
-			KEYPOM_CONTRACT, 
-			'create_drop', 
-			{
+		await fundingAccount.functionCall({
+			contractId: KEYPOM_CONTRACT, 
+			methodName: 'create_drop', 
+			args: {
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount("0.1"),
 				fc: {
@@ -70,10 +73,10 @@ async function fcDropNear(){
 				    ]
 				}
 			}, 
-			"300000000000000",
+			gas: "300000000000000",
 			// Attcned depot of 1.5 $NEAR for creating the drop
-			parseNearAmount("1.5")
-		);
+			attachedDeposit: parseNearAmount("1.5")
+		});
 	} catch(e) {
 		console.log('error creating drop: ', e);
 	}
@@ -82,7 +85,7 @@ async function fcDropNear(){
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
+	    let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

@@ -1,5 +1,8 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { KeyPair } = require("@near-js/crypto")
+const { Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
 const { getRecentDropId } = require("../utils/general.js")
 const path = require("path");
 const homedir = require("os").homedir();
@@ -15,7 +18,7 @@ async function ftDropNear(){
 	const FT_CONTRACT = "ft.keypom.testnet";
 	const KEYPOM_CONTRACT = "v2.keypom.testnet";
 
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -26,18 +29,18 @@ async function ftDropNear(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 
 	// Get amount of FTs to transfer. In this scenario, we've assumed it to be 1 for one single use key.
 	let amountToTransfer = parseNearAmount("1")
-	let funderFungibleTokenBal = await fundingAccount.viewFunction(
-		FT_CONTRACT, 
-		'ft_balance_of',
-		{
+	let funderFungibleTokenBal = await fundingAccount.viewFunction({
+		contractId: FT_CONTRACT, 
+		methodName: 'ft_balance_of',
+		args: {
 			account_id: YOUR_ACCOUNT
 		}
-	);
+	});
 
 	// Check if the owner has enough FT balance to fund drop
 	if (new BN(funderFungibleTokenBal).lte(new BN(amountToTransfer))){
@@ -56,10 +59,10 @@ async function ftDropNear(){
 	// Note that the user is responsible for error checking when using NEAR-API-JS
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
-		await fundingAccount.functionCall(
-			KEYPOM_CONTRACT, 
-			'create_drop', 
-			{
+		await fundingAccount.functionCall({
+			contractId: KEYPOM_CONTRACT, 
+			methodName: 'create_drop', 
+			args: {
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount("1"),
 				ft: {
@@ -70,44 +73,43 @@ async function ftDropNear(){
 					balance_per_use: parseNearAmount("1")
 				}
 			}, 
-			"300000000000000",
+			gas: "300000000000000",
 			// Attached deposit of 1.5 $NEAR
-			parseNearAmount("1.5")
-		);
+			attachedDeposit: parseNearAmount("1.5")
+		});
 	} catch(e) {
 		console.log('error creating drop: ', e);
 	}
 
 	// Pay storage deposit and trasnfer FTs to Keypom contract.
 	try {
-		await fundingAccount.functionCall(
-			FT_CONTRACT, 
-			'storage_deposit',
-			{
+		await fundingAccount.functionCall({
+			contractId: FT_CONTRACT, 
+			methodName: 'storage_deposit',
+			args: {
 				account_id: YOUR_ACCOUNT,
 			},
-			"300000000000000",
+			gas: "300000000000000",
 			// We are using 0.1 $NEAR to pay the storage deposit to include our account ID in their registered list of users. 
 			// Realistically, this will be more than enough and will be refunded the excess
-			parseNearAmount("0.1")
-		);
+			attachedDeposit: parseNearAmount("0.1")
+		});
 
 		// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
 		let dropId = await getRecentDropId(fundingAccount, YOUR_ACCOUNT, KEYPOM_CONTRACT);
 		
 		console.log(dropId)
-		await fundingAccount.functionCall(
-			FT_CONTRACT, 
-			'ft_transfer_call', 
-			{
+		await fundingAccount.functionCall({
+			contractId: FT_CONTRACT, 
+			methodName: 'ft_transfer_call', 
+			args: {
 				receiver_id: KEYPOM_CONTRACT,
 				amount: (amountToTransfer.toString()),				
 				msg: dropId.toString()
 			},
-			"300000000000000",
-			// Attached deposit of 0.1 $NEAR
-			"1"
-		);
+			gas: "300000000000000",
+			attachedDeposit: "1"
+		});
 	} catch(e) {
 		console.log('error sending FTs', e);
 	}
@@ -115,7 +117,7 @@ async function ftDropNear(){
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
+	    let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

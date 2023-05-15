@@ -1,5 +1,10 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { KeyPair } = require("@near-js/crypto")
+const { Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+
+
 const path = require("path");
 const homedir = require("os").homedir();
 
@@ -12,7 +17,7 @@ async function simpleDropNear(){
 	const KEYPOM_CONTRACT = "v2.keypom.testnet"
 
 	
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 
 	let nearConfig = {
 	    networkId: network,
@@ -23,8 +28,8 @@ async function simpleDropNear(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 
 	// Keep track of an array of the key pairs we create and the public keys we pass into the contract
 	let keyPairs = [];
@@ -38,17 +43,17 @@ async function simpleDropNear(){
 	// Note that the user is responsible for error checking when using NEAR-API-JS
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
-		await fundingAccount.functionCall(
-			KEYPOM_CONTRACT, 
-			'create_drop', 
-			{
+		await fundingAccount.functionCall({
+			contractId: KEYPOM_CONTRACT, 
+			methodName: 'create_drop', 
+			args: {
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount('1'),
 			}, 
-			"300000000000000",
+			gas: "300000000000000",
 			// Generous attached deposit of 1.5 $NEAR
-			parseNearAmount("1.5")
-		);
+			attachedDeposit: parseNearAmount("1.5")
+		});
 	} catch(e) {
 		console.log('error creating drop: ', e);
 	}
@@ -56,7 +61,7 @@ async function simpleDropNear(){
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
+	    let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops

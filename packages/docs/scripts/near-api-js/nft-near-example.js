@@ -1,5 +1,8 @@
-const { parseNearAmount, formatNearAmount } = require("near-api-js/lib/utils/format");
-const { KeyPair, keyStores, connect } = require("near-api-js");
+const { parseNearAmount } = require("@near-js/utils");
+const { KeyPair } = require("@near-js/crypto")
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { Near } = require("@near-js/wallet-account");
+const { Account } = require("@near-js/accounts");
 const { getRecentDropId } = require("../utils/general.js")
 const path = require("path");
 const homedir = require("os").homedir();
@@ -14,7 +17,7 @@ async function nftDropNear(){
 	const NFT_CONTRACT = "nft.examples.testnet";
 	const KEYPOM_CONTRACT = "v2.keypom.testnet";
 	
-	let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);
+	let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
 	
 	let nearConfig = {
 	    networkId: network,
@@ -25,14 +28,14 @@ async function nftDropNear(){
 	    explorerUrl: `https://explorer.${network}.near.org`,
 	};
 	
-	let near = await connect(nearConfig);
-	const fundingAccount = await near.account(YOUR_ACCOUNT);
+	let near = new Near(nearConfig);
+	const fundingAccount = new Account(near.connection, YOUR_ACCOUNT);
 	
 	// Mint 1 NFT for the funder from the NFT contract outlined in the NFT_DATA
-	await fundingAccount.functionCall(
-		NFT_CONTRACT, 
-		'nft_mint', 
-		{
+	await fundingAccount.functionCall({
+		contractId: NFT_CONTRACT, 
+		methodName: 'nft_mint', 
+		args: {
 			receiver_id: YOUR_ACCOUNT,
 			metadata: {
 			    title: "My Keypom NFT",
@@ -41,10 +44,10 @@ async function nftDropNear(){
 			},
 			token_id: NFT_TOKEN_ID,
 		},
-		"300000000000000",
+		gas: "300000000000000",
 		// Attached deposit of 0.1 $NEAR
-		parseNearAmount("0.1")
-	);
+		attachedDeposit: parseNearAmount("0.1")
+	});
 	
 	// Keep track of an array of the key pairs we create and the public keys we pass into the contract
 	let keyPairs = [];
@@ -58,10 +61,10 @@ async function nftDropNear(){
 	// Note that the user is responsible for error checking when using NEAR-API-JS
 	// The SDK automatically does error checking; ensuring valid configurations, enough attached deposit, drop existence etc.
 	try {
-		await fundingAccount.functionCall(
-			KEYPOM_CONTRACT, 
-			'create_drop', 
-			{
+		await fundingAccount.functionCall({
+			contractId: KEYPOM_CONTRACT, 
+			methodName: 'create_drop', 
+			args: {
 				public_keys: pubKeys,
 				deposit_per_use: parseNearAmount("1"),
 				nft: {
@@ -71,28 +74,28 @@ async function nftDropNear(){
 					contract_id: NFT_CONTRACT
 				}
 			}, 
-			"300000000000000",
+			gas: "300000000000000",
 			// Attached deposit of 1 $NEAR
-			parseNearAmount("1")
-		);
+			attachedDeposit: parseNearAmount("1")
+		});
 		
 		// Get the drop ID of the drop that we just created. This is for the message in the NFT transfer
 		let dropId = await getRecentDropId(fundingAccount, YOUR_ACCOUNT, KEYPOM_CONTRACT);
 		
 		// Transfer the NFT to the Keypom contract. 
 		// This gives Keypom the ownership and thus the ability to give it to the recipient when they use the linkdrop
-		await fundingAccount.functionCall(
-			NFT_CONTRACT, 
-			'nft_transfer_call', 
-			{
+		await fundingAccount.functionCall({
+			contractId: NFT_CONTRACT, 
+			methodName: 'nft_transfer_call', 
+			args: {
 				receiver_id: KEYPOM_CONTRACT,
 				token_id: NFT_TOKEN_ID,
 				msg: dropId.toString()
 			},
-			"300000000000000",
+			gas: "300000000000000",
 			// Attached deposit of 1 $NEAR
-			"1"
-		);
+			attachedDeposit: "1"
+		});
 	} catch(e) {
 		console.log('error creating drop: ', e);
 	}
@@ -100,7 +103,7 @@ async function nftDropNear(){
     	// Creating list of pk's and linkdrops; copied from orignal simple-create.js
     	for(var i = 0; i < keyPairs.length; i++) {
 		// For keyPairs.length > 1, change URL secret key to keyPair.secretKey[i]
-	    let linkdropUrl = `https://wallet.testnet.near.org/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
+	    let linkdropUrl = `https://testnet.mynearwallet.com/linkdrop/${KEYPOM_CONTRACT}/${keyPair.secretKey}`;
 	    dropInfo[pubKeys[i]] = linkdropUrl;
 	}
 	// Write file of all pk's and their respective linkdrops
