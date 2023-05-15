@@ -486,6 +486,8 @@ export const createDrop = async ({
         account.connection.networkId
     );
 
+    assert(pk !== null, 'Could not get public key from signer. Ensure you have the key in the key store.')
+
     const txnInfo: BasicTransaction = {
         receiverId: receiverId!,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws

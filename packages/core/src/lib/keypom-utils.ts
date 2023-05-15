@@ -27,6 +27,7 @@ import { Near } from '@near-js/wallet-account';
 import { FinalExecutionOutcome } from '@near-js/types';
 import { actionCreators, Action, Transaction, stringifyJsonOrBytes, createTransaction } from '@near-js/transactions';
 import { baseDecode } from 'borsh';
+import { TextDecoder } from 'util';
 
 type AnyWallet = BrowserWalletBehaviour | Wallet;
 

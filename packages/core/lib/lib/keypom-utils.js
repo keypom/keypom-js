@@ -25,6 +25,7 @@ const accounts_1 = require("@near-js/accounts");
 const utils_1 = require("@near-js/utils");
 const transactions_1 = require("@near-js/transactions");
 const borsh_1 = require("borsh");
+const util_1 = require("util");
 let sha256Hash;
 // @ts-ignore
 if (typeof crypto === 'undefined') {
@@ -575,7 +576,7 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
                     type: 'FunctionCall',
                     params: {
                         methodName: a.functionCall.methodName,
-                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
@@ -606,7 +607,7 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
                     type: 'FunctionCall',
                     params: {
                         methodName: a.functionCall.methodName,
-                        args: JSON.parse(new TextDecoder().decode(a.functionCall.args)),
+                        args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
                         gas: a.functionCall.gas
                     }
