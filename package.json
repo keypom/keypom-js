@@ -1,50 +1,34 @@
 {
-  "name": "keypom-js",
-  "version": "1.4.9",
-  "description": "Keypom JS SDK",
-  "main": "./lib/index.js",
-  "scripts": {
-    "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation && yarn test:dummy-creation",
-    "test:main": "yarn build && yarn ava:main",
-    "test:trial-accounts": "yarn build && yarn ava:trial-accounts",
-    "test:drop-creation": "yarn build && yarn ava:drop-creation",
-    "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
-    "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
-    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
-    "ava:main": "ava test/ws.test.js -vs --timeout=5m",
-    "ava:dao": "ava test/dao.test.js -vs --timeout=5m",
-
-    "ava:trial-accounts": "ava test/trial-accounts.test.js -vs --timeout=5m",
-    "build": "npx tsc",
-    "publish": "npx tsc && npm publish",
-    "build-docs": "npx typedoc --options typedoc.json",
-    "create-trial-drop": "node ./test/create-trial-drop.js",
-    "daofulltest": "node docs-advanced-tutorials/dao-onboarding/sputnikPreTest && node docs-advanced-tutorials/dao-onboarding/daoScript",
-    "daotest": "node docs-advanced-tutorials/dao-onboarding/daoScript"
-  },
+  "name": "@keypom-js/monorepo",
   "author": "benkurrek, mattlockyer",
-  "license": "MIT",
-  "dependencies": {
-    "@near-wallet-selector/core": "^7.9.1",
-    "@types/react": "^18.0.26",
-    "ava": "^4.3.3",
-    "bn.js": "^5.2.1",
-    "dotenv": "^16.0.3",
-    "fs": "^0.0.1-security",
-    "near-api-js": "^0.45.1",
-    "near-seed-phrase": "^0.2.0",
-    "path-browserify": "^1.0.1",
-    "react": "^18.2.0",
-    "react-dom": "18.2.0",
-    "typescript": "^4.8.4",
-    "util": "^0.12.5"
+  "private": true,
+  "engines": {
+    "node": ">=16.14.0",
+    "pnpm": ">=7"
   },
-  "ava": {
-    "require": [
-      "dotenv/config"
-    ]
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "lint": "turbo run lint:ts",
+    "lint:fix": "turbo run lint:ts:fix",
+    "autoclave": "rimraf packages/**/dist && rimraf packages/**/lib && rimraf packages/**/node_modules && rimraf packages/**/coverage && rimraf packages/**/.turbo && rm -rf node_modules",
+    "test": "turbo run test",
+    "release": "changeset publish",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "typedoc": "^0.23.24"
+    "@changesets/changelog-github": "^0.4.6",
+    "@changesets/cli": "^2.24.4",
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "commitlint": "^17.0.3",
+    "eslint": "^8.20.0",
+    "husky": "^7.0.4",
+    "rimraf": "^3.0.2",
+    "turbo": "^1.4.5",
+    "typescript": "^4.9.4"
   }
 }

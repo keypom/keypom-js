@@ -1,13 +1,39 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 # Developer note: near.gitignore will be renamed to .gitignore upon project creation
 # dependencies
-package-lock.json
+node_modules
 yarn.lock
-node_modules/
 /.pnp
 .pnp.js
 /out
 notes
+
+doc
+
+*_links.json
+
+#IDE
+.idea
+.vscode
+
+storage
+
+*.map
+
+dist/
+
+# near-api-js files & coverage
+.nyc_output
+src\.ts/protos\.d\.ts
+package\-lock\.json
+
+# OS X
+.DS_Store
+
+# Generated test files
+test-keys/
+
+.turbo
 
 #keys
 /neardev
