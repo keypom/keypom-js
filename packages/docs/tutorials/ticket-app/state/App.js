@@ -4,15 +4,15 @@ import KeyInfo from "./keyInfo";
 import React from "react";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import * as nearAPI from "near-api-js";
 import { Scanner } from "../components/scanner";
 import "../styles.css";
-import { initKeypom, formatLinkdropUrl } from "keypom-js";
-const { keyStores, connect } = nearAPI;
+import { initKeypom, formatLinkdropUrl } from "@keypom/core";
+import { Near } from "@near-js/wallet-account";
+import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
 
 const NETWORK_ID = "testnet";
 async function connectNear(privateKey, contractId){
-  const myKeyStore = new keyStores.BrowserLocalStorageKeyStore();
+  const myKeyStore = new BrowserLocalStorageKeyStore();
   const connectionConfig = {
      networkId: NETWORK_ID,
      keyStore: myKeyStore,
@@ -22,7 +22,7 @@ async function connectNear(privateKey, contractId){
      explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
   };
 
-  const nearConnection = await connect(connectionConfig);
+  const nearConnection = new Near(connectionConfig);
   await initKeypom({
       near: nearConnection,
       network: NETWORK_ID,

@@ -1,14 +1,16 @@
 const path = require("path");
 const homedir = require("os").homedir();
-const { KeyPair, keyStores, connect, Account } = require("near-api-js");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { parseNearAmount } = require("@near-js/utils");
+const { Account } = require("@near-js/accounts");
+const { connect, Near } = require("@near-js/wallet-account");
 var assert = require('assert');
 
-const keypom = require("keypom-js");
+const keypom = require("@keypom/core");
 const {
 	initKeypom,
 	getEnv,
 	createDrop,
-    parseNearAmount,
     createNFTSeries,
     formatLinkdropUrl
 } = keypom
@@ -21,7 +23,7 @@ async function createTickDrop() {
     const CREDENTIALS_DIR = ".near-credentials";
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-    let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+    let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
 
     let nearConfig = {
         networkId: NETWORK_ID,
@@ -32,7 +34,7 @@ async function createTickDrop() {
         explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
     };  
 
-    let near = await connect(nearConfig);
+    let near = new Near(nearConfig);
     const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
     
     // If a NEAR connection is not passed in and is not already running, initKeypom will create a new connection
