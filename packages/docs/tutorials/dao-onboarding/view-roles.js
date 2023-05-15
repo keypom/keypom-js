@@ -1,9 +1,11 @@
 const path = require("path");
 const homedir = require("os").homedir();
-const { KeyPair, keyStores, connect, Account } = require("near-api-js");
+const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
+const { Account } = require("@near-js/accounts");
+const { connect, Near } = require("@near-js/wallet-account");
 var assert = require('assert');
 
-const keypom = require("keypom-js");
+const keypom = require("@keypom/core");
 const { DAO_CONTRACT, DAO_BOT_CONTRACT } = require("./configurations");
 const {
 	initKeypom,
@@ -49,7 +51,7 @@ async function viewRoles(){
     const CREDENTIALS_DIR = ".near-credentials";
     const credentialsPath =  path.join(homedir, CREDENTIALS_DIR);
 
-    let keyStore = new keyStores.UnencryptedFileSystemKeyStore(credentialsPath);  
+    let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
 
     let nearConfig = {
         networkId: NETWORK_ID,
@@ -60,7 +62,7 @@ async function viewRoles(){
         explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
     };  
 
-    let near = await connect(nearConfig);
+    let near = new Near(nearConfig);
     const fundingAccount = new Account(near.connection, FUNDER_ACCOUNT_ID)
     
     // get policy and parse
