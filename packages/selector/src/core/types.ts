@@ -84,7 +84,7 @@ export interface KeypomInitializeOptions {
 export interface KeypomParams {
     networkId: NetworkId;
     signInContractId: string;
-    trialAccountSpecs: TrialSignInSpecs,
+    trialAccountSpecs: BaseSignInSpecs,
     instantSignInSpecs: InstantSignInSpecs,
     deprecated?: boolean;
     trialSplitDelim?: string;

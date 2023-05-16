@@ -170,17 +170,22 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signInInstantAccount = function (accountId, secretKey, moduleId) {
         return __awaiter(this, void 0, void 0, function () {
-            var keyInfo, keyPerms, e_3;
+            var account, allKeys, pk_1, keyInfoView, e_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, (0, core_1.viewAccessKeyData)({ accountId: accountId, secretKey: secretKey })];
+                        account = new accounts_1.Account(this.near.connection, accountId);
+                        return [4 /*yield*/, account.getAccessKeys()];
                     case 1:
-                        keyInfo = _a.sent();
-                        console.log('keyInfo instant sign in: ', keyInfo);
-                        keyPerms = keyInfo.permission.FunctionCall;
-                        if (keyPerms) {
+                        allKeys = _a.sent();
+                        pk_1 = (0, core_1.getPubFromSecret)(secretKey);
+                        keyInfoView = allKeys.find(function (_a) {
+                            var public_key = _a.public_key;
+                            return public_key === pk_1;
+                        });
+                        console.log("keyInfoView: ".concat(JSON.stringify(keyInfoView)));
+                        if (keyInfoView) {
                             return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
                         }
                         return [3 /*break*/, 3];

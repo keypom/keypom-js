@@ -9,7 +9,7 @@ import { KeypomTrialModal, setupModal } from '../modal/src';
 import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.types';
 import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { BaseSignInSpecs, FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
-import { TRIAL_ERRORS, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
+import { TRIAL_ERRORS, getPubFromSecret, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
 import { actionCreators, stringifyJsonOrBytes } from '@near-js/transactions';
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
@@ -136,11 +136,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     async signInInstantAccount(accountId, secretKey, moduleId): Promise<Account[]> {
          // Check if the account ID and secret key are valid and sign in accordingly
          try {
-            const keyInfo = await viewAccessKeyData({accountId, secretKey});
-            console.log('keyInfo instant sign in: ', keyInfo)
+            const account = new Account(this.near.connection, accountId);
+            const allKeys = await account.getAccessKeys();
+            const pk = getPubFromSecret(secretKey);
 
-            const keyPerms = keyInfo.permission.FunctionCall;
-            if (keyPerms) {
+            const keyInfoView = allKeys.find(({public_key}) => public_key === pk);
+            console.log(`keyInfoView: ${JSON.stringify(keyInfoView)}`)
+
+            if (keyInfoView) {
                 return this.internalSignIn(accountId, secretKey, moduleId);
             }
         } catch (e) {
