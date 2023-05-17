@@ -9,6 +9,7 @@ const { connect, Near } = require("@near-js/wallet-account");
 
 const keypom = require('../lib');
 const { Account } = require('@near-js/accounts');
+const { parseNearAmount } = require('@near-js/utils');
 const {
     execute,
     initKeypom,
@@ -24,8 +25,8 @@ const {
     addToBalance
 } = keypom;
 
-const NETWORK_ID = 'testnet';
-const funderAccountId = 'foo.benjiman.testnet';
+const NETWORK_ID = 'mainnet';
+const funderAccountId = 'keypom.near';
 const viewAccountId = NETWORK_ID == 'mainnet' ? 'near' : 'testnet';
 
 /// all tests
@@ -59,7 +60,7 @@ test('init', async (t) => {
 test('token drop', async (t) => {
     const wallets = ['mynearwallet', 'herewallet'];
     const dropName = 'My Cool Drop Name';
-    const depositPerUseNEAR = 0.1;
+    const depositPerUseNEAR = 1;
     const numKeys = 1;
     const usesPerKey = 1;
     const masterKey = 'MASTER_KEY';
@@ -78,6 +79,17 @@ test('token drop', async (t) => {
             dropName,
             wallets
         }),
+        fcData: {
+            methods: [[
+                {
+                    receiverId: NETWORK_ID === 'testnet' ? 'v1.social08.testnet' : 'social.near',
+                    methodName: "storage_deposit",
+                    args: JSON.stringify({}),
+                    accountIdField: "account_id",
+                    attachedDeposit: parseNearAmount("0.1")
+                }
+            ]]
+        },
         depositPerUseNEAR,
     });
 
@@ -103,9 +115,9 @@ test('token drop', async (t) => {
 
     const {contractId} = getEnv();
 
-    const baseUrl = NETWORK_ID === 'testnet' ? 'https://testnet.keypom-airfoil.pages.dev/claim' : 'https://keypom.xyz/claim';
+    const baseUrl = NETWORK_ID === 'testnet' ? 'https://testnet.mynearwallet.com/linkdrop' : 'https://localhost:1234/linkdrop';
 
-    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(':')[1]}`);
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}/${sk.split(':')[1]}`);
 
     let stringToWrite = '';
     // Loop through each secret key
@@ -114,113 +126,97 @@ test('token drop', async (t) => {
         stringToWrite += sk + '\n';
         i++;
     }
-    
-    let userBal = await getUserBalance({
-        accountId: funderAccountId
-    });
-    console.log('userBal before: ', userBal);
-    
-    await claim({
-        secretKey: allSecretKeys[0],
-        accountId: 'benjiman.testnet'
-    });
-
-    userBal = await getUserBalance({
-        accountId: funderAccountId
-    });
-    console.log('userBal after: ', userBal);
-
 
     await writeFile(path.resolve(__dirname, 'token_links.json'), stringToWrite);
     
     t.true(true);
 });
 
-// test('NFT drop', async (t) => {
-// 	const wallets = ["mynearwallet", "herewallet"];
-//     const dropName = "My Cool Drop Name";
-//     const depositPerUseNEAR = 0.1;
-//     const numKeys = 50;
-//     const usesPerKey = 1;
-//     const masterKey = "MASTER_KEY";
+test('NFT drop', async (t) => {
+	const wallets = ["mynearwallet", "herewallet"];
+    const dropName = "My Cool Drop Name";
+    const depositPerUseNEAR = 0.1;
+    const numKeys = 50;
+    const usesPerKey = 1;
+    const masterKey = "MASTER_KEY";
     
-//     const nftTitle = "Moon NFT!";
-//     const nftDescription = "A cool NFT for the best dog in the world.";
-//     const nftMediaIPFSHash = "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq";
+    const nftTitle = "Moon NFT!";
+    const nftDescription = "A cool NFT for the best dog in the world.";
+    const nftMediaIPFSHash = "bafybeibwhlfvlytmttpcofahkukuzh24ckcamklia3vimzd4vkgnydy7nq";
 
-//     const {dropId} = await createDrop({
-//         account: fundingAccount,
-//         numKeys: 0,
-//         metadata: JSON.stringify({
-//             dropName,
-//             wallets
-//         }),
-//         config: {
-//             usesPerKey
-//         },
-//         depositPerUseNEAR,
-//         fcData: {
-//             methods: [[
-//                 {
-//                     receiverId: `nft-v2.keypom.${viewAccountId}`,
-//                     methodName: "nft_mint",
-//                     args: "",
-//                     dropIdField: "mint_id",
-//                     accountIdField: "receiver_id",
-//                     attachedDeposit: parseNearAmount("0.008")
-//                 }
-//             ]]
-//         }
-//     })
+    const {dropId} = await createDrop({
+        account: fundingAccount,
+        numKeys: 0,
+        metadata: JSON.stringify({
+            dropName,
+            wallets
+        }),
+        config: {
+            usesPerKey
+        },
+        depositPerUseNEAR,
+        fcData: {
+            methods: [[
+                {
+                    receiverId: `nft-v2.keypom.${viewAccountId}`,
+                    methodName: "nft_mint",
+                    args: "",
+                    dropIdField: "mint_id",
+                    accountIdField: "receiver_id",
+                    attachedDeposit: parseNearAmount("0.008")
+                }
+            ]]
+        }
+    })
 
-//     let allSecretKeys = [];
-//     // Loop through in intervals of 50 until numKeys is reached
-//     let keysAdded = 0;
-//     while (keysAdded < numKeys) {
-//         const keysToAdd = Math.min(50, numKeys - keysAdded);
-//         const {secretKeys, publicKeys} = await generateKeys({
-//             numKeys: keysToAdd,
-//             rootEntropy: `${masterKey}-${dropId}`,
-//             autoMetaNonceStart: keysAdded
-//         })
-//         await addKeys({
-//             account: fundingAccount,
-//             dropId,
-//             publicKeys
-//         })
-//         keysAdded += keysToAdd;
+    let allSecretKeys = [];
+    // Loop through in intervals of 50 until numKeys is reached
+    let keysAdded = 0;
+    while (keysAdded < numKeys) {
+        const keysToAdd = Math.min(50, numKeys - keysAdded);
+        const {secretKeys, publicKeys} = await generateKeys({
+            numKeys: keysToAdd,
+            rootEntropy: `${masterKey}-${dropId}`,
+            autoMetaNonceStart: keysAdded
+        })
+        await addKeys({
+            account: fundingAccount,
+            dropId,
+            publicKeys
+        })
+        keysAdded += keysToAdd;
 
-//         allSecretKeys = allSecretKeys.concat(secretKeys);
-//     }
+        allSecretKeys = allSecretKeys.concat(secretKeys);
+    }
 
-//     await keypom.createNFTSeries({
-//         account: fundingAccount,
-//         dropId,
-//         metadata: {
-//             title: nftTitle,
-//             description: nftDescription,
-//             media: nftMediaIPFSHash
-//         }
-//     });
+    await keypom.createNFTSeries({
+        account: fundingAccount,
+        dropId,
+        metadata: {
+            title: nftTitle,
+            description: nftDescription,
+            media: nftMediaIPFSHash
+        }
+    });
 
-//     const {contractId} = getEnv();
+    const {contractId} = getEnv();
 
-//     const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
+    const baseUrl = NETWORK_ID === "testnet" ? `https://testnet.keypom-airfoil.pages.dev/claim` : `https://keypom.xyz/claim`
 
-//     const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
+    const secretKeysStripped = allSecretKeys.map((sk) => `${baseUrl}/${contractId}#${sk.split(":")[1]}`)
 
-//     let stringToWrite = ""
-//     // Loop through each secret key
-//     var i = 0;
-//     for (const sk of secretKeysStripped) {
-//         stringToWrite += sk + "\n";
-//         i++;
-//     }
+    let stringToWrite = ""
+    // Loop through each secret key
+    var i = 0;
+    for (const sk of secretKeysStripped) {
+        stringToWrite += sk + "\n";
+        i++;
+    }
 
-//     await writeFile(path.resolve(__dirname, `nft_links.json`), stringToWrite);
+    await writeFile(path.resolve(__dirname, `nft_links.json`), stringToWrite);
 
-// 	t.true(true);
-// });
+	t.true(true);
+});
 
 // test('Ticket drops', async (t) => {
 // 	const wallets = ["mynearwallet", "herewallet"];

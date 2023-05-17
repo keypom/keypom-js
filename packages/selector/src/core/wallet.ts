@@ -11,6 +11,7 @@ import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, 
 import { BaseSignInSpecs, FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
 import { TRIAL_ERRORS, getPubFromSecret, initKeypom, isUnclaimedTrialDrop, networks, trialSignAndSendTxns, viewAccessKeyData } from '@keypom/core';
 import { actionCreators, stringifyJsonOrBytes } from '@near-js/transactions';
+import { SUPPORTED_EXT_WALLET_DATA, extSignAndSendTransactions } from './ext_wallets';
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
@@ -161,6 +162,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         let instantSignInData = this.instantSignInSpecs !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
         console.log('instantSignInData: ', instantSignInData)
         if (instantSignInData !== undefined) {
+            if (SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId!][instantSignInData.moduleId] === undefined) {
+                console.warn(`Module ID ${instantSignInData.moduleId} is not supported on ${this.near.connection.networkId}.`)
+                return [];
+            }
+            
             return this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId);
         }
         
@@ -262,27 +268,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 return [FAILED_EXECUTION_OUTCOME];
             }
         } else {
-            const account = new Account(this.near.connection, this.accountId!);
-            for (let i = 0; i < transactions.length; i++) {
-                let txn = transactions[i];
-
-                let mappedActions = txn.actions.map((a) => {
-                    const fcAction = a as FunctionCallAction
-                    return actionCreators.functionCall(
-                        fcAction.params.methodName,
-                        stringifyJsonOrBytes(fcAction.params.args),
-                        fcAction.params.gas,
-                        fcAction.params.deposit,
-                    )
-                })
-                console.log('txn.actions: ', txn.actions)
-                console.log('mappedActions: ', mappedActions)
-
-                res.push(await account.signAndSendTransaction({
-                    receiverId: txn.receiverId,
-                    actions: mappedActions
-                }));
-            }
+            return await extSignAndSendTransactions({
+                transactions,
+                moduleId: this.moduleId!,
+                accountId: this.accountId!,
+                secretKey: this.secretKey!,
+                near: this.near
+            })
         }
         console.log('res sign & send txn: ', res)
         return res;

@@ -61,7 +61,7 @@ var modal_types_1 = require("../modal/src/lib/modal.types");
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
 var core_1 = require("@keypom/core");
-var transactions_1 = require("@near-js/transactions");
+var ext_wallets_1 = require("./ext_wallets");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
         var signInContractId = _a.signInContractId, networkId = _a.networkId, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, modalOptions = _a.modalOptions;
@@ -211,6 +211,10 @@ var KeypomWallet = /** @class */ (function () {
                         instantSignInData = this.instantSignInSpecs !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs) : undefined;
                         console.log('instantSignInData: ', instantSignInData);
                         if (instantSignInData !== undefined) {
+                            if (ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId][instantSignInData.moduleId] === undefined) {
+                                console.warn("Module ID ".concat(instantSignInData.moduleId, " is not supported on ").concat(this.near.connection.networkId, "."));
+                                return [2 /*return*/, []];
+                            }
                             return [2 /*return*/, this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId)];
                         }
                         trialData = this.trialAccountSpecs !== undefined ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs) : undefined;
@@ -284,18 +288,18 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signAndSendTransactions = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var transactions, res, e_5, account, i, txn, mappedActions, _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var transactions, res, e_5;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         console.log('sign and send txns params inner: ', params);
                         this.assertSignedIn();
                         transactions = params.transactions;
                         res = [];
                         if (!(this.moduleId === types_1.KEYPOM_MODULE_ID)) return [3 /*break*/, 5];
-                        _c.label = 1;
+                        _a.label = 1;
                     case 1:
-                        _c.trys.push([1, 3, , 4]);
+                        _a.trys.push([1, 3, , 4]);
                         if (!this.trialAccountSpecs.isMappingAccount) {
                             (0, selector_utils_1.addUserToMappingContract)(this.accountId, this.secretKey);
                         }
@@ -305,10 +309,10 @@ var KeypomWallet = /** @class */ (function () {
                                 txns: transactions
                             })];
                     case 2:
-                        res = _c.sent();
+                        res = _a.sent();
                         return [3 /*break*/, 4];
                     case 3:
-                        e_5 = _c.sent();
+                        e_5 = _a.sent();
                         console.log("e: ".concat(JSON.stringify(e_5)));
                         switch (e_5) {
                             case core_1.TRIAL_ERRORS.EXIT_EXPECTED: {
@@ -335,32 +339,16 @@ var KeypomWallet = /** @class */ (function () {
                             }
                         }
                         return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
-                    case 4: return [3 /*break*/, 9];
-                    case 5:
-                        account = new accounts_1.Account(this.near.connection, this.accountId);
-                        i = 0;
-                        _c.label = 6;
-                    case 6:
-                        if (!(i < transactions.length)) return [3 /*break*/, 9];
-                        txn = transactions[i];
-                        mappedActions = txn.actions.map(function (a) {
-                            var fcAction = a;
-                            return transactions_1.actionCreators.functionCall(fcAction.params.methodName, (0, transactions_1.stringifyJsonOrBytes)(fcAction.params.args), fcAction.params.gas, fcAction.params.deposit);
-                        });
-                        console.log('txn.actions: ', txn.actions);
-                        console.log('mappedActions: ', mappedActions);
-                        _b = (_a = res).push;
-                        return [4 /*yield*/, account.signAndSendTransaction({
-                                receiverId: txn.receiverId,
-                                actions: mappedActions
-                            })];
+                    case 4: return [3 /*break*/, 7];
+                    case 5: return [4 /*yield*/, (0, ext_wallets_1.extSignAndSendTransactions)({
+                            transactions: transactions,
+                            moduleId: this.moduleId,
+                            accountId: this.accountId,
+                            secretKey: this.secretKey,
+                            near: this.near
+                        })];
+                    case 6: return [2 /*return*/, _a.sent()];
                     case 7:
-                        _b.apply(_a, [_c.sent()]);
-                        _c.label = 8;
-                    case 8:
-                        i++;
-                        return [3 /*break*/, 6];
-                    case 9:
                         console.log('res sign & send txn: ', res);
                         return [2 /*return*/, res];
                 }

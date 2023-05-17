@@ -6,6 +6,7 @@ const { UnencryptedFileSystemKeyStore } = require("@near-js/keystores-node");
 const { Account } = require('@near-js/accounts');
 const { connect, Near } = require("@near-js/wallet-account");
 const { initKeypom, createTrialAccountDrop, generateKeys } = require('@keypom/core');
+const { parseNearAmount } = require('@near-js/utils');
 
 const funderAccountId = 'benjiman.testnet';
 const NETWORK_ID = 'testnet';
@@ -26,7 +27,7 @@ async function createTrialAccount() {
     };  
 
     let near = new Near(nearConfig);
-    fundingAccount = new Account(near.connection, funderAccountId);
+    const fundingAccount = new Account(near.connection, funderAccountId);
 
 	// Initialize the SDK and point it to the custom NEAR object that was created.
     await initKeypom({
@@ -86,7 +87,7 @@ async function createTrialAccount() {
         numKeys: 1
     })
 
-    await fundingAccount.addKey(res.publicKeys[0], callableContracts[0], 'add_message');
+    await fundingAccount.addKey(res.publicKeys[0], callableContracts[0], '', parseNearAmount('0.0001'));
 
     console.log(`
 

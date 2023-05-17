@@ -165,6 +165,9 @@ importers:
       bn.js:
         specifier: ^5.2.1
         version: 5.2.1
+      borsh:
+        specifier: ^0.7.0
+        version: 0.7.0
     devDependencies:
       '@near-js/accounts':
         specifier: ^0.1.3

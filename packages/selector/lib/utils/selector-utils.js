@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
+exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.keyHasPermissionForTransaction = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
 var core_1 = require("@keypom/core");
 var utils_1 = require("@near-js/utils");
 exports.KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
@@ -71,6 +71,40 @@ var getAccountFromMap = function (secretKey) { return __awaiter(void 0, void 0, 
     });
 }); };
 exports.getAccountFromMap = getAccountFromMap;
+/**
+ * Check if given access key allows the function call or method attempted in transaction
+ * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items
+ * @param receiverId The NEAR account attempting to have access
+ * @param actions The action(s) needed to be checked for access
+ */
+var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) { return __awaiter(void 0, void 0, void 0, function () {
+    var permission, _a, allowedReceiverId, allowedMethods, allowed, _i, actions_1, action, functionCall;
+    return __generator(this, function (_b) {
+        console.log('accessKey: ', accessKey);
+        permission = accessKey.permission;
+        if (permission === 'FullAccess') {
+            return [2 /*return*/, true];
+        }
+        if (permission.FunctionCall) {
+            _a = permission.FunctionCall, allowedReceiverId = _a.receiver_id, allowedMethods = _a.method_names;
+            if (allowedReceiverId === receiverId) {
+                allowed = true;
+                for (_i = 0, actions_1 = actions; _i < actions_1.length; _i++) {
+                    action = actions_1[_i];
+                    functionCall = action.functionCall;
+                    if (!(functionCall && (!functionCall.deposit || functionCall.deposit.toString() === '0') && // TODO: Should support charging amount smaller than allowance?
+                        (allowedMethods.length === 0 || allowedMethods.includes(functionCall.methodName)))) {
+                        allowed = false;
+                        break;
+                    }
+                }
+                return [2 /*return*/, allowed];
+            }
+        }
+        return [2 /*return*/, false];
+    });
+}); };
+exports.keyHasPermissionForTransaction = keyHasPermissionForTransaction;
 var addUserToMappingContract = function (accountId, secretKey) { return __awaiter(void 0, void 0, void 0, function () {
     var accountIdFromMapping;
     return __generator(this, function (_a) {
