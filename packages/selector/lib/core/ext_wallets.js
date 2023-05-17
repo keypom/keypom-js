@@ -36,13 +36,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
+exports.nearWalletFAKSigning = exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
 var core_1 = require("@keypom/core");
 var accounts_1 = require("@near-js/accounts");
 var crypto_1 = require("@near-js/crypto");
 var transactions_1 = require("@near-js/transactions");
 var borsh_1 = require("borsh");
 var selector_utils_1 = require("../utils/selector-utils");
+var types_1 = require("./types");
 exports.SUPPORTED_EXT_WALLET_DATA = {
     "testnet": {
         "near-wallet": {
@@ -69,7 +70,7 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
 var extSignAndSendTransactions = function (_a) {
     var transactions = _a.transactions, moduleId = _a.moduleId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, account, i, txn, mappedActions, pk, transaction, accessKey, canExecuteTxn, _b, _c, e_1, currentUrl, baseUrl, newUrl;
+        var fakRequiredTxns, responses, account, i, txn, mappedActions, pk, transaction, accessKey, canExecuteTxn, _b, _c, e_1;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
@@ -125,15 +126,18 @@ var extSignAndSendTransactions = function (_a) {
                     return [3 /*break*/, 1];
                 case 11:
                     if (fakRequiredTxns.length > 0) {
-                        currentUrl = new URL(window.location.href);
-                        baseUrl = exports.SUPPORTED_EXT_WALLET_DATA[near.connection.networkId][moduleId].baseUrl;
-                        newUrl = new URL('sign', baseUrl);
-                        newUrl.searchParams.set('transactions', fakRequiredTxns
-                            .map(function (transaction) { return (0, borsh_1.serialize)(transactions_1.SCHEMA, transaction); })
-                            .map(function (serialized) { return Buffer.from(serialized).toString('base64'); })
-                            .join(','));
-                        newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                        window.location.assign(newUrl.toString());
+                        switch (moduleId) {
+                            case 'my-near-wallet':
+                            case 'near-wallet':
+                                (0, exports.nearWalletFAKSigning)(fakRequiredTxns, near.config.networkId, moduleId);
+                                break;
+                            case 'sweat-wallet':
+                                console.warn('Sweat wallet does not support FAK signing yet');
+                                return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
+                            default:
+                                console.warn('Unsupported wallet module: ', moduleId);
+                                return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
+                        }
                     }
                     return [2 /*return*/, responses];
             }
@@ -141,3 +145,15 @@ var extSignAndSendTransactions = function (_a) {
     });
 };
 exports.extSignAndSendTransactions = extSignAndSendTransactions;
+var nearWalletFAKSigning = function (transactions, networkId, moduleId) {
+    var currentUrl = new URL(window.location.href);
+    var baseUrl = exports.SUPPORTED_EXT_WALLET_DATA[networkId][moduleId].baseUrl;
+    var newUrl = new URL('sign', baseUrl);
+    newUrl.searchParams.set('transactions', transactions
+        .map(function (transaction) { return (0, borsh_1.serialize)(transactions_1.SCHEMA, transaction); })
+        .map(function (serialized) { return Buffer.from(serialized).toString('base64'); })
+        .join(','));
+    newUrl.searchParams.set('callbackUrl', currentUrl.href);
+    window.location.assign(newUrl.toString());
+};
+exports.nearWalletFAKSigning = nearWalletFAKSigning;

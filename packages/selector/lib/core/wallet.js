@@ -51,6 +51,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeypomWallet = void 0;
+var core_1 = require("@keypom/core");
 var accounts_1 = require("@near-js/accounts");
 var crypto_1 = require("@near-js/crypto");
 var keystores_browser_1 = require("@near-js/keystores-browser");
@@ -59,9 +60,8 @@ var bn_js_1 = __importDefault(require("bn.js"));
 var src_1 = require("../modal/src");
 var modal_types_1 = require("../modal/src/lib/modal.types");
 var selector_utils_1 = require("../utils/selector-utils");
-var types_1 = require("./types");
-var core_1 = require("@keypom/core");
 var ext_wallets_1 = require("./ext_wallets");
+var types_1 = require("./types");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
         var signInContractId = _a.signInContractId, networkId = _a.networkId, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, modalOptions = _a.modalOptions;

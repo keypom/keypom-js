@@ -1,11 +1,13 @@
-import { getPubFromSecret, convertBasicTransaction } from '@keypom/core';
+import { convertBasicTransaction, getPubFromSecret } from '@keypom/core';
 import { Account } from '@near-js/accounts';
 import { PublicKey } from '@near-js/crypto';
-import { SCHEMA, actionCreators, stringifyJsonOrBytes, Transaction } from '@near-js/transactions';
+import { SCHEMA, Transaction, actionCreators, stringifyJsonOrBytes } from '@near-js/transactions';
 import { Near } from '@near-js/wallet-account';
 import { FinalExecutionOutcome, FunctionCallAction, Transaction as wsTransaction } from '@near-wallet-selector/core';
-import { baseDecode, serialize } from 'borsh';
+import { serialize } from 'borsh';
 import { keyHasPermissionForTransaction } from '../utils/selector-utils';
+import { FAILED_EXECUTION_OUTCOME } from './types';
+
 
 export const SUPPORTED_EXT_WALLET_DATA = {
     "testnet": {
@@ -95,18 +97,33 @@ export const extSignAndSendTransactions = async ({ transactions, moduleId, accou
     }
 
     if(fakRequiredTxns.length > 0) {
-        const currentUrl = new URL(window.location.href);
-        const baseUrl = SUPPORTED_EXT_WALLET_DATA[near.connection.networkId][moduleId].baseUrl;
-        const newUrl = new URL('sign', baseUrl);
-    
-        newUrl.searchParams.set('transactions', fakRequiredTxns
-            .map(transaction => serialize(SCHEMA, transaction))
-            .map(serialized => Buffer.from(serialized).toString('base64'))
-            .join(','));
-        newUrl.searchParams.set('callbackUrl', currentUrl.href);
-    
-        window.location.assign(newUrl.toString());
+        switch (moduleId) {
+            case 'my-near-wallet':
+            case 'near-wallet':
+                nearWalletFAKSigning(fakRequiredTxns, near.config.networkId, moduleId)
+                break;
+            case 'sweat-wallet':
+                console.warn('Sweat wallet does not support FAK signing yet')
+                return [FAILED_EXECUTION_OUTCOME]
+            default:
+                console.warn('Unsupported wallet module: ', moduleId)
+                return [FAILED_EXECUTION_OUTCOME]
+        }
     }
 
     return responses;
+}
+
+export const nearWalletFAKSigning = (transactions, networkId, moduleId) => {
+    const currentUrl = new URL(window.location.href);
+    const baseUrl = SUPPORTED_EXT_WALLET_DATA[networkId][moduleId].baseUrl;
+    const newUrl = new URL('sign', baseUrl);
+
+    newUrl.searchParams.set('transactions', transactions
+        .map(transaction => serialize(SCHEMA, transaction))
+        .map(serialized => Buffer.from(serialized).toString('base64'))
+        .join(','));
+    newUrl.searchParams.set('callbackUrl', currentUrl.href);
+
+    window.location.assign(newUrl.toString());
 }
