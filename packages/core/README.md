@@ -10,13 +10,13 @@
 
 <p align="center">
   <a aria-label="Made by Ben Kurrek" href="https://github.com/BenKurrek">
-    <img src="https://img.shields.io/badge/MADE%20BY%20Ben%20Kurrek-000000.svg?style=for-the-badge">
+    <img src="https://img.shields.io/badge/MADE%20BY-Ben%20Kurrek-000000.svg?style=for-the-badge">
   </a>
   <a aria-label="Made by Matt Lockyer" href="https://github.com/mattlockyer">
-    <img src="https://img.shields.io/badge/MADE%20BY%20Matt%20Lockyer-000000.svg?style=for-the-badge">
+    <img src="https://img.shields.io/badge/MADE%20BY-Matt%20Lockyer-000000.svg?style=for-the-badge">
   </a>
   <a aria-label="License" href="https://github.com/vercel/next.js/blob/canary/license.md">
-    <img alt="" src="https://img.shields.io/npm/l/next.svg?style=for-the-badge&labelColor=000000">
+    <img alt="" src="https://img.shields.io/badge/License-GNU%20GPL-green?style=for-the-badge">
   </a>
   <a aria-label="Join the community on GitHub" href="https://github.com/vercel/next.js/discussions">
     <img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&logo=Next.js&labelColor=000000&logoWidth=20">
