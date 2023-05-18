@@ -15,11 +15,11 @@
   <a aria-label="Made by Matt Lockyer" href="https://github.com/mattlockyer">
     <img src="https://img.shields.io/badge/MADE%20BY-Matt%20Lockyer-000000.svg?style=for-the-badge">
   </a>
-  <a aria-label="License" href="https://github.com/vercel/next.js/blob/canary/license.md">
+  <a aria-label="License" href="https://github.com/keypom/keypom-js/blob/main/LICENSE">
     <img alt="" src="https://img.shields.io/badge/License-GNU%20GPL-green?style=for-the-badge">
   </a>
-  <a aria-label="Join the community on GitHub" href="https://github.com/vercel/next.js/discussions">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&logo=Next.js&labelColor=000000&logoWidth=20">
+  <a aria-label="Join the community" href="https://t.me/+OqI-cKxQU05lZDIx">
+    <img alt="" src="https://img.shields.io/badge/Join%20The-community-blueviolet.svg?style=for-the-badge">
   </a>
 </p>
 
