@@ -3,11 +3,11 @@ import { BeginTrial } from "./components/BeginTrial";
 import { InsufficientBalance } from "./components/InsufficientBalance";
 import { InvalidActions } from "./components/InvalidActions";
 import { TrialOver } from "./components/TrialOver";
-import { ModalOptions, ModalType, MODAL_TYPE_IDS } from "./modal.types";
+import { ModalCustomizations, ModalType, MODAL_TYPE_IDS } from "./modal.types";
 
 export const renderModalType = (
   modalType: ModalType,
-  options: ModalOptions,
+  options: ModalCustomizations,
   hide: () => void
 ) => {
   switch (modalType.id) {

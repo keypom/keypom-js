@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FAILED_EXECUTION_OUTCOME = void 0;
+exports.KEYPOM_MODULE_ID = exports.FAILED_EXECUTION_OUTCOME = void 0;
 exports.FAILED_EXECUTION_OUTCOME = {
     status: {
         Failure: {
@@ -42,3 +42,4 @@ exports.FAILED_EXECUTION_OUTCOME = {
             }
         }]
 };
+exports.KEYPOM_MODULE_ID = 'keypom';

@@ -2,6 +2,6 @@ export { setupModal } from './lib/modal';
 
 export type {
     KeypomTrialModal,
-    ModalOptions,
+    ModalCustomizations,
     Theme
 } from './lib/modal.types';

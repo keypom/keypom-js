@@ -1,12 +1,8 @@
-//import { SignAndSendTransactionOptions } from "@near-api-js/lib/account";
 import {
     BrowserWalletBehaviour,
     Wallet
 } from '@near-wallet-selector/core/lib/wallet/wallet.types';
 import BN from 'bn.js';
-//import * as nearAPI from "near-api-js";
-//import { Account, Near, transactions } from "near-api-js";
-//import { base_decode } from "near-api-js/lib/utils/serialize";
 import { generateSeedPhrase } from 'near-seed-phrase';
 import { assert, isValidAccountObj } from './checks';
 import { getEnv, supportedLinkdropClaimPages } from './keypom';

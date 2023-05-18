@@ -3,7 +3,7 @@ import type {
     WalletBehaviourFactory, WalletModuleFactory
 } from '@near-wallet-selector/core';
 import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
-import { KeypomParams, KeypomWalletInstant } from './types';
+import { KEYPOM_MODULE_ID, KeypomParams, KeypomWalletInstant } from './types';
 import { KeypomWallet } from './wallet';
 
 interface KeypomInitializeOptions {
@@ -13,11 +13,11 @@ interface KeypomInitializeOptions {
 const Keypom: WalletBehaviourFactory<
 	KeypomWalletInstant,
 	KeypomInitializeOptions
-> = async ({ logger, keypomWallet }) => {
+> = async ({ store, logger, keypomWallet }) => {
     // return the wallet interface for wallet-selector
     return {
         get networkId() {
-            return keypomWallet.networkId;
+            return keypomWallet.near.connection.networkId;
         },
         getContractId() {
             return keypomWallet.getContractId();
@@ -90,24 +90,24 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-    trialSplitDelim = '/',
     deprecated = false,
-    trialBaseUrl,
+    trialAccountSpecs,
+    instantSignInSpecs,
     networkId,
     signInContractId,
     modalOptions
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
-        if (!signInContractId || !networkId || !trialBaseUrl) {
-            console.warn('KeypomWallet: signInContractId, networkId, and trialBaseUrl are required to use the KeypomWallet.');
+        if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
+            console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
             return null;
         }
 		
         const keypomWallet = new KeypomWallet({
             signInContractId,
             networkId,
-            trialBaseUrl,
-            trialSplitDelim,
+            trialAccountSpecs,
+            instantSignInSpecs,
             modalOptions
         });
 
@@ -116,7 +116,7 @@ export function setupKeypom({
         console.log('shouldSignIn: ', shouldSignIn);
 
         return {
-            id: 'keypom',
+            id: KEYPOM_MODULE_ID,
             type: 'instant-link',
             metadata: {
                 name: 'Keypom Account',
