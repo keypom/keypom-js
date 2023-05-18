@@ -1,9 +1,4 @@
 "use strict";
-//import * as nearAPI from "near-api-js";
-// const {
-//     KeyPair,
-//     keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
-// } = nearAPI;
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -20,8 +15,6 @@ const crypto_1 = require("@near-js/crypto");
 const keystores_1 = require("@near-js/keystores");
 const keystores_browser_1 = require("@near-js/keystores-browser");
 const wallet_account_1 = require("@near-js/wallet-account");
-//import { Account, Connection, Near } from "near-api-js";
-//import { KeyStore } from "near-api-js/lib/key_stores";
 const near_seed_phrase_1 = require("near-seed-phrase");
 const checks_1 = require("./checks");
 const keypom_utils_1 = require("./keypom-utils");
@@ -48,6 +41,11 @@ exports.networks = {
         viewAccountId: 'test.near',
     },
 };
+/**
+ * List of supported Keypom contracts that can be used with the SDK.
+ *
+ * @group Keypom SDK Environment
+ */
 exports.supportedKeypomContracts = {
     mainnet: {
         'v1.keypom.near': false,
@@ -65,16 +63,28 @@ exports.supportedKeypomContracts = {
         'keypom.test.near': true,
     },
 };
+/**
+ * Official linkdrop claim pages for wallets and other applications
+ *
+ * @group Keypom SDK Environment
+ */
 exports.supportedLinkdropClaimPages = {
     mainnet: {
         mynearwallet: 'https://app.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY',
         keypom: 'https://keypom.xyz/claim/CONTRACT_ID#SECRET_KEY',
+        meteor: 'https://wallet.meteorwallet.app/linkdrop/CONTRACT_ID/SECRET_KEY'
     },
     testnet: {
         mynearwallet: 'https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY',
         keypom: 'https://testnet.keypom.xyz/claim/CONTRACT_ID#SECRET_KEY',
+        meteor: 'https://wallet.meteorwallet.app/linkdrop/CONTRACT_ID/SECRET_KEY'
     },
 };
+/**
+ * Recovery mapping contracts used to keep track of trial account IDs for given public keys.
+ *
+ * @group Keypom SDK Environment
+ */
 exports.accountMappingContract = {
     mainnet: 'v1.mapping.keypom.near',
     testnet: 'v1.mapping.keypom.testnet',
