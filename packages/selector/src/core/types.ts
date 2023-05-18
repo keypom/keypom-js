@@ -52,17 +52,20 @@ export interface InternalInstantSignInSpecs extends InstantSignInSpecs {
     moduleId?: string;
 }
 
-export interface InstantSignInSpecs extends BaseSignInSpecs {
-    moduleDelimiter: string;
-}
-
-export interface TrialSignInSpecs extends BaseSignInSpecs {
+export interface InternalTrialSignInSpecs extends TrialSignInSpecs {
     isMappingAccount: boolean;
 }
 
-export interface BaseSignInSpecs {
+export interface InstantSignInSpecs {
     baseUrl: string;
     delimiter: string;
+    moduleDelimiter: string;
+}
+
+export interface TrialSignInSpecs {
+    baseUrl: string;
+    delimiter: string;
+    modalOptions: ModalCustomizations;
 }
 
 export interface SignInOptions {
@@ -71,12 +74,6 @@ export interface SignInOptions {
     methodNames?: string[];
 }
 
-// export declare type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-// export interface SignAndSendTransactionsParams {
-//     transactions: Array<Optional<Transaction, 'signerId'>>;
-// }
-
 export interface KeypomInitializeOptions {
     keypomWallet: KeypomWallet
 }
@@ -84,11 +81,8 @@ export interface KeypomInitializeOptions {
 export interface KeypomParams {
     networkId: NetworkId;
     signInContractId: string;
-    trialAccountSpecs: BaseSignInSpecs,
+    trialAccountSpecs: TrialSignInSpecs,
     instantSignInSpecs: InstantSignInSpecs,
-    deprecated?: boolean;
-    trialSplitDelim?: string;
-    modalOptions: ModalCustomizations;
 }
 
 export type KeypomWalletInstant = InstantLinkWallet & {

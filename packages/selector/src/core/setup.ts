@@ -90,12 +90,10 @@ const Keypom: WalletBehaviourFactory<
 };
 
 export function setupKeypom({
-    deprecated = false,
     trialAccountSpecs,
     instantSignInSpecs,
     networkId,
-    signInContractId,
-    modalOptions
+    signInContractId
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
         if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
@@ -107,8 +105,7 @@ export function setupKeypom({
             signInContractId,
             networkId,
             trialAccountSpecs,
-            instantSignInSpecs,
-            modalOptions
+            instantSignInSpecs
         });
 
         // CHECK URL / LOCAL STORAGE TO SEE IF A TRIAL ACCOUNT SHOULD BE SIGNED IN
@@ -122,7 +119,7 @@ export function setupKeypom({
                 name: 'Keypom Account',
                 description: null,
                 iconUrl: '',
-                deprecated,
+                deprecated: false,
                 available: true,
                 contractId: signInContractId,
                 runOnStartup: shouldSignIn,

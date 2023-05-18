@@ -35,13 +35,12 @@ The core package serves as a way to interact with Keypom through a set of easy t
 
 - [Installation](#installation)
 - [Getting Started](#getting-started)
-  - [Initializing the SDK](#initializing-the-sdk)
-  - [View Functions](#view-functions)
-  - [Creating Drops](#creating-drops)
-  - [Claiming Linkdrops](#claiming-linkdrops)
-  - [Deleting Keys and Drops](#Deleting-Keys-and-Drops)
-  - [Account Balances for Smooth UX](#Account-Balances-for-Smooth-UX)
-  - [Utility Functions](#Utility-Functions)
+  - [View Methods & Utility Functions Only](#view-methods--utility-functions-only)
+  - [Funder Object](#funder-object)
+  - [Customized KeyStore & Multiple Signers](#customized-keystore--multiple-signers)
+- [Costs](#costs)
+    - [Per Drop](#per-drop)
+    - [Per Key](#per-key)
 - [Contributing](#contributing)
 
 </details>
