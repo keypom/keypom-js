@@ -47,7 +47,6 @@ var getLocalStorageKeypomEnv = function () {
 exports.getLocalStorageKeypomEnv = getLocalStorageKeypomEnv;
 var setLocalStorageKeypomEnv = function (jsonData) {
     var dataToWrite = JSON.stringify(jsonData);
-    console.log('dataToWrite: ', dataToWrite);
     localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"), dataToWrite);
 };
 exports.setLocalStorageKeypomEnv = setLocalStorageKeypomEnv;
@@ -172,14 +171,9 @@ var parseInstantSignInUrl = function (instantSignInSpecs) {
     // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
     var regex = new RegExp("(.*)".concat(delimiter, "(.*)").concat(moduleDelimiter, "(.*)"));
     var matches = signInInfo.match(regex);
-    console.log('matches: ', matches);
     var accountId = matches === null || matches === void 0 ? void 0 : matches[1];
-    console.log('accountId: ', accountId);
-    console.log('accountId: ', accountId);
     var secretKey = matches === null || matches === void 0 ? void 0 : matches[2];
-    console.log('secretKey: ', secretKey);
     var moduleId = matches === null || matches === void 0 ? void 0 : matches[3];
-    console.log('moduleId: ', moduleId);
     if (!accountId || !secretKey || !moduleId) {
         return;
     }

@@ -60,66 +60,6 @@ const Keypom: WalletBehaviourFactory<
         },
 
         async signIn() {
-            const modules = store.getState().modules;
-            const selectedModule = (modules.filter((m) => m.id === 'my-near-wallet'))[0];
-            const wallet = await selectedModule.wallet();
-            // wallet.signIn({
-            //     /**
-            //      * Account ID of the Smart Contract.
-            //      */
-            //     contractId: "foo",
-            //     /**
-            //      * Specify limited access to particular methods on the Smart Contract.
-            //      */
-            //     methodNames: ["foo"],
-            //     accounts: []
-            // });
-
-            // wallet.signAndSendTransaction(
-            //     {
-            //             receiverId: "nft-v2.keypom.testnet",
-            //             actions: [
-            //                 {
-            //                     type: 'FunctionCall',
-            //                     params: {
-            //                         methodName: 'nft_mint',
-            //                         args: {
-            //                             token_id: 'tokenId-keypom-1',
-            //                             receiver_id: 'foo.testnet',
-            //                             metadata: {
-            //                                 title: 'test1',
-            //                                 description: 'test1',
-            //                                 media: 'test1',
-            //                             }
-            //                         },
-            //                         gas: '30000000000000',
-            //                         deposit: "0"
-            //                     },
-            //                 },
-            //                 {
-            //                     type: 'FunctionCall',
-            //                     params: {
-            //                         methodName: 'nft_mint',
-            //                         args: {
-            //                             token_id: 'tokenId-keypom-2',
-            //                             receiver_id: 'foo.testnet',
-            //                             metadata: {
-            //                                 title: 'test2',
-            //                                 description: 'test2',
-            //                                 media: 'test2',
-            //                             }
-            //                         },
-            //                         gas: '30000000000000',
-            //                         deposit: "0"
-            //                     },
-            //                 },
-            //             ],
-            //         }
-            //      )
-
-            console.log('selectedModule: ', selectedModule)
-
-            console.log('modules in sign in: ', modules)
             logger.log('Keypom:signIn');
             return await keypomWallet.signIn();
         },

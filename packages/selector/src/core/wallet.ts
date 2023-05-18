@@ -39,7 +39,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         instantSignInSpecs?: InstantSignInSpecs;
         modalOptions: ModalCustomizations;
     }) {
-        console.log('Keypom constructor called.');
+        console.log('Initializing Keypom');
         this.signInContractId = signInContractId;
 
         this.keyStore = new BrowserLocalStorageKeyStore();
@@ -60,7 +60,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.instantSignInSpecs = instantSignInSpecs;
         
         this.modal = setupModal(modalOptions);
-        console.log('finished constructor');
     }
 
     getContractId(): string {
@@ -111,7 +110,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // Check if the account ID and secret key are valid and sign in accordingly
         try {
             const keyInfo = await viewAccessKeyData({accountId, secretKey});
-            console.log('keyInfo trial accounts: ', keyInfo)
 
             const keyPerms = keyInfo.permission.FunctionCall;
             // Check if accountKeys's length is 1 and it has a `public_key` field
@@ -141,7 +139,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             const pk = getPubFromSecret(secretKey);
 
             const keyInfoView = allKeys.find(({public_key}) => public_key === pk);
-            console.log(`keyInfoView: ${JSON.stringify(keyInfoView)}`)
 
             if (keyInfoView) {
                 return this.internalSignIn(accountId, secretKey, moduleId);
@@ -170,14 +167,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
         
         let trialData = this.trialAccountSpecs !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
-        console.log('trialData: ', trialData)
         if (trialData !== undefined) {
             return this.signInTrialAccount(trialData.accountId, trialData.secretKey);
         }
 
         // If the URL doesn't match the instant sign in or the trial data, resort to local storage.
         const curEnvData = getLocalStorageKeypomEnv();
-        console.log('trial info invalid. Cur env data: ', curEnvData);
 
         // If there is any data in local storage, default to that otherwise return empty array
         if (curEnvData !== null) {

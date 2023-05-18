@@ -12,7 +12,6 @@ export const getLocalStorageKeypomEnv = () => {
 
 export const setLocalStorageKeypomEnv = (jsonData) => {
     const dataToWrite = JSON.stringify(jsonData);
-    console.log('dataToWrite: ', dataToWrite);
 
     localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 };
@@ -141,14 +140,9 @@ export const parseInstantSignInUrl = (instantSignInSpecs: InstantSignInSpecs) =>
     // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
     const regex = new RegExp(`(.*)${delimiter}(.*)${moduleDelimiter}(.*)`);
     const matches = signInInfo.match(regex);
-    console.log('matches: ', matches)
     const accountId = matches?.[1];
-    console.log('accountId: ', accountId)
-    console.log('accountId: ', accountId)
     const secretKey = matches?.[2];
-    console.log('secretKey: ', secretKey)
     const moduleId = matches?.[3];
-    console.log('moduleId: ', moduleId)
 
     if (!accountId || !secretKey || !moduleId) {
         return;

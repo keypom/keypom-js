@@ -76,7 +76,7 @@ var KeypomWallet = /** @class */ (function () {
             var trialData = _this.trialAccountSpecs !== undefined ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs) : undefined;
             return instantSignInData !== undefined || trialData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null;
         };
-        console.log('Keypom constructor called.');
+        console.log('Initializing Keypom');
         this.signInContractId = signInContractId;
         this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
@@ -87,7 +87,6 @@ var KeypomWallet = /** @class */ (function () {
         this.trialAccountSpecs = trialSpecs;
         this.instantSignInSpecs = instantSignInSpecs;
         this.modal = (0, src_1.setupModal)(modalOptions);
-        console.log('finished constructor');
     }
     KeypomWallet.prototype.getContractId = function () {
         return this.signInContractId;
@@ -146,7 +145,6 @@ var KeypomWallet = /** @class */ (function () {
                         return [4 /*yield*/, (0, core_1.viewAccessKeyData)({ accountId: accountId, secretKey: secretKey })];
                     case 8:
                         keyInfo = _a.sent();
-                        console.log('keyInfo trial accounts: ', keyInfo);
                         keyPerms = keyInfo.permission.FunctionCall;
                         if (!(keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute'))) return [3 /*break*/, 10];
                         return [4 /*yield*/, (0, selector_utils_1.addUserToMappingContract)(accountId, secretKey)];
@@ -184,7 +182,6 @@ var KeypomWallet = /** @class */ (function () {
                             var public_key = _a.public_key;
                             return public_key === pk_1;
                         });
-                        console.log("keyInfoView: ".concat(JSON.stringify(keyInfoView)));
                         if (keyInfoView) {
                             return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
                         }
@@ -218,12 +215,10 @@ var KeypomWallet = /** @class */ (function () {
                             return [2 /*return*/, this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId)];
                         }
                         trialData = this.trialAccountSpecs !== undefined ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs) : undefined;
-                        console.log('trialData: ', trialData);
                         if (trialData !== undefined) {
                             return [2 /*return*/, this.signInTrialAccount(trialData.accountId, trialData.secretKey)];
                         }
                         curEnvData = (0, selector_utils_1.getLocalStorageKeypomEnv)();
-                        console.log('trial info invalid. Cur env data: ', curEnvData);
                         // If there is any data in local storage, default to that otherwise return empty array
                         if (curEnvData !== null) {
                             _a = JSON.parse(curEnvData), accountId = _a.accountId, secretKey = _a.secretKey, moduleId = _a.moduleId;
