@@ -1,8 +1,7 @@
 <p align="center">
-  <a href="https://nextjs.org">
+  <a href="https://docs.keypom.xyz/">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://bafybeibr5uoixk6ywwlacntniyuepkb4bedwgghtstg3q3vusp6u6z5a6q.ipfs.nftstorage.link/">
-      <img src="https://bafybeibdwgbvcn7jtxulbqdram6uf52nypyruacobzb2vja3zlgdlvl3nu.ipfs.nftstorage.link/" height="128">
+      <img src="https://cloudflare-ipfs.com/ipfs/bafybeightypuoqly32gsrivh4efckhdv6wsefiynpnonlem6ts3ypgdm7e" height="128">
     </picture>
     <h1 align="center">Keypom Core SDK</h1>
   </a>
