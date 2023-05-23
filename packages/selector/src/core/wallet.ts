@@ -11,6 +11,10 @@ import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.type
 import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { SUPPORTED_EXT_WALLET_DATA, extSignAndSendTransactions } from './ext_wallets';
 import { FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
+
+const TRIAL_URL_REGEX = new RegExp(`(.*)ACCOUNT_ID(.*)SECRET_KEY`);
+const INSTANT_URL_REGEX = new RegExp(`(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID`);
+
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
@@ -48,16 +52,39 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         let trialSpecs: InternalTrialSignInSpecs | undefined = undefined;
         if (trialAccountSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            const matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
+            const baseUrl = matches?.[1]!;
+            const delimiter = matches?.[2]!;
+
             trialSpecs = {
                 ...trialAccountSpecs,
-                isMappingAccount: false
+                isMappingAccount: false,
+                baseUrl,
+                delimiter
             }
 
             this.modal = setupModal(trialAccountSpecs!.modalOptions);
         }
-
         this.trialAccountSpecs = trialSpecs;
-        this.instantSignInSpecs = instantSignInSpecs;
+
+        let instantSpecs: InternalInstantSignInSpecs | undefined = undefined;
+        if (instantSignInSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            const matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            const baseUrl = matches?.[1]!;
+            const delimiter = matches?.[2]!;
+            const moduleDelimiter = matches?.[3]!;
+
+            instantSpecs = {
+                ...instantSignInSpecs,
+                baseUrl,
+                delimiter,
+                moduleDelimiter
+            }
+        }
+
+        this.instantSignInSpecs = instantSpecs;
     }
 
     getContractId(): string {
@@ -153,7 +180,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             network: this.near.connection.networkId
         });
 
-        let instantSignInData = this.instantSignInSpecs !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
+        let instantSignInData = this.instantSignInSpecs?.baseUrl !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
         console.log('instantSignInData: ', instantSignInData)
         if (instantSignInData !== undefined) {
             if (SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId!][instantSignInData.moduleId] === undefined) {
@@ -164,7 +191,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             return this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId);
         }
         
-        let trialData = this.trialAccountSpecs !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
+        let trialData = this.trialAccountSpecs?.baseUrl !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
+        console.log('trialData: ', trialData)
         if (trialData !== undefined) {
             return this.signInTrialAccount(trialData.accountId, trialData.secretKey);
         }
@@ -278,8 +306,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     };
 
     public checkValidTrialInfo = () => {
-        let instantSignInData = this.instantSignInSpecs !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
-        let trialData = this.trialAccountSpecs !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
+        let instantSignInData = this.instantSignInSpecs?.baseUrl !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
+        let trialData = this.trialAccountSpecs?.baseUrl !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
         
         return instantSignInData !== undefined || trialData !== undefined || getLocalStorageKeypomEnv() !== null;
     };

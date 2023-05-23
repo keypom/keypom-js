@@ -72,7 +72,7 @@ const selector = await setupWalletSelector({
 
 ## Setup Keypom Parameters
 
-`setupKeypom` is the core of the Keypom wallet selector and is the only function you need to worry about. There are a suite of customizable features that you can make use of to tailor the user experience to your app's needs. At its core, the setup function takes the following parameters:
+`setupKeypom` is the core of the Keypom wallet selector and is the only function you should know about. There are a ton of customizable features that you can make use of to tailor the user experience to your app's needs. At its core, the setup function takes the following parameters:
 
 - `networkId`: Either `testnet` or `mainnet`.
 - `signInContractId`: Which contract will be used to sign in users.
@@ -89,20 +89,65 @@ This technology is perfect for dApps of all sizes ranging from small indie to la
 
 In order to support trial accounts, your app must have the `setupKeypom` function embedded within the wallet selector with the `trialAccountSpecs` parameter specified.
 
+## Trial Account Specs
+
+The trial account specifications allows the Keypom wallet selector to support trial accounts on your app. In order to trigger the sign in flow, the user must be on the correct URL. This URL is specified in the specifications as a string and should look like this:
 
 ```js
-await initKeypom({
-    network: "testnet"
-});
-
-const keys = await generateKeys({
-    numKeys: 1
-})
-console.log('keys: ', keys)
-
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
+https://near.org/#trial-url/ACCOUNT_ID/SECRET_KEY
 ```
+
+The URL *must* have the `ACCOUNT_ID` and `SECRET_KEY` placeholders.
+
+As an example, if you wanted your trial users to sign in once they reached `https://near.org/#trial-url/`, and you wanted the account and secret key to be seperated using `/`, your specs should look like this:
+
+```js
+trialAccountSpecs: {
+    url: "https://near.org/#trial-url/ACCOUNT_ID/SECRET_KEY",
+}
+```
+
+> **NOTE:** The account ID must come first and the secret key must follow the delimiter. For unclaimed trial account linkdrops, the account ID will be the Keypom contract. For claimed trial account linkdrops, the account ID will be the account ID chosen by the user.
+
+### Modal Options
+
+The second field in the trial account specs is the `modalOptions`. This contains all the customizable options for the trial account modals as well as the wallets you want to support for user offboarding.
+
+All of the modal text can be optionally customized but the only *required* field that you must specify in the modal options are the wallets.
+
+These specs are an object that have three mandatory fields:
+- `baseUrl`: The URL of your app. This is the URL that will be used to construct the trial account URL.
+- `delimiter`: The delimiter that separates the base URL from the trial account ID. For example, if the base URL is `https://near.org/#trial-url/` and the delimiter is `/`, the trial account URL will be `https://near.org/#trial-url/<trial-account-id>`.
+- `modalOptions`: An object that contains all the customizable options for the trial account modals. See the [Modal Options](#modal-options) section for more information.
+
+In the following example,
+
+```js
+const NETWORK_ID = "mainnet";
+const CONTRACT_ID = "social.near";
+
+const selector = await setupWalletSelector({
+  network: NETWORK_ID,
+  modules: [
+    setupMyNearWallet(),
+    ...
+    setupSender(),
+    setupKeypom({ 
+        networkId: NETWORK_ID, 
+        signInContractId: CONTRACT_ID,
+        trialAccountSpecs: {
+            baseUrl: "https://near.org/#trial-url/",
+            delimiter: "/",
+            modalOptions: KEYPOM_OPTIONS
+        }
+    })
+  ],
+});
+```
+
+## Offboarding Mechanisms
+
+
 
 ## Funder Object
 

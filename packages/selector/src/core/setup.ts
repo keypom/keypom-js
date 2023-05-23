@@ -100,6 +100,16 @@ export function setupKeypom({
             console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
             return null;
         }
+
+        if (trialAccountSpecs && !(trialAccountSpecs.url.includes('ACCOUNT_ID') || trialAccountSpecs.url.includes('SECRET_KEY'))) {
+            console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url');
+            return null;
+        }
+
+        if (instantSignInSpecs && !(instantSignInSpecs.url.includes('ACCOUNT_ID') || instantSignInSpecs.url.includes('SECRET_KEY'))) {
+            console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID');
+            return null;
+        }
 		
         const keypomWallet = new KeypomWallet({
             signInContractId,

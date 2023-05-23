@@ -44,18 +44,15 @@ export class Wallet {
       modules: [
         setupMyNearWallet({ iconUrl: MyNearIconUrl }),
         setupKeypom({ 
-          trialAccountSpecs: {
-            baseUrl: "http://localhost:1234/trial-url#",
-            delimiter: "/"
-          },
-          instantSignInSpecs: {
-            baseUrl: "http://localhost:1234/instant-url#",
-            delimiter: "/",
-            moduleDelimiter: "/"
-          },
           networkId: this.network, 
           signInContractId: this.createAccessKeyFor,
-          modalOptions: KEYPOM_OPTIONS
+          trialAccountSpecs: {
+            url: "http://localhost:1234/trial-url#ACCOUNT_ID/SECRET_KEY",
+            modalOptions: KEYPOM_OPTIONS
+          },
+          instantSignInSpecs: {
+            url: "http://localhost:1234/instant-url#ACCOUNT_ID/SECRET_KEY",
+          }
         })
       ],
     });

@@ -5,8 +5,7 @@ import { Near } from '@near-js/wallet-account';
 import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/core';
 import BN from 'bn.js';
 import { KeypomTrialModal } from '../modal/src';
-import { ModalCustomizations } from '../modal/src/lib/modal.types';
-import { BaseSignInSpecs, InstantSignInSpecs, InternalInstantSignInSpecs, TrialSignInSpecs } from './types';
+import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs } from './types';
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
@@ -14,15 +13,14 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     signInContractId: string;
     near: Near;
     keyStore: BrowserLocalStorageKeyStore;
-    trialAccountSpecs?: TrialSignInSpecs;
+    trialAccountSpecs?: InternalTrialSignInSpecs;
     instantSignInSpecs?: InternalInstantSignInSpecs;
-    modal: KeypomTrialModal;
-    constructor({ signInContractId, networkId, trialAccountSpecs, instantSignInSpecs, modalOptions }: {
+    modal?: KeypomTrialModal;
+    constructor({ signInContractId, networkId, trialAccountSpecs, instantSignInSpecs, }: {
         signInContractId: string;
         networkId: string;
-        trialAccountSpecs?: BaseSignInSpecs;
+        trialAccountSpecs?: TrialSignInSpecs;
         instantSignInSpecs?: InstantSignInSpecs;
-        modalOptions: ModalCustomizations;
     });
     getContractId(): string;
     getAccountId(): string;

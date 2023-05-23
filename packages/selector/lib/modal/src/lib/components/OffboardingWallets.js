@@ -10,9 +10,14 @@ var OffboardingWallets = function (_a) {
     var customizations = _a.customizations, wallets = _a.wallets, accountId = _a.accountId, secretKey = _a.secretKey;
     function renderOptionsList(walletsToRender) {
         return walletsToRender.reduce(function (result, wallet, index) {
-            var name = wallet.name, description = wallet.description, iconUrl = wallet.iconUrl, baseRedirectUrl = wallet.baseRedirectUrl, _a = wallet.delimiter, delimiter = _a === void 0 ? "/" : _a;
+            var name = wallet.name, description = wallet.description, iconUrl = wallet.iconUrl, redirectUrl = wallet.redirectUrl;
+            var mapObj = {
+                ACCOUNT_ID: accountId,
+                SECRET_KEY: secretKey
+            };
+            var url = redirectUrl.replace(/\b(?:SECRET_KEY|ACCOUNT_ID)\b/gi, function (matched) { return mapObj[matched]; });
             result.push(react_1.default.createElement("li", { tabIndex: 0, className: "single-wallet sidebar ".concat(wallet.name), key: wallet.name, onClick: function () {
-                    window.open("".concat(baseRedirectUrl).concat(accountId).concat(delimiter).concat(secretKey), "_blank");
+                    window.open(url, "_blank");
                 } },
                 react_1.default.createElement("div", { className: "icon" },
                     react_1.default.createElement("img", { src: iconUrl, alt: name })),
