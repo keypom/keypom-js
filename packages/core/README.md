@@ -30,9 +30,7 @@ The core package serves as a way to interact with Keypom through a set of easy t
 - Delete drops and refund assets
 - Manage user balances
 
-<details open="open">
-<summary>Table of Contents</summary>
-
+# Table of Contents
 - [Installation](#installation)
 - [Getting Started](#getting-started)
   - [View Methods & Utility Functions Only](#view-methods--utility-functions-only)
@@ -42,8 +40,6 @@ The core package serves as a way to interact with Keypom through a set of easy t
     - [Per Drop](#per-drop)
     - [Per Key](#per-key)
 - [Contributing](#contributing)
-
-</details>
 
 ---
 

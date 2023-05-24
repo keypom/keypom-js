@@ -26,17 +26,17 @@ The Keypom Wallet Selector is a package that allows apps to be fully compatible 
 - Instant Sign-In [Demo](https://www.youtube.com/watch?v=p_NOcYbRlJw&feature=youtu.be)
 - Trial Account [Demo](https://www.youtube.com/watch?v=p_NOcYbRlJw)
 
-<details open="open">
-<summary>Table of Contents</summary>
-
+# Table of Contents
 - [Installation](#installation)
 - [Getting Started](#getting-started)
     - [Setup Keypom Parameters](#setup-keypom-parameters)
 - [Keypom Trial Accounts](#keypom-trial-accounts)
-- [Instant Sign-In Experiences](#instant-sign-in-experiences)
+    - [Trial Account Specs](#trial-account-specs)
+    - [Modal Options](#modal-options)
+    - [Example Trial Account Integration](#example-trial-account-integration)
+- [Keypom Instant Sign In Experiences](#keypom-instant-sign-in-experiences)
+    - [Instant Sign In Specs](#instant-sign-in-specs)
 - [Contributing](#contributing)
-
-</details>
 
 ---
 
@@ -87,6 +87,8 @@ Keypom Trial Accounts are an exciting new opportunity for Web3 apps to seamlessl
 
 This technology is perfect for dApps of all sizes ranging from small indie to large enterprise applications.
 
+- Trial Account [Demo](https://www.youtube.com/watch?v=p_NOcYbRlJw)
+
 In order to support trial accounts, your app must have the `setupKeypom` function embedded within the wallet selector with the `trialAccountSpecs` parameter specified.
 
 ## Trial Account Specs
@@ -117,7 +119,7 @@ trialAccountSpecs: {
 
 > **NOTE:** The account ID must come first and the secret key must follow the delimiter. For unclaimed trial account linkdrops, the account ID will be the Keypom contract. For claimed trial account linkdrops, the account ID will be the account ID chosen by the user.
 
-### Modal Options
+## Modal Options
 
 The second field in the trial account specs is the `modalOptions`. This contains all the customizable options for the trial account modals as well as the wallets you want to support for user offboarding.
 
@@ -153,13 +155,13 @@ https://app.mynearwallet.com/linkdrop/ACCOUNT_ID/SECRET_KEY
 
 The URL *must* have the `ACCOUNT_ID` and `SECRET_KEY` placeholders.
 
-#### Theme And CSS
+### Theme And CSS
 
 The modal used by Keypom uses the same CSS as the official wallet selector modal behind the scenes. To learn how to customize the theme to match your app, see the selector's [documentation](https://github.com/near/wallet-selector/tree/main/packages/modal-ui#react--vue).
 
 If you only wish to change the theme between light and dark mode, you can pass in a `theme` field in the modal options. This field should be either `light` or `dark`.
 
-#### Modal Text 
+### Modal Text 
 
 In addition to the modal style, you have complete control over the text that is displayed at each stage of the claiming process. To see the default text, see the [Default Text](#modal-default-text) section.
 
@@ -226,17 +228,34 @@ trialOver?: {
 }
 ```
 
+You can change the titles, descriptions, button text / behaviour and more to tailor the experience to your app. Finally, you can change the text for when the user tries to perform an invalid action, or tries to spend more $NEAR than the account has available.
 
-These specs are an object that have three mandatory fields:
-- `baseUrl`: The URL of your app. This is the URL that will be used to construct the trial account URL.
-- `delimiter`: The delimiter that separates the base URL from the trial account ID. For example, if the base URL is `https://near.org/#trial-url/` and the delimiter is `/`, the trial account URL will be `https://near.org/#trial-url/<trial-account-id>`.
-- `modalOptions`: An object that contains all the customizable options for the trial account modals. See the [Modal Options](#modal-options) section for more information.
 
-In the following example,
+## Example Trial Account Integration
+
+In the following example, you'll see how the trial account flow can be fully integrated into an application. The app has the domain `https://example.com` and the trial account modals should show up once the user lands on `https://example.com/trial-accounts`. In addition, the app doesn't want to expose the secret key in their analytics so they'll separate the account ID and secret key using a `#` instead of a `/`.
+
+The app will also support MyNEARWallet offboarding and will change the default text for the landing modal when the trial begins.
 
 ```js
-const NETWORK_ID = "mainnet";
-const CONTRACT_ID = "social.near";
+const NETWORK_ID = "testnet";
+const CONTRACT_ID = "example.near";
+
+export const KEYPOM_OPTIONS = {
+  beginTrial: {
+    landing: {
+      title: "Welcome To My Cool Example App!",
+    },
+  },
+  wallets: [
+    {
+      name: "MyNEARWallet",
+      description: "Secure your account with a Seed Phrase",
+      redirectUrl: "https://testnet.mynearwallet.com/linkdrop/ACCOUNT_ID/SECRET_KEY",
+      iconUrl: "INSERT_ICON_URL_HERE"
+    },
+  ]
+}
 
 const selector = await setupWalletSelector({
   network: NETWORK_ID,
@@ -248,8 +267,7 @@ const selector = await setupWalletSelector({
         networkId: NETWORK_ID, 
         signInContractId: CONTRACT_ID,
         trialAccountSpecs: {
-            baseUrl: "https://near.org/#trial-url/",
-            delimiter: "/",
+            url: "https://example.com/trial-accounts/ACCOUNT_ID#SECRET_KEY",
             modalOptions: KEYPOM_OPTIONS
         }
     })
@@ -257,111 +275,83 @@ const selector = await setupWalletSelector({
 });
 ```
 
-## Offboarding Mechanisms
+# Keypom Instant Sign In Experiences
 
+Instant sign in experiences are a great way to reduce friction for users signing into applications. Currently, the sign in flow for a new user is as follows:
+1. User creates an account.
+2. They navigate to an application.
+3. Sign-in is clicked.
+4. The wallet selector modal is opened and the user needs to scroll to find their wallet.
+5. The user clicks their wallet and is redirected to the wallet's website to approve a transaction.
+6. The user is redirected back to the app and is signed in.
 
+As NEAR pushes to abstract the crypto complexities and jargon away from the end user, this current approach is not scalable. Not only is there a huge amount of clicks and redirects which leads to a loss in conversion, but the user is also expected to know which wallet they own. This is a huge barrier to entry as often times, the wallet logic will be abstracted from the user as seen with SWEAT.
 
-## Funder Object
+The flow that Keypom offers is as follows:
+1. User creates an account.
+2. User clicks discovers an application from their wallet.
+3. User is instantly signed in and can start using the application.
 
-If you have the private key of an account that you'd like to use to sign transactions with, you can pass in a `funder` object to `initKeypom`. The private key can either be hardcoded or passed in through environment variables / secrets.
+This flow is much more seamless and removes all the redirects and wallet selector modal friction.
 
-Using this method, you only need to pass the funder object once on initialization and can freely invoke any of the SDK methods moving forward. To update the funder object, you can call `updateFunder` and pass in different information.
+- Instant Sign-In [Demo](https://www.youtube.com/watch?v=p_NOcYbRlJw&feature=youtu.be)
 
-```js
-await initKeypom({
-    network: "testnet",
-    funder: {
-        accountId: "benji_demo.testnet",
-        secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
-    }
-});
+In order to support instant sign in, your app must have the `setupKeypom` function embedded within the wallet selector with the `instantSignInSpecs` parameter specified.
 
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
+## Instant Sign In Specs
 
-const {keys} = await createDrop({
-    numKeys: 1,
-    depositPerUseNEAR: 1
-})
-console.log('keys: ', keys)
-```
-
-## Customized KeyStore & Multiple Signers
-
-Passing in a custom `near` object when initializing Keypom has several benefits as seen below:
-- If you have multiple accounts that will be signing transactions and don't want to keep calling `updateFunder`.
-- You don't want to hardcode the private key in the `funder` object.
-- You have a keystore containing keys that will be used to sign transactions already in scope.
-
-In this case, you can pass in an existing `near` object and then pass in `Account` objects when calling the SDK methods.
+The instant sign in specifications allows the Keypom wallet selector to support instant sign on experiences for your app. In order to trigger the sign in flow, the user must be on the correct URL. This URL is specified in the specifications as a string and should look like this:
 
 ```js
-let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
-let nearConfig = {
-    networkId: NETWORK_ID,
-    keyStore: keyStore,
-    nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
-    walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
-    helperUrl: `https://helper.${NETWORK_ID}.near.org`,
-    explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
-};  
-let near = new Near(nearConfig);
-
-
-await initKeypom({
-    near
-});
-
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
-
-const fundingAccount = new Account(near.connection, funderAccountId);
-const {keys} = await createDrop({
-    account: fundingAccount,
-    numKeys: 1,
-    depositPerUseNEAR: 1
-})
-console.log('keys: ', keys)
+https://near.org/#trial-url/ACCOUNT_ID/SECRET_KEY/MODULE_ID
 ```
 
-# Costs
+The URL *must* have the `ACCOUNT_ID`, `SECRET_KEY`, and `MODULE_ID` placeholders.
 
-It is important to note that the Keypom contracts are 100% **FEE FREE** and will remain that way for the *forseeable future*. These contracts are a public good and are meant to inspire change in the NEAR ecosystem.
+Behind the scenes, Keypom will take the secret key and use it to sign transactions on behalf of the account whenever they perform an action. Since this key is limited access, there needs to be a way to approve any transaction that requires full access. This is why the `MODULE_ID` field is present. This is the ID of the wallet that the user will be redirected to in order to approve any full access key required transactions.
 
-With that being said, there are several mandatory costs that must be taken into account when using Keypom. These costs are broken down into two categories: per key and per drop.
+Currently, Keypom supports:
+- MyNEARWallet: `my-near-wallet`,
+- NEAR Wallet: `near-wallet`,
+- SWEAT Wallet: `sweat-wallet`
 
-> **NOTE:** Creating an empty drop and then adding 100 keys in separate calls will incur the same cost as creating a drop with 100 keys in the same call.
+As an example, if you wanted to support instant sign in for users once they reached `https://near.org/#instant-url/`, and you wanted the account and secret key to be separated using `#`, but the module ID and secret key to be separated by `/`, your specs should look like this:
 
-## Per Drop
+```js
+instantSignInSpecs: {
+    url: "https://near.org/#instant-url/ACCOUNT_ID#SECRET_KEY/MODULE_ID",
+}
+```
 
-When creating an empty drop, there is only one cost to keep in mind regardless of the drop type:
-- Storage cost (**~0.006 $NEAR** for simple drops)
+> **NOTE:** The account ID must come first followed by the secret key and then finally the module ID.
 
-## Per Key
-Whenever keys are added to a drop (either when the drop is first created or at a later date), the costs are outlined below.
+The wallet selector would then look as follows.
 
-### Key Costs for Simple Drop
+```js
+const selector = await setupWalletSelector({
+  network: NETWORK_ID,
+  modules: [
+    setupMyNearWallet(),
+    ...
+    setupSender(),
+    setupKeypom({ 
+        networkId: NETWORK_ID, 
+        signInContractId: CONTRACT_ID,
+        instantSignInSpecs: {
+            url: "https://near.org/#instant-url/ACCOUNT_ID#SECRET_KEY/MODULE_ID"
+        }
+    })
+  ],
+});
+```
 
-- $NEAR sent whenever the key is used (can be 0).
-- Access key allowance (**~0.0187 $NEAR per use**).
-- Storage for creating access key (**0.001 $NEAR**).
-- Storage cost (**~0.006 $NEAR** for simple drops)
+From this point onwards, any app or wallet could create a limited access key for the contract that your app is using and then redirect the user to your instant sign in URL. An example could be that that account `benjiman.near` wants to use the `near.org` app and the contract being used there is `social.near`. Benji came from MyNEARWallet and so the URL would be:
 
-### Additional Costs for NFT Drops
+```
+https://near.org/#instant-url/benjiman.near#3C6rhKRWLFmho9bQo32EUmk9Ldx47paRSMUdaoR551EtcaNSPziave55HJosi71tfWSRQjjRrL4exfaBi9o7XKUG/my-near-wallet
+```
 
-Since keys aren't registered for use until **after** the contract has received the NFT, we don't know how much storage the token IDs will use on the contract. To combat this, the Keypom contract will automatically measure the storage used up for storing each token ID in the `nft_on_transfer` function and that $NEAR will be taken from the funder's balance.
-
-### Additional Costs for FT Drops
-
-Since accounts claiming FTs may or may not be registered on the Fungible Token contract, Keypom will automatically try to register **all** accounts. This means that the drop creators must front the cost of registering users depending on the `storage_balance_bounds` returned from the FT contract. This applies to every use for every key.
-
-In addition, Keypom must be registered on the FT contract. If you create a FT drop and are the first person to ever do so for a specific FT contract on Keypom, Keypom will be automatically registered when the drop is created. This is a one time cost and once it is done, no other account will need to register Keypom for that specific FT contract.
-
-### Additional Costs for FC Drops
-
-Drop creators have a ton of customization available to them when creation Function Call drops. A cost that they might incur is the attached deposit being sent alongside the function call. Keypom will charge creators for all the attached deposits they specify.
-
-> **NOTE:** The storage costs are dynamically calculated and will vary depending on the information you store on-chain.
+At this point, Benji would be instantly signed into `near.org` and can start using the app. If anything requires a full access key, he would be redirected to MyNEARWallet to approve the transaction and come back.
 
 # Contributing
 
