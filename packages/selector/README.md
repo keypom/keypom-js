@@ -1,7 +1,7 @@
 <p align="center">
   <a href="https://docs.keypom.xyz/">
     <picture>
-      <img src="https://cloudflare-ipfs.com/ipfs/bafybeightypuoqly32gsrivh4efckhdv6wsefiynpnonlem6ts3ypgdm7e" height="128">
+      <img src="https://cloudflare-ipfs.com/ipfs/bafybeightypuoqly32gsrivh4efckhdv6wsefiynpnonlem6ts3ypgdm7e" width="128" />
     </picture>
     <h1 align="center">Keypom Wallet Selector</h1>
   </a>
@@ -9,16 +9,16 @@
 
 <p align="center">
   <a aria-label="Made by Ben Kurrek" href="https://github.com/BenKurrek">
-    <img src="https://img.shields.io/badge/MADE%20BY-Ben%20Kurrek-000000.svg?style=for-the-badge">
+    <img src="https://img.shields.io/badge/MADE%20BY-Ben%20Kurrek-000000.svg?style=for-the-badge" />
   </a>
   <a aria-label="Made by Matt Lockyer" href="https://github.com/mattlockyer">
-    <img src="https://img.shields.io/badge/MADE%20BY-Matt%20Lockyer-000000.svg?style=for-the-badge">
+    <img src="https://img.shields.io/badge/MADE%20BY-Matt%20Lockyer-000000.svg?style=for-the-badge" />
   </a>
   <a aria-label="License" href="https://github.com/keypom/keypom-js/blob/main/LICENSE">
-    <img alt="" src="https://img.shields.io/badge/License-GNU%20GPL-green?style=for-the-badge">
+    <img alt="" src="https://img.shields.io/badge/License-GNU%20GPL-green?style=for-the-badge" />
   </a>
   <a aria-label="Join the community" href="https://t.me/+OqI-cKxQU05lZDIx">
-    <img alt="" src="https://img.shields.io/badge/Join%20The-community-blueviolet.svg?style=for-the-badge">
+    <img alt="" src="https://img.shields.io/badge/Join%20The-community-blueviolet.svg?style=for-the-badge" />
   </a>
 </p>
 
