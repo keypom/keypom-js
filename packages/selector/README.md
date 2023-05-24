@@ -99,11 +99,19 @@ https://near.org/#trial-url/ACCOUNT_ID/SECRET_KEY
 
 The URL *must* have the `ACCOUNT_ID` and `SECRET_KEY` placeholders.
 
-As an example, if you wanted your trial users to sign in once they reached `https://near.org/#trial-url/`, and you wanted the account and secret key to be seperated using `/`, your specs should look like this:
+As an example, if you wanted your trial users to sign in once they reached `https://near.org/#trial-url/`, and you wanted the account and secret key to be separated using `/`, your specs should look like this:
 
 ```js
 trialAccountSpecs: {
     url: "https://near.org/#trial-url/ACCOUNT_ID/SECRET_KEY",
+}
+```
+
+Alternatively, you could swap the `/` delimiter with a `#` instead:
+
+```js
+trialAccountSpecs: {
+    url: "https://near.org/#trial-url/ACCOUNT_ID#SECRET_KEY",
 }
 ```
 
@@ -113,7 +121,111 @@ trialAccountSpecs: {
 
 The second field in the trial account specs is the `modalOptions`. This contains all the customizable options for the trial account modals as well as the wallets you want to support for user offboarding.
 
-All of the modal text can be optionally customized but the only *required* field that you must specify in the modal options are the wallets.
+```js
+export interface ModalCustomizations {
+  wallets: OffboardingWallet[];
+  theme?: Theme;
+  beginTrial?: BeginTrialCustomizations,
+  trialOver?: TrialOverCustomizations,
+  invalidAction?: InvalidActionCustomizations,
+  insufficientBalance?: InsufficientBalanceCustomizations,
+}
+```
+
+#### Wallets
+
+The only required field is `wallets`. This should be a list of valid domains that support trial account offboarding. Each of the wallets in the list will be displayed as a button once the trial is over.
+
+```js
+export interface OffboardingWallet {
+  name: string;
+  description: string;
+  iconUrl: string;
+  redirectUrl: string;
+}
+```
+
+For each wallet, you can specify a name to display, a description, an image (in the form of a URL), and where to redirect the user to once the button is clicked. The redirect URL follows the same format as the trial account URL and should look like this:
+
+```js
+https://app.mynearwallet.com/linkdrop/ACCOUNT_ID/SECRET_KEY
+```
+
+The URL *must* have the `ACCOUNT_ID` and `SECRET_KEY` placeholders.
+
+#### Theme And CSS
+
+The modal used by Keypom uses the same CSS as the official wallet selector modal behind the scenes. To learn how to customize the theme to match your app, see the selector's [documentation](https://github.com/near/wallet-selector/tree/main/packages/modal-ui#react--vue).
+
+If you only wish to change the theme between light and dark mode, you can pass in a `theme` field in the modal options. This field should be either `light` or `dark`.
+
+#### Modal Text 
+
+In addition to the modal style, you have complete control over the text that is displayed at each stage of the claiming process. To see the default text, see the [Default Text](#modal-default-text) section.
+
+For the trial account creation process, there are currently 3 modals that can be customized:
+
+1. Landing page: what the user sees when they first click the link
+
+```bash
+landing?: {
+    title?: string;
+    body?: string;
+    fieldPlaceholder?: string;
+    buttonText?: string;
+    subText?: {
+        landing?: string;
+        invalidAccountId?: string;
+        accountIdTaken?: string;
+        accountIdAvailable?: string;
+    }
+},
+```
+
+2. Claiming: while the account is being created:
+```bash
+claiming?: {
+    title?: string;
+    body?: string;
+},  
+```
+
+3. Claimed: once the account has been created:
+```bash
+claimed?: {
+    title?: string;
+    body?: string;
+    buttonText?: string;
+}
+```
+
+The next stage that can be customized is what the user sees once their trial is over and they need to choose a wallet to offboard to.
+
+```bash
+trialOver?: {
+    mainBody?: {
+        title?: string;
+        body?: string;
+        imageOne?: {
+            title: string;
+            body: string;
+        },
+        imageTwo?: {
+            title: string;
+            body: string;
+        },
+        button?: {
+            url?: string;
+            newTab?: boolean;
+            text?: string;
+        }
+    },
+    offboardingOptions?: {
+        title?: string;
+    }
+}
+```
+
 
 These specs are an object that have three mandatory fields:
 - `baseUrl`: The URL of your app. This is the URL that will be used to construct the trial account URL.
