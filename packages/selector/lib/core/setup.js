@@ -179,7 +179,7 @@ var Keypom = function (_a) {
 };
 function setupKeypom(_a) {
     var _this = this;
-    var _b = _a.deprecated, deprecated = _b === void 0 ? false : _b, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, networkId = _a.networkId, signInContractId = _a.signInContractId, modalOptions = _a.modalOptions;
+    var trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, networkId = _a.networkId, signInContractId = _a.signInContractId;
     return function () { return __awaiter(_this, void 0, void 0, function () {
         var keypomWallet, shouldSignIn;
         var _this = this;
@@ -188,12 +188,19 @@ function setupKeypom(_a) {
                 console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
                 return [2 /*return*/, null];
             }
+            if (trialAccountSpecs && !(trialAccountSpecs.url.includes('ACCOUNT_ID') || trialAccountSpecs.url.includes('SECRET_KEY'))) {
+                console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url');
+                return [2 /*return*/, null];
+            }
+            if (instantSignInSpecs && !(instantSignInSpecs.url.includes('ACCOUNT_ID') || instantSignInSpecs.url.includes('SECRET_KEY'))) {
+                console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID');
+                return [2 /*return*/, null];
+            }
             keypomWallet = new wallet_1.KeypomWallet({
                 signInContractId: signInContractId,
                 networkId: networkId,
                 trialAccountSpecs: trialAccountSpecs,
-                instantSignInSpecs: instantSignInSpecs,
-                modalOptions: modalOptions
+                instantSignInSpecs: instantSignInSpecs
             });
             shouldSignIn = keypomWallet.checkValidTrialInfo();
             console.log('shouldSignIn: ', shouldSignIn);
@@ -204,7 +211,7 @@ function setupKeypom(_a) {
                         name: 'Keypom Account',
                         description: null,
                         iconUrl: '',
-                        deprecated: deprecated,
+                        deprecated: false,
                         available: true,
                         contractId: signInContractId,
                         runOnStartup: shouldSignIn,

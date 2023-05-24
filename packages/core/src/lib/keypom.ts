@@ -1,16 +1,8 @@
-//import * as nearAPI from "near-api-js";
-// const {
-//     KeyPair,
-//     keyStores: { BrowserLocalStorageKeyStore, InMemoryKeyStore },
-// } = nearAPI;
-
 import { Account, Connection } from '@near-js/accounts';
 import { KeyPair } from '@near-js/crypto';
 import { KeyStore, InMemoryKeyStore } from '@near-js/keystores';
 import { BrowserLocalStorageKeyStore } from '@near-js/keystores-browser';
 import { Near } from '@near-js/wallet-account';
-//import { Account, Connection, Near } from "near-api-js";
-//import { KeyStore } from "near-api-js/lib/key_stores";
 import { parseSeedPhrase } from 'near-seed-phrase';
 import {
     assert,
@@ -51,6 +43,11 @@ export const networks = {
     },
 };
 
+/**
+ * List of supported Keypom contracts that can be used with the SDK.
+ * 
+ * @group Keypom SDK Environment
+ */
 export const supportedKeypomContracts = {
     mainnet: {
         'v1.keypom.near': false,
@@ -69,18 +66,30 @@ export const supportedKeypomContracts = {
     },
 };
 
+/**
+ * Official linkdrop claim pages for wallets and other applications
+ * 
+ * @group Keypom SDK Environment
+ */
 export const supportedLinkdropClaimPages = {
     mainnet: {
         mynearwallet: 'https://app.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY',
         keypom: 'https://keypom.xyz/claim/CONTRACT_ID#SECRET_KEY',
+        meteor: 'https://wallet.meteorwallet.app/linkdrop/CONTRACT_ID/SECRET_KEY'
     },
     testnet: {
         mynearwallet:
             'https://testnet.mynearwallet.com/linkdrop/CONTRACT_ID/SECRET_KEY',
         keypom: 'https://testnet.keypom.xyz/claim/CONTRACT_ID#SECRET_KEY',
+        meteor: 'https://wallet.meteorwallet.app/linkdrop/CONTRACT_ID/SECRET_KEY'
     },
 };
 
+/**
+ * Recovery mapping contracts used to keep track of trial account IDs for given public keys.
+ * 
+ * @group Keypom SDK Environment
+ */
 export const accountMappingContract = {
     mainnet: 'v1.mapping.keypom.near',
     testnet: 'v1.mapping.keypom.testnet',

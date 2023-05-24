@@ -62,9 +62,11 @@ var modal_types_1 = require("../modal/src/lib/modal.types");
 var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
 var types_1 = require("./types");
+var TRIAL_URL_REGEX = new RegExp("(.*)ACCOUNT_ID(.*)SECRET_KEY");
+var INSTANT_URL_REGEX = new RegExp("(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var signInContractId = _a.signInContractId, networkId = _a.networkId, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, modalOptions = _a.modalOptions;
+        var signInContractId = _a.signInContractId, networkId = _a.networkId, trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs;
         var _this = this;
         this.showModal = function (modalType) {
             if (modalType === void 0) { modalType = { id: modal_types_1.MODAL_TYPE_IDS.TRIAL_OVER }; }
@@ -72,8 +74,9 @@ var KeypomWallet = /** @class */ (function () {
             _this.modal.show(modalType);
         };
         this.checkValidTrialInfo = function () {
-            var instantSignInData = _this.instantSignInSpecs !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs) : undefined;
-            var trialData = _this.trialAccountSpecs !== undefined ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs) : undefined;
+            var _a, _b;
+            var instantSignInData = ((_a = _this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs) : undefined;
+            var trialData = ((_b = _this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs) : undefined;
             return instantSignInData !== undefined || trialData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null;
         };
         console.log('Initializing Keypom');
@@ -82,11 +85,24 @@ var KeypomWallet = /** @class */ (function () {
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
         var trialSpecs = undefined;
         if (trialAccountSpecs !== undefined) {
-            trialSpecs = __assign(__assign({}, trialAccountSpecs), { isMappingAccount: false });
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            var matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
+            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
+            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
+            trialSpecs = __assign(__assign({}, trialAccountSpecs), { isMappingAccount: false, baseUrl: baseUrl, delimiter: delimiter });
+            this.modal = (0, src_1.setupModal)(trialAccountSpecs.modalOptions);
         }
         this.trialAccountSpecs = trialSpecs;
-        this.instantSignInSpecs = instantSignInSpecs;
-        this.modal = (0, src_1.setupModal)(modalOptions);
+        var instantSpecs = undefined;
+        if (instantSignInSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            var matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
+            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
+            var moduleDelimiter = matches === null || matches === void 0 ? void 0 : matches[3];
+            instantSpecs = __assign(__assign({}, instantSignInSpecs), { baseUrl: baseUrl, delimiter: delimiter, moduleDelimiter: moduleDelimiter });
+        }
+        this.instantSignInSpecs = instantSpecs;
     }
     KeypomWallet.prototype.getContractId = function () {
         return this.signInContractId;
@@ -196,16 +212,17 @@ var KeypomWallet = /** @class */ (function () {
         });
     };
     KeypomWallet.prototype.signIn = function () {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var instantSignInData, trialData, curEnvData, _a, accountId, secretKey, moduleId;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var instantSignInData, trialData, curEnvData, _c, accountId, secretKey, moduleId;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, (0, core_1.initKeypom)({
                             network: this.near.connection.networkId
                         })];
                     case 1:
-                        _b.sent();
-                        instantSignInData = this.instantSignInSpecs !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs) : undefined;
+                        _d.sent();
+                        instantSignInData = ((_a = this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs) : undefined;
                         console.log('instantSignInData: ', instantSignInData);
                         if (instantSignInData !== undefined) {
                             if (ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId][instantSignInData.moduleId] === undefined) {
@@ -214,14 +231,15 @@ var KeypomWallet = /** @class */ (function () {
                             }
                             return [2 /*return*/, this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId)];
                         }
-                        trialData = this.trialAccountSpecs !== undefined ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs) : undefined;
+                        trialData = ((_b = this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs) : undefined;
+                        console.log('trialData: ', trialData);
                         if (trialData !== undefined) {
                             return [2 /*return*/, this.signInTrialAccount(trialData.accountId, trialData.secretKey)];
                         }
                         curEnvData = (0, selector_utils_1.getLocalStorageKeypomEnv)();
                         // If there is any data in local storage, default to that otherwise return empty array
                         if (curEnvData !== null) {
-                            _a = JSON.parse(curEnvData), accountId = _a.accountId, secretKey = _a.secretKey, moduleId = _a.moduleId;
+                            _c = JSON.parse(curEnvData), accountId = _c.accountId, secretKey = _c.secretKey, moduleId = _c.moduleId;
                             return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
                         }
                         return [2 /*return*/, []];

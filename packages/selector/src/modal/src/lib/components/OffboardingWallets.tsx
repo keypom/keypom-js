@@ -25,9 +25,14 @@ export const OffboardingWallets: React.FC<OffboardingWalletsProps> = ({
           name,
           description,
           iconUrl,
-          baseRedirectUrl,
-          delimiter = "/",
+          redirectUrl
         } = wallet;
+
+        const mapObj = {
+          ACCOUNT_ID: accountId,
+          SECRET_KEY: secretKey
+        };
+        const url = redirectUrl.replace(/\b(?:SECRET_KEY|ACCOUNT_ID)\b/gi, matched => mapObj[matched]);
 
         result.push(
           <li
@@ -36,7 +41,7 @@ export const OffboardingWallets: React.FC<OffboardingWalletsProps> = ({
             key={wallet.name}
             onClick={() => {
               window.open(
-                `${baseRedirectUrl}${accountId}${delimiter}${secretKey}`,
+                url,
                 "_blank"
               );
             }}

@@ -20,6 +20,11 @@ export declare const networks: {
         viewAccountId: string;
     };
 };
+/**
+ * List of supported Keypom contracts that can be used with the SDK.
+ *
+ * @group Keypom SDK Environment
+ */
 export declare const supportedKeypomContracts: {
     mainnet: {
         'v1.keypom.near': boolean;
@@ -37,16 +42,28 @@ export declare const supportedKeypomContracts: {
         'keypom.test.near': boolean;
     };
 };
+/**
+ * Official linkdrop claim pages for wallets and other applications
+ *
+ * @group Keypom SDK Environment
+ */
 export declare const supportedLinkdropClaimPages: {
     mainnet: {
         mynearwallet: string;
         keypom: string;
+        meteor: string;
     };
     testnet: {
         mynearwallet: string;
         keypom: string;
+        meteor: string;
     };
 };
+/**
+ * Recovery mapping contracts used to keep track of trial account IDs for given public keys.
+ *
+ * @group Keypom SDK Environment
+ */
 export declare const accountMappingContract: {
     mainnet: string;
     testnet: string;

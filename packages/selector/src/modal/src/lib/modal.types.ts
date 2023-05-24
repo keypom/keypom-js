@@ -64,8 +64,7 @@ export interface OffboardingWallet {
   name: string;
   description: string;
   iconUrl: string;
-  baseRedirectUrl: string;
-  delimiter?: string;
+  redirectUrl: string;
 }
 
 export interface MainBodyImage {

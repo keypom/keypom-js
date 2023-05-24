@@ -16,7 +16,9 @@
     "test:drop-creation": "yarn build && yarn ava:drop-creation",
     "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
     "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
-    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m"
+    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
+
+    "build-docs": "npx typedoc --options typedoc.json"
   },
   "author": "benkurrek, mattlockyer",
   "license": "MIT",

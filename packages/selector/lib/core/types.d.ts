@@ -7,16 +7,21 @@ export declare const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome;
 export declare const KEYPOM_MODULE_ID = "keypom";
 export interface InternalInstantSignInSpecs extends InstantSignInSpecs {
     moduleId?: string;
+    baseUrl?: string;
+    delimiter?: string;
+    moduleDelimiter?: string;
 }
-export interface InstantSignInSpecs extends BaseSignInSpecs {
-    moduleDelimiter: string;
-}
-export interface TrialSignInSpecs extends BaseSignInSpecs {
+export interface InternalTrialSignInSpecs extends TrialSignInSpecs {
     isMappingAccount: boolean;
+    baseUrl?: string;
+    delimiter?: string;
 }
-export interface BaseSignInSpecs {
-    baseUrl: string;
-    delimiter: string;
+export interface InstantSignInSpecs {
+    url: string;
+}
+export interface TrialSignInSpecs {
+    url: string;
+    modalOptions: ModalCustomizations;
 }
 export interface SignInOptions {
     contractId?: string;
@@ -29,11 +34,8 @@ export interface KeypomInitializeOptions {
 export interface KeypomParams {
     networkId: NetworkId;
     signInContractId: string;
-    trialAccountSpecs: BaseSignInSpecs;
-    instantSignInSpecs: InstantSignInSpecs;
-    deprecated?: boolean;
-    trialSplitDelim?: string;
-    modalOptions: ModalCustomizations;
+    trialAccountSpecs?: TrialSignInSpecs;
+    instantSignInSpecs?: InstantSignInSpecs;
 }
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;

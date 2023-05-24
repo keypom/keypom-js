@@ -1,6 +1,6 @@
 import { accountMappingContract, getEnv, getPubFromSecret, supportedKeypomContracts, trialCallMethod, updateKeypomContractId } from '@keypom/core';
 import { parseNearAmount } from '@near-js/utils';
-import { InstantSignInSpecs, TrialSignInSpecs } from '../core/types';
+import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs } from '../core/types';
 import { Action } from '@near-js/transactions';
 
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
@@ -101,18 +101,18 @@ export const updateKeypomContractIfValid = (keypomContractId) => {
     return false;
 };
 
-export const parseTrialUrl = (trialSpecs: TrialSignInSpecs) => {
+export const parseTrialUrl = (trialSpecs: InternalTrialSignInSpecs) => {
     const {baseUrl, delimiter} = trialSpecs;
     console.log(`Parse trial URL with base: ${baseUrl} and delim: ${delimiter}`);
 
-    const split = window.location.href.split(baseUrl);
+    const split = window.location.href.split(baseUrl!);
 
     if (split.length !== 2) {
         return;
     }
 
     const trialInfo = split[1];
-    const [accountId, secretKey] = trialInfo.split(delimiter);
+    const [accountId, secretKey] = trialInfo.split(delimiter!);
 
     if (!accountId || !secretKey) {
         return;
@@ -124,12 +124,12 @@ export const parseTrialUrl = (trialSpecs: TrialSignInSpecs) => {
     };
 };
 
-export const parseInstantSignInUrl = (instantSignInSpecs: InstantSignInSpecs) => {
+export const parseInstantSignInUrl = (instantSignInSpecs: InternalInstantSignInSpecs) => {
     const {baseUrl, delimiter, moduleDelimiter} = instantSignInSpecs;
 
     console.log(`Parse instant sign in URL with base: ${baseUrl} delim: ${delimiter} and module delim: ${moduleDelimiter}`);
 
-    const split = window.location.href.split(baseUrl);
+    const split = window.location.href.split(baseUrl!);
 
     if (split.length !== 2) {
         return;
