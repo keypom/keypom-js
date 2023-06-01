@@ -287,6 +287,7 @@ export const addKeys = async ({
     }
 
     numKeys = publicKeys!.length;
+    assert(numKeys <= 100, 'Cannot add more than 100 keys at once');
     let passwords;
     if (basePassword) {
         assert(numKeys <= 50, 'Cannot add 50 keys at once with passwords');
