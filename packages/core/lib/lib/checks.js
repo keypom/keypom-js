@@ -55,8 +55,9 @@ const assertValidDropConfig = (config) => {
     }
     if (config === null || config === void 0 ? void 0 : config.time) {
         const currentBlockTimestamp = Date.now() * 1e6;
-        (0, exports.assert)((config.time.interval != undefined &&
-            config.time.start != undefined) == false, 'If you want to set a claim interval, you must also set a start timestamp');
+        if (config.time.interval != undefined) {
+            (0, exports.assert)(config.time.start != undefined, 'If you want to set a claim interval, you must also set a start timestamp');
+        }
         (0, exports.assert)((config.time.start || currentBlockTimestamp) >=
             currentBlockTimestamp, 'The start timestamp must be greater than the current block timestamp');
         exports.assert((config.time.end || currentBlockTimestamp) >= currentBlockTimestamp, 'The end timestamp must be greater than the current block timestamp');
