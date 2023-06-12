@@ -215,9 +215,10 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
         publicKeys = keys.publicKeys;
     }
     numKeys = publicKeys.length;
+    (0, checks_1.assert)(numKeys <= 100, 'Cannot add more than 100 keys at once');
     let passwords;
     if (basePassword) {
-        (0, checks_1.assert)(numKeys <= 50, 'Cannot add 50 keys at once with passwords');
+        (0, checks_1.assert)(numKeys <= 50, 'Cannot add more than 50 keys at once with passwords');
         // Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
         passwords = yield (0, keypom_utils_1.generatePerUsePasswords)({
             publicKeys: publicKeys,
