@@ -64,12 +64,12 @@ export const assertValidDropConfig = (config?: ProtocolReturnedDropConfig) => {
 
     if (config?.time) {
         const currentBlockTimestamp = Date.now() * 1e6;
-
-        assert(
-            (config.time.interval != undefined &&
-                config.time.start != undefined) == false,
-            'If you want to set a claim interval, you must also set a start timestamp'
-        );
+        if(config.time.interval != undefined){
+            assert(
+                config.time.start != undefined,
+                'If you want to set a claim interval, you must also set a start timestamp'
+            );
+        }
         assert(
             (config.time.start || currentBlockTimestamp) >=
                 currentBlockTimestamp,

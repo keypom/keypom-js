@@ -347,9 +347,10 @@ export const createDrop = async ({
     }
 
     numKeys = publicKeys!.length;
+    assert(numKeys <= 100, 'Cannot add more than 100 keys at once');
     let passwords;
     if (basePassword) {
-        assert(numKeys <= 50, 'Cannot add 50 keys at once with passwords');
+        assert(numKeys <= 50, 'Cannot add more than 50 keys at once with passwords');
 
         // Generate the passwords with the base password and public keys. By default, each key will have a unique password for all of its uses unless passwordProtectedUses is passed in
         passwords = await generatePerUsePasswords({
