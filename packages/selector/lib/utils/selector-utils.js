@@ -36,9 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.keyHasPermissionForTransaction = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
+exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.parseIPFSDataFromURL = exports.keyHasPermissionForTransaction = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
 var core_1 = require("@keypom/core");
 var utils_1 = require("@near-js/utils");
+var types_1 = require("../core/types");
 exports.KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 var getLocalStorageKeypomEnv = function () {
     var localStorageDataJson = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"));
@@ -104,6 +105,33 @@ var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) {
     });
 }); };
 exports.keyHasPermissionForTransaction = keyHasPermissionForTransaction;
+var parseIPFSDataFromURL = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var split, cid, response, data;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                split = window.location.href.split("?cid=");
+                if (!(split.length > 1)) return [3 /*break*/, 3];
+                cid = split[1];
+                console.log("found CID in URL: ", cid);
+                return [4 /*yield*/, fetch("https://cloudflare-ipfs.com/ipfs/".concat(cid))];
+            case 1:
+                response = _a.sent();
+                return [4 /*yield*/, response.json()];
+            case 2:
+                data = _a.sent();
+                console.log('data: ', data);
+                if ((0, types_1.isKeypomParams)(data)) {
+                    console.log('Successfully parsed Keypom params from URL.');
+                    return [2 /*return*/, data];
+                }
+                console.log('data is not castable to Keypom params: ', data);
+                _a.label = 3;
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.parseIPFSDataFromURL = parseIPFSDataFromURL;
 var addUserToMappingContract = function (accountId, secretKey) { return __awaiter(void 0, void 0, void 0, function () {
     var accountIdFromMapping;
     return __generator(this, function (_a) {
@@ -145,7 +173,8 @@ exports.updateKeypomContractIfValid = updateKeypomContractIfValid;
 var parseTrialUrl = function (trialSpecs) {
     var baseUrl = trialSpecs.baseUrl, delimiter = trialSpecs.delimiter;
     console.log("Parse trial URL with base: ".concat(baseUrl, " and delim: ").concat(delimiter));
-    var split = window.location.href.split(baseUrl);
+    // remove everything after ?cid= in the URL if it's present
+    var split = window.location.href.split("?cid=")[0].split(baseUrl);
     if (split.length !== 2) {
         return;
     }
@@ -163,7 +192,8 @@ exports.parseTrialUrl = parseTrialUrl;
 var parseInstantSignInUrl = function (instantSignInSpecs) {
     var baseUrl = instantSignInSpecs.baseUrl, delimiter = instantSignInSpecs.delimiter, moduleDelimiter = instantSignInSpecs.moduleDelimiter;
     console.log("Parse instant sign in URL with base: ".concat(baseUrl, " delim: ").concat(delimiter, " and module delim: ").concat(moduleDelimiter));
-    var split = window.location.href.split(baseUrl);
+    // remove everything after ?cid= in the URL if it's present
+    var split = window.location.href.split("?cid=")[0].split(baseUrl);
     if (split.length !== 2) {
         return;
     }

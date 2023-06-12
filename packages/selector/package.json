@@ -12,6 +12,9 @@
     "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
     "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
 
+    "create:trial-accounts": "yarn build && node test/trial-accounts.ts",
+    "create:instant-sign-in": "yarn build && node test/instant-sign-in.ts",
+
     "build-docs": "npx typedoc --options typedoc.json"
   },
   "author": "benkurrek, mattlockyer",
@@ -50,6 +53,7 @@
     "@near-js/wallet-account": "^0.0.6",
     "@near-js/utils": "^0.0.4",
     "@near-js/keystores-browser": "^0.0.4",
+    "@near-js/keystores-node": "^0.0.4",
     "@near-wallet-selector/core": "^8.0.3",
     "react": "^18.2.0",
     "react-dom": "18.2.0",

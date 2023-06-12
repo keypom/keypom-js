@@ -43,4 +43,5 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     switchAccount(id: string): Promise<void>;
     private internalSignIn;
     private assertSignedIn;
+    private setSpecsFromKeypomParams;
 }

@@ -3,7 +3,7 @@ import type {
     WalletBehaviourFactory, WalletModuleFactory
 } from '@near-wallet-selector/core';
 import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
-import { KEYPOM_MODULE_ID, KeypomParams, KeypomWalletInstant } from './types';
+import { KEYPOM_MODULE_ID, KeypomParams, KeypomWalletInstant, isKeypomParams } from './types';
 import { KeypomWallet } from './wallet';
 
 interface KeypomInitializeOptions {
@@ -96,6 +96,12 @@ export function setupKeypom({
     signInContractId
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
+        // Ensure that the passed in arguments are of type KeypomParams
+        if (!isKeypomParams({signInContractId, networkId, trialAccountSpecs, instantSignInSpecs})) {
+            console.warn('KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.');
+            return null;
+        }
+
         if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
             console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
             return null;

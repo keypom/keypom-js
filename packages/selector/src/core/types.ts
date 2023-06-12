@@ -87,6 +87,24 @@ export interface KeypomParams {
     instantSignInSpecs?: InstantSignInSpecs,
 }
 
+export const isTrialSignInSpecs = (obj: any): obj is TrialSignInSpecs =>
+    typeof obj === 'object' && obj !== null &&
+    obj.hasOwnProperty('url') && typeof obj.url === 'string' &&
+    obj.hasOwnProperty('modalOptions') && typeof obj.modalOptions === 'object' && obj.modalOptions !== null;
+
+export const isInstantSignInSpecs = (obj: any): obj is InstantSignInSpecs =>
+    typeof obj === 'object' && obj !== null &&
+    obj.hasOwnProperty('url') && typeof obj.url === 'string';
+
+export const isKeypomParams = (obj: any): obj is KeypomParams =>
+    typeof obj === 'object' && obj !== null &&
+    obj.hasOwnProperty('networkId') && (obj.networkId === 'testnet' || obj.networkId === 'mainnet') &&
+    obj.hasOwnProperty('signInContractId') && typeof obj.signInContractId === 'string' &&
+    (obj.hasOwnProperty('trialAccountSpecs') || obj.hasOwnProperty('instantSignInSpecs')) &&
+    (!obj.hasOwnProperty('trialAccountSpecs') || isTrialSignInSpecs(obj.trialAccountSpecs)) &&
+    (!obj.hasOwnProperty('instantSignInSpecs') || isInstantSignInSpecs(obj.instantSignInSpecs));
+
+
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;
     getContractId(): string;

@@ -77,32 +77,17 @@ var KeypomWallet = /** @class */ (function () {
             var _a, _b;
             var instantSignInData = ((_a = _this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs) : undefined;
             var trialData = ((_b = _this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs) : undefined;
-            return instantSignInData !== undefined || trialData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null;
+            var isCIDPresent = window.location.href.split("?cid=").length > 1;
+            return instantSignInData !== undefined || trialData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null || isCIDPresent;
         };
         console.log('Initializing Keypom');
         this.signInContractId = signInContractId;
         this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
-        var trialSpecs = undefined;
-        if (trialAccountSpecs !== undefined) {
-            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
-            var matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
-            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
-            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
-            trialSpecs = __assign(__assign({}, trialAccountSpecs), { isMappingAccount: false, baseUrl: baseUrl, delimiter: delimiter });
-            this.modal = (0, src_1.setupModal)(trialAccountSpecs.modalOptions);
-        }
-        this.trialAccountSpecs = trialSpecs;
-        var instantSpecs = undefined;
-        if (instantSignInSpecs !== undefined) {
-            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
-            var matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
-            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
-            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
-            var moduleDelimiter = matches === null || matches === void 0 ? void 0 : matches[3];
-            instantSpecs = __assign(__assign({}, instantSignInSpecs), { baseUrl: baseUrl, delimiter: delimiter, moduleDelimiter: moduleDelimiter });
-        }
-        this.instantSignInSpecs = instantSpecs;
+        // Only setup the modal if the CID is not present (as to not set it up twice).
+        // In the case that the CID is present, it will be setup in `signIn()`
+        var isCIDPresent = window.location.href.split("?cid=").length > 1;
+        this.setSpecsFromKeypomParams({ trialAccountSpecs: trialAccountSpecs, instantSignInSpecs: instantSignInSpecs, shouldSetupModal: !isCIDPresent });
     }
     KeypomWallet.prototype.getContractId = function () {
         return this.signInContractId;
@@ -214,7 +199,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.signIn = function () {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var instantSignInData, trialData, curEnvData, _c, accountId, secretKey, moduleId;
+            var ipfsData, instantSignInData, trialData, curEnvData, _c, accountId, secretKey, moduleId;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0: return [4 /*yield*/, (0, core_1.initKeypom)({
@@ -222,6 +207,16 @@ var KeypomWallet = /** @class */ (function () {
                         })];
                     case 1:
                         _d.sent();
+                        return [4 /*yield*/, (0, selector_utils_1.parseIPFSDataFromURL)()];
+                    case 2:
+                        ipfsData = _d.sent();
+                        if (ipfsData !== undefined) {
+                            this.setSpecsFromKeypomParams({
+                                trialAccountSpecs: ipfsData.trialAccountSpecs,
+                                instantSignInSpecs: ipfsData.instantSignInSpecs,
+                                shouldSetupModal: true
+                            });
+                        }
                         instantSignInData = ((_a = this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs) : undefined;
                         console.log('instantSignInData: ', instantSignInData);
                         if (instantSignInData !== undefined) {
@@ -431,6 +426,33 @@ var KeypomWallet = /** @class */ (function () {
         if (!this.accountId) {
             throw new Error('Wallet not signed in');
         }
+    };
+    KeypomWallet.prototype.setSpecsFromKeypomParams = function (_a) {
+        var trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, shouldSetupModal = _a.shouldSetupModal;
+        console.log('setSpecsFromKeypomParams instantSignInSpecs : ', instantSignInSpecs);
+        console.log('setSpecsFromKeypomParams trialAccountSpecs: ', trialAccountSpecs);
+        var trialSpecs = undefined;
+        if (trialAccountSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            var matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
+            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
+            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
+            trialSpecs = __assign(__assign({}, trialAccountSpecs), { isMappingAccount: false, baseUrl: baseUrl, delimiter: delimiter });
+            if (shouldSetupModal) {
+                this.modal = (0, src_1.setupModal)(trialAccountSpecs.modalOptions);
+            }
+        }
+        this.trialAccountSpecs = trialSpecs;
+        var instantSpecs = undefined;
+        if (instantSignInSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            var matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
+            var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
+            var moduleDelimiter = matches === null || matches === void 0 ? void 0 : matches[3];
+            instantSpecs = __assign(__assign({}, instantSignInSpecs), { baseUrl: baseUrl, delimiter: delimiter, moduleDelimiter: moduleDelimiter });
+        }
+        this.instantSignInSpecs = instantSpecs;
     };
     return KeypomWallet;
 }());

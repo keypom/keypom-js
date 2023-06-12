@@ -8,9 +8,9 @@ import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/c
 import BN from 'bn.js';
 import { KeypomTrialModal, setupModal } from '../modal/src';
 import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.types';
-import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
+import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseIPFSDataFromURL, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { SUPPORTED_EXT_WALLET_DATA, extSignAndSendTransactions } from './ext_wallets';
-import { FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, KEYPOM_MODULE_ID, TrialSignInSpecs } from './types';
+import { FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, KEYPOM_MODULE_ID, KeypomParams, TrialSignInSpecs } from './types';
 
 const TRIAL_URL_REGEX = new RegExp(`(.*)ACCOUNT_ID(.*)SECRET_KEY`);
 const INSTANT_URL_REGEX = new RegExp(`(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID`);
@@ -50,41 +50,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             deps: { keyStore: this.keyStore },
         });
 
-        let trialSpecs: InternalTrialSignInSpecs | undefined = undefined;
-        if (trialAccountSpecs !== undefined) {
-            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
-            const matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
-            const baseUrl = matches?.[1]!;
-            const delimiter = matches?.[2]!;
-
-            trialSpecs = {
-                ...trialAccountSpecs,
-                isMappingAccount: false,
-                baseUrl,
-                delimiter
-            }
-
-            this.modal = setupModal(trialAccountSpecs!.modalOptions);
-        }
-        this.trialAccountSpecs = trialSpecs;
-
-        let instantSpecs: InternalInstantSignInSpecs | undefined = undefined;
-        if (instantSignInSpecs !== undefined) {
-            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
-            const matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
-            const baseUrl = matches?.[1]!;
-            const delimiter = matches?.[2]!;
-            const moduleDelimiter = matches?.[3]!;
-
-            instantSpecs = {
-                ...instantSignInSpecs,
-                baseUrl,
-                delimiter,
-                moduleDelimiter
-            }
-        }
-
-        this.instantSignInSpecs = instantSpecs;
+        // Only setup the modal if the CID is not present (as to not set it up twice).
+        // In the case that the CID is present, it will be setup in `signIn()`
+        let isCIDPresent = window.location.href.split("?cid=").length > 1;
+        this.setSpecsFromKeypomParams({trialAccountSpecs, instantSignInSpecs, shouldSetupModal: !isCIDPresent});
     }
 
     getContractId(): string {
@@ -179,6 +148,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         await initKeypom({
             network: this.near.connection.networkId
         });
+
+        // If there is IPFS data in the URL, use that for the specs
+        let ipfsData = await parseIPFSDataFromURL();
+        if (ipfsData !== undefined) {
+            this.setSpecsFromKeypomParams({
+                trialAccountSpecs: ipfsData.trialAccountSpecs, 
+                instantSignInSpecs: ipfsData.instantSignInSpecs,
+                shouldSetupModal: true
+            });
+        }
 
         let instantSignInData = this.instantSignInSpecs?.baseUrl !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
         console.log('instantSignInData: ', instantSignInData)
@@ -308,8 +287,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     public checkValidTrialInfo = () => {
         let instantSignInData = this.instantSignInSpecs?.baseUrl !== undefined ? parseInstantSignInUrl(this.instantSignInSpecs) : undefined;
         let trialData = this.trialAccountSpecs?.baseUrl !== undefined ? parseTrialUrl(this.trialAccountSpecs) : undefined;
-        
-        return instantSignInData !== undefined || trialData !== undefined || getLocalStorageKeypomEnv() !== null;
+        let isCIDPresent = window.location.href.split("?cid=").length > 1;
+
+        return instantSignInData !== undefined || trialData !== undefined || getLocalStorageKeypomEnv() !== null || isCIDPresent;
     };
 
     async verifyOwner() {
@@ -358,5 +338,45 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         if (!this.accountId) {
             throw new Error('Wallet not signed in');
         }
+    }
+
+    private setSpecsFromKeypomParams({ trialAccountSpecs, instantSignInSpecs, shouldSetupModal}: { trialAccountSpecs?: TrialSignInSpecs, instantSignInSpecs?: InstantSignInSpecs, shouldSetupModal: boolean }) {
+        let trialSpecs: InternalTrialSignInSpecs | undefined = undefined;
+        if (trialAccountSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            const matches = trialAccountSpecs.url.match(TRIAL_URL_REGEX);
+            const baseUrl = matches?.[1]!;
+            const delimiter = matches?.[2]!;
+
+            trialSpecs = {
+                ...trialAccountSpecs,
+                isMappingAccount: false,
+                baseUrl,
+                delimiter
+            }
+
+            if (shouldSetupModal) {
+                this.modal = setupModal(trialAccountSpecs!.modalOptions);
+            }
+        }
+        this.trialAccountSpecs = trialSpecs;
+
+        let instantSpecs: InternalInstantSignInSpecs | undefined = undefined;
+        if (instantSignInSpecs !== undefined) {
+            // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
+            const matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            const baseUrl = matches?.[1]!;
+            const delimiter = matches?.[2]!;
+            const moduleDelimiter = matches?.[3]!;
+
+            instantSpecs = {
+                ...instantSignInSpecs,
+                baseUrl,
+                delimiter,
+                moduleDelimiter
+            }
+        }
+
+        this.instantSignInSpecs = instantSpecs;
     }
 }

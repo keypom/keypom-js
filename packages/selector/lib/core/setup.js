@@ -184,6 +184,11 @@ function setupKeypom(_a) {
         var keypomWallet, shouldSignIn;
         var _this = this;
         return __generator(this, function (_a) {
+            // Ensure that the passed in arguments are of type KeypomParams
+            if (!(0, types_1.isKeypomParams)({ signInContractId: signInContractId, networkId: networkId, trialAccountSpecs: trialAccountSpecs, instantSignInSpecs: instantSignInSpecs })) {
+                console.warn('KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.');
+                return [2 /*return*/, null];
+            }
             if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
                 console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
                 return [2 /*return*/, null];
