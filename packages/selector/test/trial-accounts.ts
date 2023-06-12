@@ -36,7 +36,8 @@ const startingBalanceNEAR = 0.5;
 const trialEndFloorNEAR = 0.01;
 
 const numKeys = 1;
-const claimTrialAccounts = true;
+const claimTrialAccounts = false;
+const includedCID; // = "bafkreidneri4ffymscahjprlapg4j62yleli73ncwdmopnkxpgczpusqn4"
 
 async function createTrialAccount() {
 	// Initiate connection to the NEAR blockchain.
@@ -110,6 +111,10 @@ async function createTrialAccount() {
             } else {
                 // insert the contract ID into the base URL
                 url = url.replace('ACCOUNT_ID', keypomContractId);
+            }
+
+            if (includedCID !== undefined) {
+                url = url + `?cid=${includedCID}`
             }
             // add the URL to the array of URLs
             returnedURLs.push(url);

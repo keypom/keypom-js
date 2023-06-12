@@ -1,7 +1,8 @@
 import { accountMappingContract, getEnv, getPubFromSecret, supportedKeypomContracts, trialCallMethod, updateKeypomContractId } from '@keypom/core';
 import { parseNearAmount } from '@near-js/utils';
-import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs } from '../core/types';
+import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs, isKeypomParams } from '../core/types';
 import { Action } from '@near-js/transactions';
+import { KeypomParams } from '../core/types';
 
 export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
 
@@ -64,6 +65,26 @@ export const keyHasPermissionForTransaction = async (accessKey, receiverId: stri
     return false;
 }
 
+export const parseIPFSDataFromURL = async () => {
+    let split = window.location.href.split("?cid=");
+
+    if (split.length > 1) {
+        const cid = split[1];
+        console.log("found CID in URL: ", cid);
+        const response = await fetch(`https://cloudflare-ipfs.com/ipfs/${cid}`);
+        const data = await response.json();
+
+        if (isKeypomParams(data)) {
+            console.log('Successfully parsed Keypom params from URL.');
+            return data;
+        }
+
+        console.log('data can not be cast to Keypom params: ', data);
+    }
+
+    return;
+};
+
 
 export const addUserToMappingContract = async (accountId, secretKey) => {
     const accountIdFromMapping = await getAccountFromMap(secretKey);
@@ -105,7 +126,8 @@ export const parseTrialUrl = (trialSpecs: InternalTrialSignInSpecs) => {
     const {baseUrl, delimiter} = trialSpecs;
     console.log(`Parse trial URL with base: ${baseUrl} and delim: ${delimiter}`);
 
-    const split = window.location.href.split(baseUrl!);
+    // remove everything after ?cid= in the URL if it's present
+    const split = window.location.href.split("?cid=")[0].split(baseUrl!);
 
     if (split.length !== 2) {
         return;
@@ -129,7 +151,8 @@ export const parseInstantSignInUrl = (instantSignInSpecs: InternalInstantSignInS
 
     console.log(`Parse instant sign in URL with base: ${baseUrl} delim: ${delimiter} and module delim: ${moduleDelimiter}`);
 
-    const split = window.location.href.split(baseUrl!);
+    // remove everything after ?cid= in the URL if it's present
+    const split = window.location.href.split("?cid=")[0].split(baseUrl!);
 
     if (split.length !== 2) {
         return;

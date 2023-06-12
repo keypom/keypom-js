@@ -81,6 +81,29 @@ const selector = await setupWalletSelector({
     2. Customizable options for the trial account modals including *all* the text such as titles, descriptions, buttons, placeholders etc. In addition, you can specify exactly which off-boarding wallets you'd like to support.
 - `instantSignInSpecs`: If specified, trial accounts will be supported on the app. The instant sign in specs dictate how the URL should be constructed for the app to trigger the instant sign in flow.
 
+### IPFS Customizations
+
+For apps that wish to customize the Keypom parameters on a per page basis or even a per user basis, they can make use of IPFS CIDs. By adding a `?cid=` parameter to the URL, Keypom will fetch the parameters from the specified CID. The contents on IPFS must be JSON that match the Keypom parameters:
+
+```json
+{
+  "networkId": "testnet", // Or "mainnet",
+  "signInContractId": CONTRACT_ID,
+  "trialAccountSpecs": {
+    "url": "vandeley_industries.com/trial-sign-in/ACCOUNT_ID#SECRET_KEY",
+    "modalOptions": KEYPOM_OPTIONS
+  },
+  "instantSignInSpecs": {
+    "url": "vandeley_industries.com/instant-sign-in/ACCOUNT_ID#SECRET_KEY"
+  }
+}
+```
+
+An example CID can be found below:
+```
+bafkreidneri4ffymscahjprlapg4j62yleli73ncwdmopnkxpgczpusqn4
+```
+
 # Keypom Trial Accounts
 
 Keypom Trial Accounts are an exciting new opportunity for Web3 apps to seamlessly onboard users whether they’re completely new to crypto or seasoned veterans. With the click of a link, users require no software, wallet setup, wallet connection, and are *instantly signed into apps* with their trial account, ready to make on-chain transactions. Unlike most other onboarding mechanisms, the entire experience can be embedded *directly in the app* to increase user retention and is entirely on-chain.

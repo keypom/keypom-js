@@ -4,7 +4,7 @@ export { createDrop, deleteDrops } from "./lib/drops";
 export { 
 /** @group Utility */
 execute, getEnv, initKeypom, networks, accountMappingContract, supportedKeypomContracts, supportedLinkdropClaimPages, updateFunder, updateKeypomContractId } from "./lib/keypom";
-export { viewAccessKeyData, convertBasicTransaction, accountExists, createNFTSeries, estimateRequiredDeposit, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall } from "./lib/keypom-utils";
+export { viewAccessKeyData, generatePerUsePasswords, convertBasicTransaction, accountExists, createNFTSeries, estimateRequiredDeposit, formatLinkdropUrl, ftTransferCall, generateKeys, getFTMetadata, getNFTMetadata, getPubFromSecret, getStorageBase, hashPassword, nftTransferCall } from "./lib/keypom-utils";
 export { addKeys, deleteKeys } from "./lib/keys";
 export * from "./lib/sales";
 export { claimTrialAccountDrop, createTrialAccountDrop } from "./lib/trial-accounts/pre-trial";
