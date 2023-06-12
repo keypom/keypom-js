@@ -120,12 +120,11 @@ var parseIPFSDataFromURL = function () { return __awaiter(void 0, void 0, void 0
                 return [4 /*yield*/, response.json()];
             case 2:
                 data = _a.sent();
-                console.log('data: ', data);
                 if ((0, types_1.isKeypomParams)(data)) {
                     console.log('Successfully parsed Keypom params from URL.');
                     return [2 /*return*/, data];
                 }
-                console.log('data is not castable to Keypom params: ', data);
+                console.log('data can not be cast to Keypom params: ', data);
                 _a.label = 3;
             case 3: return [2 /*return*/];
         }

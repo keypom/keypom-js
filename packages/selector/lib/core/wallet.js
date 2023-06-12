@@ -429,8 +429,6 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.setSpecsFromKeypomParams = function (_a) {
         var trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, shouldSetupModal = _a.shouldSetupModal;
-        console.log('setSpecsFromKeypomParams instantSignInSpecs : ', instantSignInSpecs);
-        console.log('setSpecsFromKeypomParams trialAccountSpecs: ', trialAccountSpecs);
         var trialSpecs = undefined;
         if (trialAccountSpecs !== undefined) {
             // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
