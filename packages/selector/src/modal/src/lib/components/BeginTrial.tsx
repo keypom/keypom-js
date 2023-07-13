@@ -10,6 +10,7 @@ export const accountAddressPatternNoSubaccount = /^([a-z\d]+[-_])*[a-z\d]+$/;
 
 interface BeginTrialProps {
   customizations?: BeginTrialCustomizations;
+  includedCid?: string;
   secretKey: string;
   redirectUrlBase: string;
   delimiter: string;
@@ -20,6 +21,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
   hide,
   secretKey,
   redirectUrlBase,
+  includedCid,
   delimiter,
   customizations,
 }) => {
@@ -230,7 +232,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
           button={null}
           onCloseModal={() => {
             window.location.replace(
-              `${redirectUrlBase}${accountId}${delimiter}${secretKey}`
+              `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
             );
             window.location.reload();
           }}
@@ -240,7 +242,7 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
             className="middleButton"
             onClick={() => {
               window.location.replace(
-                `${redirectUrlBase}${accountId}${delimiter}${secretKey}`
+                `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
               );
               window.location.reload();
             }}

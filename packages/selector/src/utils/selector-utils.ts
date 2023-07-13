@@ -65,21 +65,33 @@ export const keyHasPermissionForTransaction = async (accessKey, receiverId: stri
     return false;
 }
 
-export const parseIPFSDataFromURL = async () => {
+export const getCidFromUrl = () => {
     let split = window.location.href.split("?cid=");
 
     if (split.length > 1) {
         const cid = split[1];
         console.log("found CID in URL: ", cid);
+        return cid;
+    }
+
+    return null;
+}
+
+export const parseIPFSDataFromURL = async () => {
+    const cid = getCidFromUrl();
+
+    if (cid != null) {
         const response = await fetch(`https://cloudflare-ipfs.com/ipfs/${cid}`);
         const data = await response.json();
 
         if (isKeypomParams(data)) {
-            console.log('Successfully parsed Keypom params from URL.');
+            console.log('Successfully parsed Keypom params from URL: ', data);
             return data;
+        } else {
+            console.log('data can not be cast to Keypom params: ', data);
         }
-
-        console.log('data can not be cast to Keypom params: ', data);
+    } else {
+        console.log('no cid found in URL');
     }
 
     return;

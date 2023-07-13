@@ -8,7 +8,7 @@ import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/c
 import BN from 'bn.js';
 import { KeypomTrialModal, setupModal } from '../modal/src';
 import { MODAL_TYPE_IDS, ModalCustomizations } from '../modal/src/lib/modal.types';
-import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getLocalStorageKeypomEnv, parseIPFSDataFromURL, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
+import { KEYPOM_LOCAL_STORAGE_KEY, addUserToMappingContract, getAccountFromMap, getCidFromUrl, getLocalStorageKeypomEnv, parseIPFSDataFromURL, parseInstantSignInUrl, parseTrialUrl, setLocalStorageKeypomEnv, updateKeypomContractIfValid } from '../utils/selector-utils';
 import { SUPPORTED_EXT_WALLET_DATA, extSignAndSendTransactions } from './ext_wallets';
 import { FAILED_EXECUTION_OUTCOME, InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, KEYPOM_MODULE_ID, KeypomParams, TrialSignInSpecs } from './types';
 
@@ -82,12 +82,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 
                 // If the drop is unclaimed, we should show the unclaimed drop modal
                 if (isUnclaimed === true) {
+                    const cid = getCidFromUrl();
                     this.modal!.show({
                         id: MODAL_TYPE_IDS.BEGIN_TRIAL,
                         meta: {
                             secretKey,
                             redirectUrlBase: this.trialAccountSpecs!.baseUrl,
                             delimiter: this.trialAccountSpecs!.delimiter,
+                            includedCid: cid == null ? undefined : cid
                         }
                     });
                     return [];

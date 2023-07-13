@@ -38,6 +38,7 @@ export const renderModalType = (
           hide={hide}
           secretKey={modalType.meta.secretKey}
           redirectUrlBase={modalType.meta.redirectUrlBase}
+          includedCid={modalType.meta.includedCid}
           delimiter={modalType.meta.delimiter}
           customizations={options.beginTrial}
         />
