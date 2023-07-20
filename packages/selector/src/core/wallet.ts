@@ -83,14 +83,18 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 // If the drop is unclaimed, we should show the unclaimed drop modal
                 if (isUnclaimed === true) {
                     const cid = getCidFromUrl();
+                    console.log('cid: ', cid)
+                    let meta = {
+                        secretKey,
+                        redirectUrlBase: this.trialAccountSpecs!.baseUrl,
+                        delimiter: this.trialAccountSpecs!.delimiter,
+                        includedCid: cid == null ? undefined : cid
+                    }
+                    console.log('meta: ', meta)
+
                     this.modal!.show({
                         id: MODAL_TYPE_IDS.BEGIN_TRIAL,
-                        meta: {
-                            secretKey,
-                            redirectUrlBase: this.trialAccountSpecs!.baseUrl,
-                            delimiter: this.trialAccountSpecs!.delimiter,
-                            includedCid: cid == null ? undefined : cid
-                        }
+                        meta
                     });
                     return [];
                 } else {

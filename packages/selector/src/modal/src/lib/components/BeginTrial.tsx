@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BeginTrialCustomizations, MODAL_DEFAULTS } from "../modal.types";
 import { MainBody } from "./MainBody";
 import { accountExists, claim, getCurMethodData, getEnv, getPubFromSecret } from "@keypom/core";
+import { KEYPOM_LOCAL_STORAGE_KEY } from "../../../../utils/selector-utils";
 
 /**
  * regex for the body of an account not including TLA and not allowing subaccount
@@ -231,20 +232,26 @@ export const BeginTrial: React.FC<BeginTrialProps> = ({
           imageTwo={null}
           button={null}
           onCloseModal={() => {
+            let urlToRedirectTo = `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
+            console.log('url to redirect to: ', urlToRedirectTo)
+            localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:urlToRedirectTo`, urlToRedirectTo);
             window.location.replace(
-              `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
+              urlToRedirectTo
             );
-            window.location.reload();
+            window.location.reload(); 
           }}
         />
         <div className="nws-modal-body wallet-info-wrapper what-wallet-hide ">
           <button
             className="middleButton"
             onClick={() => {
+              let urlToRedirectTo = `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
+              console.log('url to redirect to: ', urlToRedirectTo)
+              localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:urlToRedirectTo`, urlToRedirectTo);
               window.location.replace(
-                `${redirectUrlBase}${accountId}${delimiter}${secretKey}${includedCid !== undefined ? `?cid=${includedCid}` : ""}`
+                urlToRedirectTo
               );
-              window.location.reload();
+              window.location.reload(); 
             }}
             style={{
               width: "100%",

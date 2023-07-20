@@ -33,6 +33,7 @@ export const renderModalType = (
         />
       );
     case MODAL_TYPE_IDS.BEGIN_TRIAL:
+      console.log("modalType.meta", modalType.meta);
       return (
         <BeginTrial
           hide={hide}
