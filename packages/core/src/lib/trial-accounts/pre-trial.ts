@@ -116,15 +116,15 @@ export const createTrialAccountDrop = async ({
     /** The contracts that the trial account should be able to call. */
     callableContracts: string[];
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
-    maxAttachableNEARPerContract: (string | number)[];
+    maxAttachableNEARPerContract?: (string | number)[];
     /** The upper bound of $yocto that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $yoctoNEAR (i.e `1` = 1 $yoctoNEAR). */
-    maxAttachableYoctoPerContract: string[];
+    maxAttachableYoctoPerContract?: string[];
     /** An array that contains the list of methods that the trial account should be able to call on each respective contract. To allow any methods to be called on the receiver contract, pass in `[*]`. */
-    callableMethods: string[][];
+    callableMethods?: string[][];
     /** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
-    trialEndFloorNEAR: string | number;
+    trialEndFloorNEAR?: string | number;
     /** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
-    trialEndFloorYocto: string;
+    trialEndFloorYocto?: string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
     repayAmountNEAR?: number | string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
@@ -181,6 +181,18 @@ export const createTrialAccountDrop = async ({
         "All custom drop IDs must be greater than 1_000_000_000"
     );
     if (!dropId) dropId = Date.now().toString();
+
+    if (!callableMethods) {
+        callableMethods = new Array(callableContracts.length).fill(['*']);
+    }
+ 
+    if (!maxAttachableNEARPerContract && !maxAttachableYoctoPerContract) {
+        maxAttachableYoctoPerContract = new Array(callableMethods.length).fill('0');
+    }
+
+    if (!trialEndFloorNEAR && !trialEndFloorYocto) {
+        trialEndFloorYocto = '0';
+    }
 
     // Ensure that the length of the callable methods, contracts, and max attachable deposit per contract are all the same
     assert(
