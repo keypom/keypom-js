@@ -1,0 +1,66 @@
+{
+  "name": "@keypom/core",
+  "version": "1.0.2",
+  "type": "module",
+  "description": "Core library for interacting with the Keypom Protocol",
+  "main": "lib/index.js",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "pnpm compile",
+    "compile": "tsc -p tsconfig.json",
+    "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
+    "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
+    "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
+    "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
+    "test": "yarn test:main && yarn test:trial-accounts && yarn test:drop-creation && yarn test:dummy-creation",
+    "test:drop-creation": "yarn build && yarn ava:drop-creation",
+    "test:dummy-creation": "yarn build && yarn ava:dummy-creation",
+    "ava:drop-creation": "ava test/creation.test.js -vs --timeout=5m",
+    "ava:dummy-creation": "ava test/dummy-creation.test.js -vs --timeout=5m",
+    "build-docs": "npx typedoc --options typedoc.json"
+  },
+  "author": "benkurrek, mattlockyer",
+  "license": "MIT",
+  "dependencies": {
+    "@near-wallet-selector/core": "^8.0.3",
+    "bn.js": "^5.2.1",
+    "borsh": "^0.7.0",
+    "near-seed-phrase": "^0.2.0",
+    "util": "^0.12.5"
+  },
+  "ava": {
+    "require": [
+      "dotenv/config"
+    ]
+  },
+  "devDependencies": {
+    "@near-js/accounts": "^0.1.3",
+    "@near-js/crypto": "^0.0.4",
+    "@near-js/keystores": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
+    "@near-js/keystores-node": "^0.0.4",
+    "@near-js/transactions": "^0.2.0",
+    "@near-js/providers": "^0.0.7",
+    "@near-js/types": "^0.0.4",
+    "@near-js/utils": "^0.0.4",
+    "@near-js/wallet-account": "^0.0.6",
+    "@types/node": "^20.4.1",
+    "ava": "^4.3.3",
+    "eslint": "^8.39.0",
+    "typedoc": "^0.23.24",
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {
+    "@near-js/accounts": "^0.1.3",
+    "@near-js/crypto": "^0.0.4",
+    "@near-js/keystores": "^0.0.4",
+    "@near-js/keystores-browser": "^0.0.4",
+    "@near-js/transactions": "^0.2.0",
+    "@near-js/types": "^0.0.4",
+    "@near-js/utils": "^0.0.4",
+    "@near-js/wallet-account": "^0.0.6"
+  },
+  "files": [
+    "lib"
+  ]
+}
