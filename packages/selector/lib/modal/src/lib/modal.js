@@ -30,7 +30,7 @@ var setupModal = function (options) {
             },
             hide: function () {
                 render(false);
-            }
+            },
         };
     }
     return modalInstance;

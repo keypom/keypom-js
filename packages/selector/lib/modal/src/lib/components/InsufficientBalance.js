@@ -11,6 +11,8 @@ var InsufficientBalance = function (_a) {
     var customizations = _a.customizations, hide = _a.hide;
     return (react_1.default.createElement("div", { className: "nws-modal", style: { width: "70%", height: "27%" } },
         react_1.default.createElement("div", { className: "modal-right", style: { width: "100%" } },
-            react_1.default.createElement(MainBody_1.MainBody, { title: (customizations === null || customizations === void 0 ? void 0 : customizations.title) || modal_types_1.MODAL_DEFAULTS.insufficientBalance.title, body: (customizations === null || customizations === void 0 ? void 0 : customizations.body) || modal_types_1.MODAL_DEFAULTS.insufficientBalance.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () { return hide(); } }))));
+            react_1.default.createElement(MainBody_1.MainBody, { title: (customizations === null || customizations === void 0 ? void 0 : customizations.title) ||
+                    modal_types_1.MODAL_DEFAULTS.insufficientBalance.title, body: (customizations === null || customizations === void 0 ? void 0 : customizations.body) ||
+                    modal_types_1.MODAL_DEFAULTS.insufficientBalance.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () { return hide(); } }))));
 };
 exports.InsufficientBalance = InsufficientBalance;

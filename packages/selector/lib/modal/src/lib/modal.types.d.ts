@@ -1,4 +1,4 @@
-export type Theme = 'dark' | 'light' | 'auto';
+export type Theme = "dark" | "light" | "auto";
 export interface ModalCustomizations {
     wallets: OffboardingWallet[];
     theme?: Theme;

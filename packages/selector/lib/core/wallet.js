@@ -320,7 +320,7 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signAndSendTransactions = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var transactions, res, e_5;
+            var transactions, res, walletResponse, e_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -341,7 +341,8 @@ var KeypomWallet = /** @class */ (function () {
                                 txns: transactions,
                             })];
                     case 2:
-                        res = _a.sent();
+                        walletResponse = _a.sent();
+                        res = walletResponse.map(function (response) { return (__assign(__assign({}, response), { final_execution_status: "FINAL" })); });
                         return [3 /*break*/, 4];
                     case 3:
                         e_5 = _a.sent();

@@ -36,33 +36,32 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.nearWalletFAKSigning = exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
+exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
 var core_1 = require("@keypom/core");
 var accounts_1 = require("@near-js/accounts");
 var crypto_1 = require("@near-js/crypto");
 var transactions_1 = require("@near-js/transactions");
-var borsh_1 = require("borsh");
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
 exports.SUPPORTED_EXT_WALLET_DATA = {
-    "testnet": {
+    testnet: {
         "near-wallet": {
             baseUrl: "https://wallet.testnet.near.org",
         },
         "my-near-wallet": {
             baseUrl: "https://testnet.mynearwallet.com",
         },
-        "sweat-wallet": {}
+        "sweat-wallet": {},
     },
-    "mainnet": {
+    mainnet: {
         "near-wallet": {
             baseUrl: "https://wallet.near.org",
         },
         "my-near-wallet": {
             baseUrl: "https://app.mynearwallet.com",
         },
-        "sweat-wallet": {}
-    }
+        "sweat-wallet": {},
+    },
 };
 /**
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
@@ -84,21 +83,23 @@ var extSignAndSendTransactions = function (_a) {
                     txn = transactions[i];
                     mappedActions = txn.actions.map(function (a) {
                         var fcAction = a;
-                        return transactions_1.actionCreators.functionCall(fcAction.params.methodName, (0, transactions_1.stringifyJsonOrBytes)(fcAction.params.args), fcAction.params.gas, fcAction.params.deposit);
+                        return transactions_1.actionCreators.functionCall(fcAction.params.methodName, (0, transactions_1.stringifyJsonOrBytes)(fcAction.params.args), BigInt(fcAction.params.gas), // Convert string to bigint
+                        BigInt(fcAction.params.deposit) // Convert string to bigint
+                        );
                     });
                     pk = crypto_1.PublicKey.from((0, core_1.getPubFromSecret)(secretKey));
                     return [4 /*yield*/, (0, core_1.convertBasicTransaction)({
                             txnInfo: {
                                 receiverId: txn.receiverId,
                                 signerId: txn.signerId,
-                                actions: mappedActions
+                                actions: mappedActions,
                             },
                             signerId: accountId,
                             signerPk: pk,
                         })];
                 case 2:
                     transaction = _d.sent();
-                    return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), '')];
+                    return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
                 case 3:
                     accessKey = _d.sent();
                     return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, mappedActions)];
@@ -127,15 +128,14 @@ var extSignAndSendTransactions = function (_a) {
                 case 11:
                     if (fakRequiredTxns.length > 0) {
                         switch (moduleId) {
-                            case 'my-near-wallet':
-                            case 'near-wallet':
-                                (0, exports.nearWalletFAKSigning)(fakRequiredTxns, near.config.networkId, moduleId);
+                            case "my-near-wallet":
+                            case "near-wallet":
                                 break;
-                            case 'sweat-wallet':
-                                console.warn('Sweat wallet does not support FAK signing yet');
+                            case "sweat-wallet":
+                                console.warn("Sweat wallet does not support FAK signing yet");
                                 return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
                             default:
-                                console.warn('Unsupported wallet module: ', moduleId);
+                                console.warn("Unsupported wallet module: ", moduleId);
                                 return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
                         }
                     }
@@ -145,15 +145,3 @@ var extSignAndSendTransactions = function (_a) {
     });
 };
 exports.extSignAndSendTransactions = extSignAndSendTransactions;
-var nearWalletFAKSigning = function (transactions, networkId, moduleId) {
-    var currentUrl = new URL(window.location.href);
-    var baseUrl = exports.SUPPORTED_EXT_WALLET_DATA[networkId][moduleId].baseUrl;
-    var newUrl = new URL('sign', baseUrl);
-    newUrl.searchParams.set('transactions', transactions
-        .map(function (transaction) { return (0, borsh_1.serialize)(transactions_1.SCHEMA, transaction); })
-        .map(function (serialized) { return Buffer.from(serialized).toString('base64'); })
-        .join(','));
-    newUrl.searchParams.set('callbackUrl', currentUrl.href);
-    window.location.assign(newUrl.toString());
-};
-exports.nearWalletFAKSigning = nearWalletFAKSigning;

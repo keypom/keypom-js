@@ -40,7 +40,7 @@ exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomCont
 var core_1 = require("@keypom/core");
 var utils_1 = require("@near-js/utils");
 var types_1 = require("../core/types");
-exports.KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
+exports.KEYPOM_LOCAL_STORAGE_KEY = "keypom-wallet-selector";
 var getLocalStorageKeypomEnv = function () {
     var localStorageDataJson = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"));
     return localStorageDataJson;
@@ -60,12 +60,12 @@ var getAccountFromMap = function (secretKey) { return __awaiter(void 0, void 0, 
                 pk = (0, core_1.getPubFromSecret)(secretKey);
                 return [4 /*yield*/, viewCall({
                         contractId: core_1.accountMappingContract[(0, core_1.getEnv)().networkId],
-                        methodName: 'get_account_id',
-                        args: { pk: pk }
+                        methodName: "get_account_id",
+                        args: { pk: pk },
                     })];
             case 1:
                 accountId = _a.sent();
-                console.log('accountId found from map: ', accountId);
+                console.log("accountId found from map: ", accountId);
                 return [2 /*return*/, accountId];
         }
     });
@@ -80,9 +80,9 @@ exports.getAccountFromMap = getAccountFromMap;
 var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) { return __awaiter(void 0, void 0, void 0, function () {
     var permission, _a, allowedReceiverId, allowedMethods, allowed, _i, actions_1, action, functionCall;
     return __generator(this, function (_b) {
-        console.log('accessKey: ', accessKey);
+        console.log("accessKey: ", accessKey);
         permission = accessKey.permission;
-        if (permission === 'FullAccess') {
+        if (permission === "FullAccess") {
             return [2 /*return*/, true];
         }
         if (permission.FunctionCall) {
@@ -92,8 +92,11 @@ var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) {
                 for (_i = 0, actions_1 = actions; _i < actions_1.length; _i++) {
                     action = actions_1[_i];
                     functionCall = action.functionCall;
-                    if (!(functionCall && (!functionCall.deposit || functionCall.deposit.toString() === '0') && // TODO: Should support charging amount smaller than allowance?
-                        (allowedMethods.length === 0 || allowedMethods.includes(functionCall.methodName)))) {
+                    if (!(functionCall &&
+                        (!functionCall.deposit ||
+                            functionCall.deposit.toString() === "0") && // TODO: Should support charging amount smaller than allowance?
+                        (allowedMethods.length === 0 ||
+                            allowedMethods.includes(functionCall.methodName)))) {
                         allowed = false;
                         break;
                     }
@@ -129,15 +132,15 @@ var parseIPFSDataFromURL = function () { return __awaiter(void 0, void 0, void 0
             case 2:
                 data = _a.sent();
                 if ((0, types_1.isKeypomParams)(data)) {
-                    console.log('Successfully parsed Keypom params from URL: ', data);
+                    console.log("Successfully parsed Keypom params from URL: ", data);
                     return [2 /*return*/, data];
                 }
                 else {
-                    console.log('data can not be cast to Keypom params: ', data);
+                    console.log("data can not be cast to Keypom params: ", data);
                 }
                 return [3 /*break*/, 4];
             case 3:
-                console.log('no cid found in URL');
+                console.log("no cid found in URL");
                 _a.label = 4;
             case 4: return [2 /*return*/];
         }
@@ -157,10 +160,10 @@ var addUserToMappingContract = function (accountId, secretKey) { return __awaite
                         trialAccountId: accountId,
                         trialAccountSecretKey: secretKey,
                         contractId: core_1.accountMappingContract[(0, core_1.getEnv)().networkId],
-                        methodName: 'set',
+                        methodName: "set",
                         args: {},
-                        attachedDeposit: (0, utils_1.parseNearAmount)('0.002'),
-                        attachedGas: '10000000000000'
+                        attachedDeposit: (0, utils_1.parseNearAmount)("0.002"),
+                        attachedGas: "10000000000000",
                     });
                 }
                 return [2 /*return*/, accountIdFromMapping !== accountId];
@@ -175,7 +178,7 @@ var isValidKeypomContract = function (keypomContractId) {
 var updateKeypomContractIfValid = function (keypomContractId) {
     if (isValidKeypomContract(keypomContractId) === true) {
         (0, core_1.updateKeypomContractId)({
-            keypomContractId: keypomContractId
+            keypomContractId: keypomContractId,
         });
         return true;
     }
@@ -197,7 +200,7 @@ var parseTrialUrl = function (trialSpecs) {
     }
     return {
         accountId: accountId,
-        secretKey: secretKey
+        secretKey: secretKey,
     };
 };
 exports.parseTrialUrl = parseTrialUrl;
@@ -222,7 +225,7 @@ var parseInstantSignInUrl = function (instantSignInSpecs) {
     return {
         accountId: accountId,
         secretKey: secretKey,
-        moduleId: moduleId
+        moduleId: moduleId,
     };
 };
 exports.parseInstantSignInUrl = parseInstantSignInUrl;

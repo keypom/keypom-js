@@ -161,7 +161,8 @@ var BeginTrial = function (_a) {
                             alignItems: "center",
                         } },
                         react_1.default.createElement("input", { type: "text", value: userInput, onChange: handleChangeInput, placeholder: ((_f = customizations === null || customizations === void 0 ? void 0 : customizations.landing) === null || _f === void 0 ? void 0 : _f.fieldPlaceholder) ||
-                                modal_types_1.MODAL_DEFAULTS.beginTrial.landing.fieldPlaceholder, style: {
+                                modal_types_1.MODAL_DEFAULTS.beginTrial.landing
+                                    .fieldPlaceholder, style: {
                                 width: "100%",
                                 padding: "8px",
                                 border: "1px solid",
@@ -194,7 +195,9 @@ var BeginTrial = function (_a) {
             react_1.default.createElement("div", { className: "modal-right", style: { width: "100%" } },
                 react_1.default.createElement(MainBody_1.MainBody, { title: ((_h = customizations === null || customizations === void 0 ? void 0 : customizations.claiming) === null || _h === void 0 ? void 0 : _h.title) ||
                         modal_types_1.MODAL_DEFAULTS.beginTrial.claiming.title, body: ((_j = customizations === null || customizations === void 0 ? void 0 : customizations.claiming) === null || _j === void 0 ? void 0 : _j.body) ||
-                        modal_types_1.MODAL_DEFAULTS.beginTrial.claiming.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () { return console.log("cant close... claiming."); } }))));
+                        modal_types_1.MODAL_DEFAULTS.beginTrial.claiming.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () {
+                        return console.log("cant close... claiming.");
+                    } }))));
     }
     // Drop was claimed
     return (react_1.default.createElement("div", { className: "nws-modal", style: { width: "100%", height: "auto", maxWidth: "500px" } },
@@ -202,16 +205,20 @@ var BeginTrial = function (_a) {
             react_1.default.createElement(MainBody_1.MainBody, { title: ((_k = customizations === null || customizations === void 0 ? void 0 : customizations.claimed) === null || _k === void 0 ? void 0 : _k.title) ||
                     modal_types_1.MODAL_DEFAULTS.beginTrial.claimed.title, body: ((_l = customizations === null || customizations === void 0 ? void 0 : customizations.claimed) === null || _l === void 0 ? void 0 : _l.body) ||
                     modal_types_1.MODAL_DEFAULTS.beginTrial.claimed.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () {
-                    var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined ? "?cid=".concat(includedCid) : "");
-                    console.log('url to redirect to: ', urlToRedirectTo);
+                    var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined
+                        ? "?cid=".concat(includedCid)
+                        : "");
+                    console.log("url to redirect to: ", urlToRedirectTo);
                     localStorage.setItem("".concat(selector_utils_1.KEYPOM_LOCAL_STORAGE_KEY, ":urlToRedirectTo"), urlToRedirectTo);
                     window.location.replace(urlToRedirectTo);
                     window.location.reload();
                 } }),
             react_1.default.createElement("div", { className: "nws-modal-body wallet-info-wrapper what-wallet-hide " },
                 react_1.default.createElement("button", { className: "middleButton", onClick: function () {
-                        var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined ? "?cid=".concat(includedCid) : "");
-                        console.log('url to redirect to: ', urlToRedirectTo);
+                        var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined
+                            ? "?cid=".concat(includedCid)
+                            : "");
+                        console.log("url to redirect to: ", urlToRedirectTo);
                         localStorage.setItem("".concat(selector_utils_1.KEYPOM_LOCAL_STORAGE_KEY, ":urlToRedirectTo"), urlToRedirectTo);
                         window.location.replace(urlToRedirectTo);
                         window.location.reload();

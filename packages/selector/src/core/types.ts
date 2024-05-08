@@ -9,6 +9,7 @@ import { FinalExecutionOutcome } from "@near-js/types";
 import { ModalCustomizations } from "../modal/src";
 
 export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
+    final_execution_status: "NONE",
     status: {
         Failure: {
             error_message: "Invalid Trial Action",

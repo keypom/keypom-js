@@ -73,7 +73,7 @@ var Keypom = function (_a) {
                     getAccounts: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                logger.log('Keypom:account');
+                                logger.log("Keypom:account");
                                 return [2 /*return*/, keypomWallet.getAccounts()];
                             });
                         });
@@ -89,7 +89,7 @@ var Keypom = function (_a) {
                         });
                     },
                     getAccountId: function () {
-                        logger.log('Keypom:getAccountId');
+                        logger.log("Keypom:getAccountId");
                         return keypomWallet.getAccountId();
                     },
                     isSignedIn: function () {
@@ -97,7 +97,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log('Keypom:isSignedIn');
+                                        logger.log("Keypom:isSignedIn");
                                         return [4 /*yield*/, keypomWallet.isSignedIn()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -109,7 +109,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log('Keypom:isSignedIn');
+                                        logger.log("Keypom:isSignedIn");
                                         return [4 /*yield*/, keypomWallet.getAvailableBalance()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -119,7 +119,7 @@ var Keypom = function (_a) {
                     verifyOwner: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                throw Error('KeypomWallet:verifyOwner is deprecated');
+                                throw Error("KeypomWallet:verifyOwner is deprecated");
                             });
                         });
                     },
@@ -128,7 +128,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log('Keypom:signIn');
+                                        logger.log("Keypom:signIn");
                                         return [4 /*yield*/, keypomWallet.signIn()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -140,7 +140,7 @@ var Keypom = function (_a) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        logger.log('Keypom:signOut');
+                                        logger.log("Keypom:signOut");
                                         return [4 /*yield*/, keypomWallet.signOut()];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -166,7 +166,7 @@ var Keypom = function (_a) {
                                         transactions = params.transactions.map(function (tx) {
                                             return __assign(__assign({}, tx), { signerId: tx.signerId || keypomWallet.getAccountId() });
                                         });
-                                        logger.log('Keypom:signAndSendTransactions', params);
+                                        logger.log("Keypom:signAndSendTransactions", params);
                                         return [4 /*yield*/, keypomWallet.signAndSendTransactions({ transactions: transactions })];
                                     case 1: return [2 /*return*/, _a.sent()];
                                 }
@@ -185,37 +185,48 @@ function setupKeypom(_a) {
         var _this = this;
         return __generator(this, function (_a) {
             // Ensure that the passed in arguments are of type KeypomParams
-            if (!(0, types_1.isKeypomParams)({ signInContractId: signInContractId, networkId: networkId, trialAccountSpecs: trialAccountSpecs, instantSignInSpecs: instantSignInSpecs })) {
-                console.warn('KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.');
+            if (!(0, types_1.isKeypomParams)({
+                signInContractId: signInContractId,
+                networkId: networkId,
+                trialAccountSpecs: trialAccountSpecs,
+                instantSignInSpecs: instantSignInSpecs,
+            })) {
+                console.warn("KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.");
                 return [2 /*return*/, null];
             }
-            if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
-                console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
+            if (!signInContractId ||
+                !networkId ||
+                !(instantSignInSpecs || trialAccountSpecs)) {
+                console.warn("KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.");
                 return [2 /*return*/, null];
             }
-            if (trialAccountSpecs && !(trialAccountSpecs.url.includes('ACCOUNT_ID') || trialAccountSpecs.url.includes('SECRET_KEY'))) {
-                console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url');
+            if (trialAccountSpecs &&
+                !(trialAccountSpecs.url.includes("ACCOUNT_ID") ||
+                    trialAccountSpecs.url.includes("SECRET_KEY"))) {
+                console.warn("KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url");
                 return [2 /*return*/, null];
             }
-            if (instantSignInSpecs && !(instantSignInSpecs.url.includes('ACCOUNT_ID') || instantSignInSpecs.url.includes('SECRET_KEY'))) {
-                console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID');
+            if (instantSignInSpecs &&
+                !(instantSignInSpecs.url.includes("ACCOUNT_ID") ||
+                    instantSignInSpecs.url.includes("SECRET_KEY"))) {
+                console.warn("KeypomWallet: trial account specs must include ACCOUNT_ID");
                 return [2 /*return*/, null];
             }
             keypomWallet = new wallet_1.KeypomWallet({
                 signInContractId: signInContractId,
                 networkId: networkId,
                 trialAccountSpecs: trialAccountSpecs,
-                instantSignInSpecs: instantSignInSpecs
+                instantSignInSpecs: instantSignInSpecs,
             });
             shouldSignIn = keypomWallet.checkValidTrialInfo();
-            console.log('shouldSignIn: ', shouldSignIn);
+            console.log("shouldSignIn: ", shouldSignIn);
             return [2 /*return*/, {
                     id: types_1.KEYPOM_MODULE_ID,
-                    type: 'instant-link',
+                    type: "instant-link",
                     metadata: {
-                        name: 'Keypom Account',
+                        name: "Keypom Account",
                         description: null,
-                        iconUrl: '',
+                        iconUrl: "",
                         deprecated: false,
                         available: true,
                         contractId: signInContractId,

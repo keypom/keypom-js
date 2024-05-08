@@ -41,7 +41,8 @@ var KeypomModal = function (_a) {
     var options = _a.options, modalType = _a.modalType, visible = _a.visible, hide = _a.hide;
     (0, react_1.useEffect)(function () {
         var close = function (e) {
-            if (e.key === "Escape" && modalType.id !== modal_types_1.MODAL_TYPE_IDS.BEGIN_TRIAL) {
+            if (e.key === "Escape" &&
+                modalType.id !== modal_types_1.MODAL_TYPE_IDS.BEGIN_TRIAL) {
                 hide();
             }
         };

@@ -322,11 +322,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 if (!this.trialAccountSpecs!.isMappingAccount) {
                     addUserToMappingContract(this.accountId!, this.secretKey!);
                 }
-                res = await trialSignAndSendTxns({
+                let walletResponse = await trialSignAndSendTxns({
                     trialAccountId: this.accountId!,
                     trialAccountSecretKey: this.secretKey!,
                     txns: transactions,
                 });
+                res = walletResponse.map((response) => ({
+                    ...response,
+                    final_execution_status: "FINAL",
+                }));
             } catch (e) {
                 console.log(`e: ${JSON.stringify(e)}`);
                 switch (e) {

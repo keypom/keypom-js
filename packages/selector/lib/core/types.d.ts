@@ -1,8 +1,8 @@
-import { InstantLinkWallet, NetworkId } from '@near-wallet-selector/core';
-import BN from 'bn.js';
-import { KeypomWallet } from './wallet';
-import { FinalExecutionOutcome } from '@near-js/types';
-import { ModalCustomizations } from '../modal/src';
+import { InstantLinkWallet, NetworkId } from "@near-wallet-selector/core";
+import BN from "bn.js";
+import { KeypomWallet } from "./wallet";
+import { FinalExecutionOutcome } from "@near-js/types";
+import { ModalCustomizations } from "../modal/src";
 export declare const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome;
 export declare const KEYPOM_MODULE_ID = "keypom";
 export interface InternalInstantSignInSpecs extends InstantSignInSpecs {

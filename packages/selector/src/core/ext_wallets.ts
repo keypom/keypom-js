@@ -118,11 +118,6 @@ export const extSignAndSendTransactions = async ({
         switch (moduleId) {
             case "my-near-wallet":
             case "near-wallet":
-                nearWalletFAKSigning(
-                    fakRequiredTxns,
-                    near.config.networkId,
-                    moduleId
-                );
                 break;
             case "sweat-wallet":
                 console.warn("Sweat wallet does not support FAK signing yet");
@@ -134,21 +129,4 @@ export const extSignAndSendTransactions = async ({
     }
 
     return responses;
-};
-
-export const nearWalletFAKSigning = (transactions, networkId, moduleId) => {
-    const currentUrl = new URL(window.location.href);
-    const baseUrl = SUPPORTED_EXT_WALLET_DATA[networkId][moduleId].baseUrl;
-    const newUrl = new URL("sign", baseUrl);
-
-    newUrl.searchParams.set(
-        "transactions",
-        transactions
-            .map((transaction) => serialize(SCHEMA, transaction))
-            .map((serialized) => Buffer.from(serialized).toString("base64"))
-            .join(",")
-    );
-    newUrl.searchParams.set("callbackUrl", currentUrl.href);
-
-    window.location.assign(newUrl.toString());
 };

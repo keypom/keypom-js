@@ -13,7 +13,7 @@ var OffboardingWallets = function (_a) {
             var name = wallet.name, description = wallet.description, iconUrl = wallet.iconUrl, redirectUrl = wallet.redirectUrl;
             var mapObj = {
                 ACCOUNT_ID: accountId,
-                SECRET_KEY: secretKey
+                SECRET_KEY: secretKey,
             };
             var url = redirectUrl.replace(/\b(?:SECRET_KEY|ACCOUNT_ID)\b/gi, function (matched) { return mapObj[matched]; });
             result.push(react_1.default.createElement("li", { tabIndex: 0, className: "single-wallet sidebar ".concat(wallet.name), key: wallet.name, onClick: function () {
