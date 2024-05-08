@@ -25,13 +25,13 @@ const borsh_1 = require("borsh");
 const util_1 = require("util");
 let sha256Hash;
 // @ts-ignore
-if (typeof crypto === 'undefined') {
-    const nodeCrypto = require('crypto');
-    sha256Hash = (ab) => nodeCrypto.createHash('sha256').update(ab).digest();
+if (typeof crypto === "undefined") {
+    const nodeCrypto = require("crypto");
+    sha256Hash = (ab) => nodeCrypto.createHash("sha256").update(ab).digest();
 }
 else {
     // @ts-ignore
-    sha256Hash = (ab) => crypto.subtle.digest('SHA-256', ab);
+    sha256Hash = (ab) => crypto.subtle.digest("SHA-256", ab);
 }
 /// How much Gas each each cross contract call with cost to be converted to a receipt
 const GAS_PER_CCC = 5000000000000; // 5 TGas
@@ -39,10 +39,10 @@ const RECEIPT_GAS_COST = 2500000000000; // 2.5 TGas
 const YOCTO_PER_GAS = 100000000; // 100 million
 exports.ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 /// How much yoctoNEAR it costs to store 1 access key
-const ACCESS_KEY_STORAGE = new bn_js_1.default('1000000000000000000000');
-const key2str = (v) => (typeof v === 'string' ? v : v.pk);
+const ACCESS_KEY_STORAGE = new bn_js_1.default("1000000000000000000000");
+const key2str = (v) => (typeof v === "string" ? v : v.pk);
 exports.key2str = key2str;
-const hashBuf = (str, fromHex = false) => sha256Hash(Buffer.from(str, fromHex ? 'hex' : 'utf8'));
+const hashBuf = (str, fromHex = false) => sha256Hash(Buffer.from(str, fromHex ? "hex" : "utf8"));
 /**
  * Get the public key from a given secret key.
  *
@@ -113,7 +113,7 @@ const getNFTMetadata = ({ contractId, tokenId, }) => __awaiter(void 0, void 0, v
     const { viewCall } = (0, keypom_1.getEnv)();
     const res = yield viewCall({
         contractId,
-        methodName: 'nft_token',
+        methodName: "nft_token",
         args: {
             token_id: tokenId,
         },
@@ -141,7 +141,7 @@ const getFTMetadata = ({ contractId, }) => __awaiter(void 0, void 0, void 0, fun
     const { viewCall } = (0, keypom_1.getEnv)();
     const res = yield viewCall({
         contractId,
-        methodName: 'ft_metadata',
+        methodName: "ft_metadata",
         args: {},
     });
     return res;
@@ -204,7 +204,7 @@ exports.getFTMetadata = getFTMetadata;
  */
 const createNFTSeries = ({ account, wallet, dropId, metadata, royalty, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { getAccount, networkId } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
     account = yield getAccount({ account, wallet });
     const actualMetadata = {
         title: metadata.title,
@@ -220,29 +220,36 @@ const createNFTSeries = ({ account, wallet, dropId, metadata, royalty, }) => __a
         reference: metadata.reference,
         reference_hash: metadata.referenceHash,
     };
-    const nftSeriesAccount = networkId == 'testnet' ? 'nft-v2.keypom.testnet' : 'nft-v2.keypom.near';
+    const nftSeriesAccount = networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
     const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
     const txnInfo = {
         receiverId: nftSeriesAccount,
         signerId: account.accountId,
         actions: [
             {
-                enum: 'FunctionCall',
+                enum: "FunctionCall",
                 functionCall: {
-                    methodName: 'create_series',
+                    methodName: "create_series",
                     args: (0, transactions_1.stringifyJsonOrBytes)({
                         mint_id: parseInt(dropId),
                         metadata: actualMetadata,
                         royalty,
                     }),
-                    gas: '50000000000000',
-                    deposit: (0, utils_1.parseNearAmount)('0.25'),
-                }
+                    gas: BigInt("50000000000000"),
+                    deposit: BigInt((0, utils_1.parseNearAmount)("0.25")),
+                },
             },
         ],
     };
-    const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
-    return (0, exports.execute)({ account: account, transactions: [transaction] });
+    const transaction = yield (0, exports.convertBasicTransaction)({
+        txnInfo,
+        signerId: account.accountId,
+        signerPk: pk,
+    });
+    return (0, exports.execute)({
+        account: account,
+        transactions: [transaction],
+    });
 });
 exports.createNFTSeries = createNFTSeries;
 /**
@@ -334,13 +341,13 @@ const formatLinkdropUrl = ({ claimPage, networkId, contractId, secretKeys, custo
     const { networkId: envNetworkId, contractId: envContractId } = (0, keypom_1.getEnv)();
     networkId = networkId || envNetworkId;
     contractId = contractId || envContractId;
-    (0, checks_1.assert)(secretKeys, 'Secret keys must be passed in as either an array or a single string');
+    (0, checks_1.assert)(secretKeys, "Secret keys must be passed in as either an array or a single string");
     (0, checks_1.assert)(customURL ||
-        Object.prototype.hasOwnProperty.call(keypom_1.supportedLinkdropClaimPages[networkId], claimPage), 'Either a custom base URL or a supported claim page must be passed in.');
+        Object.prototype.hasOwnProperty.call(keypom_1.supportedLinkdropClaimPages[networkId], claimPage), "Either a custom base URL or a supported claim page must be passed in.");
     customURL =
         customURL || keypom_1.supportedLinkdropClaimPages[networkId][claimPage];
     // If the secret key is a single string, convert it to an array
-    if (typeof secretKeys === 'string') {
+    if (typeof secretKeys === "string") {
         secretKeys = [secretKeys];
     }
     // insert the contractId and secret key into the base URL based on the CONTRACT_ID and SECRET_KEY field
@@ -348,9 +355,9 @@ const formatLinkdropUrl = ({ claimPage, networkId, contractId, secretKeys, custo
     // loop through all secret keys
     secretKeys.forEach((secretKey) => {
         // insert the secret key into the base URL
-        let url = customURL.replace('SECRET_KEY', secretKey);
+        let url = customURL.replace("SECRET_KEY", secretKey);
         // insert the contract ID into the base URL
-        url = url.replace('CONTRACT_ID', contractId);
+        url = url.replace("CONTRACT_ID", contractId);
         // add the URL to the array of URLs
         returnedURLs.push(url);
     });
@@ -376,7 +383,7 @@ exports.formatLinkdropUrl = formatLinkdropUrl;
  */
 const hashPassword = (str, fromHex = false) => __awaiter(void 0, void 0, void 0, function* () {
     const buf = yield hashBuf(str, fromHex);
-    return Buffer.from(buf).toString('hex');
+    return Buffer.from(buf).toString("hex");
 });
 exports.hashPassword = hashPassword;
 /**
@@ -463,7 +470,7 @@ const generateKeys = ({ numKeys, rootEntropy, metaEntropy, autoMetaNonceStart, }
     }
     // Ensure that if metaEntropy is provided, it should be the same length as the number of keys
     const numEntropy = (metaEntropy === null || metaEntropy === void 0 ? void 0 : metaEntropy.length) || numKeys;
-    (0, checks_1.assert)(numEntropy == numKeys, 'You must provide the same number of meta entropy values as the number of keys');
+    (0, checks_1.assert)(numEntropy == numKeys, "You must provide the same number of meta entropy values as the number of keys");
     const keyPairs = [];
     const publicKeys = [];
     const secretKeys = [];
@@ -527,8 +534,8 @@ const viewAccessKeyData = ({ accountId, publicKey, secretKey, }) => __awaiter(vo
         publicKey = (0, exports.getPubFromSecret)(secretKey);
     }
     const res = yield provider.query({
-        request_type: 'view_access_key',
-        finality: 'final',
+        request_type: "view_access_key",
+        finality: "final",
         account_id: accountId,
         public_key: publicKey,
     });
@@ -560,7 +567,7 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
     if (wallet) {
         // wallet might be Promise<Wallet> or value, either way doesn't matter
         wallet = yield wallet;
-        console.log('wallet: ', wallet);
+        console.log("wallet: ", wallet);
         // might be able to sign transactions with app key
         let needsRedirect = false;
         const selectorTxns = [];
@@ -570,30 +577,30 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
                 needsRedirect = true;
             tx.actions.forEach((a) => {
                 selectorActions.push({
-                    type: 'FunctionCall',
+                    type: "FunctionCall",
                     params: {
                         methodName: a.functionCall.methodName,
                         args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
-                        gas: a.functionCall.gas
-                    }
+                        gas: a.functionCall.gas,
+                    },
                 });
                 const { deposit } = a.params;
-                if (deposit && deposit !== '0')
+                if (deposit && deposit !== "0")
                     needsRedirect = true;
             });
             selectorTxns.push({
                 signerId: tx.signerId,
                 receiverId: tx.receiverId,
-                actions: selectorActions
+                actions: selectorActions,
             });
         });
-        console.log('needsRedirect: ', needsRedirect);
-        console.log('transactions: ', transactions);
+        console.log("needsRedirect: ", needsRedirect);
+        console.log("transactions: ", transactions);
         if (needsRedirect)
             return yield wallet.signAndSendTransactions({
                 transactions: selectorTxns,
-                callbackUrl: successUrl
+                callbackUrl: successUrl,
             });
         // sign txs in serial without redirect
         const responses = [];
@@ -601,25 +608,25 @@ const execute = ({ transactions, account, wallet, fundingAccount, successUrl, })
             const selectorActions = [];
             tx.actions.forEach((a) => {
                 selectorActions.push({
-                    type: 'FunctionCall',
+                    type: "FunctionCall",
                     params: {
                         methodName: a.functionCall.methodName,
                         args: JSON.parse(new util_1.TextDecoder().decode(a.functionCall.args)),
                         deposit: a.functionCall.deposit,
-                        gas: a.functionCall.gas
-                    }
+                        gas: a.functionCall.gas,
+                    },
                 });
             });
             responses.push(yield wallet.signAndSendTransaction({
                 actions: selectorActions,
             }));
         }
-        console.log('responses: ', responses);
+        console.log("responses: ", responses);
         return responses;
     }
     /// instance of NEAR Account (backend usage)
     const nearAccount = account || fundingAccount;
-    (0, checks_1.assert)(nearAccount, 'Call with either a NEAR Account argument \'account\' or initialize Keypom with a \'fundingAccount\'');
+    (0, checks_1.assert)(nearAccount, "Call with either a NEAR Account argument 'account' or initialize Keypom with a 'fundingAccount'");
     return yield signAndSendTransactions(nearAccount, (0, exports.transformTransactions)(transactions));
 });
 exports.execute = execute;
@@ -648,13 +655,13 @@ exports.execute = execute;
  * @group Registering Key Uses
  */
 const ftTransferCall = ({ account, wallet, contractId, absoluteAmount, amount, dropId, returnTransaction = false, }) => __awaiter(void 0, void 0, void 0, function* () {
-    const { getAccount, receiverId: keypomContractId, viewCall, } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
+    const { getAccount, receiverId: keypomContractId, viewCall } = (0, keypom_1.getEnv)();
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
     account = yield getAccount({ account, wallet });
     if (amount) {
         const metadata = yield viewCall({
             contractId,
-            methodName: 'ft_metadata',
+            methodName: "ft_metadata",
         });
         absoluteAmount = (0, exports.parseFTAmount)(amount, metadata.decimals);
     }
@@ -664,24 +671,31 @@ const ftTransferCall = ({ account, wallet, contractId, absoluteAmount, amount, d
         signerId: account.accountId,
         actions: [
             {
-                enum: 'FunctionCall',
+                enum: "FunctionCall",
                 functionCall: {
-                    methodName: 'ft_transfer_call',
+                    methodName: "ft_transfer_call",
                     args: (0, transactions_1.stringifyJsonOrBytes)({
                         receiver_id: keypomContractId,
                         amount: absoluteAmount,
                         msg: dropId.toString(),
                     }),
-                    gas: '50000000000000',
-                    deposit: '1',
-                }
+                    gas: BigInt("50000000000000"),
+                    deposit: BigInt("1"),
+                },
             },
         ],
     };
-    const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
+    const transaction = yield (0, exports.convertBasicTransaction)({
+        txnInfo,
+        signerId: account.accountId,
+        signerPk: pk,
+    });
     if (returnTransaction)
         return transaction;
-    return (0, exports.execute)({ account: account, transactions: [transaction] });
+    return (0, exports.execute)({
+        account: account,
+        transactions: [transaction],
+    });
 });
 exports.ftTransferCall = ftTransferCall;
 /**
@@ -717,9 +731,9 @@ exports.ftTransferCall = ftTransferCall;
  */
 const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, returnTransactions = false, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { getAccount, receiverId } = (0, keypom_1.getEnv)();
-    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), 'Passed in account is not a valid account object.');
+    (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
     account = yield getAccount({ account, wallet });
-    (0, checks_1.assert)(tokenIds.length < 6, 'This method can only transfer 6 NFTs in 1 batch transaction.');
+    (0, checks_1.assert)(tokenIds.length < 6, "This method can only transfer 6 NFTs in 1 batch transaction.");
     const responses = [];
     const transactions = [];
     /// TODO batch calls in parallel where it makes sense
@@ -730,21 +744,25 @@ const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, return
             signerId: account.accountId,
             actions: [
                 {
-                    enum: 'FunctionCall',
+                    enum: "FunctionCall",
                     functionCall: {
-                        methodName: 'nft_transfer_call',
+                        methodName: "nft_transfer_call",
                         args: (0, transactions_1.stringifyJsonOrBytes)({
                             receiver_id: receiverId,
                             token_id: tokenIds[i],
                             msg: dropId.toString(),
                         }),
-                        gas: '50000000000000',
-                        deposit: '1',
-                    }
+                        gas: BigInt("50000000000000"),
+                        deposit: BigInt("1"),
+                    },
                 },
             ],
         };
-        const transaction = yield (0, exports.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk });
+        const transaction = yield (0, exports.convertBasicTransaction)({
+            txnInfo,
+            signerId: account.accountId,
+            signerPk: pk,
+        });
         transactions.push(transaction);
         if (returnTransactions)
             continue;
@@ -758,20 +776,20 @@ const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, return
 exports.nftTransferCall = nftTransferCall;
 /// https://github.com/near/near-api-js/blob/7f16b10ece3c900aebcedf6ebc660cc9e604a242/packages/near-api-js/src/utils/format.ts#L53
 const parseFTAmount = (amt, decimals) => {
-    amt = amt.replace(/,/g, '').trim();
-    const split = amt.split('.');
+    amt = amt.replace(/,/g, "").trim();
+    const split = amt.split(".");
     const wholePart = split[0];
-    const fracPart = split[1] || '';
+    const fracPart = split[1] || "";
     if (split.length > 2 || fracPart.length > decimals) {
         throw new Error(`Cannot parse '${amt}' as NEAR amount`);
     }
-    return trimLeadingZeroes(wholePart + fracPart.padEnd(decimals, '0'));
+    return trimLeadingZeroes(wholePart + fracPart.padEnd(decimals, "0"));
 };
 exports.parseFTAmount = parseFTAmount;
 const trimLeadingZeroes = (value) => {
-    value = value.replace(/^0+/, '');
-    if (value === '') {
-        return '0';
+    value = value.replace(/^0+/, "");
+    if (value === "") {
+        return "0";
     }
     return value;
 };
@@ -821,7 +839,7 @@ const createAction = (action) => {
         const { beneficiaryId } = action.deleteAccount;
         return transactions_1.actionCreators.deleteAccount(beneficiaryId);
     }
-    throw new Error('Unknown action');
+    throw new Error("Unknown action");
 };
 exports.createAction = createAction;
 /** @group Utility */
@@ -829,36 +847,36 @@ const getStorageBase = ({ public_keys, deposit_per_use, drop_id, config, metadat
     const storageCostNEARPerByte = 0.00001;
     let totalBytes = 0;
     // Get the bytes per public key, multiply it by number of keys, and add it to the total
-    const bytesPerKey = Buffer.from('ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim').length;
+    const bytesPerKey = Buffer.from("ed25519:88FHvWTp21tahAobQGjD8YweXGRgA7jE8TSQM6yg4Cim").length;
     const totalBytesForKeys = bytesPerKey * ((public_keys === null || public_keys === void 0 ? void 0 : public_keys.length) || 0);
     // console.log('totalBytesForKeys: ', totalBytesForKeys)
     // Bytes for the deposit per use
     const bytesForDeposit = Buffer.from(deposit_per_use.toString()).length + 40;
     // console.log('bytesForDeposit: ', bytesForDeposit)
     // Bytes for the drop ID
-    const bytesForDropId = Buffer.from(drop_id || '').length + 40;
+    const bytesForDropId = Buffer.from(drop_id || "").length + 40;
     // console.log('bytesForDropId: ', bytesForDropId)
     // Bytes for the config
-    const bytesForConfig = Buffer.from(JSON.stringify(config || '')).length + 40;
+    const bytesForConfig = Buffer.from(JSON.stringify(config || "")).length + 40;
     // console.log('bytesForConfig: ', bytesForConfig)
     // Bytes for the metadata. 66 comes from collection initialization
-    const bytesForMetadata = Buffer.from(metadata || '').length + 66;
+    const bytesForMetadata = Buffer.from(metadata || "").length + 66;
     // console.log('bytesForMetadata: ', bytesForMetadata)
     // Bytes for the simple data
-    const bytesForSimple = Buffer.from(JSON.stringify(simple || '')).length + 40;
+    const bytesForSimple = Buffer.from(JSON.stringify(simple || "")).length + 40;
     // console.log('bytesForSimple: ', bytesForSimple)
     // Bytes for the FT data
-    const bytesForFT = Buffer.from(JSON.stringify(ft || '')).length + 40;
+    const bytesForFT = Buffer.from(JSON.stringify(ft || "")).length + 40;
     // console.log('bytesForFT: ', bytesForFT)
     // Bytes for the NFT data
-    const bytesForNFT = Buffer.from(JSON.stringify(nft || '')).length + 40;
+    const bytesForNFT = Buffer.from(JSON.stringify(nft || "")).length + 40;
     // console.log('bytesForNFT: ', bytesForNFT)
     // Bytes for the FC data
-    const bytesForFC = Buffer.from(JSON.stringify(fc || '')).length + 40;
+    const bytesForFC = Buffer.from(JSON.stringify(fc || "")).length + 40;
     // console.log('bytesForFC: ', bytesForFC)
     // Bytes for the passwords per use
     // Magic numbers come from plotting SDK data against protocol data and finding the best fit
-    const bytesForPasswords = Buffer.from(JSON.stringify(passwords_per_use || '')).length * 4;
+    const bytesForPasswords = Buffer.from(JSON.stringify(passwords_per_use || "")).length * 4;
     // console.log('bytesForPasswords: ', bytesForPasswords)
     totalBytes +=
         totalBytesForKeys +
@@ -892,7 +910,7 @@ const getStorageBase = ({ public_keys, deposit_per_use, drop_id, config, metadat
 };
 exports.getStorageBase = getStorageBase;
 /** Initiate the connection to the NEAR blockchain. @group Utility */
-const estimateRequiredDeposit = ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage = (0, utils_1.parseNearAmount)('0.034'), keyStorage = (0, utils_1.parseNearAmount)('0.0065'), fcData, ftData, }) => __awaiter(void 0, void 0, void 0, function* () {
+const estimateRequiredDeposit = ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage = (0, utils_1.parseNearAmount)("0.034"), keyStorage = (0, utils_1.parseNearAmount)("0.0065"), fcData, ftData, }) => __awaiter(void 0, void 0, void 0, function* () {
     const numKeysBN = new bn_js_1.default(numKeys.toString());
     const usesPerKeyBN = new bn_js_1.default(usesPerKey.toString());
     const totalRequiredStorage = new bn_js_1.default(storage).add(new bn_js_1.default(keyStorage).mul(numKeysBN));
@@ -921,12 +939,12 @@ const estimateRequiredDeposit = ({ near, depositPerUse, numKeys, usesPerKey, att
         requiredDeposit = requiredDeposit.add(new bn_js_1.default(extraFtCosts));
         // console.log('requiredDeposit AFTER FT costs: ', requiredDeposit.toString())
     }
-    return requiredDeposit.toString() || '0';
+    return requiredDeposit.toString() || "0";
 });
 exports.estimateRequiredDeposit = estimateRequiredDeposit;
 // Estimate the amount of allowance required for a given attached gas.
 const estimatePessimisticAllowance = (attachedGas) => {
-    if (typeof attachedGas !== 'number')
+    if (typeof attachedGas !== "number")
         attachedGas = parseInt(attachedGas);
     // Get the number of CCCs you can make with the attached GAS
     const numCCCs = Math.floor(attachedGas / GAS_PER_CCC);
@@ -988,10 +1006,10 @@ const getNoneFcsAndDepositRequired = (fcData, usesPerKey) => {
 };
 // Estimate the amount of allowance required for a given attached gas.
 const getFtCosts = (near, numKeys, usesPerKey, ftContract) => __awaiter(void 0, void 0, void 0, function* () {
-    const viewAccount = yield near.account('foo');
+    const viewAccount = yield near.account("foo");
     const { min } = yield viewAccount.viewFunction({
         contractId: ftContract,
-        methodName: 'storage_balance_bounds',
+        methodName: "storage_balance_bounds",
         args: {},
     });
     // console.log('storageBalanceBounds: ', storageBalanceBounds)
@@ -1000,7 +1018,7 @@ const getFtCosts = (near, numKeys, usesPerKey, ftContract) => __awaiter(void 0, 
         .mul(new bn_js_1.default(usesPerKey))
         .add(new bn_js_1.default(min));
     // console.log('costs: ', costs.toString());
-    return costs.toString() || '0';
+    return costs.toString() || "0";
 });
 /**
  * Generate passwords for a set of public keys. A unique password will be created for each specified use of a public key where the use is NOT zero indexed (i.e 1st use = 1).
@@ -1023,10 +1041,10 @@ function generatePerUsePasswords({ publicKeys, uses, basePassword, }) {
             for (let j = 0; j < uses.length; j++) {
                 // First inner hash takes in utf8 and returns hash
                 const innerHashBuff = yield hashBuf(basePassword + publicKeys[i] + uses[j].toString());
-                const innerHash = Buffer.from(innerHashBuff).toString('hex');
+                const innerHash = Buffer.from(innerHashBuff).toString("hex");
                 // Outer hash takes in hex and returns hex
                 const outerHashBuff = yield hashBuf(innerHash, true);
-                const outerHash = Buffer.from(outerHashBuff).toString('hex');
+                const outerHash = Buffer.from(outerHashBuff).toString("hex");
                 const jsonPw = {
                     pw: outerHash,
                     key_use: uses[j],
@@ -1042,14 +1060,14 @@ exports.generatePerUsePasswords = generatePerUsePasswords;
 // Taken from https://stackoverflow.com/a/61375162/16441367
 const snakeToCamel = (str) => str
     .toLowerCase()
-    .replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', ''));
+    .replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace("-", "").replace("_", ""));
 exports.snakeToCamel = snakeToCamel;
 // Taken from https://stackoverflow.com/a/26215431/16441367
 const toCamel = (o) => {
     let newO, origKey, newKey, value;
     if (o instanceof Array) {
         return o.map(function (value) {
-            if (typeof value === 'object') {
+            if (typeof value === "object") {
                 value = (0, exports.toCamel)(value);
             }
             return value;
@@ -1073,31 +1091,31 @@ const toCamel = (o) => {
 };
 exports.toCamel = toCamel;
 const nearArgsToYocto = (nearAmount, yoctoAmount) => {
-    let yoctoToReturn = yoctoAmount || '0';
+    let yoctoToReturn = yoctoAmount || "0";
     if (nearAmount) {
-        yoctoToReturn = (0, utils_1.parseNearAmount)(nearAmount.toString()) || '0';
+        yoctoToReturn = (0, utils_1.parseNearAmount)(nearAmount.toString()) || "0";
     }
     return yoctoToReturn;
 };
 exports.nearArgsToYocto = nearArgsToYocto;
-const convertBasicTransaction = ({ txnInfo, signerId, signerPk }) => __awaiter(void 0, void 0, void 0, function* () {
+const convertBasicTransaction = ({ txnInfo, signerId, signerPk, }) => __awaiter(void 0, void 0, void 0, function* () {
     const { near } = (0, keypom_1.getEnv)();
     const account = new accounts_1.Account(near.connection, signerId);
     const { provider } = account.connection;
     const actions = txnInfo.actions.map((action) => (0, exports.createAction)(action));
-    const block = yield provider.block({ finality: 'final' });
-    const accessKey = yield provider.query(`access_key/${signerId}/${signerPk}`, '');
+    const block = yield provider.block({ finality: "final" });
+    const accessKey = yield provider.query(`access_key/${signerId}/${signerPk}`, "");
     return (0, transactions_1.createTransaction)(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + 1, actions, (0, borsh_1.baseDecode)(block.header.hash));
 });
 exports.convertBasicTransaction = convertBasicTransaction;
-const createTransactions = ({ txnInfos, signerId, signerPk }) => {
+const createTransactions = ({ txnInfos, signerId, signerPk, }) => {
     const { near } = (0, keypom_1.getEnv)();
     return Promise.all(txnInfos.map((txnInfo, index) => __awaiter(void 0, void 0, void 0, function* () {
         const account = new accounts_1.Account(near.connection, signerId);
         const { provider } = account.connection;
         const actions = txnInfo.actions.map((action) => (0, exports.createAction)(action));
-        const block = yield provider.block({ finality: 'final' });
-        const accessKey = yield provider.query(`access_key/${signerId}/${signerPk}`, '');
+        const block = yield provider.block({ finality: "final" });
+        const accessKey = yield provider.query(`access_key/${signerId}/${signerPk}`, "");
         return (0, transactions_1.createTransaction)(signerId, signerPk, txnInfo.receiverId, accessKey.nonce + index + 1, actions, (0, borsh_1.baseDecode)(block.header.hash));
     })));
 };

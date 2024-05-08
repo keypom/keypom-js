@@ -1,11 +1,11 @@
-import { Account } from '@near-js/accounts';
-import { BrowserLocalStorageKeyStore } from '@near-js/keystores-browser';
-import { FinalExecutionOutcome } from '@near-js/types';
-import { Near } from '@near-js/wallet-account';
-import { InstantLinkWalletBehaviour, Transaction } from '@near-wallet-selector/core';
-import BN from 'bn.js';
-import { KeypomTrialModal } from '../modal/src';
-import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs } from './types';
+import { Account } from "@near-js/accounts";
+import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
+import { FinalExecutionOutcome } from "@near-js/types";
+import { Near } from "@near-js/wallet-account";
+import { InstantLinkWalletBehaviour, Transaction } from "@near-wallet-selector/core";
+import BN from "bn.js";
+import { KeypomTrialModal } from "../modal/src";
+import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs } from "./types";
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
@@ -32,7 +32,7 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;
     signAndSendTransactions(params: {
         transactions: Transaction[];
-    }): Promise<FinalExecutionOutcome[]>;
+    }): Promise<import("@near-wallet-selector/core").FinalExecutionOutcome[]>;
     showModal: (modalType?: {
         id: string;
     }) => void;

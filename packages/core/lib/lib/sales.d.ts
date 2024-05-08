@@ -1,6 +1,5 @@
-import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account } from '@near-js/accounts';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { Account } from "@near-js/accounts";
+import { AnyWallet } from "./types/params";
 /**
  * Add a list of account IDs to a drop's sale allowlist. If the allowlist is empty, anyone can purchase keys. The sale object must exist in the drop's config for this to go through.
  *
@@ -208,4 +207,3 @@ export declare const updateSale: ({ account, wallet, dropId, maxNumKeys, pricePe
      */
     end?: number;
 }) => Promise<any>;
-export {};

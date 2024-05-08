@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.parseIPFSDataFromURL = exports.keyHasPermissionForTransaction = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
+exports.parseInstantSignInUrl = exports.parseTrialUrl = exports.updateKeypomContractIfValid = exports.addUserToMappingContract = exports.parseIPFSDataFromURL = exports.getCidFromUrl = exports.keyHasPermissionForTransaction = exports.getAccountFromMap = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.KEYPOM_LOCAL_STORAGE_KEY = void 0;
 var core_1 = require("@keypom/core");
 var utils_1 = require("@near-js/utils");
 var types_1 = require("../core/types");
@@ -105,15 +105,23 @@ var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) {
     });
 }); };
 exports.keyHasPermissionForTransaction = keyHasPermissionForTransaction;
+var getCidFromUrl = function () {
+    var split = window.location.href.split("?cid=");
+    if (split.length > 1) {
+        var cid = split[1];
+        console.log("found CID in URL: ", cid);
+        return cid;
+    }
+    return null;
+};
+exports.getCidFromUrl = getCidFromUrl;
 var parseIPFSDataFromURL = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var split, cid, response, data;
+    var cid, response, data;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                split = window.location.href.split("?cid=");
-                if (!(split.length > 1)) return [3 /*break*/, 3];
-                cid = split[1];
-                console.log("found CID in URL: ", cid);
+                cid = (0, exports.getCidFromUrl)();
+                if (!(cid != null)) return [3 /*break*/, 3];
                 return [4 /*yield*/, fetch("https://cloudflare-ipfs.com/ipfs/".concat(cid))];
             case 1:
                 response = _a.sent();
@@ -121,12 +129,17 @@ var parseIPFSDataFromURL = function () { return __awaiter(void 0, void 0, void 0
             case 2:
                 data = _a.sent();
                 if ((0, types_1.isKeypomParams)(data)) {
-                    console.log('Successfully parsed Keypom params from URL.');
+                    console.log('Successfully parsed Keypom params from URL: ', data);
                     return [2 /*return*/, data];
                 }
-                console.log('data can not be cast to Keypom params: ', data);
-                _a.label = 3;
-            case 3: return [2 /*return*/];
+                else {
+                    console.log('data can not be cast to Keypom params: ', data);
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                console.log('no cid found in URL');
+                _a.label = 4;
+            case 4: return [2 /*return*/];
         }
     });
 }); };

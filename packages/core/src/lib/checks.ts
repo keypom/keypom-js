@@ -1,10 +1,10 @@
 //import { Account, Near } from "near-api-js";
-import { Account } from '@near-js/accounts';
-import { Near } from '@near-js/wallet-account';
-import { getEnv, supportedKeypomContracts } from './keypom';
-import { FCData } from './types/fc';
-import { Funder } from './types/general';
-import { ProtocolReturnedDropConfig } from './types/protocol';
+import { Account } from "@near-js/accounts";
+import { Near } from "@near-js/wallet-account";
+import { getEnv, supportedKeypomContracts } from "./keypom";
+import { FCData } from "./types/fc";
+import { Funder } from "./types/general";
+import { ProtocolReturnedDropConfig } from "./types/protocol";
 
 export function isValidKeypomContract(keypomContractId: string) {
     const { networkId } = getEnv();
@@ -51,39 +51,39 @@ export const assert = (exp, m) => {
 export const assertValidDropConfig = (config?: ProtocolReturnedDropConfig) => {
     assert(
         (config?.uses_per_key || 1) != 0,
-        'Cannot have 0 uses per key for a drop config'
+        "Cannot have 0 uses per key for a drop config"
     );
 
     if (config?.usage?.permissions) {
         assert(
-            config.usage.permissions == 'create_account_and_claim' ||
-                config.usage.permissions == 'claim',
-            'Invalid permission type for usage. Must be \'create_account_and_claim\' or \'claim\''
+            config.usage.permissions == "create_account_and_claim" ||
+                config.usage.permissions == "claim",
+            "Invalid permission type for usage. Must be 'create_account_and_claim' or 'claim'"
         );
     }
 
     if (config?.time) {
         const currentBlockTimestamp = Date.now() * 1e6;
-        if(config.time.interval != undefined){
+        if (config.time.interval != undefined) {
             assert(
                 config.time.start != undefined,
-                'If you want to set a claim interval, you must also set a start timestamp'
+                "If you want to set a claim interval, you must also set a start timestamp"
             );
         }
         assert(
             (config.time.start || currentBlockTimestamp) >=
                 currentBlockTimestamp,
-            'The start timestamp must be greater than the current block timestamp'
+            "The start timestamp must be greater than the current block timestamp"
         );
         assert!(
             (config.time.end || currentBlockTimestamp) >= currentBlockTimestamp,
-            'The end timestamp must be greater than the current block timestamp'
+            "The end timestamp must be greater than the current block timestamp"
         );
 
         if (config.time.start != undefined && config.time.end != undefined) {
             assert(
                 config.time.start < config.time.end,
-                'The start timestamp must be less than the end timestamp'
+                "The start timestamp must be less than the end timestamp"
             );
         }
     }
@@ -99,19 +99,19 @@ export const assertValidFCData = (
         if (usesPerKey == 1) {
             assert(
                 numMethodData == 1,
-                'Cannot have more Method Data than the number of uses per key'
+                "Cannot have more Method Data than the number of uses per key"
             );
         } else if (numMethodData > 1) {
             assert(
                 numMethodData == usesPerKey,
-                'Number of FCs must match number of uses per key if more than 1 is specified'
+                "Number of FCs must match number of uses per key if more than 1 is specified"
             );
         }
 
         if (usesPerKey > 1 && numMethodData == 1) {
             assert(
                 fcData.methods[0] != undefined,
-                'cannot have a single none function call'
+                "cannot have a single none function call"
             );
         }
 
@@ -124,24 +124,24 @@ export const assertValidFCData = (
                     if (methodData) {
                         assert(
                             methodData.methodName != undefined,
-                            'Must specify a method name'
+                            "Must specify a method name"
                         );
                         assert(
                             methodData.args != undefined,
-                            'Must specify arguments for method'
+                            "Must specify arguments for method"
                         );
                         assert(
-                            typeof methodData.args == 'string',
-                            'Arguments must be a string. If you want to pass a JSON object, stringify it first.'
+                            typeof methodData.args == "string",
+                            "Arguments must be a string. If you want to pass a JSON object, stringify it first."
                         );
                         assert(
                             methodData.receiverId != undefined,
-                            'Must specify arguments for method'
+                            "Must specify arguments for method"
                         );
                         assert(
                             isValidKeypomContract(methodData.receiverId) ===
                                 false,
-                            'Cannot have a keypom contract as the receiver'
+                            "Cannot have a keypom contract as the receiver"
                         );
                     }
                 }
@@ -156,7 +156,7 @@ export const assertDropIdUnique = async (dropId: string) => {
     try {
         const dropInfo = await viewCall({
             contractId,
-            methodName: 'get_drop_information',
+            methodName: "get_drop_information",
             args: {
                 drop_id: dropId,
             },

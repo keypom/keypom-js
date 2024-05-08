@@ -3,9 +3,11 @@
     "compilerOptions": {
         "preserveSymlinks": false,
         "outDir": "./lib",
+        "baseUrl": ".", // Make sure baseUrl is set
+        "paths": {
+            "@near-js/types/*": ["node_modules/@near-js/types/lib/*"]
+        }
     },
-    "files": [
-        "src/index.ts"
-    ],
+    "files": ["src/index.ts"],
     "types": ["node"]
 }

@@ -1,16 +1,14 @@
-import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { PasswordPerUse } from './types/drops';
-import { FCData } from './types/fc';
-import { FTData, FungibleTokenMetadata } from './types/ft';
-import { BasicTransaction, GeneratedKeyPairs } from './types/general';
-import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from './types/nft';
-import { CreateDropProtocolArgs } from './types/params';
-import { PublicKey } from '@near-js/crypto';
-import { Account, SignAndSendTransactionOptions } from '@near-js/accounts';
-import { Near } from '@near-js/wallet-account';
-import { FinalExecutionOutcome } from '@near-js/types';
-import { Action, Transaction } from '@near-js/transactions';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { PasswordPerUse } from "./types/drops";
+import { FCData } from "./types/fc";
+import { FTData, FungibleTokenMetadata } from "./types/ft";
+import { BasicTransaction, GeneratedKeyPairs } from "./types/general";
+import { NonFungibleTokenMetadata, ProtocolReturnedNonFungibleTokenObject } from "./types/nft";
+import { AnyWallet, CreateDropProtocolArgs } from "./types/params";
+import { PublicKey } from "@near-js/crypto";
+import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
+import { Near } from "@near-js/wallet-account";
+import { FinalExecutionOutcome } from "@near-js/types";
+import { Action, Transaction } from "@near-js/transactions";
 export declare const ATTACHED_GAS_FROM_WALLET = 100000000000000;
 export declare const key2str: (v: any) => any;
 /**
@@ -377,7 +375,7 @@ export declare const viewAccessKeyData: ({ accountId, publicKey, secretKey, }: {
 export declare const execute: ({ transactions, account, wallet, fundingAccount, successUrl, }: {
     transactions: Transaction[];
     account: Account;
-    wallet?: Wallet;
+    wallet?: any;
     fundingAccount?: Account;
     successUrl?: string;
 }) => Promise<void | FinalExecutionOutcome[] | Array<void | FinalExecutionOutcome>>;
@@ -516,14 +514,13 @@ export declare function generatePerUsePasswords({ publicKeys, uses, basePassword
 export declare const snakeToCamel: (str: any) => any;
 export declare const toCamel: (o: any) => any;
 export declare const nearArgsToYocto: (nearAmount?: string | number, yoctoAmount?: string) => string;
-export declare const convertBasicTransaction: ({ txnInfo, signerId, signerPk }: {
+export declare const convertBasicTransaction: ({ txnInfo, signerId, signerPk, }: {
     txnInfo: BasicTransaction;
     signerId: string;
     signerPk: PublicKey;
 }) => Promise<Transaction>;
-export declare const createTransactions: ({ txnInfos, signerId, signerPk }: {
+export declare const createTransactions: ({ txnInfos, signerId, signerPk, }: {
     txnInfos: BasicTransaction[];
     signerId: string;
     signerPk: PublicKey;
 }) => Promise<Transaction[]>;
-export {};

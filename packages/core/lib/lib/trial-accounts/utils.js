@@ -102,23 +102,23 @@ const generateExecuteArgs = ({ desiredTxns, }) => {
         newTx.actions = [];
         console.log("newTx: ", newTx);
         tx.actions.forEach((action) => {
-            console.log('action: ', action);
+            console.log("action: ", action);
             if (action.type !== "FunctionCall") {
                 throw new Error("Only FunctionCall actions are supported");
             }
             methodDataToValidate.push({
                 receiverId: tx.receiverId,
                 methodName: action.params.methodName,
-                deposit: action.params.deposit
+                deposit: action.params.deposit,
             });
             totalGasBN = totalGasBN.add(new bn_js_1.default(action.params.gas));
             totalDepositsBN = totalDepositsBN.add(new bn_js_1.default(action.params.deposit));
             const newAction = {};
-            console.log('newAction 1: ', newAction);
+            console.log("newAction 1: ", newAction);
             newAction[ACTION_HEADER] = action.type;
-            console.log('newAction 2: ', newAction);
+            console.log("newAction 2: ", newAction);
             newAction.params = (0, exports.wrapTxnParamsForTrial)(action.params);
-            console.log('newAction 3: ', newAction);
+            console.log("newAction 3: ", newAction);
             newTx.actions.push(newAction);
         });
         executeArgs.transactions.push(newTx);

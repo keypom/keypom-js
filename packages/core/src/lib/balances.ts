@@ -1,16 +1,11 @@
-import { assert, isValidAccountObj } from './checks';
-import { getEnv } from './keypom';
+import { assert, isValidAccountObj } from "./checks";
+import { getEnv } from "./keypom";
 
-import {
-    BrowserWalletBehaviour,
-    Wallet,
-} from '@near-wallet-selector/core/lib/wallet/wallet.types';
 //import { Account } from "near-api-js";
-import { nearArgsToYocto } from './keypom-utils';
-import { Account } from '@near-js/accounts';
-import { Action, stringifyJsonOrBytes } from '@near-js/transactions';
-
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { nearArgsToYocto } from "./keypom-utils";
+import { Account } from "@near-js/accounts";
+import { Action, stringifyJsonOrBytes } from "@near-js/transactions";
+import { AnyWallet } from "./types/params";
 
 /**
  * Deposit some amount of $NEAR or yoctoNEAR$ into the Keypom contract. This amount can then be used to create drops or add keys without
@@ -64,21 +59,21 @@ export const addToBalance = async ({
 
     assert(
         isValidAccountObj(account),
-        'Passed in account is not a valid account object.'
+        "Passed in account is not a valid account object."
     );
     account = await getAccount({ account, wallet });
 
     const deposit = nearArgsToYocto(amountNear, amountYocto);
-    assert(amountYocto != '0', 'Amount to add to balance cannot be 0.');
+    assert(amountYocto != "0", "Amount to add to balance cannot be 0.");
 
     const actions: Action[] = [];
     actions.push({
-        enum: 'FunctionCall',
+        enum: "FunctionCall",
         functionCall: {
-            methodName: 'add_to_balance',
+            methodName: "add_to_balance",
             args: stringifyJsonOrBytes({}),
-            gas: '100000000000000',
-            deposit,
+            gas: BigInt("100000000000000"),
+            deposit: BigInt(deposit),
         },
     });
 
@@ -128,18 +123,18 @@ export const withdrawBalance = async ({
 
     assert(
         isValidAccountObj(account),
-        'Passed in account is not a valid account object.'
+        "Passed in account is not a valid account object."
     );
     account = await getAccount({ account, wallet });
 
     const actions: Action[] = [];
     actions.push({
-        enum: 'FunctionCall',
+        enum: "FunctionCall",
         functionCall: {
-            methodName: 'withdraw_from_balance',
+            methodName: "withdraw_from_balance",
             args: stringifyJsonOrBytes({}),
-            gas: '100000000000000',
-            deposit: '0'
+            gas: BigInt("100000000000000"),
+            deposit: BigInt("0"),
         },
     });
 

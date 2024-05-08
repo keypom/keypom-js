@@ -70,24 +70,35 @@ var KeypomWallet = /** @class */ (function () {
         var _this = this;
         this.showModal = function (modalType) {
             if (modalType === void 0) { modalType = { id: modal_types_1.MODAL_TYPE_IDS.TRIAL_OVER }; }
-            console.log('modalType for show modal: ', modalType);
+            console.log("modalType for show modal: ", modalType);
             _this.modal.show(modalType);
         };
         this.checkValidTrialInfo = function () {
             var _a, _b;
-            var instantSignInData = ((_a = _this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs) : undefined;
-            var trialData = ((_b = _this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs) : undefined;
+            var instantSignInData = ((_a = _this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined
+                ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs)
+                : undefined;
+            var trialData = ((_b = _this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined
+                ? (0, selector_utils_1.parseTrialUrl)(_this.trialAccountSpecs)
+                : undefined;
             var isCIDPresent = window.location.href.split("?cid=").length > 1;
-            return instantSignInData !== undefined || trialData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null || isCIDPresent;
+            return (instantSignInData !== undefined ||
+                trialData !== undefined ||
+                (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null ||
+                isCIDPresent);
         };
-        console.log('Initializing Keypom');
+        console.log("Initializing Keypom");
         this.signInContractId = signInContractId;
         this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
         // Only setup the modal if the CID is not present (as to not set it up twice).
         // In the case that the CID is present, it will be setup in `signIn()`
         var isCIDPresent = window.location.href.split("?cid=").length > 1;
-        this.setSpecsFromKeypomParams({ trialAccountSpecs: trialAccountSpecs, instantSignInSpecs: instantSignInSpecs, shouldSetupModal: !isCIDPresent });
+        this.setSpecsFromKeypomParams({
+            trialAccountSpecs: trialAccountSpecs,
+            instantSignInSpecs: instantSignInSpecs,
+            shouldSetupModal: !isCIDPresent,
+        });
     }
     KeypomWallet.prototype.getContractId = function () {
         return this.signInContractId;
@@ -105,33 +116,41 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signInTrialAccount = function (accountId, secretKey) {
         return __awaiter(this, void 0, void 0, function () {
-            var isOriginalLink, isUnclaimed, e_1, keyInfo, keyPerms, isAdding, e_2;
+            var isOriginalLink, isUnclaimed, cid, meta, e_1, keyInfo, keyPerms, isAdding, e_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         isOriginalLink = (0, selector_utils_1.updateKeypomContractIfValid)(accountId);
-                        console.log('isOriginalLink: ', isOriginalLink);
+                        console.log("isOriginalLink: ", isOriginalLink);
                         if (!isOriginalLink) return [3 /*break*/, 7];
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 6, , 7]);
-                        return [4 /*yield*/, (0, core_1.isUnclaimedTrialDrop)({ keypomContractId: accountId, secretKey: secretKey })];
+                        return [4 /*yield*/, (0, core_1.isUnclaimedTrialDrop)({
+                                keypomContractId: accountId,
+                                secretKey: secretKey,
+                            })];
                     case 2:
                         isUnclaimed = _a.sent();
-                        console.log('isUnclaimed: ', isUnclaimed);
+                        console.log("isUnclaimed: ", isUnclaimed);
                         if (!(isUnclaimed === true)) return [3 /*break*/, 3];
+                        cid = (0, selector_utils_1.getCidFromUrl)();
+                        console.log("cid: ", cid);
+                        meta = {
+                            secretKey: secretKey,
+                            redirectUrlBase: this.trialAccountSpecs.baseUrl,
+                            delimiter: this.trialAccountSpecs.delimiter,
+                            includedCid: cid == null ? undefined : cid,
+                        };
+                        console.log("meta: ", meta);
                         this.modal.show({
                             id: modal_types_1.MODAL_TYPE_IDS.BEGIN_TRIAL,
-                            meta: {
-                                secretKey: secretKey,
-                                redirectUrlBase: this.trialAccountSpecs.baseUrl,
-                                delimiter: this.trialAccountSpecs.delimiter,
-                            }
+                            meta: meta,
                         });
                         return [2 /*return*/, []];
                     case 3:
                         // If the drop is claimed, we should attempt to recover the drop
-                        console.log('DROP IS CLAIMED. RECOVERY TODO');
+                        console.log("DROP IS CLAIMED. RECOVERY TODO");
                         return [4 /*yield*/, (0, selector_utils_1.getAccountFromMap)(secretKey)];
                     case 4:
                         accountId = _a.sent();
@@ -139,7 +158,7 @@ var KeypomWallet = /** @class */ (function () {
                     case 5: return [3 /*break*/, 7];
                     case 6:
                         e_1 = _a.sent();
-                        console.log('e checking if drop is from keypom: ', e_1);
+                        console.log("e checking if drop is from keypom: ", e_1);
                         return [3 /*break*/, 7];
                     case 7:
                         _a.trys.push([7, 11, , 12]);
@@ -147,7 +166,8 @@ var KeypomWallet = /** @class */ (function () {
                     case 8:
                         keyInfo = _a.sent();
                         keyPerms = keyInfo.permission.FunctionCall;
-                        if (!(keyPerms.receiver_id === accountId && keyPerms.method_names.includes('execute'))) return [3 /*break*/, 10];
+                        if (!(keyPerms.receiver_id === accountId &&
+                            keyPerms.method_names.includes("execute"))) return [3 /*break*/, 10];
                         return [4 /*yield*/, (0, selector_utils_1.addUserToMappingContract)(accountId, secretKey)];
                     case 9:
                         isAdding = _a.sent();
@@ -158,7 +178,7 @@ var KeypomWallet = /** @class */ (function () {
                     case 10: return [3 /*break*/, 12];
                     case 11:
                         e_2 = _a.sent();
-                        console.log('e: ', e_2);
+                        console.log("e: ", e_2);
                         return [3 /*break*/, 12];
                     case 12: 
                     // Invalid local storage info so return nothing
@@ -189,7 +209,7 @@ var KeypomWallet = /** @class */ (function () {
                         return [3 /*break*/, 3];
                     case 2:
                         e_3 = _a.sent();
-                        console.log('e: ', e_3);
+                        console.log("e: ", e_3);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/, []];
                 }
@@ -203,7 +223,7 @@ var KeypomWallet = /** @class */ (function () {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0: return [4 /*yield*/, (0, core_1.initKeypom)({
-                            network: this.near.connection.networkId
+                            network: this.near.connection.networkId,
                         })];
                     case 1:
                         _d.sent();
@@ -214,11 +234,13 @@ var KeypomWallet = /** @class */ (function () {
                             this.setSpecsFromKeypomParams({
                                 trialAccountSpecs: ipfsData.trialAccountSpecs,
                                 instantSignInSpecs: ipfsData.instantSignInSpecs,
-                                shouldSetupModal: true
+                                shouldSetupModal: true,
                             });
                         }
-                        instantSignInData = ((_a = this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs) : undefined;
-                        console.log('instantSignInData: ', instantSignInData);
+                        instantSignInData = ((_a = this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined
+                            ? (0, selector_utils_1.parseInstantSignInUrl)(this.instantSignInSpecs)
+                            : undefined;
+                        console.log("instantSignInData: ", instantSignInData);
                         if (instantSignInData !== undefined) {
                             if (ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId][instantSignInData.moduleId] === undefined) {
                                 console.warn("Module ID ".concat(instantSignInData.moduleId, " is not supported on ").concat(this.near.connection.networkId, "."));
@@ -226,8 +248,10 @@ var KeypomWallet = /** @class */ (function () {
                             }
                             return [2 /*return*/, this.signInInstantAccount(instantSignInData.accountId, instantSignInData.secretKey, instantSignInData.moduleId)];
                         }
-                        trialData = ((_b = this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs) : undefined;
-                        console.log('trialData: ', trialData);
+                        trialData = ((_b = this.trialAccountSpecs) === null || _b === void 0 ? void 0 : _b.baseUrl) !== undefined
+                            ? (0, selector_utils_1.parseTrialUrl)(this.trialAccountSpecs)
+                            : undefined;
+                        console.log("trialData: ", trialData);
                         if (trialData !== undefined) {
                             return [2 /*return*/, this.signInTrialAccount(trialData.accountId, trialData.secretKey)];
                         }
@@ -248,7 +272,7 @@ var KeypomWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (this.accountId === undefined || this.accountId === null) {
-                            throw new Error('Wallet is already signed out');
+                            throw new Error("Wallet is already signed out");
                         }
                         this.accountId = this.secretKey = this.moduleId = undefined;
                         return [4 /*yield*/, this.keyStore.removeKey(this.near.connection.networkId, this.accountId)];
@@ -267,7 +291,7 @@ var KeypomWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         this.assertSignedIn();
-                        console.log('sign and send txn params: ', params);
+                        console.log("sign and send txn params: ", params);
                         receiverId = params.receiverId, actions = params.actions;
                         _a.label = 1;
                     case 1:
@@ -300,7 +324,7 @@ var KeypomWallet = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log('sign and send txns params inner: ', params);
+                        console.log("sign and send txns params inner: ", params);
                         this.assertSignedIn();
                         transactions = params.transactions;
                         res = [];
@@ -314,7 +338,7 @@ var KeypomWallet = /** @class */ (function () {
                         return [4 /*yield*/, (0, core_1.trialSignAndSendTxns)({
                                 trialAccountId: this.accountId,
                                 trialAccountSecretKey: this.secretKey,
-                                txns: transactions
+                                txns: transactions,
                             })];
                     case 2:
                         res = _a.sent();
@@ -328,8 +352,8 @@ var KeypomWallet = /** @class */ (function () {
                                     id: modal_types_1.MODAL_TYPE_IDS.TRIAL_OVER,
                                     meta: {
                                         accountId: this.accountId,
-                                        secretKey: this.secretKey
-                                    }
+                                        secretKey: this.secretKey,
+                                    },
                                 });
                                 break;
                             }
@@ -338,11 +362,13 @@ var KeypomWallet = /** @class */ (function () {
                                 break;
                             }
                             case core_1.TRIAL_ERRORS.INSUFFICIENT_BALANCE: {
-                                this.modal.show({ id: modal_types_1.MODAL_TYPE_IDS.INSUFFICIENT_BALANCE });
+                                this.modal.show({
+                                    id: modal_types_1.MODAL_TYPE_IDS.INSUFFICIENT_BALANCE,
+                                });
                                 break;
                             }
                             default: {
-                                console.log('Unidentified error when signing txn: ', e_5);
+                                console.log("Unidentified error when signing txn: ", e_5);
                                 break;
                             }
                         }
@@ -353,11 +379,11 @@ var KeypomWallet = /** @class */ (function () {
                             moduleId: this.moduleId,
                             accountId: this.accountId,
                             secretKey: this.secretKey,
-                            near: this.near
+                            near: this.near,
                         })];
                     case 6: return [2 /*return*/, _a.sent()];
                     case 7:
-                        console.log('res sign & send txn: ', res);
+                        console.log("res sign & send txn: ", res);
                         return [2 /*return*/, res];
                 }
             });
@@ -366,7 +392,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.verifyOwner = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                throw Error('KeypomWallet:verifyOwner is deprecated');
+                throw Error("KeypomWallet:verifyOwner is deprecated");
             });
         });
     };
@@ -410,7 +436,7 @@ var KeypomWallet = /** @class */ (function () {
                         dataToWrite = {
                             accountId: accountId,
                             secretKey: secretKey,
-                            moduleId: moduleId
+                            moduleId: moduleId,
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         return [4 /*yield*/, this.keyStore.setKey(this.near.connection.networkId, accountId, crypto_1.KeyPair.fromString(secretKey))];
@@ -424,7 +450,7 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.assertSignedIn = function () {
         if (!this.accountId) {
-            throw new Error('Wallet not signed in');
+            throw new Error("Wallet not signed in");
         }
     };
     KeypomWallet.prototype.setSpecsFromKeypomParams = function (_a) {

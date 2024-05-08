@@ -1,13 +1,28 @@
-import { accountMappingContract, getEnv, getPubFromSecret, supportedKeypomContracts, trialCallMethod, updateKeypomContractId } from '@keypom/core';
-import { parseNearAmount } from '@near-js/utils';
-import { InstantSignInSpecs, InternalInstantSignInSpecs, InternalTrialSignInSpecs, TrialSignInSpecs, isKeypomParams } from '../core/types';
-import { Action } from '@near-js/transactions';
-import { KeypomParams } from '../core/types';
+import {
+    accountMappingContract,
+    getEnv,
+    getPubFromSecret,
+    supportedKeypomContracts,
+    trialCallMethod,
+    updateKeypomContractId,
+} from "@keypom/core";
+import { parseNearAmount } from "@near-js/utils";
+import {
+    InstantSignInSpecs,
+    InternalInstantSignInSpecs,
+    InternalTrialSignInSpecs,
+    TrialSignInSpecs,
+    isKeypomParams,
+} from "../core/types";
+import { Action } from "@near-js/transactions";
+import { KeypomParams } from "../core/types";
 
-export const KEYPOM_LOCAL_STORAGE_KEY = 'keypom-wallet-selector';
+export const KEYPOM_LOCAL_STORAGE_KEY = "keypom-wallet-selector";
 
 export const getLocalStorageKeypomEnv = () => {
-    const localStorageDataJson = localStorage.getItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
+    const localStorageDataJson = localStorage.getItem(
+        `${KEYPOM_LOCAL_STORAGE_KEY}:envData`
+    );
     return localStorageDataJson;
 };
 
@@ -18,16 +33,16 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
 };
 
 export const getAccountFromMap = async (secretKey) => {
-    const {viewCall} = getEnv();
+    const { viewCall } = getEnv();
     const pk = getPubFromSecret(secretKey);
 
     const accountId = await viewCall({
         contractId: accountMappingContract[getEnv().networkId!],
-        methodName: 'get_account_id',
-        args: {pk}
+        methodName: "get_account_id",
+        args: { pk },
     });
-    console.log('accountId found from map: ', accountId);
-	
+    console.log("accountId found from map: ", accountId);
+
     return accountId;
 };
 
@@ -37,22 +52,34 @@ export const getAccountFromMap = async (secretKey) => {
  * @param receiverId The NEAR account attempting to have access
  * @param actions The action(s) needed to be checked for access
  */
-export const keyHasPermissionForTransaction = async (accessKey, receiverId: string, actions: Action[]): Promise<boolean> => {
-    console.log('accessKey: ', accessKey)
+export const keyHasPermissionForTransaction = async (
+    accessKey,
+    receiverId: string,
+    actions: Action[]
+): Promise<boolean> => {
+    console.log("accessKey: ", accessKey);
     const { permission } = accessKey;
-    if (permission === 'FullAccess') {
+    if (permission === "FullAccess") {
         return true;
     }
 
     if (permission.FunctionCall) {
-        const { receiver_id: allowedReceiverId, method_names: allowedMethods } = permission.FunctionCall;
+        const { receiver_id: allowedReceiverId, method_names: allowedMethods } =
+            permission.FunctionCall;
         if (allowedReceiverId === receiverId) {
             let allowed = true;
-            
+
             for (const action of actions) {
                 const { functionCall } = action;
-                if (!(functionCall && (!functionCall.deposit || functionCall.deposit.toString() === '0') && // TODO: Should support charging amount smaller than allowance?
-                    (allowedMethods.length === 0 || allowedMethods.includes(functionCall.methodName)))) {
+                if (
+                    !(
+                        functionCall &&
+                        (!functionCall.deposit ||
+                            functionCall.deposit.toString() === "0") && // TODO: Should support charging amount smaller than allowance?
+                        (allowedMethods.length === 0 ||
+                            allowedMethods.includes(functionCall.methodName))
+                    )
+                ) {
                     allowed = false;
                     break;
                 }
@@ -63,7 +90,7 @@ export const keyHasPermissionForTransaction = async (accessKey, receiverId: stri
     }
 
     return false;
-}
+};
 
 export const getCidFromUrl = () => {
     let split = window.location.href.split("?cid=");
@@ -75,7 +102,7 @@ export const getCidFromUrl = () => {
     }
 
     return null;
-}
+};
 
 export const parseIPFSDataFromURL = async () => {
     const cid = getCidFromUrl();
@@ -85,32 +112,35 @@ export const parseIPFSDataFromURL = async () => {
         const data = await response.json();
 
         if (isKeypomParams(data)) {
-            console.log('Successfully parsed Keypom params from URL: ', data);
+            console.log("Successfully parsed Keypom params from URL: ", data);
             return data;
         } else {
-            console.log('data can not be cast to Keypom params: ', data);
+            console.log("data can not be cast to Keypom params: ", data);
         }
     } else {
-        console.log('no cid found in URL');
+        console.log("no cid found in URL");
     }
 
     return;
 };
 
-
 export const addUserToMappingContract = async (accountId, secretKey) => {
     const accountIdFromMapping = await getAccountFromMap(secretKey);
 
     if (accountIdFromMapping !== accountId) {
-        console.log(`No Account ID found from mapping contract: ${JSON.stringify(accountIdFromMapping)} Adding now.`);
+        console.log(
+            `No Account ID found from mapping contract: ${JSON.stringify(
+                accountIdFromMapping
+            )} Adding now.`
+        );
         trialCallMethod({
             trialAccountId: accountId,
             trialAccountSecretKey: secretKey,
             contractId: accountMappingContract[getEnv().networkId!],
-            methodName: 'set',
+            methodName: "set",
             args: {},
-            attachedDeposit: parseNearAmount('0.002')!,
-            attachedGas: '10000000000000'
+            attachedDeposit: parseNearAmount("0.002")!,
+            attachedGas: "10000000000000",
         });
     }
 
@@ -125,7 +155,7 @@ const isValidKeypomContract = (keypomContractId: string) => {
 export const updateKeypomContractIfValid = (keypomContractId) => {
     if (isValidKeypomContract(keypomContractId) === true) {
         updateKeypomContractId({
-            keypomContractId
+            keypomContractId,
         });
 
         return true;
@@ -135,8 +165,10 @@ export const updateKeypomContractIfValid = (keypomContractId) => {
 };
 
 export const parseTrialUrl = (trialSpecs: InternalTrialSignInSpecs) => {
-    const {baseUrl, delimiter} = trialSpecs;
-    console.log(`Parse trial URL with base: ${baseUrl} and delim: ${delimiter}`);
+    const { baseUrl, delimiter } = trialSpecs;
+    console.log(
+        `Parse trial URL with base: ${baseUrl} and delim: ${delimiter}`
+    );
 
     // remove everything after ?cid= in the URL if it's present
     const split = window.location.href.split("?cid=")[0].split(baseUrl!);
@@ -154,14 +186,18 @@ export const parseTrialUrl = (trialSpecs: InternalTrialSignInSpecs) => {
 
     return {
         accountId,
-        secretKey
+        secretKey,
     };
 };
 
-export const parseInstantSignInUrl = (instantSignInSpecs: InternalInstantSignInSpecs) => {
-    const {baseUrl, delimiter, moduleDelimiter} = instantSignInSpecs;
+export const parseInstantSignInUrl = (
+    instantSignInSpecs: InternalInstantSignInSpecs
+) => {
+    const { baseUrl, delimiter, moduleDelimiter } = instantSignInSpecs;
 
-    console.log(`Parse instant sign in URL with base: ${baseUrl} delim: ${delimiter} and module delim: ${moduleDelimiter}`);
+    console.log(
+        `Parse instant sign in URL with base: ${baseUrl} delim: ${delimiter} and module delim: ${moduleDelimiter}`
+    );
 
     // remove everything after ?cid= in the URL if it's present
     const split = window.location.href.split("?cid=")[0].split(baseUrl!);
@@ -186,6 +222,6 @@ export const parseInstantSignInUrl = (instantSignInSpecs: InternalInstantSignInS
     return {
         accountId,
         secretKey,
-        moduleId
+        moduleId,
     };
 };

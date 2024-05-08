@@ -19,7 +19,8 @@ var renderModalType = function (modalType, options, hide) {
         case modal_types_1.MODAL_TYPE_IDS.INSUFFICIENT_BALANCE:
             return (react_1.default.createElement(InsufficientBalance_1.InsufficientBalance, { hide: hide, customizations: options.insufficientBalance }));
         case modal_types_1.MODAL_TYPE_IDS.BEGIN_TRIAL:
-            return (react_1.default.createElement(BeginTrial_1.BeginTrial, { hide: hide, secretKey: modalType.meta.secretKey, redirectUrlBase: modalType.meta.redirectUrlBase, delimiter: modalType.meta.delimiter, customizations: options.beginTrial }));
+            console.log("modalType.meta", modalType.meta);
+            return (react_1.default.createElement(BeginTrial_1.BeginTrial, { hide: hide, secretKey: modalType.meta.secretKey, redirectUrlBase: modalType.meta.redirectUrlBase, includedCid: modalType.meta.includedCid, delimiter: modalType.meta.delimiter, customizations: options.beginTrial }));
         default:
             return null;
     }

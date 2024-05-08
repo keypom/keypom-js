@@ -6,6 +6,7 @@ import { BeginTrialCustomizations } from "../modal.types";
 export declare const accountAddressPatternNoSubaccount: RegExp;
 interface BeginTrialProps {
     customizations?: BeginTrialCustomizations;
+    includedCid?: string;
     secretKey: string;
     redirectUrlBase: string;
     delimiter: string;

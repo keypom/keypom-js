@@ -1,7 +1,3 @@
-import {
-    BrowserWalletBehaviour,
-    Wallet,
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
 //import { Account } from "near-api-js";
 import { Maybe } from "../keypom";
 import { PasswordPerUse } from "./drops";
@@ -15,6 +11,8 @@ import {
 } from "./protocol";
 import { Account } from "@near-js/accounts";
 import { Transaction } from "@near-js/transactions";
+import { BrowserWalletBehaviour } from "@near-wallet-selector/core";
+import { Wallet } from "@near-wallet-selector/core";
 
 export type AnyWallet = BrowserWalletBehaviour | Wallet | Promise<Wallet>;
 

@@ -1,8 +1,6 @@
-import { BrowserWalletBehaviour, Wallet } from "@near-wallet-selector/core/lib/wallet/wallet.types";
 import { Account } from "@near-js/accounts";
 import { DropConfig } from "../types/drops";
-import { CreateOrAddReturn } from "../types/params";
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { AnyWallet, CreateOrAddReturn } from "../types/params";
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new trial account drop which can be used to instantly sign users into decentralized applications that support the Keypom wallet selector plugin.
@@ -63,15 +61,15 @@ export declare const createTrialAccountDrop: ({ account, wallet, contractBytes, 
     /** The contracts that the trial account should be able to call. */
     callableContracts: string[];
     /** The upper bound of $NEAR that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $NEAR (i.e `1` = 1 $NEAR). */
-    maxAttachableNEARPerContract: (string | number)[];
+    maxAttachableNEARPerContract?: (string | number)[];
     /** The upper bound of $yocto that trial account is able to attach to calls associated with each contract passed in. For no upper limit, pass in `*`. Units are in $yoctoNEAR (i.e `1` = 1 $yoctoNEAR). */
-    maxAttachableYoctoPerContract: string[];
+    maxAttachableYoctoPerContract?: string[];
     /** An array that contains the list of methods that the trial account should be able to call on each respective contract. To allow any methods to be called on the receiver contract, pass in `[*]`. */
-    callableMethods: string[][];
+    callableMethods?: string[][];
     /** Once the account has spent more than this amount (in $NEAR), the trial is over and the exit conditions must be met. */
-    trialEndFloorNEAR: string | number;
+    trialEndFloorNEAR?: string | number;
     /** Once the account has spent more than this amount (in yocto), the trial is over and the exit conditions must be met. */
-    trialEndFloorYocto: string;
+    trialEndFloorYocto?: string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in $NEAR (i.e `1` = 1 $NEAR) */
     repayAmountNEAR?: number | string;
     /** How much $NEAR should be paid back to the specified funder in order to unlock the trial account. Unit in yoctoNEAR (1 yoctoNEAR = 1e-24 $NEAR) */
@@ -149,4 +147,3 @@ export declare const claimTrialAccountDrop: ({ secretKey, desiredAccountId, }: {
     /** The account ID that will be created for the trial */
     desiredAccountId: string;
 }) => Promise<any>;
-export {};

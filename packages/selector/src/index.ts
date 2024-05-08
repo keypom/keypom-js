@@ -1,2 +1,2 @@
-export type { KeypomWallet } from './core/wallet';
-export { setupKeypom } from './core/setup';
+export type { KeypomWallet } from "./core/wallet";
+export { setupKeypom } from "./core/setup";

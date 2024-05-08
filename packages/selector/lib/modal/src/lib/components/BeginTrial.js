@@ -64,13 +64,14 @@ var react_1 = __importStar(require("react"));
 var modal_types_1 = require("../modal.types");
 var MainBody_1 = require("./MainBody");
 var core_1 = require("@keypom/core");
+var selector_utils_1 = require("../../../../utils/selector-utils");
 /**
  * regex for the body of an account not including TLA and not allowing subaccount
  */
 exports.accountAddressPatternNoSubaccount = /^([a-z\d]+[-_])*[a-z\d]+$/;
 var BeginTrial = function (_a) {
     var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-    var hide = _a.hide, secretKey = _a.secretKey, redirectUrlBase = _a.redirectUrlBase, delimiter = _a.delimiter, customizations = _a.customizations;
+    var hide = _a.hide, secretKey = _a.secretKey, redirectUrlBase = _a.redirectUrlBase, includedCid = _a.includedCid, delimiter = _a.delimiter, customizations = _a.customizations;
     var _o = (0, react_1.useState)(""), userInput = _o[0], setUserInput = _o[1];
     var _p = (0, react_1.useState)(""), accountId = _p[0], setAccountId = _p[1];
     var _q = (0, react_1.useState)(false), isClaimingTrial = _q[0], setIsClaimingTrial = _q[1];
@@ -201,12 +202,18 @@ var BeginTrial = function (_a) {
             react_1.default.createElement(MainBody_1.MainBody, { title: ((_k = customizations === null || customizations === void 0 ? void 0 : customizations.claimed) === null || _k === void 0 ? void 0 : _k.title) ||
                     modal_types_1.MODAL_DEFAULTS.beginTrial.claimed.title, body: ((_l = customizations === null || customizations === void 0 ? void 0 : customizations.claimed) === null || _l === void 0 ? void 0 : _l.body) ||
                     modal_types_1.MODAL_DEFAULTS.beginTrial.claimed.body, imageOne: null, imageTwo: null, button: null, onCloseModal: function () {
-                    window.location.replace("".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey));
+                    var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined ? "?cid=".concat(includedCid) : "");
+                    console.log('url to redirect to: ', urlToRedirectTo);
+                    localStorage.setItem("".concat(selector_utils_1.KEYPOM_LOCAL_STORAGE_KEY, ":urlToRedirectTo"), urlToRedirectTo);
+                    window.location.replace(urlToRedirectTo);
                     window.location.reload();
                 } }),
             react_1.default.createElement("div", { className: "nws-modal-body wallet-info-wrapper what-wallet-hide " },
                 react_1.default.createElement("button", { className: "middleButton", onClick: function () {
-                        window.location.replace("".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey));
+                        var urlToRedirectTo = "".concat(redirectUrlBase).concat(accountId).concat(delimiter).concat(secretKey).concat(includedCid !== undefined ? "?cid=".concat(includedCid) : "");
+                        console.log('url to redirect to: ', urlToRedirectTo);
+                        localStorage.setItem("".concat(selector_utils_1.KEYPOM_LOCAL_STORAGE_KEY, ":urlToRedirectTo"), urlToRedirectTo);
+                        window.location.replace(urlToRedirectTo);
                         window.location.reload();
                     }, style: {
                         width: "100%",

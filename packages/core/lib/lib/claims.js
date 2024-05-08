@@ -119,43 +119,43 @@ const claim = ({ secretKey, accountId, newAccountId, newPublicKey, password, fcA
     const { networkId, keyStore, contractId, contractAccount, receiverId, execute, } = (0, keypom_1.getEnv)();
     const keyPair = crypto_1.KeyPair.fromString(secretKey);
     yield keyStore.setKey(networkId, contractId, keyPair);
-    (0, checks_1.assert)(secretKey, 'A secretKey must be passed in.');
-    (0, checks_1.assert)(!newAccountId || newPublicKey, 'If creating a new account, a newPublicKey must be passed in.');
+    (0, checks_1.assert)(secretKey, "A secretKey must be passed in.");
+    (0, checks_1.assert)(!newAccountId || newPublicKey, "If creating a new account, a newPublicKey must be passed in.");
     const dropInfo = yield (0, views_1.getDropInformation)({ secretKey });
     const attachedGas = dropInfo.required_gas;
     let curMethodData;
     if (dropInfo.fc) {
         curMethodData = yield (0, views_1.getCurMethodData)({ secretKey });
         if (curMethodData == null) {
-            accountId = 'none';
+            accountId = "none";
         }
     }
     if (fcArgs) {
-        (0, checks_1.assert)(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
-        (0, checks_1.assert)((curMethodData || []).length === fcArgs.length, 'The number of fcArgs must match the number of methods being executed.');
+        (0, checks_1.assert)(dropInfo.fc, "Cannot pass in fcArgs for non-FC drops.");
+        (0, checks_1.assert)((curMethodData || []).length === fcArgs.length, "The number of fcArgs must match the number of methods being executed.");
     }
-    (0, checks_1.assert)(newAccountId || accountId, 'Either an accountId or newAccountId must be passed in.');
+    (0, checks_1.assert)(newAccountId || accountId, "Either an accountId or newAccountId must be passed in.");
     const fcAction = newAccountId
         ? {
-            methodName: 'create_account_and_claim',
+            methodName: "create_account_and_claim",
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 new_account_id: newAccountId,
                 new_public_key: newPublicKey,
                 password,
                 fc_args: fcArgs,
             }),
-            gas: attachedGas,
-            deposit: '0',
+            gas: BigInt(attachedGas),
+            deposit: BigInt("0"),
         }
         : {
-            methodName: 'claim',
+            methodName: "claim",
             args: (0, transactions_1.stringifyJsonOrBytes)({
                 account_id: accountId,
                 password,
                 fc_args: fcArgs,
             }),
-            gas: attachedGas,
-            deposit: '0',
+            gas: BigInt(attachedGas),
+            deposit: BigInt("0"),
         };
     const txn = yield (0, keypom_utils_1.convertBasicTransaction)({
         txnInfo: {
@@ -163,7 +163,7 @@ const claim = ({ secretKey, accountId, newAccountId, newPublicKey, password, fcA
             signerId: contractId,
             actions: [
                 {
-                    enum: 'FunctionCall',
+                    enum: "FunctionCall",
                     functionCall: fcAction,
                 },
             ],

@@ -1,18 +1,24 @@
 import type {
     Transaction,
-    WalletBehaviourFactory, WalletModuleFactory
-} from '@near-wallet-selector/core';
-import { MODAL_TYPE_IDS } from '../modal/src/lib/modal.types';
-import { KEYPOM_MODULE_ID, KeypomParams, KeypomWalletInstant, isKeypomParams } from './types';
-import { KeypomWallet } from './wallet';
+    WalletBehaviourFactory,
+    WalletModuleFactory,
+} from "@near-wallet-selector/core";
+import { MODAL_TYPE_IDS } from "../modal/src/lib/modal.types";
+import {
+    KEYPOM_MODULE_ID,
+    KeypomParams,
+    KeypomWalletInstant,
+    isKeypomParams,
+} from "./types";
+import { KeypomWallet } from "./wallet";
 
 interface KeypomInitializeOptions {
-	keypomWallet: KeypomWallet;
+    keypomWallet: KeypomWallet;
 }
 
 const Keypom: WalletBehaviourFactory<
-	KeypomWalletInstant,
-	KeypomInitializeOptions
+    KeypomWalletInstant,
+    KeypomInitializeOptions
 > = async ({ store, logger, keypomWallet }) => {
     // return the wallet interface for wallet-selector
     return {
@@ -27,12 +33,12 @@ const Keypom: WalletBehaviourFactory<
         // 	return keypomWallet.getAccount();
         // },
 
-        showModal(modalType = {id: MODAL_TYPE_IDS.TRIAL_OVER}) {
+        showModal(modalType = { id: MODAL_TYPE_IDS.TRIAL_OVER }) {
             keypomWallet.showModal(modalType);
         },
 
         async getAccounts() {
-            logger.log('Keypom:account');
+            logger.log("Keypom:account");
             return keypomWallet.getAccounts();
         },
 
@@ -41,31 +47,31 @@ const Keypom: WalletBehaviourFactory<
         },
 
         getAccountId() {
-            logger.log('Keypom:getAccountId');
+            logger.log("Keypom:getAccountId");
             return keypomWallet.getAccountId();
         },
 
         async isSignedIn() {
-            logger.log('Keypom:isSignedIn');
+            logger.log("Keypom:isSignedIn");
             return await keypomWallet.isSignedIn();
         },
 
         async getAvailableBalance() {
-            logger.log('Keypom:isSignedIn');
+            logger.log("Keypom:isSignedIn");
             return await keypomWallet.getAvailableBalance();
         },
 
         async verifyOwner() {
-            throw Error('KeypomWallet:verifyOwner is deprecated');
+            throw Error("KeypomWallet:verifyOwner is deprecated");
         },
 
         async signIn() {
-            logger.log('Keypom:signIn');
+            logger.log("Keypom:signIn");
             return await keypomWallet.signIn();
         },
 
         async signOut() {
-            logger.log('Keypom:signOut');
+            logger.log("Keypom:signOut");
             return await keypomWallet.signOut();
         },
 
@@ -76,15 +82,17 @@ const Keypom: WalletBehaviourFactory<
         async signAndSendTransactions(params) {
             // Convert the params to Array<Transaction>
 
-            const transactions: Transaction[] = params.transactions.map((tx) => {
-                return {
-                    ...tx,
-                    signerId: tx.signerId || keypomWallet.getAccountId(),
-                };
-            });
+            const transactions: Transaction[] = params.transactions.map(
+                (tx) => {
+                    return {
+                        ...tx,
+                        signerId: tx.signerId || keypomWallet.getAccountId(),
+                    };
+                }
+            );
 
-            logger.log('Keypom:signAndSendTransactions', params);
-            return await keypomWallet.signAndSendTransactions({transactions});
+            logger.log("Keypom:signAndSendTransactions", params);
+            return await keypomWallet.signAndSendTransactions({ transactions });
         },
     };
 };
@@ -93,48 +101,79 @@ export function setupKeypom({
     trialAccountSpecs,
     instantSignInSpecs,
     networkId,
-    signInContractId
+    signInContractId,
 }: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
         // Ensure that the passed in arguments are of type KeypomParams
-        if (!isKeypomParams({signInContractId, networkId, trialAccountSpecs, instantSignInSpecs})) {
-            console.warn('KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.');
+        if (
+            !isKeypomParams({
+                signInContractId,
+                networkId,
+                trialAccountSpecs,
+                instantSignInSpecs,
+            })
+        ) {
+            console.warn(
+                "KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format."
+            );
             return null;
         }
 
-        if (!signInContractId || !networkId || !(instantSignInSpecs || trialAccountSpecs)) {
-            console.warn('KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.');
+        if (
+            !signInContractId ||
+            !networkId ||
+            !(instantSignInSpecs || trialAccountSpecs)
+        ) {
+            console.warn(
+                "KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet."
+            );
             return null;
         }
 
-        if (trialAccountSpecs && !(trialAccountSpecs.url.includes('ACCOUNT_ID') || trialAccountSpecs.url.includes('SECRET_KEY'))) {
-            console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url');
+        if (
+            trialAccountSpecs &&
+            !(
+                trialAccountSpecs.url.includes("ACCOUNT_ID") ||
+                trialAccountSpecs.url.includes("SECRET_KEY")
+            )
+        ) {
+            console.warn(
+                "KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url"
+            );
             return null;
         }
 
-        if (instantSignInSpecs && !(instantSignInSpecs.url.includes('ACCOUNT_ID') || instantSignInSpecs.url.includes('SECRET_KEY'))) {
-            console.warn('KeypomWallet: trial account specs must include ACCOUNT_ID');
+        if (
+            instantSignInSpecs &&
+            !(
+                instantSignInSpecs.url.includes("ACCOUNT_ID") ||
+                instantSignInSpecs.url.includes("SECRET_KEY")
+            )
+        ) {
+            console.warn(
+                "KeypomWallet: trial account specs must include ACCOUNT_ID"
+            );
             return null;
         }
-		
+
         const keypomWallet = new KeypomWallet({
             signInContractId,
             networkId,
             trialAccountSpecs,
-            instantSignInSpecs
+            instantSignInSpecs,
         });
 
         // CHECK URL / LOCAL STORAGE TO SEE IF A TRIAL ACCOUNT SHOULD BE SIGNED IN
         const shouldSignIn = keypomWallet.checkValidTrialInfo();
-        console.log('shouldSignIn: ', shouldSignIn);
+        console.log("shouldSignIn: ", shouldSignIn);
 
         return {
             id: KEYPOM_MODULE_ID,
-            type: 'instant-link',
+            type: "instant-link",
             metadata: {
-                name: 'Keypom Account',
+                name: "Keypom Account",
                 description: null,
-                iconUrl: '',
+                iconUrl: "",
                 deprecated: false,
                 available: true,
                 contractId: signInContractId,

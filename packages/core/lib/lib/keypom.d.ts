@@ -1,5 +1,5 @@
-import { Near } from '@near-js/wallet-account';
-import { EnvVars, Funder } from './types/general';
+import { Near } from "@near-js/wallet-account";
+import { EnvVars, Funder } from "./types/general";
 export declare const networks: {
     mainnet: {
         networkId: string;
@@ -27,19 +27,21 @@ export declare const networks: {
  */
 export declare const supportedKeypomContracts: {
     mainnet: {
-        'v1.keypom.near': boolean;
-        'v1-3.keypom.near': boolean;
-        'v1-4.keypom.near': boolean;
-        'v2.keypom.near': boolean;
+        "v1.keypom.near": boolean;
+        "v1-3.keypom.near": boolean;
+        "v1-4.keypom.near": boolean;
+        "v2.keypom.near": boolean;
+        "v3.keypom.near": boolean;
     };
     testnet: {
-        'v1.keypom.testnet': boolean;
-        'v1-3.keypom.testnet': boolean;
-        'v1-4.keypom.testnet': boolean;
-        'v2.keypom.testnet': boolean;
+        "v1.keypom.testnet": boolean;
+        "v1-3.keypom.testnet": boolean;
+        "v1-4.keypom.testnet": boolean;
+        "v2.keypom.testnet": boolean;
+        "v3.keypom.testnet": boolean;
     };
     localnet: {
-        'keypom.test.near': boolean;
+        "keypom.test.near": boolean;
     };
 };
 /**

@@ -12,6 +12,7 @@ export declare const getAccountFromMap: (secretKey: any) => Promise<any>;
  * @param actions The action(s) needed to be checked for access
  */
 export declare const keyHasPermissionForTransaction: (accessKey: any, receiverId: string, actions: Action[]) => Promise<boolean>;
+export declare const getCidFromUrl: () => string | null;
 export declare const parseIPFSDataFromURL: () => Promise<KeypomParams | undefined>;
 export declare const addUserToMappingContract: (accountId: any, secretKey: any) => Promise<boolean>;
 export declare const updateKeypomContractIfValid: (keypomContractId: any) => boolean;
