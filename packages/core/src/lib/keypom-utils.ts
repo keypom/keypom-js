@@ -600,7 +600,7 @@ export const generateKeys = async ({
             const keyPair = KeyPairEd25519.fromRandom();
             keyPairs.push(keyPair);
             publicKeys.push(keyPair.getPublicKey().toString());
-            secretKeys.push(keyPair.secretKey);
+            secretKeys.push(keyPair.extendedSecretKey);
         }
     }
 

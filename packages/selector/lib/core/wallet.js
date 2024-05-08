@@ -75,6 +75,8 @@ var KeypomWallet = /** @class */ (function () {
         };
         this.checkValidTrialInfo = function () {
             var _a, _b;
+            console.log("CheckValidTrial");
+            console.log("Instant Sign in Specs: ", _this.instantSignInSpecs);
             var instantSignInData = ((_a = _this.instantSignInSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined
                 ? (0, selector_utils_1.parseInstantSignInUrl)(_this.instantSignInSpecs)
                 : undefined;
@@ -472,6 +474,7 @@ var KeypomWallet = /** @class */ (function () {
         if (instantSignInSpecs !== undefined) {
             // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
             var matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            console.log("Matches: ", matches);
             var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
             var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
             var moduleDelimiter = matches === null || matches === void 0 ? void 0 : matches[3];

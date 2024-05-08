@@ -97,35 +97,38 @@ const Keypom: WalletBehaviourFactory<
     };
 };
 
-export function setupKeypom({
-    trialAccountSpecs,
-    instantSignInSpecs,
-    networkId,
-    signInContractId,
-}: KeypomParams): WalletModuleFactory<KeypomWalletInstant> {
+export function setupKeypom(
+    params: KeypomParams
+): WalletModuleFactory<KeypomWalletInstant> | null {
     return async () => {
-        // Ensure that the passed in arguments are of type KeypomParams
-        if (
-            !isKeypomParams({
-                signInContractId,
-                networkId,
-                trialAccountSpecs,
-                instantSignInSpecs,
-            })
-        ) {
+        const {
+            trialAccountSpecs,
+            instantSignInSpecs,
+            networkId,
+            signInContractId,
+        } = params;
+
+        console.log("setupKeypom");
+        console.log("trialAccountSpecs: ", trialAccountSpecs);
+        console.log("instantSignInSpecs: ", instantSignInSpecs);
+        console.log("networkId:", networkId);
+        console.log("signInContractId:", signInContractId);
+        // Validate Keypom parameters
+        if (!isKeypomParams(params)) {
             console.warn(
                 "KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format."
             );
             return null;
         }
 
+        // Additional business logic checks
         if (
             !signInContractId ||
             !networkId ||
             !(instantSignInSpecs || trialAccountSpecs)
         ) {
             console.warn(
-                "KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet."
+                "KeypomWallet: signInContractId, networkId, and at least one type of sign-in specs are required."
             );
             return null;
         }
@@ -133,12 +136,12 @@ export function setupKeypom({
         if (
             trialAccountSpecs &&
             !(
-                trialAccountSpecs.url.includes("ACCOUNT_ID") ||
+                trialAccountSpecs.url.includes("ACCOUNT_ID") &&
                 trialAccountSpecs.url.includes("SECRET_KEY")
             )
         ) {
             console.warn(
-                "KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url"
+                "KeypomWallet: Trial account specs must include ACCOUNT_ID and SECRET_KEY in the URL."
             );
             return null;
         }
@@ -151,7 +154,7 @@ export function setupKeypom({
             )
         ) {
             console.warn(
-                "KeypomWallet: trial account specs must include ACCOUNT_ID"
+                "KeypomWallet: Instant sign-in specs must include ACCOUNT_ID in the URL."
             );
             return null;
         }

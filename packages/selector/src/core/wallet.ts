@@ -380,6 +380,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     };
 
     public checkValidTrialInfo = () => {
+        console.log("CheckValidTrial");
+        console.log("Instant Sign in Specs: ", this.instantSignInSpecs);
+
         let instantSignInData =
             this.instantSignInSpecs?.baseUrl !== undefined
                 ? parseInstantSignInUrl(this.instantSignInSpecs)
@@ -486,6 +489,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         if (instantSignInSpecs !== undefined) {
             // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID and SECRET_KEY
             const matches = instantSignInSpecs.url.match(INSTANT_URL_REGEX);
+            console.log("Matches: ", matches);
             const baseUrl = matches?.[1]!;
             const delimiter = matches?.[2]!;
             const moduleDelimiter = matches?.[3]!;

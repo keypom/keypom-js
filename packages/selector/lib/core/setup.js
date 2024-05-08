@@ -177,39 +177,40 @@ var Keypom = function (_a) {
         });
     });
 };
-function setupKeypom(_a) {
+function setupKeypom(params) {
     var _this = this;
-    var trialAccountSpecs = _a.trialAccountSpecs, instantSignInSpecs = _a.instantSignInSpecs, networkId = _a.networkId, signInContractId = _a.signInContractId;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var keypomWallet, shouldSignIn;
+        var trialAccountSpecs, instantSignInSpecs, networkId, signInContractId, keypomWallet, shouldSignIn;
         var _this = this;
         return __generator(this, function (_a) {
-            // Ensure that the passed in arguments are of type KeypomParams
-            if (!(0, types_1.isKeypomParams)({
-                signInContractId: signInContractId,
-                networkId: networkId,
-                trialAccountSpecs: trialAccountSpecs,
-                instantSignInSpecs: instantSignInSpecs,
-            })) {
+            trialAccountSpecs = params.trialAccountSpecs, instantSignInSpecs = params.instantSignInSpecs, networkId = params.networkId, signInContractId = params.signInContractId;
+            console.log("setupKeypom");
+            console.log("trialAccountSpecs: ", trialAccountSpecs);
+            console.log("instantSignInSpecs: ", instantSignInSpecs);
+            console.log("networkId:", networkId);
+            console.log("signInContractId:", signInContractId);
+            // Validate Keypom parameters
+            if (!(0, types_1.isKeypomParams)(params)) {
                 console.warn("KeypomWallet: Invalid KeypomParams passed in. Please check the docs for the correct format.");
                 return [2 /*return*/, null];
             }
+            // Additional business logic checks
             if (!signInContractId ||
                 !networkId ||
                 !(instantSignInSpecs || trialAccountSpecs)) {
-                console.warn("KeypomWallet: signInContractId, networkId and either instant sign in specs or trial account specs are required to use the KeypomWallet.");
+                console.warn("KeypomWallet: signInContractId, networkId, and at least one type of sign-in specs are required.");
                 return [2 /*return*/, null];
             }
             if (trialAccountSpecs &&
-                !(trialAccountSpecs.url.includes("ACCOUNT_ID") ||
+                !(trialAccountSpecs.url.includes("ACCOUNT_ID") &&
                     trialAccountSpecs.url.includes("SECRET_KEY"))) {
-                console.warn("KeypomWallet: trial account specs must include ACCOUNT_ID and SECRET_KEY in url");
+                console.warn("KeypomWallet: Trial account specs must include ACCOUNT_ID and SECRET_KEY in the URL.");
                 return [2 /*return*/, null];
             }
             if (instantSignInSpecs &&
                 !(instantSignInSpecs.url.includes("ACCOUNT_ID") ||
                     instantSignInSpecs.url.includes("SECRET_KEY"))) {
-                console.warn("KeypomWallet: trial account specs must include ACCOUNT_ID");
+                console.warn("KeypomWallet: Instant sign-in specs must include ACCOUNT_ID in the URL.");
                 return [2 /*return*/, null];
             }
             keypomWallet = new wallet_1.KeypomWallet({

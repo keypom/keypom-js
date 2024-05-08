@@ -4,7 +4,6 @@
     "description": "Wallet selector plugin for the Keypom SDK",
     "main": "lib/index.js",
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
         "build": "pnpm compile",
         "compile": "tsc -p tsconfig.json",
         "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",

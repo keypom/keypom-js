@@ -39,7 +39,7 @@ export interface KeypomParams {
 }
 export declare const isTrialSignInSpecs: (obj: any) => obj is TrialSignInSpecs;
 export declare const isInstantSignInSpecs: (obj: any) => obj is InstantSignInSpecs;
-export declare const isKeypomParams: (obj: any) => obj is KeypomParams;
+export declare const isKeypomParams: (params: KeypomParams) => boolean;
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;
     getContractId(): string;

@@ -1,6 +1,5 @@
 import { InternalInstantSignInSpecs, InternalTrialSignInSpecs } from "../core/types";
 import { Action } from "@near-js/transactions";
-import { KeypomParams } from "../core/types";
 export declare const KEYPOM_LOCAL_STORAGE_KEY = "keypom-wallet-selector";
 export declare const getLocalStorageKeypomEnv: () => string | null;
 export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
@@ -13,7 +12,7 @@ export declare const getAccountFromMap: (secretKey: any) => Promise<any>;
  */
 export declare const keyHasPermissionForTransaction: (accessKey: any, receiverId: string, actions: Action[]) => Promise<boolean>;
 export declare const getCidFromUrl: () => string | null;
-export declare const parseIPFSDataFromURL: () => Promise<KeypomParams | undefined>;
+export declare const parseIPFSDataFromURL: () => Promise<any>;
 export declare const addUserToMappingContract: (accountId: any, secretKey: any) => Promise<boolean>;
 export declare const updateKeypomContractIfValid: (keypomContractId: any) => boolean;
 export declare const parseTrialUrl: (trialSpecs: InternalTrialSignInSpecs) => {
