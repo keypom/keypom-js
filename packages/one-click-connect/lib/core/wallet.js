@@ -51,6 +51,7 @@ exports.KeypomWallet = void 0;
 var core_1 = require("@keypom/core");
 var accounts_1 = require("@near-js/accounts");
 var crypto_1 = require("@near-js/crypto");
+var crypto_2 = require("@near-js/crypto");
 var keystores_browser_1 = require("@near-js/keystores-browser");
 var wallet_account_1 = require("@near-js/wallet-account");
 var selector_utils_1 = require("../utils/selector-utils");
@@ -58,24 +59,31 @@ var ext_wallets_1 = require("./ext_wallets");
 var ONE_CLICK_URL_REGEX = new RegExp("(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var signInContractId = _a.signInContractId, networkId = _a.networkId, url = _a.url;
+        var networkId = _a.networkId, url = _a.url;
         var _this = this;
         this.checkValidOneClickParams = function () {
             var _a;
-            console.log("CheckValidTrial");
-            var oneClickData = ((_a = _this.oneClickConnectSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined
-                ? (0, selector_utils_1.parseOneClickSignInFromUrl)(_this.oneClickConnectSpecs)
-                : undefined;
-            return (oneClickData !== undefined || (0, selector_utils_1.getLocalStorageKeypomEnv)() !== null);
+            console.log("CheckValidOneClick");
+            var oneClickData = null;
+            if (((_a = _this.oneClickConnectSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined) {
+                oneClickData = (0, selector_utils_1.parseOneClickSignInFromUrl)(_this.oneClickConnectSpecs);
+            }
+            if (oneClickData !== null) {
+                return oneClickData;
+            }
+            var localStorageData = (0, selector_utils_1.getLocalStorageKeypomEnv)();
+            if (localStorageData !== null) {
+                return JSON.parse(localStorageData);
+            }
+            return null;
         };
         console.log("Initializing OneClick Connect");
-        this.signInContractId = signInContractId;
         this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
         this.setSpecsFromKeypomParams(url);
     }
     KeypomWallet.prototype.getContractId = function () {
-        return this.signInContractId;
+        return this.contractId || "foo.near";
     };
     KeypomWallet.prototype.getAccountId = function () {
         this.assertSignedIn();
@@ -117,31 +125,57 @@ var KeypomWallet = /** @class */ (function () {
             });
         });
     };
-    KeypomWallet.prototype.signIn = function () {
-        var _a;
+    KeypomWallet.prototype.getLAKContractId = function (accountId, secretKey) {
         return __awaiter(this, void 0, void 0, function () {
-            var oneClickSignInData, curEnvData, _b, accountId, secretKey, moduleId;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var pk, accessKey, permission, receiver_id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (this.contractId !== undefined) {
+                            return [2 /*return*/, this.contractId];
+                        }
+                        pk = crypto_1.PublicKey.from((0, core_1.getPubFromSecret)(secretKey));
+                        return [4 /*yield*/, this.near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
+                    case 1:
+                        accessKey = _a.sent();
+                        permission = accessKey.permission;
+                        if (permission.FunctionCall) {
+                            receiver_id = permission.FunctionCall.receiver_id;
+                            this.contractId = receiver_id;
+                            return [2 /*return*/, receiver_id];
+                        }
+                        this.contractId = "foo.near";
+                        return [2 /*return*/, "foo.near"];
+                }
+            });
+        });
+    };
+    KeypomWallet.prototype.signIn = function () {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function () {
+            var oneClickSignInData, networkId, isModuleSupported, curEnvData, _c, accountId, secretKey, moduleId;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0: return [4 /*yield*/, (0, core_1.initKeypom)({
                             network: this.near.connection.networkId,
                         })];
                     case 1:
-                        _c.sent();
+                        _d.sent();
                         oneClickSignInData = ((_a = this.oneClickConnectSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) !== undefined
                             ? (0, selector_utils_1.parseOneClickSignInFromUrl)(this.oneClickConnectSpecs)
-                            : undefined;
-                        if (oneClickSignInData !== undefined) {
-                            if (ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId][oneClickSignInData.moduleId] === undefined) {
-                                console.warn("Module ID ".concat(oneClickSignInData.moduleId, " is not supported on ").concat(this.near.connection.networkId, "."));
+                            : null;
+                        if (oneClickSignInData !== null) {
+                            networkId = this.near.connection.networkId;
+                            isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.moduleId]) !== undefined;
+                            if (!isModuleSupported) {
+                                console.warn("Module ID ".concat(oneClickSignInData.moduleId, " is not supported on ").concat(networkId, "."));
                                 return [2 /*return*/, []];
                             }
                             return [2 /*return*/, this.signInInstantAccount(oneClickSignInData.accountId, oneClickSignInData.secretKey, oneClickSignInData.moduleId)];
                         }
                         curEnvData = (0, selector_utils_1.getLocalStorageKeypomEnv)();
-                        // If there is any data in local storage, default to that otherwise return empty array
                         if (curEnvData !== null) {
-                            _b = JSON.parse(curEnvData), accountId = _b.accountId, secretKey = _b.secretKey, moduleId = _b.moduleId;
+                            _c = JSON.parse(curEnvData), accountId = _c.accountId, secretKey = _c.secretKey, moduleId = _c.moduleId;
                             return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
                         }
                         return [2 /*return*/, []];
@@ -272,7 +306,7 @@ var KeypomWallet = /** @class */ (function () {
                             moduleId: moduleId,
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
-                        return [4 /*yield*/, this.keyStore.setKey(this.near.connection.networkId, accountId, crypto_1.KeyPair.fromString(secretKey))];
+                        return [4 /*yield*/, this.keyStore.setKey(this.near.connection.networkId, accountId, crypto_2.KeyPair.fromString(secretKey))];
                     case 1:
                         _a.sent();
                         accountObj = new accounts_1.Account(this.near.connection, accountId);

@@ -8,12 +8,11 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
     moduleId?: string;
-    signInContractId: string;
+    contractId?: string;
     near: Near;
     keyStore: BrowserLocalStorageKeyStore;
     oneClickConnectSpecs?: InternalOneClickSpecs;
-    constructor({ signInContractId, networkId, url, }: {
-        signInContractId: string;
+    constructor({ networkId, url }: {
         networkId: string;
         url: string;
     });
@@ -21,7 +20,12 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     getAccountId(): string;
     isSignedIn(): Promise<boolean>;
     signInInstantAccount(accountId: string, secretKey: string, moduleId: string): Promise<Account[]>;
-    checkValidOneClickParams: () => boolean;
+    getLAKContractId(accountId: string, secretKey: string): Promise<string>;
+    checkValidOneClickParams: () => {
+        accountId: string;
+        secretKey: string;
+        moduleId: string;
+    } | null;
     signIn(): Promise<Account[]>;
     signOut(): Promise<void>;
     signAndSendTransaction(params: any): Promise<FinalExecutionOutcome>;

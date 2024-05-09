@@ -1,5 +1,6 @@
 import { getPubFromSecret, initKeypom, networks } from "@keypom/core";
 import { Account } from "@near-js/accounts";
+import { PublicKey } from "@near-js/crypto";
 import { KeyPair } from "@near-js/crypto";
 import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
 import { FinalExecutionOutcome } from "@near-js/types";
@@ -28,25 +29,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
     moduleId?: string;
-
-    signInContractId: string;
+    contractId?: string;
 
     near: Near;
     keyStore: BrowserLocalStorageKeyStore;
 
     oneClickConnectSpecs?: InternalOneClickSpecs;
 
-    public constructor({
-        signInContractId,
-        networkId,
-        url,
-    }: {
-        signInContractId: string;
-        networkId: string;
-        url: string;
-    }) {
+    public constructor({ networkId, url }: { networkId: string; url: string }) {
         console.log("Initializing OneClick Connect");
-        this.signInContractId = signInContractId;
 
         this.keyStore = new BrowserLocalStorageKeyStore();
         this.near = new Near({
@@ -58,7 +49,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     getContractId(): string {
-        return this.signInContractId;
+        return this.contractId || "foo.near";
     }
 
     getAccountId(): string {
@@ -95,16 +86,60 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return [];
     }
 
-    public checkValidOneClickParams = () => {
-        console.log("CheckValidTrial");
+    async getLAKContractId(
+        accountId: string,
+        secretKey: string
+    ): Promise<string> {
+        if (this.contractId !== undefined) {
+            return this.contractId;
+        }
 
-        let oneClickData =
-            this.oneClickConnectSpecs?.baseUrl !== undefined
-                ? parseOneClickSignInFromUrl(this.oneClickConnectSpecs)
-                : undefined;
-        return (
-            oneClickData !== undefined || getLocalStorageKeypomEnv() !== null
+        const pk = PublicKey.from(getPubFromSecret(secretKey));
+
+        const accessKey: any = await this.near!.connection.provider.query(
+            `access_key/${accountId}/${pk}`,
+            ""
         );
+
+        const { permission } = accessKey;
+        if (permission.FunctionCall) {
+            const { receiver_id } = permission.FunctionCall;
+            this.contractId = receiver_id;
+            return receiver_id;
+        }
+
+        this.contractId = "foo.near";
+        return "foo.near";
+    }
+
+    public checkValidOneClickParams = (): {
+        accountId: string;
+        secretKey: string;
+        moduleId: string;
+    } | null => {
+        console.log("CheckValidOneClick");
+
+        let oneClickData: {
+            accountId: string;
+            secretKey: string;
+            moduleId: string;
+        } | null = null;
+        if (this.oneClickConnectSpecs?.baseUrl !== undefined) {
+            oneClickData = parseOneClickSignInFromUrl(
+                this.oneClickConnectSpecs
+            );
+        }
+
+        if (oneClickData !== null) {
+            return oneClickData;
+        }
+
+        const localStorageData = getLocalStorageKeypomEnv();
+        if (localStorageData !== null) {
+            return JSON.parse(localStorageData);
+        }
+
+        return null;
     };
 
     async signIn(): Promise<Account[]> {
@@ -112,19 +147,22 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             network: this.near.connection.networkId,
         });
 
-        let oneClickSignInData =
+        // Try to sign in using one click sign-in data from URL
+        const oneClickSignInData =
             this.oneClickConnectSpecs?.baseUrl !== undefined
                 ? parseOneClickSignInFromUrl(this.oneClickConnectSpecs)
-                : undefined;
+                : null;
 
-        if (oneClickSignInData !== undefined) {
-            if (
-                SUPPORTED_EXT_WALLET_DATA[this.near.connection.networkId!][
+        if (oneClickSignInData !== null) {
+            const networkId = this.near.connection.networkId!;
+            const isModuleSupported =
+                SUPPORTED_EXT_WALLET_DATA[networkId]?.[
                     oneClickSignInData.moduleId
-                ] === undefined
-            ) {
+                ] !== undefined;
+
+            if (!isModuleSupported) {
                 console.warn(
-                    `Module ID ${oneClickSignInData.moduleId} is not supported on ${this.near.connection.networkId}.`
+                    `Module ID ${oneClickSignInData.moduleId} is not supported on ${networkId}.`
                 );
                 return [];
             }
@@ -136,10 +174,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             );
         }
 
-        // If one click data isn't in URL, check local storage
+        // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
         const curEnvData = getLocalStorageKeypomEnv();
-
-        // If there is any data in local storage, default to that otherwise return empty array
         if (curEnvData !== null) {
             const { accountId, secretKey, moduleId } = JSON.parse(curEnvData);
             return this.internalSignIn(accountId, secretKey, moduleId);

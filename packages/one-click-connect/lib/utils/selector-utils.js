@@ -90,7 +90,7 @@ var parseOneClickSignInFromUrl = function (oneClickSpecs) {
     // remove everything after ?cid= in the URL if it's present
     var split = window.location.href.split("?cid=")[0].split(baseUrl);
     if (split.length !== 2) {
-        return;
+        return null;
     }
     var signInInfo = split[1];
     // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
@@ -100,7 +100,7 @@ var parseOneClickSignInFromUrl = function (oneClickSpecs) {
     var secretKey = matches === null || matches === void 0 ? void 0 : matches[2];
     var moduleId = matches === null || matches === void 0 ? void 0 : matches[3];
     if (!accountId || !secretKey || !moduleId) {
-        return;
+        return null;
     }
     return {
         accountId: accountId,

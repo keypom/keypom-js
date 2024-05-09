@@ -18,7 +18,6 @@ export interface KeypomInitializeOptions {
 }
 export interface OneClickParams {
     networkId: NetworkId;
-    signInContractId: string;
     url: string;
 }
 export declare const isOneClickParams: (params: OneClickParams) => boolean;

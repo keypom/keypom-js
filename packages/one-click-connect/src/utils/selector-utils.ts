@@ -65,14 +65,14 @@ export const keyHasPermissionForTransaction = async (
 
 export const parseOneClickSignInFromUrl = (
     oneClickSpecs: InternalOneClickSpecs
-) => {
+): { accountId: string; secretKey: string; moduleId: string } | null => {
     const { baseUrl, delimiter, moduleDelimiter } = oneClickSpecs;
 
     // remove everything after ?cid= in the URL if it's present
     const split = window.location.href.split("?cid=")[0].split(baseUrl!);
 
     if (split.length !== 2) {
-        return;
+        return null;
     }
 
     const signInInfo = split[1];
@@ -85,7 +85,7 @@ export const parseOneClickSignInFromUrl = (
     const moduleId = matches?.[3];
 
     if (!accountId || !secretKey || !moduleId) {
-        return;
+        return null;
     }
 
     return {

@@ -14,4 +14,4 @@ export declare const parseOneClickSignInFromUrl: (oneClickSpecs: InternalOneClic
     accountId: string;
     secretKey: string;
     moduleId: string;
-} | undefined;
+} | null;

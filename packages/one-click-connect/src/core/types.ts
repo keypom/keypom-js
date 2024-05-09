@@ -66,14 +66,12 @@ export interface KeypomInitializeOptions {
 
 export interface OneClickParams {
     networkId: NetworkId;
-    signInContractId: string;
     url: string;
 }
 
 export const isOneClickParams = (params: OneClickParams): boolean =>
     typeof params.networkId === "string" &&
     (params.networkId === "testnet" || params.networkId === "mainnet") &&
-    typeof params.signInContractId === "string" &&
     typeof params.url === "string";
 
 export type KeypomWalletInstant = InstantLinkWallet & {

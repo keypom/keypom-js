@@ -48,7 +48,6 @@ exports.FAILED_EXECUTION_OUTCOME = {
 var isOneClickParams = function (params) {
     return typeof params.networkId === "string" &&
         (params.networkId === "testnet" || params.networkId === "mainnet") &&
-        typeof params.signInContractId === "string" &&
         typeof params.url === "string";
 };
 exports.isOneClickParams = isOneClickParams;
