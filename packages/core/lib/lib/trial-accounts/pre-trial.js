@@ -78,6 +78,15 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
     (0, checks_1.assert)(parseInt(dropId || "1000000000") >= 1000000000, "All custom drop IDs must be greater than 1_000_000_000");
     if (!dropId)
         dropId = Date.now().toString();
+    if (!callableMethods) {
+        callableMethods = new Array(callableContracts.length).fill(["*"]);
+    }
+    if (!maxAttachableNEARPerContract && !maxAttachableYoctoPerContract) {
+        maxAttachableYoctoPerContract = new Array(callableMethods.length).fill("0");
+    }
+    if (!trialEndFloorNEAR && !trialEndFloorYocto) {
+        trialEndFloorYocto = "0";
+    }
     // Ensure that the length of the callable methods, contracts, and max attachable deposit per contract are all the same
     (0, checks_1.assert)(callableMethods.length === callableContracts.length &&
         callableMethods.length ===
@@ -290,13 +299,19 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
                 functionCall: {
                     methodName: "create_drop",
                     args: (0, transactions_1.stringifyJsonOrBytes)(createDropArgs),
-                    gas: gas,
-                    deposit,
-                }
+                    gas: BigInt(gas),
+                    deposit: BigInt(deposit),
+                },
             },
         ],
     };
-    const transactions = [yield (0, keypom_utils_1.convertBasicTransaction)({ txnInfo, signerId: account.accountId, signerPk: pk })];
+    const transactions = [
+        yield (0, keypom_utils_1.convertBasicTransaction)({
+            txnInfo,
+            signerId: account.accountId,
+            signerPk: pk,
+        }),
+    ];
     if (returnTransactions) {
         return { keys, dropId, transactions, requiredDeposit };
     }
@@ -353,7 +368,7 @@ exports.createTrialAccountDrop = createTrialAccountDrop;
  * @group Trial Accounts
  */
 const claimTrialAccountDrop = ({ secretKey, desiredAccountId, }) => __awaiter(void 0, void 0, void 0, function* () {
-    const { networkId, keyStore, contractId, contractAccount, receiverId, execute } = (0, keypom_1.getEnv)();
+    const { networkId, keyStore, contractId, contractAccount, receiverId, execute, } = (0, keypom_1.getEnv)();
     const keyPair = crypto_1.KeyPair.fromString(secretKey);
     const pubKey = keyPair.getPublicKey().toString();
     yield keyStore.setKey(networkId, contractId, keyPair);
@@ -377,9 +392,9 @@ const claimTrialAccountDrop = ({ secretKey, desiredAccountId, }) => __awaiter(vo
                             account_id: desiredAccountId,
                             fc_args: [JSON.stringify(userFcArgs), null],
                         }),
-                        gas: attachedGas,
-                        deposit: '0',
-                    }
+                        gas: BigInt(attachedGas),
+                        deposit: BigInt("0"),
+                    },
                 },
             ],
         },

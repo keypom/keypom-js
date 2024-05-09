@@ -1,8 +1,6 @@
-import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account } from '@near-js/accounts';
-import { CreateOrAddReturn } from './types/params';
-import { ProtocolReturnedDrop } from './types/protocol';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { Account } from "@near-js/accounts";
+import { AnyWallet, CreateOrAddReturn } from "./types/params";
+import { ProtocolReturnedDrop } from "./types/protocol";
 /**
  * Add keys that are manually generated and passed in, or automatically generated to an existing drop. If they're
  * automatically generated, they can be based off a set of entropy. For NFT and FT drops, assets can automatically be sent to Keypom to register keys as part of the payload.
@@ -194,4 +192,3 @@ export declare const deleteKeys: ({ account, wallet, publicKeys, dropId, withdra
     /** Whether or not to withdraw any remaining balance on the Keypom contract. */
     withdrawBalance?: boolean;
 }) => Promise<any>;
-export {};

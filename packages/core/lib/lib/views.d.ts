@@ -1,6 +1,6 @@
-import { Maybe } from './keypom';
-import { ContractSourceMetadata } from './types/general';
-import { ProtocolReturnedDrop, ProtocolReturnedKeyInfo, ProtocolReturnedMethod } from './types/protocol';
+import { Maybe } from "./keypom";
+import { ContractSourceMetadata } from "./types/general";
+import { ProtocolReturnedDrop, ProtocolReturnedKeyInfo, ProtocolReturnedMethod } from "./types/protocol";
 /**
  * Returns the balance associated a with given public key. If only the secret key is known, this can be passed in instead. This is used by the NEAR wallet to display the amount of the linkdrop
  *

@@ -1,14 +1,12 @@
-import { FinalExecutionOutcome } from '@near-wallet-selector/core';
-import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account } from '@near-js/accounts';
-import { DropConfig } from './types/drops';
-import { FCData } from './types/fc';
-import { FTData } from './types/ft';
-import { NFTData } from './types/nft';
-import { CreateOrAddReturn } from './types/params';
-import { ProtocolReturnedDrop } from './types/protocol';
-import { SimpleData } from './types/simple';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { Account } from "@near-js/accounts";
+import { DropConfig } from "./types/drops";
+import { FCData } from "./types/fc";
+import { FTData } from "./types/ft";
+import { NFTData } from "./types/nft";
+import { AnyWallet, CreateOrAddReturn } from "./types/params";
+import { ProtocolReturnedDrop } from "./types/protocol";
+import { SimpleData } from "./types/simple";
 export declare const KEY_LIMIT = 50;
 /**
  * Creates a new drop based on parameters passed in. This drop can have keys that are manually generated and passed in, or automatically generated. If they're
@@ -236,4 +234,3 @@ export declare const deleteDrops: ({ account, wallet, drops, dropIds, withdrawBa
     /** Whether or not to withdraw any remaining balance on the Keypom contract. */
     withdrawBalance?: boolean;
 }) => Promise<(void | FinalExecutionOutcome[])[][]>;
-export {};

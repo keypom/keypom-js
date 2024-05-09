@@ -1,7 +1,3 @@
-import {
-    BrowserWalletBehaviour,
-    Wallet,
-} from "@near-wallet-selector/core/lib/wallet/wallet.types";
 import BN from "bn.js";
 import { Account } from "@near-js/accounts";
 import { KeyPair } from "@near-js/crypto";
@@ -25,12 +21,15 @@ import {
 import { DropConfig } from "../types/drops";
 import { FCData } from "../types/fc";
 import { BasicTransaction } from "../types/general";
-import { CreateDropProtocolArgs, CreateOrAddReturn } from "../types/params";
+import {
+    AnyWallet,
+    CreateDropProtocolArgs,
+    CreateOrAddReturn,
+} from "../types/params";
 import { ProtocolReturnedDropConfig } from "../types/protocol";
 import { getDropInformation, getUserBalance } from "../views";
 import { wrapTxnParamsForTrial } from "./utils";
 
-type AnyWallet = BrowserWalletBehaviour | Wallet;
 export const KEY_LIMIT = 50;
 
 /**
@@ -183,15 +182,17 @@ export const createTrialAccountDrop = async ({
     if (!dropId) dropId = Date.now().toString();
 
     if (!callableMethods) {
-        callableMethods = new Array(callableContracts.length).fill(['*']);
+        callableMethods = new Array(callableContracts.length).fill(["*"]);
     }
- 
+
     if (!maxAttachableNEARPerContract && !maxAttachableYoctoPerContract) {
-        maxAttachableYoctoPerContract = new Array(callableMethods.length).fill('0');
+        maxAttachableYoctoPerContract = new Array(callableMethods.length).fill(
+            "0"
+        );
     }
 
     if (!trialEndFloorNEAR && !trialEndFloorYocto) {
-        trialEndFloorYocto = '0';
+        trialEndFloorYocto = "0";
     }
 
     // Ensure that the length of the callable methods, contracts, and max attachable deposit per contract are all the same
@@ -439,7 +440,10 @@ export const createTrialAccountDrop = async ({
 
     const deposit = !hasBalance ? requiredDeposit : "0";
 
-    const pk = await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pk = await account.connection.signer.getPublicKey(
+        account.accountId,
+        account.connection.networkId
+    );
     const txnInfo: BasicTransaction = {
         receiverId,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -449,13 +453,19 @@ export const createTrialAccountDrop = async ({
                 functionCall: {
                     methodName: "create_drop",
                     args: stringifyJsonOrBytes(createDropArgs),
-                    gas: gas!,
-                    deposit,
-                }
+                    gas: BigInt(gas),
+                    deposit: BigInt(deposit),
+                },
             },
         ],
-    }
-    const transactions = [await convertBasicTransaction({txnInfo, signerId: account!.accountId, signerPk: pk})];
+    };
+    const transactions = [
+        await convertBasicTransaction({
+            txnInfo,
+            signerId: account!.accountId,
+            signerPk: pk,
+        }),
+    ];
 
     if (returnTransactions) {
         return { keys, dropId, transactions, requiredDeposit };
@@ -529,7 +539,7 @@ export const claimTrialAccountDrop = async ({
         contractId,
         contractAccount,
         receiverId,
-        execute
+        execute,
     } = getEnv();
 
     const keyPair = KeyPair.fromString(secretKey);
@@ -544,7 +554,7 @@ export const claimTrialAccountDrop = async ({
         INSERT_NEW_ACCOUNT: desiredAccountId,
         INSERT_TRIAL_PUBLIC_KEY: pubKey,
     };
- 
+
     const txn = await convertBasicTransaction({
         txnInfo: {
             receiverId,
@@ -558,15 +568,15 @@ export const claimTrialAccountDrop = async ({
                             account_id: desiredAccountId,
                             fc_args: [JSON.stringify(userFcArgs), null],
                         }),
-                        gas: attachedGas,
-                        deposit: '0',
-                    }
+                        gas: BigInt(attachedGas),
+                        deposit: BigInt("0"),
+                    },
                 },
             ],
         },
         signerId: receiverId,
         signerPk: keyPair.getPublicKey(),
-    })
+    });
 
     const transactions: Transaction[] = [txn];
 

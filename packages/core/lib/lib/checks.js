@@ -48,21 +48,21 @@ const assert = (exp, m) => {
 exports.assert = assert;
 const assertValidDropConfig = (config) => {
     var _a;
-    (0, exports.assert)(((config === null || config === void 0 ? void 0 : config.uses_per_key) || 1) != 0, 'Cannot have 0 uses per key for a drop config');
+    (0, exports.assert)(((config === null || config === void 0 ? void 0 : config.uses_per_key) || 1) != 0, "Cannot have 0 uses per key for a drop config");
     if ((_a = config === null || config === void 0 ? void 0 : config.usage) === null || _a === void 0 ? void 0 : _a.permissions) {
-        (0, exports.assert)(config.usage.permissions == 'create_account_and_claim' ||
-            config.usage.permissions == 'claim', 'Invalid permission type for usage. Must be \'create_account_and_claim\' or \'claim\'');
+        (0, exports.assert)(config.usage.permissions == "create_account_and_claim" ||
+            config.usage.permissions == "claim", "Invalid permission type for usage. Must be 'create_account_and_claim' or 'claim'");
     }
     if (config === null || config === void 0 ? void 0 : config.time) {
         const currentBlockTimestamp = Date.now() * 1e6;
         if (config.time.interval != undefined) {
-            (0, exports.assert)(config.time.start != undefined, 'If you want to set a claim interval, you must also set a start timestamp');
+            (0, exports.assert)(config.time.start != undefined, "If you want to set a claim interval, you must also set a start timestamp");
         }
         (0, exports.assert)((config.time.start || currentBlockTimestamp) >=
-            currentBlockTimestamp, 'The start timestamp must be greater than the current block timestamp');
-        exports.assert((config.time.end || currentBlockTimestamp) >= currentBlockTimestamp, 'The end timestamp must be greater than the current block timestamp');
+            currentBlockTimestamp, "The start timestamp must be greater than the current block timestamp");
+        exports.assert((config.time.end || currentBlockTimestamp) >= currentBlockTimestamp, "The end timestamp must be greater than the current block timestamp");
         if (config.time.start != undefined && config.time.end != undefined) {
-            (0, exports.assert)(config.time.start < config.time.end, 'The start timestamp must be less than the end timestamp');
+            (0, exports.assert)(config.time.start < config.time.end, "The start timestamp must be less than the end timestamp");
         }
     }
 };
@@ -71,13 +71,13 @@ const assertValidFCData = (fcData, usesPerKey) => {
     if (fcData === null || fcData === void 0 ? void 0 : fcData.methods) {
         const numMethodData = fcData.methods.length;
         if (usesPerKey == 1) {
-            (0, exports.assert)(numMethodData == 1, 'Cannot have more Method Data than the number of uses per key');
+            (0, exports.assert)(numMethodData == 1, "Cannot have more Method Data than the number of uses per key");
         }
         else if (numMethodData > 1) {
-            (0, exports.assert)(numMethodData == usesPerKey, 'Number of FCs must match number of uses per key if more than 1 is specified');
+            (0, exports.assert)(numMethodData == usesPerKey, "Number of FCs must match number of uses per key if more than 1 is specified");
         }
         if (usesPerKey > 1 && numMethodData == 1) {
-            (0, exports.assert)(fcData.methods[0] != undefined, 'cannot have a single none function call');
+            (0, exports.assert)(fcData.methods[0] != undefined, "cannot have a single none function call");
         }
         for (let i = 0; i < numMethodData; i++) {
             const methodsPerUse = fcData.methods[i];
@@ -86,12 +86,12 @@ const assertValidFCData = (fcData, usesPerKey) => {
                 for (let j = 0; j < methodsPerUse.length; j++) {
                     const methodData = methodsPerUse[j];
                     if (methodData) {
-                        (0, exports.assert)(methodData.methodName != undefined, 'Must specify a method name');
-                        (0, exports.assert)(methodData.args != undefined, 'Must specify arguments for method');
-                        (0, exports.assert)(typeof methodData.args == 'string', 'Arguments must be a string. If you want to pass a JSON object, stringify it first.');
-                        (0, exports.assert)(methodData.receiverId != undefined, 'Must specify arguments for method');
+                        (0, exports.assert)(methodData.methodName != undefined, "Must specify a method name");
+                        (0, exports.assert)(methodData.args != undefined, "Must specify arguments for method");
+                        (0, exports.assert)(typeof methodData.args == "string", "Arguments must be a string. If you want to pass a JSON object, stringify it first.");
+                        (0, exports.assert)(methodData.receiverId != undefined, "Must specify arguments for method");
                         (0, exports.assert)(isValidKeypomContract(methodData.receiverId) ===
-                            false, 'Cannot have a keypom contract as the receiver');
+                            false, "Cannot have a keypom contract as the receiver");
                     }
                 }
             }
@@ -104,7 +104,7 @@ const assertDropIdUnique = (dropId) => __awaiter(void 0, void 0, void 0, functio
     try {
         const dropInfo = yield viewCall({
             contractId,
-            methodName: 'get_drop_information',
+            methodName: "get_drop_information",
             args: {
                 drop_id: dropId,
             },

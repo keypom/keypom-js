@@ -3,11 +3,11 @@ import { FinalExecutionOutcome, Transaction } from "@near-wallet-selector/core";
 import { getEnv } from "../keypom";
 import { createTransactions } from "../keypom-utils";
 import {
-	estimateTrialGas,
-	generateExecuteArgs,
-	hasEnoughBalance,
-	TRIAL_ERRORS,
-	validateDesiredMethods
+    estimateTrialGas,
+    generateExecuteArgs,
+    hasEnoughBalance,
+    TRIAL_ERRORS,
+    validateDesiredMethods,
 } from "./utils";
 import { KeyPair } from "@near-js/crypto";
 import { stringifyJsonOrBytes } from "@near-js/transactions";
@@ -167,8 +167,8 @@ export const trialSignAndSendTxns = async ({
                             methodName: "execute",
                             args: stringifyJsonOrBytes(executeArgs),
                             gas: gasToAttach,
-                            deposit: '0',
-                        }
+                            deposit: BigInt("0"),
+                        },
                     },
                 ],
             },
@@ -280,21 +280,23 @@ export const trialCallMethod = async ({
     await keyStore!.setKey(networkId!, trialAccountId, trialKeyPair);
     const account = await near!.account(trialAccountId);
 
-    const txns: Transaction[] = [{
-        signerId: trialAccountId,
-		receiverId: contractId,
-		actions: [
-			{
-				type: 'FunctionCall',
-				params: {
-					methodName,
-					args,
-					gas: attachedGas,
-					deposit: attachedDeposit
-				},
-			},
-		],
-	}];
+    const txns: Transaction[] = [
+        {
+            signerId: trialAccountId,
+            receiverId: contractId,
+            actions: [
+                {
+                    type: "FunctionCall",
+                    params: {
+                        methodName,
+                        args,
+                        gas: attachedGas,
+                        deposit: attachedDeposit,
+                    },
+                },
+            ],
+        },
+    ];
 
     console.log(`txns: ${JSON.stringify(txns)}`);
 
@@ -339,8 +341,8 @@ export const trialCallMethod = async ({
                             methodName: "execute",
                             args: stringifyJsonOrBytes(executeArgs),
                             gas: gasToAttach,
-                            deposit: '0',
-                        }
+                            deposit: BigInt("0"),
+                        },
                     },
                 ],
             },

@@ -1,10 +1,10 @@
-import { KeyPair } from '@near-js/crypto';
-import { assert } from './checks';
+import { KeyPair } from "@near-js/crypto";
+import { assert } from "./checks";
 
-import { stringifyJsonOrBytes } from '@near-js/transactions';
-import { getEnv, Maybe } from './keypom';
-import { convertBasicTransaction } from './keypom-utils';
-import { getCurMethodData, getDropInformation } from './views';
+import { stringifyJsonOrBytes } from "@near-js/transactions";
+import { getEnv, Maybe } from "./keypom";
+import { convertBasicTransaction } from "./keypom-utils";
+import { getCurMethodData, getDropInformation } from "./views";
 
 /**
  * Allows a specific Keypom drop to be claimed via the secret key.
@@ -138,10 +138,10 @@ export const claim = async ({
     const keyPair = KeyPair.fromString(secretKey);
     await keyStore!.setKey(networkId!, contractId!, keyPair);
 
-    assert(secretKey, 'A secretKey must be passed in.');
+    assert(secretKey, "A secretKey must be passed in.");
     assert(
         !newAccountId || newPublicKey,
-        'If creating a new account, a newPublicKey must be passed in.'
+        "If creating a new account, a newPublicKey must be passed in."
     );
 
     const dropInfo = await getDropInformation({ secretKey });
@@ -151,45 +151,45 @@ export const claim = async ({
     if (dropInfo.fc) {
         curMethodData = await getCurMethodData({ secretKey });
         if (curMethodData == null) {
-            accountId = 'none';
+            accountId = "none";
         }
     }
 
     if (fcArgs) {
-        assert(dropInfo.fc, 'Cannot pass in fcArgs for non-FC drops.');
+        assert(dropInfo.fc, "Cannot pass in fcArgs for non-FC drops.");
         assert(
             (curMethodData || []).length === fcArgs.length,
-            'The number of fcArgs must match the number of methods being executed.'
+            "The number of fcArgs must match the number of methods being executed."
         );
     }
 
     assert(
         newAccountId || accountId,
-        'Either an accountId or newAccountId must be passed in.'
+        "Either an accountId or newAccountId must be passed in."
     );
 
     const fcAction = newAccountId
         ? {
-            methodName: 'create_account_and_claim',
-            args: stringifyJsonOrBytes({
-                new_account_id: newAccountId,
-                new_public_key: newPublicKey,
-                password,
-                fc_args: fcArgs,
-            }),
-            gas: attachedGas,
-            deposit: '0',
-        }
+              methodName: "create_account_and_claim",
+              args: stringifyJsonOrBytes({
+                  new_account_id: newAccountId,
+                  new_public_key: newPublicKey,
+                  password,
+                  fc_args: fcArgs,
+              }),
+              gas: BigInt(attachedGas),
+              deposit: BigInt("0"),
+          }
         : {
-            methodName: 'claim',
-            args: stringifyJsonOrBytes({
-                account_id: accountId,
-                password,
-                fc_args: fcArgs,
-            }),
-            gas: attachedGas,
-            deposit: '0',
-        };
+              methodName: "claim",
+              args: stringifyJsonOrBytes({
+                  account_id: accountId,
+                  password,
+                  fc_args: fcArgs,
+              }),
+              gas: BigInt(attachedGas),
+              deposit: BigInt("0"),
+          };
 
     const txn = await convertBasicTransaction({
         txnInfo: {
@@ -197,7 +197,7 @@ export const claim = async ({
             signerId: contractId,
             actions: [
                 {
-                    enum: 'FunctionCall',
+                    enum: "FunctionCall",
                     functionCall: fcAction,
                 },
             ],

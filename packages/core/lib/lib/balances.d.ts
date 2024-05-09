@@ -1,6 +1,5 @@
-import { BrowserWalletBehaviour, Wallet } from '@near-wallet-selector/core/lib/wallet/wallet.types';
-import { Account } from '@near-js/accounts';
-type AnyWallet = BrowserWalletBehaviour | Wallet;
+import { Account } from "@near-js/accounts";
+import { AnyWallet } from "./types/params";
 /**
  * Deposit some amount of $NEAR or yoctoNEAR$ into the Keypom contract. This amount can then be used to create drops or add keys without
  * Having to explicitly attach a deposit everytime. It can be thought of like a bank account.
@@ -72,4 +71,3 @@ export declare const withdrawBalance: ({ account, wallet, }: {
     /** If using a browser wallet through wallet selector and that wallet should sign the transaction, pass in the object. */
     wallet?: AnyWallet;
 }) => Promise<any>;
-export {};

@@ -149,8 +149,8 @@ const trialSignAndSendTxns = ({ trialAccountId, trialAccountSecretKey, txns, }) 
                             methodName: "execute",
                             args: (0, transactions_1.stringifyJsonOrBytes)(executeArgs),
                             gas: gasToAttach,
-                            deposit: '0',
-                        }
+                            deposit: BigInt("0"),
+                        },
                     },
                 ],
             },
@@ -234,21 +234,23 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
     const pubKey = trialKeyPair.getPublicKey();
     yield keyStore.setKey(networkId, trialAccountId, trialKeyPair);
     const account = yield near.account(trialAccountId);
-    const txns = [{
+    const txns = [
+        {
             signerId: trialAccountId,
             receiverId: contractId,
             actions: [
                 {
-                    type: 'FunctionCall',
+                    type: "FunctionCall",
                     params: {
                         methodName,
                         args,
                         gas: attachedGas,
-                        deposit: attachedDeposit
+                        deposit: attachedDeposit,
                     },
                 },
             ],
-        }];
+        },
+    ];
     console.log(`txns: ${JSON.stringify(txns)}`);
     const { methodDataToValidate, executeArgs, totalAttachedYocto, totalGasForTxns, } = yield (0, utils_1.generateExecuteArgs)({ desiredTxns: txns });
     const isValidTxn = yield (0, utils_1.validateDesiredMethods)({
@@ -282,8 +284,8 @@ const trialCallMethod = ({ trialAccountId, trialAccountSecretKey, contractId, me
                             methodName: "execute",
                             args: (0, transactions_1.stringifyJsonOrBytes)(executeArgs),
                             gas: gasToAttach,
-                            deposit: '0',
-                        }
+                            deposit: BigInt("0"),
+                        },
                     },
                 ],
             },
