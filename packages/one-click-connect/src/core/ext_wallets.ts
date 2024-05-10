@@ -31,7 +31,7 @@ interface RequestSignTransactionsOptions {
     /** list of transactions to sign */
     transactions: wsTransaction[];
 
-    moduleId: string;
+    walletId: string;
     accountId: string;
     secretKey: string;
     near: Near;
@@ -42,7 +42,7 @@ interface RequestSignTransactionsOptions {
  */
 export const extSignAndSendTransactions = async ({
     transactions,
-    moduleId,
+    walletId,
     accountId,
     secretKey,
     near,
@@ -101,12 +101,12 @@ export const extSignAndSendTransactions = async ({
     }
 
     if (fakRequiredTxns.length > 0) {
-        switch (moduleId) {
+        switch (walletId) {
             case "sweat-wallet":
                 console.warn("Sweat wallet does not support FAK signing yet");
                 return [FAILED_EXECUTION_OUTCOME];
             default:
-                console.warn("Unsupported wallet module: ", moduleId);
+                console.warn("Unsupported wallet ID: ", walletId);
                 return [FAILED_EXECUTION_OUTCOME];
         }
     }

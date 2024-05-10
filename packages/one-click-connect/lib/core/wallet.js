@@ -56,10 +56,10 @@ var keystores_browser_1 = require("@near-js/keystores-browser");
 var wallet_account_1 = require("@near-js/wallet-account");
 var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
-var ONE_CLICK_URL_REGEX = new RegExp("(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID");
+var ONE_CLICK_URL_REGEX = new RegExp("^(.*):accountId(.+):secretKey(.+):walletId(.*)$");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var networkId = _a.networkId, url = _a.url;
+        var networkId = _a.networkId, urlPattern = _a.urlPattern;
         var _this = this;
         this.checkValidOneClickParams = function () {
             var _a;
@@ -80,7 +80,7 @@ var KeypomWallet = /** @class */ (function () {
         console.log("Initializing OneClick Connect");
         this.keyStore = new keystores_browser_1.BrowserLocalStorageKeyStore();
         this.near = new wallet_account_1.Near(__assign(__assign({}, core_1.networks[networkId]), { deps: { keyStore: this.keyStore } }));
-        this.setSpecsFromKeypomParams(url);
+        this.setSpecsFromKeypomParams(urlPattern);
     }
     KeypomWallet.prototype.getContractId = function () {
         return this.contractId || "foo.near";
@@ -96,7 +96,7 @@ var KeypomWallet = /** @class */ (function () {
             });
         });
     };
-    KeypomWallet.prototype.signInInstantAccount = function (accountId, secretKey, moduleId) {
+    KeypomWallet.prototype.signInInstantAccount = function (accountId, secretKey, walletId) {
         return __awaiter(this, void 0, void 0, function () {
             var account, allKeys, pk_1, keyInfoView, e_1;
             return __generator(this, function (_a) {
@@ -113,7 +113,7 @@ var KeypomWallet = /** @class */ (function () {
                             return public_key === pk_1;
                         });
                         if (keyInfoView) {
-                            return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
+                            return [2 /*return*/, this.internalSignIn(accountId, secretKey, walletId)];
                         }
                         return [3 /*break*/, 3];
                     case 2:
@@ -153,7 +153,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.signIn = function () {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
-            var oneClickSignInData, networkId, isModuleSupported, curEnvData, _c, accountId, secretKey, moduleId;
+            var oneClickSignInData, networkId, isModuleSupported, curEnvData, _c, accountId, secretKey, walletId;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0: return [4 /*yield*/, (0, core_1.initKeypom)({
@@ -166,17 +166,17 @@ var KeypomWallet = /** @class */ (function () {
                             : null;
                         if (oneClickSignInData !== null) {
                             networkId = this.near.connection.networkId;
-                            isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.moduleId]) !== undefined;
+                            isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.walletId]) !== undefined;
                             if (!isModuleSupported) {
-                                console.warn("Module ID ".concat(oneClickSignInData.moduleId, " is not supported on ").concat(networkId, "."));
+                                console.warn("Module ID ".concat(oneClickSignInData.walletId, " is not supported on ").concat(networkId, "."));
                                 return [2 /*return*/, []];
                             }
-                            return [2 /*return*/, this.signInInstantAccount(oneClickSignInData.accountId, oneClickSignInData.secretKey, oneClickSignInData.moduleId)];
+                            return [2 /*return*/, this.signInInstantAccount(oneClickSignInData.accountId, oneClickSignInData.secretKey, oneClickSignInData.walletId)];
                         }
                         curEnvData = (0, selector_utils_1.getLocalStorageKeypomEnv)();
                         if (curEnvData !== null) {
-                            _c = JSON.parse(curEnvData), accountId = _c.accountId, secretKey = _c.secretKey, moduleId = _c.moduleId;
-                            return [2 /*return*/, this.internalSignIn(accountId, secretKey, moduleId)];
+                            _c = JSON.parse(curEnvData), accountId = _c.accountId, secretKey = _c.secretKey, walletId = _c.walletId;
+                            return [2 /*return*/, this.internalSignIn(accountId, secretKey, walletId)];
                         }
                         return [2 /*return*/, []];
                 }
@@ -191,7 +191,7 @@ var KeypomWallet = /** @class */ (function () {
                         if (this.accountId === undefined || this.accountId === null) {
                             throw new Error("Wallet is already signed out");
                         }
-                        this.accountId = this.secretKey = this.moduleId = undefined;
+                        this.accountId = this.secretKey = this.walletId = undefined;
                         return [4 /*yield*/, this.keyStore.removeKey(this.near.connection.networkId, this.accountId)];
                     case 1:
                         _a.sent();
@@ -246,7 +246,7 @@ var KeypomWallet = /** @class */ (function () {
                         transactions = params.transactions;
                         return [4 /*yield*/, (0, ext_wallets_1.extSignAndSendTransactions)({
                                 transactions: transactions,
-                                moduleId: this.moduleId,
+                                walletId: this.walletId,
                                 accountId: this.accountId,
                                 secretKey: this.secretKey,
                                 near: this.near,
@@ -290,20 +290,20 @@ var KeypomWallet = /** @class */ (function () {
             });
         });
     };
-    KeypomWallet.prototype.internalSignIn = function (accountId, secretKey, moduleId) {
+    KeypomWallet.prototype.internalSignIn = function (accountId, secretKey, walletId) {
         return __awaiter(this, void 0, void 0, function () {
             var dataToWrite, accountObj;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log("internalSignIn accountId ".concat(accountId, " secretKey ").concat(secretKey, " moduleId ").concat(moduleId));
+                        console.log("internalSignIn accountId ".concat(accountId, " secretKey ").concat(secretKey, " walletId ").concat(walletId));
                         this.accountId = accountId;
                         this.secretKey = secretKey;
-                        this.moduleId = moduleId;
+                        this.walletId = walletId;
                         dataToWrite = {
                             accountId: accountId,
                             secretKey: secretKey,
-                            moduleId: moduleId,
+                            walletId: walletId,
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         return [4 /*yield*/, this.keyStore.setKey(this.near.connection.networkId, accountId, crypto_2.KeyPair.fromString(secretKey))];
@@ -320,17 +320,22 @@ var KeypomWallet = /** @class */ (function () {
             throw new Error("Wallet not signed in");
         }
     };
-    KeypomWallet.prototype.setSpecsFromKeypomParams = function (url) {
-        // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID, SECRET_KEY, and MODULE_ID
-        var matches = url.match(ONE_CLICK_URL_REGEX);
-        var baseUrl = matches === null || matches === void 0 ? void 0 : matches[1];
-        var delimiter = matches === null || matches === void 0 ? void 0 : matches[2];
-        var moduleDelimiter = matches === null || matches === void 0 ? void 0 : matches[3];
+    KeypomWallet.prototype.setSpecsFromKeypomParams = function (urlPattern) {
+        var matches = urlPattern.match(ONE_CLICK_URL_REGEX);
+        if (!matches) {
+            console.error("Invalid URL pattern. Could not extract necessary parts.");
+            return;
+        }
+        var baseUrl = matches[1];
+        var delimiter = matches[2];
+        var walletDelimiter = matches[3];
+        var restUrl = matches[4]; // Capture any additional URL components after WALLET_ID if necessary
         var oneClickSpecs = {
-            url: url,
+            urlPattern: urlPattern,
             baseUrl: baseUrl,
             delimiter: delimiter,
-            moduleDelimiter: moduleDelimiter,
+            walletDelimiter: walletDelimiter,
+            restUrl: restUrl,
         };
         console.log("oneClickSpecs from URL: ", oneClickSpecs);
         this.oneClickConnectSpecs = oneClickSpecs;

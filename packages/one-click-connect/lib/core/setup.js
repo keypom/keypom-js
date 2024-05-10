@@ -178,32 +178,32 @@ var Keypom = function (_a) {
 function setupOneClickConnect(params) {
     var _this = this;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var url, networkId, keypomWallet, signInData, contractId, secretKey, accountId;
+        var urlPattern, networkId, keypomWallet, signInData, contractId, secretKey, accountId;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    url = params.url, networkId = params.networkId;
+                    urlPattern = params.urlPattern, networkId = params.networkId;
                     // Validate Keypom parameters
                     if (!(0, types_1.isOneClickParams)(params)) {
                         console.error("KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format.");
                         return [2 /*return*/, null];
                     }
                     // Additional business logic checks
-                    if (!networkId || !url) {
+                    if (!networkId || !urlPattern) {
                         console.warn("KeypomWallet: networkId, and url are required.");
                         return [2 /*return*/, null];
                     }
-                    if (url &&
-                        !(url.includes("ACCOUNT_ID") ||
-                            url.includes("SECRET_KEY") ||
-                            url.includes("WALLET_ID"))) {
-                        console.error("KeypomWallet: Invalid OneClick Params passed in. Url string must contain `ACCOUNT_ID`, `SECRET_KEY`, and `WALLET_ID`");
+                    if (urlPattern &&
+                        !(urlPattern.includes(":accountId") &&
+                            urlPattern.includes(":secretKey") &&
+                            urlPattern.includes(":walletId"))) {
+                        console.error("KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders.");
                         return [2 /*return*/, null];
                     }
                     keypomWallet = new wallet_1.KeypomWallet({
                         networkId: networkId,
-                        url: url,
+                        urlPattern: urlPattern,
                     });
                     signInData = keypomWallet.checkValidOneClickParams();
                     console.log("signInData: ", signInData);

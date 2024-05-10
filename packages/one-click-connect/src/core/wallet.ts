@@ -22,13 +22,13 @@ import {
 import { InternalOneClickSpecs } from "./types";
 
 const ONE_CLICK_URL_REGEX = new RegExp(
-    `(.*)ACCOUNT_ID(.*)SECRET_KEY(.*)MODULE_ID`
+    `^(.*):accountId(.+):secretKey(.+):walletId(.*)$`
 );
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId?: string;
     secretKey?: string;
-    moduleId?: string;
+    walletId?: string;
     contractId?: string;
 
     near: Near;
@@ -36,7 +36,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     oneClickConnectSpecs?: InternalOneClickSpecs;
 
-    public constructor({ networkId, url }: { networkId: string; url: string }) {
+    public constructor({
+        networkId,
+        urlPattern,
+    }: {
+        networkId: string;
+        urlPattern: string;
+    }) {
         console.log("Initializing OneClick Connect");
 
         this.keyStore = new BrowserLocalStorageKeyStore();
@@ -45,7 +51,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             deps: { keyStore: this.keyStore },
         });
 
-        this.setSpecsFromKeypomParams(url);
+        this.setSpecsFromKeypomParams(urlPattern);
     }
 
     getContractId(): string {
@@ -64,7 +70,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     async signInInstantAccount(
         accountId: string,
         secretKey: string,
-        moduleId: string
+        walletId: string
     ): Promise<Account[]> {
         // Check if the account ID and secret key are valid and sign in accordingly
         try {
@@ -77,7 +83,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             );
 
             if (keyInfoView) {
-                return this.internalSignIn(accountId, secretKey, moduleId);
+                return this.internalSignIn(accountId, secretKey, walletId);
             }
         } catch (e) {
             console.log("e: ", e);
@@ -115,14 +121,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     public checkValidOneClickParams = (): {
         accountId: string;
         secretKey: string;
-        moduleId: string;
+        walletId: string;
     } | null => {
         console.log("CheckValidOneClick");
 
         let oneClickData: {
             accountId: string;
             secretKey: string;
-            moduleId: string;
+            walletId: string;
         } | null = null;
         if (this.oneClickConnectSpecs?.baseUrl !== undefined) {
             oneClickData = parseOneClickSignInFromUrl(
@@ -157,12 +163,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             const networkId = this.near.connection.networkId!;
             const isModuleSupported =
                 SUPPORTED_EXT_WALLET_DATA[networkId]?.[
-                    oneClickSignInData.moduleId
+                    oneClickSignInData.walletId
                 ] !== undefined;
 
             if (!isModuleSupported) {
                 console.warn(
-                    `Module ID ${oneClickSignInData.moduleId} is not supported on ${networkId}.`
+                    `Module ID ${oneClickSignInData.walletId} is not supported on ${networkId}.`
                 );
                 return [];
             }
@@ -170,15 +176,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             return this.signInInstantAccount(
                 oneClickSignInData.accountId,
                 oneClickSignInData.secretKey,
-                oneClickSignInData.moduleId
+                oneClickSignInData.walletId
             );
         }
 
         // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
         const curEnvData = getLocalStorageKeypomEnv();
         if (curEnvData !== null) {
-            const { accountId, secretKey, moduleId } = JSON.parse(curEnvData);
-            return this.internalSignIn(accountId, secretKey, moduleId);
+            const { accountId, secretKey, walletId } = JSON.parse(curEnvData);
+            return this.internalSignIn(accountId, secretKey, walletId);
         }
 
         return [];
@@ -189,7 +195,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             throw new Error("Wallet is already signed out");
         }
 
-        this.accountId = this.secretKey = this.moduleId = undefined;
+        this.accountId = this.secretKey = this.walletId = undefined;
         await this.keyStore.removeKey(
             this.near.connection.networkId,
             this.accountId!
@@ -228,7 +234,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         return await extSignAndSendTransactions({
             transactions,
-            moduleId: this.moduleId!,
+            walletId: this.walletId!,
             accountId: this.accountId!,
             secretKey: this.secretKey!,
             near: this.near,
@@ -260,18 +266,18 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // TODO:  maybe?
     }
 
-    private async internalSignIn(accountId, secretKey, moduleId) {
+    private async internalSignIn(accountId, secretKey, walletId) {
         console.log(
-            `internalSignIn accountId ${accountId} secretKey ${secretKey} moduleId ${moduleId}`
+            `internalSignIn accountId ${accountId} secretKey ${secretKey} walletId ${walletId}`
         );
         this.accountId = accountId;
         this.secretKey = secretKey;
-        this.moduleId = moduleId;
+        this.walletId = walletId;
 
         const dataToWrite = {
             accountId,
             secretKey,
-            moduleId,
+            walletId,
         };
         setLocalStorageKeypomEnv(dataToWrite);
         await this.keyStore.setKey(
@@ -290,19 +296,28 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
     }
 
-    private setSpecsFromKeypomParams(url: string) {
-        // Get the base URL and delimiter by splitting the URL using ACCOUNT_ID, SECRET_KEY, and MODULE_ID
-        const matches = url.match(ONE_CLICK_URL_REGEX);
-        const baseUrl = matches?.[1]!;
-        const delimiter = matches?.[2]!;
-        const moduleDelimiter = matches?.[3]!;
+    private setSpecsFromKeypomParams(urlPattern: string) {
+        const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
+        if (!matches) {
+            console.error(
+                "Invalid URL pattern. Could not extract necessary parts."
+            );
+            return;
+        }
+
+        const baseUrl = matches[1];
+        const delimiter = matches[2];
+        const walletDelimiter = matches[3];
+        const restUrl = matches[4]; // Capture any additional URL components after WALLET_ID if necessary
 
         let oneClickSpecs = {
-            url,
+            urlPattern,
             baseUrl,
             delimiter,
-            moduleDelimiter,
+            walletDelimiter,
+            restUrl,
         };
+
         console.log("oneClickSpecs from URL: ", oneClickSpecs);
 
         this.oneClickConnectSpecs = oneClickSpecs;

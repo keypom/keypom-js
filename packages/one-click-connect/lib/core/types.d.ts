@@ -3,10 +3,11 @@ import { InstantLinkWallet, NetworkId } from "@near-wallet-selector/core";
 import { KeypomWallet } from "./wallet";
 export declare const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome;
 export interface InternalOneClickSpecs {
-    moduleId?: string;
-    baseUrl?: string;
-    delimiter?: string;
-    moduleDelimiter?: string;
+    urlPattern: string;
+    baseUrl: string;
+    delimiter: string;
+    walletDelimiter: string;
+    restUrl: string;
 }
 export interface SignInOptions {
     contractId?: string;
@@ -18,7 +19,7 @@ export interface KeypomInitializeOptions {
 }
 export interface OneClickParams {
     networkId: NetworkId;
-    url: string;
+    urlPattern: string;
 }
 export declare const isOneClickParams: (params: OneClickParams) => boolean;
 export type KeypomWalletInstant = InstantLinkWallet & {

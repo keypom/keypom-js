@@ -48,10 +48,11 @@ export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
 };
 
 export interface InternalOneClickSpecs {
-    moduleId?: string;
-    baseUrl?: string;
-    delimiter?: string;
-    moduleDelimiter?: string;
+    urlPattern: string;
+    baseUrl: string;
+    delimiter: string;
+    walletDelimiter: string;
+    restUrl: string;
 }
 
 export interface SignInOptions {
@@ -66,13 +67,13 @@ export interface KeypomInitializeOptions {
 
 export interface OneClickParams {
     networkId: NetworkId;
-    url: string;
+    urlPattern: string;
 }
 
 export const isOneClickParams = (params: OneClickParams): boolean =>
     typeof params.networkId === "string" &&
     (params.networkId === "testnet" || params.networkId === "mainnet") &&
-    typeof params.url === "string";
+    typeof params.urlPattern === "string";
 
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;

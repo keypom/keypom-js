@@ -68,7 +68,6 @@ const selector = await setupWalletSelector({
         // Add the OneClick Connect function here
         setupOneClickConnecj({
             networkId: "testnet",
-            signInContractId: "metapool.testnet",
             url: "https://www.metapool.app/vote/?network=near#ACCOUNT_ID/SECRET_KEY/MODULE_ID"
         })
     ],
@@ -76,8 +75,6 @@ const selector = await setupWalletSelector({
 ```
 
 ## setupOneClickConnect Parameters
-
-`setupKeypom` is the core of the Keypom wallet selector and is the only function you should know about. There are a ton of customizable features that you can make use of to tailor the user experience to your app's needs. At its core, the setup function takes the following parameters:
 
 -   `networkId`: Either `testnet` or `mainnet`.
 -   `signInContractId`: Which contract will be used to sign in users.

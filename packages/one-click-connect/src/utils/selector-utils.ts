@@ -65,32 +65,36 @@ export const keyHasPermissionForTransaction = async (
 
 export const parseOneClickSignInFromUrl = (
     oneClickSpecs: InternalOneClickSpecs
-): { accountId: string; secretKey: string; moduleId: string } | null => {
-    const { baseUrl, delimiter, moduleDelimiter } = oneClickSpecs;
+): { accountId: string; secretKey: string; walletId: string } | null => {
+    const { baseUrl, delimiter, walletDelimiter } = oneClickSpecs;
 
-    // remove everything after ?cid= in the URL if it's present
-    const split = window.location.href.split("?cid=")[0].split(baseUrl!);
-
-    if (split.length !== 2) {
+    let urlToCheck = window.location.href;
+    // Split the URL to get the part after baseUrl (i.e: `#instant-url/`)
+    let parts = urlToCheck.split(baseUrl);
+    if (parts.length < 2 || !parts[1]) {
+        console.error("URL does not contain the expected pattern.");
         return null;
     }
 
-    const signInInfo = split[1];
+    // Further split to separate accountId, secretKey, and walletId
+    const credentials = parts[1].split(delimiter);
+    if (credentials.length !== 3) {
+        console.error(
+            "URL does not contain all required parameters (accountId, secretKey, walletId)."
+        );
+        return null;
+    }
+    const [accountId, secretKey, walletId] = credentials;
 
-    // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
-    const regex = new RegExp(`(.*)${delimiter}(.*)${moduleDelimiter}(.*)`);
-    const matches = signInInfo.match(regex);
-    const accountId = matches?.[1];
-    const secretKey = matches?.[2];
-    const moduleId = matches?.[3];
-
-    if (!accountId || !secretKey || !moduleId) {
+    // Ensure none of the parameters are empty
+    if (!accountId || !secretKey || !walletId) {
+        console.error("Invalid or incomplete authentication data in URL.");
         return null;
     }
 
     return {
         accountId,
         secretKey,
-        moduleId,
+        walletId,
     };
 };
