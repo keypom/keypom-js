@@ -14,7 +14,7 @@ export declare const SUPPORTED_EXT_WALLET_DATA: {
 interface RequestSignTransactionsOptions {
     /** list of transactions to sign */
     transactions: wsTransaction[];
-    moduleId: string;
+    walletId: string;
     accountId: string;
     secretKey: string;
     near: Near;
@@ -22,5 +22,5 @@ interface RequestSignTransactionsOptions {
 /**
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
-export declare const extSignAndSendTransactions: ({ transactions, moduleId, accountId, secretKey, near, }: RequestSignTransactionsOptions) => Promise<FinalExecutionOutcome[]>;
+export declare const extSignAndSendTransactions: ({ transactions, walletId, accountId, secretKey, near, }: RequestSignTransactionsOptions) => Promise<FinalExecutionOutcome[]>;
 export {};

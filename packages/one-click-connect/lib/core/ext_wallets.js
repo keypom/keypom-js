@@ -55,7 +55,7 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
 var extSignAndSendTransactions = function (_a) {
-    var transactions = _a.transactions, moduleId = _a.moduleId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
+    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
     return __awaiter(void 0, void 0, void 0, function () {
         var fakRequiredTxns, responses, account, i, txn, mappedActions, pk, transaction, accessKey, canExecuteTxn, _b, _c, e_1;
         return __generator(this, function (_d) {
@@ -115,12 +115,12 @@ var extSignAndSendTransactions = function (_a) {
                     return [3 /*break*/, 1];
                 case 11:
                     if (fakRequiredTxns.length > 0) {
-                        switch (moduleId) {
+                        switch (walletId) {
                             case "sweat-wallet":
                                 console.warn("Sweat wallet does not support FAK signing yet");
                                 return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
                             default:
-                                console.warn("Unsupported wallet module: ", moduleId);
+                                console.warn("Unsupported wallet ID: ", walletId);
                                 return [2 /*return*/, [types_1.FAILED_EXECUTION_OUTCOME]];
                         }
                     }

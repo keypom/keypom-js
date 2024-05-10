@@ -95,7 +95,7 @@ export function setupOneClickConnect(
     params: OneClickParams
 ): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
-        const { url, networkId, signInContractId } = params;
+        const { urlPattern, networkId } = params;
 
         // Validate Keypom parameters
         if (!isOneClickParams(params)) {
@@ -106,36 +106,42 @@ export function setupOneClickConnect(
         }
 
         // Additional business logic checks
-        if (!signInContractId || !networkId || !url) {
-            console.warn(
-                "KeypomWallet: signInContractId, networkId, and url are required."
-            );
+        if (!networkId || !urlPattern) {
+            console.warn("KeypomWallet: networkId, and url are required.");
             return null;
         }
 
         if (
-            url &&
+            urlPattern &&
             !(
-                url.includes("ACCOUNT_ID") ||
-                url.includes("SECRET_KEY") ||
-                url.includes("WALLET_ID")
+                urlPattern.includes(":accountId") &&
+                urlPattern.includes(":secretKey") &&
+                urlPattern.includes(":walletId")
             )
         ) {
             console.error(
-                "KeypomWallet: Invalid OneClick Params passed in. Url string must contain `ACCOUNT_ID`, `SECRET_KEY`, and `WALLET_ID`"
+                "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
             );
             return null;
         }
 
         const keypomWallet = new KeypomWallet({
-            signInContractId,
             networkId,
-            url,
+            urlPattern,
         });
 
         // CHECK URL / LOCAL STORAGE TO SEE IF A ONE CLICK ACCOUNT SHOULD BE SIGNED IN
-        const shouldSignIn = keypomWallet.checkValidOneClickParams();
-        console.log("shouldSignIn: ", shouldSignIn);
+        const signInData = keypomWallet.checkValidOneClickParams();
+        console.log("signInData: ", signInData);
+
+        let contractId = "foo.near";
+        if (signInData !== null) {
+            const { secretKey, accountId } = signInData;
+            contractId = await keypomWallet.getLAKContractId(
+                accountId,
+                secretKey
+            );
+        }
 
         return {
             id: "keypom",
@@ -146,8 +152,8 @@ export function setupOneClickConnect(
                 iconUrl: "",
                 deprecated: false,
                 available: true,
-                contractId: signInContractId,
-                runOnStartup: shouldSignIn,
+                contractId,
+                runOnStartup: signInData !== null,
             },
             init: async (config) =>
                 Keypom({

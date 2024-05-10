@@ -86,26 +86,30 @@ var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) {
 }); };
 exports.keyHasPermissionForTransaction = keyHasPermissionForTransaction;
 var parseOneClickSignInFromUrl = function (oneClickSpecs) {
-    var baseUrl = oneClickSpecs.baseUrl, delimiter = oneClickSpecs.delimiter, moduleDelimiter = oneClickSpecs.moduleDelimiter;
-    // remove everything after ?cid= in the URL if it's present
-    var split = window.location.href.split("?cid=")[0].split(baseUrl);
-    if (split.length !== 2) {
-        return;
+    var baseUrl = oneClickSpecs.baseUrl, delimiter = oneClickSpecs.delimiter, walletDelimiter = oneClickSpecs.walletDelimiter;
+    var urlToCheck = window.location.href;
+    // Split the URL to get the part after baseUrl (i.e: `#instant-url/`)
+    var parts = urlToCheck.split(baseUrl);
+    if (parts.length < 2 || !parts[1]) {
+        console.error("URL does not contain the expected pattern.");
+        return null;
     }
-    var signInInfo = split[1];
-    // Get the account ID, secret key, and module ID based on the two delimiters `delimiter` and `moduleDelimiter`
-    var regex = new RegExp("(.*)".concat(delimiter, "(.*)").concat(moduleDelimiter, "(.*)"));
-    var matches = signInInfo.match(regex);
-    var accountId = matches === null || matches === void 0 ? void 0 : matches[1];
-    var secretKey = matches === null || matches === void 0 ? void 0 : matches[2];
-    var moduleId = matches === null || matches === void 0 ? void 0 : matches[3];
-    if (!accountId || !secretKey || !moduleId) {
-        return;
+    // Further split to separate accountId, secretKey, and walletId
+    var credentials = parts[1].split(delimiter);
+    if (credentials.length !== 3) {
+        console.error("URL does not contain all required parameters (accountId, secretKey, walletId).");
+        return null;
+    }
+    var accountId = credentials[0], secretKey = credentials[1], walletId = credentials[2];
+    // Ensure none of the parameters are empty
+    if (!accountId || !secretKey || !walletId) {
+        console.error("Invalid or incomplete authentication data in URL.");
+        return null;
     }
     return {
         accountId: accountId,
         secretKey: secretKey,
-        moduleId: moduleId,
+        walletId: walletId,
     };
 };
 exports.parseOneClickSignInFromUrl = parseOneClickSignInFromUrl;

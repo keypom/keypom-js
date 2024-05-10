@@ -13,5 +13,5 @@ export declare const keyHasPermissionForTransaction: (accessKey: any, receiverId
 export declare const parseOneClickSignInFromUrl: (oneClickSpecs: InternalOneClickSpecs) => {
     accountId: string;
     secretKey: string;
-    moduleId: string;
-} | undefined;
+    walletId: string;
+} | null;
