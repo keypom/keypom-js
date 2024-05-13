@@ -286,6 +286,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             KeyPair.fromString(secretKey)
         );
 
+        // Assuming the URL pattern follows directly after the domain and possible path
+        // Erase the OneClick Connect URL segment
+        if (window.history && window.history.pushState) {
+            const urlStart = window.location.href.split(
+                this.oneClickConnectSpecs?.baseUrl || "#"
+            )[0]; // This will remove everything after the base URL
+            window.history.pushState({}, "", urlStart);
+        }
+
         const accountObj = new Account(this.near.connection, accountId);
         return [accountObj];
     }

@@ -37,11 +37,13 @@ export const keyHasPermissionForTransaction = async (
     if (permission.FunctionCall) {
         const { receiver_id: allowedReceiverId, method_names: allowedMethods } =
             permission.FunctionCall;
+        console.log("allowedReceiverId: ", allowedReceiverId);
         if (allowedReceiverId === receiverId) {
             let allowed = true;
 
             for (const action of actions) {
                 const { functionCall } = action;
+                console.log("functionCall: ", functionCall);
                 if (
                     !(
                         functionCall &&
@@ -51,6 +53,7 @@ export const keyHasPermissionForTransaction = async (
                             allowedMethods.includes(functionCall.methodName))
                     )
                 ) {
+                    console.log("action not allowed: ", action);
                     allowed = false;
                     break;
                 }

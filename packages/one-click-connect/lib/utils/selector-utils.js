@@ -64,16 +64,19 @@ var keyHasPermissionForTransaction = function (accessKey, receiverId, actions) {
         }
         if (permission.FunctionCall) {
             _a = permission.FunctionCall, allowedReceiverId = _a.receiver_id, allowedMethods = _a.method_names;
+            console.log("allowedReceiverId: ", allowedReceiverId);
             if (allowedReceiverId === receiverId) {
                 allowed = true;
                 for (_i = 0, actions_1 = actions; _i < actions_1.length; _i++) {
                     action = actions_1[_i];
                     functionCall = action.functionCall;
+                    console.log("functionCall: ", functionCall);
                     if (!(functionCall &&
                         (!functionCall.deposit ||
                             functionCall.deposit.toString() === "0") && // TODO: Should support charging amount smaller than allowance?
                         (allowedMethods.length === 0 ||
                             allowedMethods.includes(functionCall.methodName)))) {
+                        console.log("action not allowed: ", action);
                         allowed = false;
                         break;
                     }

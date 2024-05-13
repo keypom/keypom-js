@@ -291,10 +291,11 @@ var KeypomWallet = /** @class */ (function () {
         });
     };
     KeypomWallet.prototype.internalSignIn = function (accountId, secretKey, walletId) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var dataToWrite, accountObj;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var dataToWrite, urlStart, accountObj;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         console.log("internalSignIn accountId ".concat(accountId, " secretKey ").concat(secretKey, " walletId ").concat(walletId));
                         this.accountId = accountId;
@@ -308,7 +309,13 @@ var KeypomWallet = /** @class */ (function () {
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         return [4 /*yield*/, this.keyStore.setKey(this.near.connection.networkId, accountId, crypto_2.KeyPair.fromString(secretKey))];
                     case 1:
-                        _a.sent();
+                        _b.sent();
+                        // Assuming the URL pattern follows directly after the domain and possible path
+                        // Erase the OneClick Connect URL segment
+                        if (window.history && window.history.pushState) {
+                            urlStart = window.location.href.split(((_a = this.oneClickConnectSpecs) === null || _a === void 0 ? void 0 : _a.baseUrl) || "#")[0];
+                            window.history.pushState({}, "", urlStart);
+                        }
                         accountObj = new accounts_1.Account(this.near.connection, accountId);
                         return [2 /*return*/, [accountObj]];
                 }

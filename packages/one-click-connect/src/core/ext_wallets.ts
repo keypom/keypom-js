@@ -86,19 +86,23 @@ export const extSignAndSendTransactions = async ({
             txn.receiverId,
             mappedActions
         );
+        console.log("canExecuteTxn", canExecuteTxn);
 
         if (canExecuteTxn) {
             try {
+                console.log("Signing transaction", transaction);
                 responses.push(
                     await account.signAndSendTransaction(transaction)
                 );
             } catch (e: any) {
+                console.error("Error signing transaction", e);
                 fakRequiredTxns.push(transaction);
             }
         } else {
             fakRequiredTxns.push(transaction);
         }
     }
+    console.log("fakRequiredTxns", fakRequiredTxns);
 
     if (fakRequiredTxns.length > 0) {
         switch (walletId) {

@@ -93,10 +93,12 @@ var extSignAndSendTransactions = function (_a) {
                     return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, mappedActions)];
                 case 4:
                     canExecuteTxn = _d.sent();
+                    console.log("canExecuteTxn", canExecuteTxn);
                     if (!canExecuteTxn) return [3 /*break*/, 9];
                     _d.label = 5;
                 case 5:
                     _d.trys.push([5, 7, , 8]);
+                    console.log("Signing transaction", transaction);
                     _c = (_b = responses).push;
                     return [4 /*yield*/, account.signAndSendTransaction(transaction)];
                 case 6:
@@ -104,6 +106,7 @@ var extSignAndSendTransactions = function (_a) {
                     return [3 /*break*/, 8];
                 case 7:
                     e_1 = _d.sent();
+                    console.error("Error signing transaction", e_1);
                     fakRequiredTxns.push(transaction);
                     return [3 /*break*/, 8];
                 case 8: return [3 /*break*/, 10];
@@ -114,6 +117,7 @@ var extSignAndSendTransactions = function (_a) {
                     i++;
                     return [3 /*break*/, 1];
                 case 11:
+                    console.log("fakRequiredTxns", fakRequiredTxns);
                     if (fakRequiredTxns.length > 0) {
                         switch (walletId) {
                             case "sweat-wallet":

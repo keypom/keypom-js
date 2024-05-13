@@ -16,10 +16,17 @@ const { parseNearAmount } = require("@near-js/utils");
 const accountId = "benjiman.testnet";
 const NETWORK_ID = "testnet";
 const instances = {
-    discovery: {
+    keypom: {
         url: "http://localhost:3000/#instant-url/ACCOUNT_ID/SECRET_KEY/MODULE_ID",
-        moduleId: "my-near-wallet",
-        contract: "v1.social08.testnet",
+        moduleId: "sweat-wallet",
+        contract: "1715371966128-marketplace.testnet",
+        allowance: parseNearAmount("0.1"),
+        numLinks: 1,
+    },
+    guestBook: {
+        url: "http://localhost:3001/#instant-url/ACCOUNT_ID/SECRET_KEY/MODULE_ID",
+        moduleId: "sweat-wallet",
+        contract: "guestbook.near-examples.testnet",
         allowance: parseNearAmount("0.1"),
         numLinks: 1,
     },

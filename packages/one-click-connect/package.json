@@ -1,6 +1,6 @@
 {
     "name": "@keypom/one-click-connect",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "OneClick Connect Wallet Selector Plugin",
     "main": "lib/index.js",
     "scripts": {
@@ -18,31 +18,6 @@
     "license": "MIT",
     "dependencies": {
         "@keypom/core": "workspace:*",
-        "bn.js": "^5.2.1",
-        "borsh": "^0.7.0"
-    },
-    "ava": {
-        "require": [
-            "dotenv/config"
-        ]
-    },
-    "devDependencies": {
-        "typedoc": "^0.23.24",
-        "typescript": "^4.8.4",
-        "ava": "^4.3.3",
-        "@near-js/accounts": "^1.2.0",
-        "@near-js/crypto": "^1.2.3",
-        "@near-js/transactions": "^1.2.1",
-        "@near-js/types": "^0.2.0",
-        "@near-js/wallet-account": "^1.2.1",
-        "@near-js/utils": "^0.2.1",
-        "@near-js/keystores-browser": "^0.0.11",
-        "@near-wallet-selector/core": "^8.9.7",
-        "react": "^18.2.0",
-        "react-dom": "18.2.0",
-        "@types/react": "^18.0.26"
-    },
-    "peerDependencies": {
         "@near-js/accounts": "^1.2.0",
         "@near-js/crypto": "^1.2.3",
         "@near-js/transactions": "^1.2.1",
@@ -55,6 +30,16 @@
         "react": "^18.2.0",
         "react-dom": "18.2.0",
         "@types/react": "^18.0.26"
+    },
+    "ava": {
+        "require": [
+            "dotenv/config"
+        ]
+    },
+    "devDependencies": {
+        "typedoc": "^0.23.24",
+        "typescript": "^4.8.4",
+        "ava": "^4.3.3"
     },
     "files": [
         "lib"
