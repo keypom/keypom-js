@@ -1,3 +1,4 @@
+import * as nearAPI from "near-api-js";
 import { Transaction as wsTransaction } from "@near-wallet-selector/core";
 export declare const SUPPORTED_EXT_WALLET_DATA: {
     testnet: {
@@ -16,7 +17,7 @@ interface RequestSignTransactionsOptions {
     walletId: string;
     accountId: string;
     secretKey: string;
-    near: any;
+    near: nearAPI.Near;
 }
 /**
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.

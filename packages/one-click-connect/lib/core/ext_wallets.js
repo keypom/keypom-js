@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
+var wallet_utils_1 = require("@near-wallet-selector/wallet-utils");
 exports.SUPPORTED_EXT_WALLET_DATA = {
     testnet: {
         "sweat-wallet": {},
@@ -53,9 +54,9 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
 var extSignAndSendTransactions = function (_a) {
     var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, account, pk, i, txn, accessKey, canExecuteTxn, _b, _c, e_1;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var fakRequiredTxns, responses, account, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     fakRequiredTxns = [];
                     responses = [];
@@ -66,39 +67,44 @@ var extSignAndSendTransactions = function (_a) {
                     }
                     return [4 /*yield*/, near.account(accountId)];
                 case 1:
-                    account = _d.sent();
+                    account = _b.sent();
                     pk = (0, selector_utils_1.getPubFromSecret)(secretKey);
                     i = 0;
-                    _d.label = 2;
+                    _b.label = 2;
                 case 2:
                     if (!(i < transactions.length)) return [3 /*break*/, 11];
                     txn = transactions[i];
                     return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
                 case 3:
-                    accessKey = _d.sent();
+                    accessKey = _b.sent();
                     return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, txn.actions)];
                 case 4:
-                    canExecuteTxn = _d.sent();
+                    canExecuteTxn = _b.sent();
                     console.log("canExecuteTxn", canExecuteTxn);
                     if (!canExecuteTxn) return [3 /*break*/, 9];
-                    _d.label = 5;
+                    _b.label = 5;
                 case 5:
-                    _d.trys.push([5, 7, , 8]);
+                    _b.trys.push([5, 7, , 8]);
                     console.log("Signing transaction", txn);
-                    _c = (_b = responses).push;
-                    return [4 /*yield*/, account.signAndSendTransaction(txn)];
+                    return [4 /*yield*/, account.signAndSendTransaction({
+                            receiverId: txn.receiverId,
+                            actions: txn.actions.map(function (action) {
+                                return (0, wallet_utils_1.createAction)(action);
+                            }),
+                        })];
                 case 6:
-                    _c.apply(_b, [_d.sent()]);
+                    response = _b.sent();
+                    responses.push(response);
                     return [3 /*break*/, 8];
                 case 7:
-                    e_1 = _d.sent();
+                    e_1 = _b.sent();
                     console.error("Error signing transaction", e_1);
                     fakRequiredTxns.push(txn);
                     return [3 /*break*/, 8];
                 case 8: return [3 /*break*/, 10];
                 case 9:
                     fakRequiredTxns.push(txn);
-                    _d.label = 10;
+                    _b.label = 10;
                 case 10:
                     i++;
                     return [3 /*break*/, 2];

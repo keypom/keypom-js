@@ -1,13 +1,11 @@
-import {
-    FinalExecutionOutcome,
-    FunctionCallAction,
-    Transaction as wsTransaction,
-} from "@near-wallet-selector/core";
+import * as nearAPI from "near-api-js";
+import { Transaction as wsTransaction } from "@near-wallet-selector/core";
 import {
     getPubFromSecret,
     keyHasPermissionForTransaction,
 } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
+import { createAction } from "@near-wallet-selector/wallet-utils";
 
 export const SUPPORTED_EXT_WALLET_DATA = {
     testnet: {
@@ -28,7 +26,7 @@ interface RequestSignTransactionsOptions {
     walletId: string;
     accountId: string;
     secretKey: string;
-    near: any;
+    near: nearAPI.Near;
 }
 
 /**
@@ -70,7 +68,14 @@ export const extSignAndSendTransactions = async ({
         if (canExecuteTxn) {
             try {
                 console.log("Signing transaction", txn);
-                responses.push(await account.signAndSendTransaction(txn));
+                const response = await account.signAndSendTransaction({
+                    receiverId: txn.receiverId,
+                    actions: txn.actions.map((action) =>
+                        createAction(action)
+                    ) as any,
+                });
+
+                responses.push(response);
             } catch (e: any) {
                 console.error("Error signing transaction", e);
                 fakRequiredTxns.push(txn);
