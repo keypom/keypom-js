@@ -1,9 +1,14 @@
+import * as nearAPI from "near-api-js";
 import type {
     Transaction,
     WalletBehaviourFactory,
     WalletModuleFactory,
 } from "@near-wallet-selector/core";
-import { areParamsCorrect, tryGetAccountData } from "../utils/selector-utils";
+import {
+    areParamsCorrect,
+    getNetworkPreset,
+    tryGetAccountData,
+} from "../utils/selector-utils";
 import { KeypomWalletInstant, isOneClickParams, OneClickParams } from "./types";
 import { KeypomWallet } from "./wallet";
 
@@ -108,8 +113,18 @@ export function setupOneClickConnect(
             return null;
         }
 
+        const { connect, keyStores } = nearAPI;
+        const networkPreset = getNetworkPreset(networkId);
+        const connectionConfig = {
+            networkId,
+            keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+            nodeUrl: networkPreset.nodeUrl,
+            headers: {},
+        };
+        const nearConnection = await connect(connectionConfig);
         const keypomWallet = new KeypomWallet({
             networkId,
+            nearConnection,
             accountId: signInData.accountId,
             secretKey: signInData.secretKey,
             walletId: signInData.walletId,
@@ -128,7 +143,7 @@ export function setupOneClickConnect(
                 deprecated: false,
                 available: true,
                 contractId,
-                runOnStartup: signInData !== null,
+                runOnStartup: true,
             },
             init: async (config) =>
                 Keypom({

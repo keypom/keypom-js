@@ -10,6 +10,29 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,6 +71,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupOneClickConnect = void 0;
+var nearAPI = __importStar(require("near-api-js"));
 var selector_utils_1 = require("../utils/selector-utils");
 var wallet_1 = require("./wallet");
 var Keypom = function (_a) {
@@ -178,7 +202,7 @@ var Keypom = function (_a) {
 function setupOneClickConnect(params) {
     var _this = this;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var urlPattern, networkId, signInData, keypomWallet, contractId;
+        var urlPattern, networkId, signInData, connect, keyStores, networkPreset, connectionConfig, nearConnection, keypomWallet, contractId;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -192,15 +216,27 @@ function setupOneClickConnect(params) {
                     if (signInData === null) {
                         return [2 /*return*/, null];
                     }
+                    connect = nearAPI.connect, keyStores = nearAPI.keyStores;
+                    networkPreset = (0, selector_utils_1.getNetworkPreset)(networkId);
+                    connectionConfig = {
+                        networkId: networkId,
+                        keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+                        nodeUrl: networkPreset.nodeUrl,
+                        headers: {},
+                    };
+                    return [4 /*yield*/, connect(connectionConfig)];
+                case 1:
+                    nearConnection = _a.sent();
                     keypomWallet = new wallet_1.KeypomWallet({
                         networkId: networkId,
+                        nearConnection: nearConnection,
                         accountId: signInData.accountId,
                         secretKey: signInData.secretKey,
                         walletId: signInData.walletId,
                         baseUrl: signInData.baseUrl,
                     });
                     return [4 /*yield*/, keypomWallet.setContractId()];
-                case 1:
+                case 2:
                     contractId = _a.sent();
                     return [2 /*return*/, {
                             id: "keypom",
@@ -212,7 +248,7 @@ function setupOneClickConnect(params) {
                                 deprecated: false,
                                 available: true,
                                 contractId: contractId,
-                                runOnStartup: signInData !== null,
+                                runOnStartup: true,
                             },
                             init: function (config) { return __awaiter(_this, void 0, void 0, function () {
                                 return __generator(this, function (_a) {

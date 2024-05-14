@@ -65,7 +65,8 @@ var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var networkId = _a.networkId, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl;
+        var networkId = _a.networkId, nearConnection = _a.nearConnection, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl;
+        this.nearConnection = nearConnection;
         this.networkId = networkId;
         this.accountId = accountId;
         this.secretKey = secretKey;
@@ -98,12 +99,15 @@ var KeypomWallet = /** @class */ (function () {
                             return [2 /*return*/, this.contractId];
                         }
                         if (this.secretKey === undefined) {
+                            console.log("secretKey not set");
                             return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
                         }
                         pk = (0, selector_utils_1.getPubFromSecret)(this.secretKey);
+                        console.log("pk", pk);
                         return [4 /*yield*/, this.nearConnection.connection.provider.query("access_key/".concat(this.accountId, "/").concat(pk), "")];
                     case 1:
                         accessKey = _a.sent();
+                        console.log("accessKey", accessKey);
                         permission = accessKey.permission;
                         if (permission.FunctionCall) {
                             receiver_id = permission.FunctionCall.receiver_id;
@@ -112,7 +116,7 @@ var KeypomWallet = /** @class */ (function () {
                             return [2 /*return*/, receiver_id];
                         }
                         this.contractId = selector_utils_1.NO_CONTRACT_ID;
-                        console.log("contractId", this.contractId);
+                        console.log("full access key: contractId", this.contractId);
                         return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
                 }
             });
@@ -120,36 +124,23 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var connect, keyStores, networkPreset, connectionConfig, nearConnection, account, allKeys, pk_1, keyInfoView, e_1;
+            var account, allKeys, pk_1, keyInfoView, e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         console.log("keypom signIn");
-                        connect = nearAPI.connect, keyStores = nearAPI.keyStores;
-                        networkPreset = (0, selector_utils_1.getNetworkPreset)(this.networkId);
-                        connectionConfig = {
-                            networkId: this.networkId,
-                            keyStore: new keyStores.BrowserLocalStorageKeyStore(),
-                            nodeUrl: networkPreset.nodeUrl,
-                            headers: {},
-                        };
-                        return [4 /*yield*/, connect(connectionConfig)];
+                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 6];
+                        _a.label = 1;
                     case 1:
-                        nearConnection = _a.sent();
-                        this.nearConnection = nearConnection;
-                        console.log("nearConnection", nearConnection);
-                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 7];
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 6, , 7]);
+                        _a.trys.push([1, 5, , 6]);
                         return [4 /*yield*/, this.setContractId()];
-                    case 3:
+                    case 2:
                         _a.sent();
-                        return [4 /*yield*/, nearConnection.account(this.accountId)];
-                    case 4:
+                        return [4 /*yield*/, this.nearConnection.account(this.accountId)];
+                    case 3:
                         account = _a.sent();
                         return [4 /*yield*/, account.getAccessKeys()];
-                    case 5:
+                    case 4:
                         allKeys = _a.sent();
                         pk_1 = (0, selector_utils_1.getPubFromSecret)(this.secretKey);
                         keyInfoView = allKeys.find(function (_a) {
@@ -160,12 +151,12 @@ var KeypomWallet = /** @class */ (function () {
                         if (keyInfoView) {
                             return [2 /*return*/, this.internalSignIn(this.accountId, this.walletId, this.secretKey)];
                         }
-                        return [3 /*break*/, 7];
-                    case 6:
+                        return [3 /*break*/, 6];
+                    case 5:
                         e_1 = _a.sent();
                         console.log("e: ", e_1);
-                        return [3 /*break*/, 7];
-                    case 7: return [2 /*return*/, []];
+                        return [3 /*break*/, 6];
+                    case 6: return [2 /*return*/, []];
                 }
             });
         });

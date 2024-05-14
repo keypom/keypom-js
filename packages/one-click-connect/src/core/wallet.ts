@@ -24,27 +24,30 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId: string;
     walletId: string;
     baseUrl: string;
+    nearConnection: any;
 
     // Initialized in signIn
     contractId?: string;
     secretKey?: string;
-    nearConnection?: any;
 
     signedIn: boolean;
 
     public constructor({
         networkId,
+        nearConnection,
         accountId,
         secretKey,
         walletId,
         baseUrl,
     }: {
         networkId: NetworkId;
+        nearConnection: any;
         accountId: string;
         walletId: string;
         baseUrl: string;
         secretKey?: string;
     }) {
+        this.nearConnection = nearConnection;
         this.networkId = networkId;
         this.accountId = accountId;
         this.secretKey = secretKey;
@@ -73,16 +76,20 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         if (this.secretKey === undefined) {
+            console.log("secretKey not set");
             return NO_CONTRACT_ID;
         }
 
         const pk = getPubFromSecret(this.secretKey);
+        console.log("pk", pk);
 
         const accessKey: any =
-            await this.nearConnection!.connection.provider.query(
+            await this.nearConnection.connection.provider.query(
                 `access_key/${this.accountId}/${pk}`,
                 ""
             );
+
+        console.log("accessKey", accessKey);
 
         const { permission } = accessKey;
         if (permission.FunctionCall) {
@@ -93,28 +100,19 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         this.contractId = NO_CONTRACT_ID;
-        console.log("contractId", this.contractId);
+        console.log("full access key: contractId", this.contractId);
         return NO_CONTRACT_ID;
     }
 
     async signIn(): Promise<KeypomWalletAccount[]> {
         console.log("keypom signIn");
-        const { connect, keyStores } = nearAPI;
-        const networkPreset = getNetworkPreset(this.networkId);
-        const connectionConfig = {
-            networkId: this.networkId,
-            keyStore: new keyStores.BrowserLocalStorageKeyStore(),
-            nodeUrl: networkPreset.nodeUrl,
-            headers: {},
-        };
-        const nearConnection = await connect(connectionConfig);
-        this.nearConnection = nearConnection;
-        console.log("nearConnection", nearConnection);
 
         if (this.secretKey !== undefined) {
             try {
                 await this.setContractId();
-                const account = await nearConnection.account(this.accountId);
+                const account = await this.nearConnection.account(
+                    this.accountId
+                );
                 const allKeys = await account.getAccessKeys();
                 const pk = getPubFromSecret(this.secretKey);
 

@@ -5,12 +5,13 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId: string;
     walletId: string;
     baseUrl: string;
+    nearConnection: any;
     contractId?: string;
     secretKey?: string;
-    nearConnection?: any;
     signedIn: boolean;
-    constructor({ networkId, accountId, secretKey, walletId, baseUrl, }: {
+    constructor({ networkId, nearConnection, accountId, secretKey, walletId, baseUrl, }: {
         networkId: NetworkId;
+        nearConnection: any;
         accountId: string;
         walletId: string;
         baseUrl: string;
