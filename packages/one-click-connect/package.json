@@ -1,6 +1,6 @@
 {
     "name": "@keypom/one-click-connect",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "description": "OneClick Connect Wallet Selector Plugin",
     "main": "lib/index.js",
     "scripts": {
