@@ -24,7 +24,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId: string;
     walletId: string;
     baseUrl: string;
-    nearConnection: any;
+
+    nearConnection: nearAPI.Near;
+    keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
 
     // Initialized in signIn
     contractId?: string;
@@ -35,6 +37,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     public constructor({
         networkId,
         nearConnection,
+        keyStore,
         accountId,
         secretKey,
         walletId,
@@ -42,12 +45,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }: {
         networkId: NetworkId;
         nearConnection: any;
+        keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
         accountId: string;
         walletId: string;
         baseUrl: string;
         secretKey?: string;
     }) {
         this.nearConnection = nearConnection;
+        this.keyStore = keyStore;
         this.networkId = networkId;
         this.accountId = accountId;
         this.secretKey = secretKey;
@@ -142,10 +147,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
 
         this.signedIn = false;
-        await this.nearConnection.keyStore.removeKey(
-            this.networkId,
-            this.accountId
-        );
+        await this.keyStore.removeKey(this.networkId, this.accountId);
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
@@ -237,7 +239,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         setLocalStorageKeypomEnv(dataToWrite);
 
         if (secretKey) {
-            await this.nearConnection.keyStore.setKey(
+            await this.keyStore.setKey(
                 this.networkId,
                 accountId,
                 nearAPI.KeyPair.fromString(secretKey)

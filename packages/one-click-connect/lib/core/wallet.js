@@ -65,8 +65,9 @@ var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var networkId = _a.networkId, nearConnection = _a.nearConnection, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl;
+        var networkId = _a.networkId, nearConnection = _a.nearConnection, keyStore = _a.keyStore, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl;
         this.nearConnection = nearConnection;
+        this.keyStore = keyStore;
         this.networkId = networkId;
         this.accountId = accountId;
         this.secretKey = secretKey;
@@ -170,7 +171,7 @@ var KeypomWallet = /** @class */ (function () {
                             throw new Error("Wallet is already signed out");
                         }
                         this.signedIn = false;
-                        return [4 /*yield*/, this.nearConnection.keyStore.removeKey(this.networkId, this.accountId)];
+                        return [4 /*yield*/, this.keyStore.removeKey(this.networkId, this.accountId)];
                     case 1:
                         _a.sent();
                         localStorage.removeItem("".concat(selector_utils_1.KEYPOM_LOCAL_STORAGE_KEY, ":envData"));
@@ -291,7 +292,7 @@ var KeypomWallet = /** @class */ (function () {
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         if (!secretKey) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.nearConnection.keyStore.setKey(this.networkId, accountId, nearAPI.KeyPair.fromString(secretKey))];
+                        return [4 /*yield*/, this.keyStore.setKey(this.networkId, accountId, nearAPI.KeyPair.fromString(secretKey))];
                     case 1:
                         _a.sent();
                         _a.label = 2;

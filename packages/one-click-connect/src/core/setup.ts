@@ -115,9 +115,10 @@ export function setupOneClickConnect(
 
         const { connect, keyStores } = nearAPI;
         const networkPreset = getNetworkPreset(networkId);
+        let keyStore = new keyStores.BrowserLocalStorageKeyStore();
         const connectionConfig = {
             networkId,
-            keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+            keyStore,
             nodeUrl: networkPreset.nodeUrl,
             headers: {},
         };
@@ -125,6 +126,7 @@ export function setupOneClickConnect(
         const keypomWallet = new KeypomWallet({
             networkId,
             nearConnection,
+            keyStore,
             accountId: signInData.accountId,
             secretKey: signInData.secretKey,
             walletId: signInData.walletId,

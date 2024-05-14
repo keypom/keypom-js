@@ -1,3 +1,4 @@
+import * as nearAPI from "near-api-js";
 import { InstantLinkWalletBehaviour, NetworkId, Transaction } from "@near-wallet-selector/core";
 import { KeypomWalletAccount } from "../utils/selector-utils";
 export declare class KeypomWallet implements InstantLinkWalletBehaviour {
@@ -5,13 +6,15 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     accountId: string;
     walletId: string;
     baseUrl: string;
-    nearConnection: any;
+    nearConnection: nearAPI.Near;
+    keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
     contractId?: string;
     secretKey?: string;
     signedIn: boolean;
-    constructor({ networkId, nearConnection, accountId, secretKey, walletId, baseUrl, }: {
+    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, }: {
         networkId: NetworkId;
         nearConnection: any;
+        keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
         accountId: string;
         walletId: string;
         baseUrl: string;

@@ -202,7 +202,7 @@ var Keypom = function (_a) {
 function setupOneClickConnect(params) {
     var _this = this;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var urlPattern, networkId, signInData, connect, keyStores, networkPreset, connectionConfig, nearConnection, keypomWallet, contractId;
+        var urlPattern, networkId, signInData, connect, keyStores, networkPreset, keyStore, connectionConfig, nearConnection, keypomWallet, contractId;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -218,9 +218,10 @@ function setupOneClickConnect(params) {
                     }
                     connect = nearAPI.connect, keyStores = nearAPI.keyStores;
                     networkPreset = (0, selector_utils_1.getNetworkPreset)(networkId);
+                    keyStore = new keyStores.BrowserLocalStorageKeyStore();
                     connectionConfig = {
                         networkId: networkId,
-                        keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+                        keyStore: keyStore,
                         nodeUrl: networkPreset.nodeUrl,
                         headers: {},
                     };
@@ -230,6 +231,7 @@ function setupOneClickConnect(params) {
                     keypomWallet = new wallet_1.KeypomWallet({
                         networkId: networkId,
                         nearConnection: nearConnection,
+                        keyStore: keyStore,
                         accountId: signInData.accountId,
                         secretKey: signInData.secretKey,
                         walletId: signInData.walletId,
