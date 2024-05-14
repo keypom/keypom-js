@@ -78,6 +78,9 @@ importers:
       '@near-js/keystores-browser':
         specifier: ^0.0.11
         version: 0.0.11
+      '@near-js/keystores-node':
+        specifier: ^0.0.11
+        version: 0.0.11
       '@near-js/providers':
         specifier: ^0.2.1
         version: 0.2.1
@@ -705,6 +708,13 @@ packages:
     dependencies:
       '@near-js/crypto': 0.0.5
       '@near-js/keystores': 0.0.5
+
+  /@near-js/keystores-node@0.0.11:
+    resolution: {integrity: sha512-KeBl7oL8AwUwTilYPV3apEcL1P+UMAGJQvmkEFl9lyK7mftyjogehdqjqFREAdQpR+4jX5NXvU8ZJIShebK3ZA==}
+    dependencies:
+      '@near-js/crypto': 1.2.3
+      '@near-js/keystores': 0.0.11
+    dev: true
 
   /@near-js/keystores-node@0.0.5:
     resolution: {integrity: sha512-BYmWyGNydfAqi7eYA1Jo8zULL13cxejD2VBr0BBIXx5bJ+BO4TLecsY1xdTBEq06jyWXHa7kV4h8BJzAjvpTLg==}

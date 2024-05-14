@@ -188,6 +188,7 @@ function setupOneClickConnect(params) {
                         return [2 /*return*/, null];
                     }
                     signInData = (0, selector_utils_1.tryGetAccountData)({ urlPattern: urlPattern, networkId: networkId });
+                    console.log("Sign in data: ", signInData);
                     if (signInData === null) {
                         return [2 /*return*/, null];
                     }

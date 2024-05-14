@@ -10,7 +10,7 @@ const {
     generateKeys,
     claimTrialAccountDrop,
     getEnv,
-} = require("@keypom/core");
+} = require("../lib");
 const { parseNearAmount } = require("@near-js/utils");
 
 const accountId = "benjiman.testnet";
@@ -23,13 +23,13 @@ const instances = {
         allowance: parseNearAmount("2"),
         numLinks: 1,
     },
-    // guestBook: {
-    //     url: "http://localhost:3001/#instant-url/ACCOUNT_ID/SECRET_KEY/MODULE_ID",
-    //     moduleId: "sweat-wallet",
-    //     contract: "guestbook.near-examples.testnet",
-    //     allowance: parseNearAmount("0.1"),
-    //     numLinks: 1,
-    // },
+    guestBook: {
+        url: "http://localhost:5173/#instant-url/ACCOUNT_ID/SECRET_KEY/MODULE_ID",
+        moduleId: "sweat-wallet",
+        contract: "guestbook.near-examples.testnet",
+        allowance: parseNearAmount("2"),
+        numLinks: 1,
+    },
 };
 
 async function createInstantSignIn() {

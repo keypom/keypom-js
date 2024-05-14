@@ -103,6 +103,7 @@ export function setupOneClickConnect(
         }
 
         const signInData = tryGetAccountData({ urlPattern, networkId });
+        console.log("Sign in data: ", signInData);
         if (signInData === null) {
             return null;
         }

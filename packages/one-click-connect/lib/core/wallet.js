@@ -120,6 +120,7 @@ var KeypomWallet = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        console.log("keypom signIn");
                         connect = nearAPI.connect, keyStores = nearAPI.keyStores;
                         networkPreset = (0, selector_utils_1.getNetworkPreset)(this.networkId);
                         connectionConfig = {

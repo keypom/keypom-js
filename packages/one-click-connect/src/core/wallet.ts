@@ -66,7 +66,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     async setContractId(): Promise<string> {
+        console.log("setContractId", this.secretKey);
         if (this.contractId !== undefined) {
+            console.log("contractId already set", this.contractId);
             return this.contractId;
         }
 
@@ -86,14 +88,17 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         if (permission.FunctionCall) {
             const { receiver_id } = permission.FunctionCall;
             this.contractId = receiver_id;
+            console.log("contractId", this.contractId);
             return receiver_id;
         }
 
         this.contractId = NO_CONTRACT_ID;
+        console.log("contractId", this.contractId);
         return NO_CONTRACT_ID;
     }
 
     async signIn(): Promise<KeypomWalletAccount[]> {
+        console.log("keypom signIn");
         const { connect, keyStores } = nearAPI;
         const networkPreset = getNetworkPreset(this.networkId);
         const connectionConfig = {
@@ -104,6 +109,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         };
         const nearConnection = await connect(connectionConfig);
         this.nearConnection = nearConnection;
+        console.log("nearConnection", nearConnection);
 
         if (this.secretKey !== undefined) {
             try {
@@ -115,6 +121,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 const keyInfoView = allKeys.find(
                     ({ public_key }) => public_key === pk
                 );
+                console.log("keyInfoView", keyInfoView);
 
                 if (keyInfoView) {
                     return this.internalSignIn(
@@ -127,6 +134,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 console.log("e: ", e);
             }
         }
+
         return [];
     }
 
