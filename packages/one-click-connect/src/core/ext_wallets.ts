@@ -1,10 +1,12 @@
-import { convertBasicTransaction, getPubFromSecret } from "@keypom/core";
 import {
     FinalExecutionOutcome,
     FunctionCallAction,
     Transaction as wsTransaction,
 } from "@near-wallet-selector/core";
-import { keyHasPermissionForTransaction } from "../utils/selector-utils";
+import {
+    getPubFromSecret,
+    keyHasPermissionForTransaction,
+} from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 
 export const SUPPORTED_EXT_WALLET_DATA = {

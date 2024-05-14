@@ -37,10 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
-var core_1 = require("@keypom/core");
-var accounts_1 = require("@near-js/accounts");
-var crypto_1 = require("@near-js/crypto");
-var transactions_1 = require("@near-js/transactions");
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
 exports.SUPPORTED_EXT_WALLET_DATA = {
@@ -57,40 +53,30 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
 var extSignAndSendTransactions = function (_a) {
     var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, account, i, txn, mappedActions, pk, transaction, accessKey, canExecuteTxn, _b, _c, e_1;
+        var fakRequiredTxns, responses, account, pk, i, txn, accessKey, canExecuteTxn, _b, _c, e_1;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0:
                     fakRequiredTxns = [];
                     responses = [];
-                    account = new accounts_1.Account(near.connection, accountId);
-                    i = 0;
-                    _d.label = 1;
+                    if (secretKey === undefined) {
+                        console.warn("Secret key not provided");
+                        // TODO: add access key as part of txn request
+                        return [2 /*return*/, []];
+                    }
+                    return [4 /*yield*/, near.account(accountId)];
                 case 1:
+                    account = _d.sent();
+                    pk = (0, selector_utils_1.getPubFromSecret)(secretKey);
+                    i = 0;
+                    _d.label = 2;
+                case 2:
                     if (!(i < transactions.length)) return [3 /*break*/, 11];
                     txn = transactions[i];
-                    mappedActions = txn.actions.map(function (a) {
-                        var fcAction = a;
-                        return transactions_1.actionCreators.functionCall(fcAction.params.methodName, (0, transactions_1.stringifyJsonOrBytes)(fcAction.params.args), BigInt(fcAction.params.gas), // Convert string to bigint
-                        BigInt(fcAction.params.deposit) // Convert string to bigint
-                        );
-                    });
-                    pk = crypto_1.PublicKey.from((0, core_1.getPubFromSecret)(secretKey));
-                    return [4 /*yield*/, (0, core_1.convertBasicTransaction)({
-                            txnInfo: {
-                                receiverId: txn.receiverId,
-                                signerId: txn.signerId,
-                                actions: mappedActions,
-                            },
-                            signerId: accountId,
-                            signerPk: pk,
-                        })];
-                case 2:
-                    transaction = _d.sent();
                     return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
                 case 3:
                     accessKey = _d.sent();
-                    return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, mappedActions)];
+                    return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, txn.actions)];
                 case 4:
                     canExecuteTxn = _d.sent();
                     console.log("canExecuteTxn", canExecuteTxn);
@@ -98,24 +84,24 @@ var extSignAndSendTransactions = function (_a) {
                     _d.label = 5;
                 case 5:
                     _d.trys.push([5, 7, , 8]);
-                    console.log("Signing transaction", transaction);
+                    console.log("Signing transaction", txn);
                     _c = (_b = responses).push;
-                    return [4 /*yield*/, account.signAndSendTransaction(transaction)];
+                    return [4 /*yield*/, account.signAndSendTransaction(txn)];
                 case 6:
                     _c.apply(_b, [_d.sent()]);
                     return [3 /*break*/, 8];
                 case 7:
                     e_1 = _d.sent();
                     console.error("Error signing transaction", e_1);
-                    fakRequiredTxns.push(transaction);
+                    fakRequiredTxns.push(txn);
                     return [3 /*break*/, 8];
                 case 8: return [3 /*break*/, 10];
                 case 9:
-                    fakRequiredTxns.push(transaction);
+                    fakRequiredTxns.push(txn);
                     _d.label = 10;
                 case 10:
                     i++;
-                    return [3 /*break*/, 1];
+                    return [3 /*break*/, 2];
                 case 11:
                     console.log("fakRequiredTxns", fakRequiredTxns);
                     if (fakRequiredTxns.length > 0) {

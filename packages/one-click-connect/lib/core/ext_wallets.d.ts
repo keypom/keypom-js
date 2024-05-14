@@ -1,5 +1,4 @@
-import { Near } from "@near-js/wallet-account";
-import { FinalExecutionOutcome, Transaction as wsTransaction } from "@near-wallet-selector/core";
+import { Transaction as wsTransaction } from "@near-wallet-selector/core";
 export declare const SUPPORTED_EXT_WALLET_DATA: {
     testnet: {
         "sweat-wallet": {};
@@ -17,10 +16,10 @@ interface RequestSignTransactionsOptions {
     walletId: string;
     accountId: string;
     secretKey: string;
-    near: Near;
+    near: any;
 }
 /**
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
-export declare const extSignAndSendTransactions: ({ transactions, walletId, accountId, secretKey, near, }: RequestSignTransactionsOptions) => Promise<FinalExecutionOutcome[]>;
+export declare const extSignAndSendTransactions: ({ transactions, walletId, accountId, secretKey, near, }: RequestSignTransactionsOptions) => Promise<any>;
 export {};

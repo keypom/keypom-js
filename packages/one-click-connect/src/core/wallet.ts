@@ -1,4 +1,3 @@
-import { getPubFromSecret, initKeypom, networks } from "@keypom/core";
 import * as nearAPI from "near-api-js";
 import {
     InstantLinkWalletBehaviour,
@@ -13,6 +12,7 @@ import {
     getNetworkPreset,
     NO_CONTRACT_ID,
     KeypomWalletAccount,
+    getPubFromSecret,
 } from "../utils/selector-utils";
 import {
     SUPPORTED_EXT_WALLET_DATA,
@@ -94,10 +94,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     async signIn(): Promise<KeypomWalletAccount[]> {
-        await initKeypom({
-            network: this.networkId,
-        });
-
         const { connect, keyStores } = nearAPI;
         const networkPreset = getNetworkPreset(this.networkId);
         const connectionConfig = {

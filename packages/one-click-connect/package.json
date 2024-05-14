@@ -1,6 +1,6 @@
 {
     "name": "@keypom/one-click-connect",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "description": "OneClick Connect Wallet Selector Plugin",
     "main": "lib/index.js",
     "scripts": {
@@ -16,9 +16,6 @@
     },
     "author": "benkurrek, mattlockyer",
     "license": "MIT",
-    "dependencies": {
-        "@keypom/core": "workspace:*"
-    },
     "ava": {
         "require": [
             "dotenv/config"

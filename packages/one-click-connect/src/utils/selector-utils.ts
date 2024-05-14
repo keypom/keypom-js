@@ -1,4 +1,4 @@
-import { accountMappingContract, getEnv, getPubFromSecret } from "@keypom/core";
+import * as nearAPI from "near-api-js";
 import { Action, Network, NetworkId } from "@near-wallet-selector/core";
 import { SUPPORTED_EXT_WALLET_DATA } from "../core/ext_wallets";
 import { isOneClickParams, OneClickParams } from "../core/types";
@@ -229,4 +229,9 @@ export const getNetworkPreset = (networkId: NetworkId): Network => {
         default:
             throw Error(`Failed to find config for: '${networkId}'`);
     }
+};
+
+export const getPubFromSecret = (secretKey: string): string => {
+    const keyPair = nearAPI.KeyPair.fromString(secretKey);
+    return keyPair.getPublicKey().toString();
 };
