@@ -1,8 +1,25 @@
-import { InternalOneClickSpecs } from "../core/types";
-import { Action } from "@near-js/transactions";
+import { Action, Network, NetworkId } from "@near-wallet-selector/core";
+import { OneClickParams } from "../core/types";
+export declare const ONE_CLICK_URL_REGEX: RegExp;
 export declare const KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
+export declare const NO_CONTRACT_ID = "no-contract";
+export interface KeypomWalletAccount {
+    accountId: string;
+    walletId: string;
+    publicKey?: string;
+}
 export declare const getLocalStorageKeypomEnv: () => string | null;
 export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
+export declare const areParamsCorrect: (params: OneClickParams) => boolean;
+export declare const tryGetAccountData: ({ urlPattern, networkId, }: {
+    urlPattern: string;
+    networkId: string;
+}) => {
+    accountId: string;
+    secretKey: string;
+    walletId: string;
+    baseUrl: string;
+} | null;
 /**
  * Check if given access key allows the function call or method attempted in transaction
  * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items
@@ -10,8 +27,14 @@ export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
  * @param actions The action(s) needed to be checked for access
  */
 export declare const keyHasPermissionForTransaction: (accessKey: any, receiverId: string, actions: Action[]) => Promise<boolean>;
-export declare const parseOneClickSignInFromUrl: (oneClickSpecs: InternalOneClickSpecs) => {
+export declare const parseOneClickSignInFromUrl: ({ baseUrl, delimiter, }: {
+    baseUrl: string;
+    delimiter: string;
+}) => {
     accountId: string;
     secretKey: string;
     walletId: string;
+    baseUrl: string;
 } | null;
+export declare const getNetworkPreset: (networkId: NetworkId) => Network;
+export declare const getPubFromSecret: (secretKey: string) => string;

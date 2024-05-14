@@ -1,8 +1,7 @@
-import { FinalExecutionOutcome } from "@near-js/types";
 import { InstantLinkWallet, NetworkId } from "@near-wallet-selector/core";
 import { KeypomWallet } from "./wallet";
 
-export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
+export const FAILED_EXECUTION_OUTCOME: any = {
     final_execution_status: "NONE",
     status: {
         Failure: {
@@ -46,14 +45,6 @@ export const FAILED_EXECUTION_OUTCOME: FinalExecutionOutcome = {
         },
     ],
 };
-
-export interface InternalOneClickSpecs {
-    urlPattern: string;
-    baseUrl: string;
-    delimiter: string;
-    walletDelimiter: string;
-    restUrl: string;
-}
 
 export interface SignInOptions {
     contractId?: string;

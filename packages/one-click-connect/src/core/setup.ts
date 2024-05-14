@@ -3,6 +3,7 @@ import type {
     WalletBehaviourFactory,
     WalletModuleFactory,
 } from "@near-wallet-selector/core";
+import { areParamsCorrect, tryGetAccountData } from "../utils/selector-utils";
 import { KeypomWalletInstant, isOneClickParams, OneClickParams } from "./types";
 import { KeypomWallet } from "./wallet";
 
@@ -17,7 +18,7 @@ const Keypom: WalletBehaviourFactory<
     // return the wallet interface for wallet-selector
     return {
         get networkId() {
-            return keypomWallet.near.connection.networkId;
+            return keypomWallet.networkId;
         },
         getContractId() {
             return keypomWallet.getContractId();
@@ -97,51 +98,24 @@ export function setupOneClickConnect(
     return async () => {
         const { urlPattern, networkId } = params;
 
-        // Validate Keypom parameters
-        if (!isOneClickParams(params)) {
-            console.error(
-                "KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format."
-            );
+        if (!areParamsCorrect(params)) {
             return null;
         }
 
-        // Additional business logic checks
-        if (!networkId || !urlPattern) {
-            console.warn("KeypomWallet: networkId, and url are required.");
-            return null;
-        }
-
-        if (
-            urlPattern &&
-            !(
-                urlPattern.includes(":accountId") &&
-                urlPattern.includes(":secretKey") &&
-                urlPattern.includes(":walletId")
-            )
-        ) {
-            console.error(
-                "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
-            );
+        const signInData = tryGetAccountData({ urlPattern, networkId });
+        if (signInData === null) {
             return null;
         }
 
         const keypomWallet = new KeypomWallet({
             networkId,
-            urlPattern,
+            accountId: signInData.accountId,
+            secretKey: signInData.secretKey,
+            walletId: signInData.walletId,
+            baseUrl: signInData.baseUrl,
         });
 
-        // CHECK URL / LOCAL STORAGE TO SEE IF A ONE CLICK ACCOUNT SHOULD BE SIGNED IN
-        const signInData = keypomWallet.checkValidOneClickParams();
-        console.log("signInData: ", signInData);
-
-        let contractId = "foo.near";
-        if (signInData !== null) {
-            const { secretKey, accountId } = signInData;
-            contractId = await keypomWallet.getLAKContractId(
-                accountId,
-                secretKey
-            );
-        }
+        let contractId = await keypomWallet.setContractId();
 
         return {
             id: "keypom",
