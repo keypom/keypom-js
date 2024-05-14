@@ -1,12 +1,8 @@
 import { getPubFromSecret, initKeypom, networks } from "@keypom/core";
-import { Account } from "@near-js/accounts";
-import { PublicKey } from "@near-js/crypto";
-import { KeyPair } from "@near-js/crypto";
-import { BrowserLocalStorageKeyStore } from "@near-js/keystores-browser";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Near } from "@near-js/wallet-account";
+import * as nearAPI from "near-api-js";
 import {
     InstantLinkWalletBehaviour,
+    NetworkId,
     Transaction,
 } from "@near-wallet-selector/core";
 import {
@@ -14,98 +10,77 @@ import {
     getLocalStorageKeypomEnv,
     setLocalStorageKeypomEnv,
     parseOneClickSignInFromUrl,
+    getNetworkPreset,
+    NO_CONTRACT_ID,
+    KeypomWalletAccount,
 } from "../utils/selector-utils";
 import {
     SUPPORTED_EXT_WALLET_DATA,
     extSignAndSendTransactions,
 } from "./ext_wallets";
-import { InternalOneClickSpecs } from "./types";
-
-const ONE_CLICK_URL_REGEX = new RegExp(
-    `^(.*):accountId(.+):secretKey(.+):walletId(.*)$`
-);
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
-    accountId?: string;
-    secretKey?: string;
-    walletId?: string;
+    networkId: NetworkId;
+    accountId: string;
+    walletId: string;
+    baseUrl: string;
+
+    // Initialized in signIn
     contractId?: string;
+    secretKey?: string;
+    nearConnection?: any;
 
-    near: Near;
-    keyStore: BrowserLocalStorageKeyStore;
-
-    oneClickConnectSpecs?: InternalOneClickSpecs;
+    signedIn: boolean;
 
     public constructor({
         networkId,
-        urlPattern,
+        accountId,
+        secretKey,
+        walletId,
+        baseUrl,
     }: {
-        networkId: string;
-        urlPattern: string;
+        networkId: NetworkId;
+        accountId: string;
+        walletId: string;
+        baseUrl: string;
+        secretKey?: string;
     }) {
-        console.log("Initializing OneClick Connect");
-
-        this.keyStore = new BrowserLocalStorageKeyStore();
-        this.near = new Near({
-            ...networks[networkId],
-            deps: { keyStore: this.keyStore },
-        });
-
-        this.setSpecsFromKeypomParams(urlPattern);
-    }
-
-    getContractId(): string {
-        return this.contractId || "foo.near";
+        this.networkId = networkId;
+        this.accountId = accountId;
+        this.secretKey = secretKey;
+        this.walletId = walletId;
+        this.baseUrl = baseUrl;
+        this.signedIn = false;
     }
 
     getAccountId(): string {
-        this.assertSignedIn();
-        return this.accountId!;
+        return this.accountId;
     }
 
     async isSignedIn() {
         return this.accountId !== undefined && this.accountId !== null;
     }
 
-    async signInInstantAccount(
-        accountId: string,
-        secretKey: string,
-        walletId: string
-    ): Promise<Account[]> {
-        // Check if the account ID and secret key are valid and sign in accordingly
-        try {
-            const account = new Account(this.near.connection, accountId);
-            const allKeys = await account.getAccessKeys();
-            const pk = getPubFromSecret(secretKey);
-
-            const keyInfoView = allKeys.find(
-                ({ public_key }) => public_key === pk
-            );
-
-            if (keyInfoView) {
-                return this.internalSignIn(accountId, secretKey, walletId);
-            }
-        } catch (e) {
-            console.log("e: ", e);
-        }
-
-        return [];
+    getContractId(): string {
+        return this.contractId || NO_CONTRACT_ID;
     }
 
-    async getLAKContractId(
-        accountId: string,
-        secretKey: string
-    ): Promise<string> {
+    async setContractId(): Promise<string> {
         if (this.contractId !== undefined) {
             return this.contractId;
         }
 
-        const pk = PublicKey.from(getPubFromSecret(secretKey));
+        if (this.secretKey === undefined) {
+            return NO_CONTRACT_ID;
+        }
 
-        const accessKey: any = await this.near!.connection.provider.query(
-            `access_key/${accountId}/${pk}`,
-            ""
-        );
+        const pk = getPubFromSecret(this.secretKey);
+
+        const accessKey: any =
+            await this.nearConnection!.connection.provider.query(
+                `access_key/${this.accountId}/${pk}`,
+                ""
+            );
 
         const { permission } = accessKey;
         if (permission.FunctionCall) {
@@ -114,97 +89,68 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             return receiver_id;
         }
 
-        this.contractId = "foo.near";
-        return "foo.near";
+        this.contractId = NO_CONTRACT_ID;
+        return NO_CONTRACT_ID;
     }
 
-    public checkValidOneClickParams = (): {
-        accountId: string;
-        secretKey: string;
-        walletId: string;
-    } | null => {
-        console.log("CheckValidOneClick");
-
-        let oneClickData: {
-            accountId: string;
-            secretKey: string;
-            walletId: string;
-        } | null = null;
-        if (this.oneClickConnectSpecs?.baseUrl !== undefined) {
-            oneClickData = parseOneClickSignInFromUrl(
-                this.oneClickConnectSpecs
-            );
-        }
-
-        if (oneClickData !== null) {
-            return oneClickData;
-        }
-
-        const localStorageData = getLocalStorageKeypomEnv();
-        if (localStorageData !== null) {
-            return JSON.parse(localStorageData);
-        }
-
-        return null;
-    };
-
-    async signIn(): Promise<Account[]> {
+    async signIn(): Promise<KeypomWalletAccount[]> {
         await initKeypom({
-            network: this.near.connection.networkId,
+            network: this.networkId,
         });
 
-        // Try to sign in using one click sign-in data from URL
-        const oneClickSignInData =
-            this.oneClickConnectSpecs?.baseUrl !== undefined
-                ? parseOneClickSignInFromUrl(this.oneClickConnectSpecs)
-                : null;
+        const { connect, keyStores } = nearAPI;
+        const networkPreset = getNetworkPreset(this.networkId);
+        const connectionConfig = {
+            networkId: this.networkId,
+            keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+            nodeUrl: networkPreset.nodeUrl,
+            headers: {},
+        };
+        const nearConnection = await connect(connectionConfig);
+        this.nearConnection = nearConnection;
 
-        if (oneClickSignInData !== null) {
-            const networkId = this.near.connection.networkId!;
-            const isModuleSupported =
-                SUPPORTED_EXT_WALLET_DATA[networkId]?.[
-                    oneClickSignInData.walletId
-                ] !== undefined;
+        if (this.secretKey !== undefined) {
+            try {
+                await this.setContractId();
+                const account = await nearConnection.account(this.accountId);
+                const allKeys = await account.getAccessKeys();
+                const pk = getPubFromSecret(this.secretKey);
 
-            if (!isModuleSupported) {
-                console.warn(
-                    `Module ID ${oneClickSignInData.walletId} is not supported on ${networkId}.`
+                const keyInfoView = allKeys.find(
+                    ({ public_key }) => public_key === pk
                 );
-                return [];
+
+                if (keyInfoView) {
+                    return this.internalSignIn(
+                        this.accountId,
+                        this.walletId,
+                        this.secretKey
+                    );
+                }
+            } catch (e) {
+                console.log("e: ", e);
             }
-
-            return this.signInInstantAccount(
-                oneClickSignInData.accountId,
-                oneClickSignInData.secretKey,
-                oneClickSignInData.walletId
-            );
         }
-
-        // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-        const curEnvData = getLocalStorageKeypomEnv();
-        if (curEnvData !== null) {
-            const { accountId, secretKey, walletId } = JSON.parse(curEnvData);
-            return this.internalSignIn(accountId, secretKey, walletId);
-        }
-
         return [];
     }
 
     async signOut() {
-        if (this.accountId === undefined || this.accountId === null) {
+        if (this.signedIn === false) {
             throw new Error("Wallet is already signed out");
         }
 
-        this.accountId = this.secretKey = this.walletId = undefined;
-        await this.keyStore.removeKey(
-            this.near.connection.networkId,
-            this.accountId!
+        this.signedIn = false;
+        await this.nearConnection.keyStore.removeKey(
+            this.networkId,
+            this.accountId
         );
         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`);
     }
 
     async signAndSendTransaction(params) {
-        this.assertSignedIn();
+        if (this.signedIn === false) {
+            throw new Error("Wallet is not signed in");
+        }
         console.log("sign and send txn params: ", params);
         const { receiverId, actions } = params;
 
@@ -224,12 +170,14 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             console.warn(e);
         }
 
-        return res[0] as FinalExecutionOutcome;
+        return res[0];
     }
 
     async signAndSendTransactions(params: { transactions: Transaction[] }) {
         console.log("sign and send txns params inner: ", params);
-        this.assertSignedIn();
+        if (this.signedIn === false) {
+            throw new Error("Wallet is not signed in");
+        }
         const { transactions } = params;
 
         return await extSignAndSendTransactions({
@@ -237,7 +185,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             walletId: this.walletId!,
             accountId: this.accountId!,
             secretKey: this.secretKey!,
-            near: this.near,
+            near: this.nearConnection,
         });
     }
 
@@ -250,13 +198,16 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return BigInt(0);
     }
 
-    async getAccounts(): Promise<Account[]> {
-        if (this.accountId != undefined && this.accountId != null) {
-            const accountObj = new Account(
-                this.near.connection,
-                this.accountId!
-            );
-            return [accountObj];
+    async getAccounts(): Promise<KeypomWalletAccount[]> {
+        if (this.signedIn === true) {
+            return [
+                {
+                    accountId: this.accountId,
+                    walletId: this.walletId,
+                    publicKey:
+                        this.secretKey && getPubFromSecret(this.secretKey),
+                },
+            ];
         }
 
         return [];
@@ -266,69 +217,43 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // TODO:  maybe?
     }
 
-    private async internalSignIn(accountId, secretKey, walletId) {
+    private async internalSignIn(
+        accountId: string,
+        walletId: string,
+        secretKey?: string
+    ): Promise<KeypomWalletAccount[]> {
         console.log(
             `internalSignIn accountId ${accountId} secretKey ${secretKey} walletId ${walletId}`
         );
-        this.accountId = accountId;
-        this.secretKey = secretKey;
-        this.walletId = walletId;
 
+        this.signedIn = true;
         const dataToWrite = {
             accountId,
             secretKey,
             walletId,
         };
         setLocalStorageKeypomEnv(dataToWrite);
-        await this.keyStore.setKey(
-            this.near.connection.networkId,
-            accountId,
-            KeyPair.fromString(secretKey)
-        );
+
+        if (secretKey) {
+            await this.nearConnection.keyStore.setKey(
+                this.networkId,
+                accountId,
+                nearAPI.KeyPair.fromString(secretKey)
+            );
+        }
 
         // Assuming the URL pattern follows directly after the domain and possible path
         // Erase the OneClick Connect URL segment
         if (window.history && window.history.pushState) {
-            const urlStart = window.location.href.split(
-                this.oneClickConnectSpecs?.baseUrl || "#"
-            )[0]; // This will remove everything after the base URL
+            const urlStart = window.location.href.split(this.baseUrl)[0]; // This will remove everything after the base URL
             window.history.pushState({}, "", urlStart);
         }
-
-        const accountObj = new Account(this.near.connection, accountId);
-        return [accountObj];
-    }
-
-    private assertSignedIn() {
-        if (!this.accountId) {
-            throw new Error("Wallet not signed in");
-        }
-    }
-
-    private setSpecsFromKeypomParams(urlPattern: string) {
-        const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
-        if (!matches) {
-            console.error(
-                "Invalid URL pattern. Could not extract necessary parts."
-            );
-            return;
-        }
-
-        const baseUrl = matches[1];
-        const delimiter = matches[2];
-        const walletDelimiter = matches[3];
-        const restUrl = matches[4]; // Capture any additional URL components after WALLET_ID if necessary
-
-        let oneClickSpecs = {
-            urlPattern,
-            baseUrl,
-            delimiter,
-            walletDelimiter,
-            restUrl,
-        };
-
-        console.log("oneClickSpecs from URL: ", oneClickSpecs);
-
-        this.oneClickConnectSpecs = oneClickSpecs;
+        return [
+            {
+                accountId: this.accountId,
+                walletId: this.walletId,
+                publicKey: this.secretKey && getPubFromSecret(this.secretKey),
+            },
+        ];
     }
 }

@@ -8,7 +8,7 @@ import { PublicKey } from "@near-js/crypto";
 import { Account, SignAndSendTransactionOptions } from "@near-js/accounts";
 import { Near } from "@near-js/wallet-account";
 import { FinalExecutionOutcome } from "@near-js/types";
-import { Action, Transaction } from "@near-js/transactions";
+import { Transaction } from "@near-js/transactions";
 export declare const ATTACHED_GAS_FROM_WALLET = 100000000000000;
 export declare const key2str: (v: any) => any;
 /**
@@ -473,7 +473,7 @@ export declare const parseFTAmount: (amt: string, decimals: number) => string;
 export declare const transformTransactions: (transactions: Transaction[]) => SignAndSendTransactionOptions[];
 export declare const createAction: (action: Action) => Action;
 /** @group Utility */
-export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use, }: CreateDropProtocolArgs) => string;
+export declare const getStorageBase: ({ public_keys, deposit_per_use, drop_id, config, metadata, simple, ft, nft, fc, passwords_per_use, }: CreateDropProtocolArgs) => any;
 /** Initiate the connection to the NEAR blockchain. @group Utility */
 export declare const estimateRequiredDeposit: ({ near, depositPerUse, numKeys, usesPerKey, attachedGas, storage, keyStorage, fcData, ftData, }: {
     /** The NEAR connection instance used to interact with the chain. This can either the connection that the SDK uses from `getEnv` or a separate connection. */
@@ -518,9 +518,9 @@ export declare const convertBasicTransaction: ({ txnInfo, signerId, signerPk, }:
     txnInfo: BasicTransaction;
     signerId: string;
     signerPk: PublicKey;
-}) => Promise<Transaction>;
+}) => Promise<any>;
 export declare const createTransactions: ({ txnInfos, signerId, signerPk, }: {
     txnInfos: BasicTransaction[];
     signerId: string;
     signerPk: PublicKey;
-}) => Promise<Transaction[]>;
+}) => Promise<any[]>;

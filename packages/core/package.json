@@ -1,6 +1,6 @@
 {
     "name": "@keypom/core",
-    "version": "1.0.3",
+    "version": "1.0.2",
     "description": "Core library for interacting with the Keypom Protocol",
     "main": "lib/index.js",
     "scripts": {
@@ -24,16 +24,7 @@
         "bn.js": "^5.2.1",
         "borsh": "^0.7.0",
         "near-seed-phrase": "^0.2.0",
-        "util": "^0.12.5",
-        "@near-js/accounts": "^1.2.0",
-        "@near-js/crypto": "^1.2.3",
-        "@near-js/keystores-browser": "^0.0.11",
-        "@near-js/transactions": "^1.2.1",
-        "@near-js/keystores": "^0.0.11",
-        "@near-js/types": "^0.2.0",
-        "@near-js/providers": "^0.2.1",
-        "@near-js/utils": "^0.2.1",
-        "@near-js/wallet-account": "^1.2.1"
+        "util": "^0.12.5"
     },
     "ava": {
         "require": [
@@ -41,10 +32,14 @@
         ]
     },
     "devDependencies": {
+        "near-api-js": "^1.0.0 || ^2.0.0",
         "ava": "^4.3.3",
         "eslint": "^8.39.0",
         "typedoc": "^0.23.24",
         "typescript": "^4.8.4"
+    },
+    "peerDependencies": {
+        "near-api-js": "^1.0.0 || ^2.0.0"
     },
     "files": [
         "lib"

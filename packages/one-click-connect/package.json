@@ -1,6 +1,6 @@
 {
     "name": "@keypom/one-click-connect",
-    "version": "0.1.1",
+    "version": "0.1.0",
     "description": "OneClick Connect Wallet Selector Plugin",
     "main": "lib/index.js",
     "scripts": {
@@ -17,19 +17,7 @@
     "author": "benkurrek, mattlockyer",
     "license": "MIT",
     "dependencies": {
-        "@keypom/core": "workspace:*",
-        "@near-js/accounts": "^1.2.0",
-        "@near-js/crypto": "^1.2.3",
-        "@near-js/transactions": "^1.2.1",
-        "@near-js/types": "^0.2.0",
-        "@near-js/wallet-account": "^1.2.1",
-        "@near-js/utils": "^0.2.1",
-        "@near-js/keystores-browser": "^0.0.11",
-        "@near-wallet-selector/core": "^8.9.7",
-        "@near-js/keystores-node": "^0.0.11",
-        "react": "^18.2.0",
-        "react-dom": "18.2.0",
-        "@types/react": "^18.0.26"
+        "@keypom/core": "workspace:*"
     },
     "ava": {
         "require": [
@@ -39,7 +27,19 @@
     "devDependencies": {
         "typedoc": "^0.23.24",
         "typescript": "^4.8.4",
-        "ava": "^4.3.3"
+        "ava": "^4.3.3",
+        "near-api-js": "^1.0.0 || ^2.0.0",
+        "@near-wallet-selector/core": "^8.9.7",
+        "react": "^18.2.0",
+        "react-dom": "18.2.0",
+        "@types/react": "^18.0.26"
+    },
+    "peerDependencies": {
+        "near-api-js": "^1.0.0 || ^2.0.0",
+        "@near-wallet-selector/core": "^8.9.7",
+        "react": "^18.2.0",
+        "react-dom": "18.2.0",
+        "@types/react": "^18.0.26"
     },
     "files": [
         "lib"

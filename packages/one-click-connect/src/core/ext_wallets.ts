@@ -1,12 +1,4 @@
 import { convertBasicTransaction, getPubFromSecret } from "@keypom/core";
-import { Account } from "@near-js/accounts";
-import { PublicKey } from "@near-js/crypto";
-import {
-    Transaction,
-    actionCreators,
-    stringifyJsonOrBytes,
-} from "@near-js/transactions";
-import { Near } from "@near-js/wallet-account";
 import {
     FinalExecutionOutcome,
     FunctionCallAction,
@@ -34,7 +26,7 @@ interface RequestSignTransactionsOptions {
     walletId: string;
     accountId: string;
     secretKey: string;
-    near: Near;
+    near: any;
 }
 
 /**
@@ -47,34 +39,19 @@ export const extSignAndSendTransactions = async ({
     secretKey,
     near,
 }: RequestSignTransactionsOptions) => {
-    let fakRequiredTxns: Transaction[] = [];
-    let responses: FinalExecutionOutcome[] = [];
+    let fakRequiredTxns: any = [];
+    let responses: any = [];
 
-    const account = new Account(near.connection, accountId!);
+    if (secretKey === undefined) {
+        console.warn("Secret key not provided");
+        // TODO: add access key as part of txn request
+        return [];
+    }
+
+    const account = await near.account(accountId);
+    const pk = getPubFromSecret(secretKey);
     for (let i = 0; i < transactions.length; i++) {
         let txn = transactions[i];
-
-        let mappedActions = txn.actions.map((a) => {
-            const fcAction = a as FunctionCallAction;
-            return actionCreators.functionCall(
-                fcAction.params.methodName,
-                stringifyJsonOrBytes(fcAction.params.args),
-                BigInt(fcAction.params.gas), // Convert string to bigint
-                BigInt(fcAction.params.deposit) // Convert string to bigint
-            );
-        });
-
-        const pk = PublicKey.from(getPubFromSecret(secretKey));
-
-        const transaction = await convertBasicTransaction({
-            txnInfo: {
-                receiverId: txn.receiverId,
-                signerId: txn.signerId,
-                actions: mappedActions,
-            },
-            signerId: accountId,
-            signerPk: pk,
-        });
 
         const accessKey: any = await near.connection.provider.query(
             `access_key/${accountId}/${pk}`,
@@ -84,22 +61,20 @@ export const extSignAndSendTransactions = async ({
         const canExecuteTxn = await keyHasPermissionForTransaction(
             accessKey,
             txn.receiverId,
-            mappedActions
+            txn.actions
         );
         console.log("canExecuteTxn", canExecuteTxn);
 
         if (canExecuteTxn) {
             try {
-                console.log("Signing transaction", transaction);
-                responses.push(
-                    await account.signAndSendTransaction(transaction)
-                );
+                console.log("Signing transaction", txn);
+                responses.push(await account.signAndSendTransaction(txn));
             } catch (e: any) {
                 console.error("Error signing transaction", e);
-                fakRequiredTxns.push(transaction);
+                fakRequiredTxns.push(txn);
             }
         } else {
-            fakRequiredTxns.push(transaction);
+            fakRequiredTxns.push(txn);
         }
     }
     console.log("fakRequiredTxns", fakRequiredTxns);
