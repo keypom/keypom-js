@@ -92,7 +92,9 @@ var KeypomWallet = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        console.log("setContractId", this.secretKey);
                         if (this.contractId !== undefined) {
+                            console.log("contractId already set", this.contractId);
                             return [2 /*return*/, this.contractId];
                         }
                         if (this.secretKey === undefined) {
@@ -106,9 +108,11 @@ var KeypomWallet = /** @class */ (function () {
                         if (permission.FunctionCall) {
                             receiver_id = permission.FunctionCall.receiver_id;
                             this.contractId = receiver_id;
+                            console.log("contractId", this.contractId);
                             return [2 /*return*/, receiver_id];
                         }
                         this.contractId = selector_utils_1.NO_CONTRACT_ID;
+                        console.log("contractId", this.contractId);
                         return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
                 }
             });
@@ -133,6 +137,7 @@ var KeypomWallet = /** @class */ (function () {
                     case 1:
                         nearConnection = _a.sent();
                         this.nearConnection = nearConnection;
+                        console.log("nearConnection", nearConnection);
                         if (!(this.secretKey !== undefined)) return [3 /*break*/, 7];
                         _a.label = 2;
                     case 2:
@@ -151,6 +156,7 @@ var KeypomWallet = /** @class */ (function () {
                             var public_key = _a.public_key;
                             return public_key === pk_1;
                         });
+                        console.log("keyInfoView", keyInfoView);
                         if (keyInfoView) {
                             return [2 /*return*/, this.internalSignIn(this.accountId, this.walletId, this.secretKey)];
                         }
