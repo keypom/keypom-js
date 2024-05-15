@@ -316,7 +316,7 @@ const createDrop = ({ account, wallet, dropId, numKeys = 0, publicKeys, rootEntr
     }
     const deposit = !hasBalance ? requiredDeposit : "0";
     let transactions = [];
-    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pk = yield (0, keypom_utils_1.getAccountPublicKey)({ account, wallet });
     (0, checks_1.assert)(pk !== null, "Could not get public key from signer. Ensure you have the key in the key store.");
     const txnInfo = {
         receiverId: receiverId,
@@ -425,7 +425,7 @@ const deleteDrops = ({ account, wallet, drops, dropIds, withdrawBalance = true, 
     (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract.");
     (0, checks_1.assert)((0, checks_1.isValidAccountObj)(account), "Passed in account is not a valid account object.");
     account = yield getAccount({ account, wallet });
-    const pubKey = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pubKey = yield (0, keypom_utils_1.getAccountPublicKey)({ account, wallet });
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {
         if (!dropIds) {

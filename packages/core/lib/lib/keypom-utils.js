@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTransactions = exports.convertBasicTransaction = exports.nearArgsToYocto = exports.toCamel = exports.snakeToCamel = exports.generatePerUsePasswords = exports.estimateRequiredDeposit = exports.getStorageBase = exports.createAction = exports.transformTransactions = exports.parseFTAmount = exports.nftTransferCall = exports.ftTransferCall = exports.execute = exports.viewAccessKeyData = exports.keypomView = exports.generateKeys = exports.hashPassword = exports.formatLinkdropUrl = exports.createNFTSeries = exports.getFTMetadata = exports.getNFTMetadata = exports.accountExists = exports.getPubFromSecret = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
+exports.createTransactions = exports.convertBasicTransaction = exports.nearArgsToYocto = exports.toCamel = exports.snakeToCamel = exports.generatePerUsePasswords = exports.estimateRequiredDeposit = exports.getStorageBase = exports.createAction = exports.transformTransactions = exports.parseFTAmount = exports.nftTransferCall = exports.ftTransferCall = exports.execute = exports.viewAccessKeyData = exports.keypomView = exports.generateKeys = exports.hashPassword = exports.getAccountPublicKey = exports.formatLinkdropUrl = exports.createNFTSeries = exports.getFTMetadata = exports.getNFTMetadata = exports.accountExists = exports.getPubFromSecret = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
 const bn_js_1 = __importDefault(require("bn.js"));
 const near_seed_phrase_1 = require("near-seed-phrase");
 const checks_1 = require("./checks");
@@ -221,7 +221,7 @@ const createNFTSeries = ({ account, wallet, dropId, metadata, royalty, }) => __a
         reference_hash: metadata.referenceHash,
     };
     const nftSeriesAccount = networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
-    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pk = yield (0, exports.getAccountPublicKey)({ account, wallet });
     const txnInfo = {
         receiverId: nftSeriesAccount,
         signerId: account.accountId,
@@ -364,6 +364,50 @@ const formatLinkdropUrl = ({ claimPage, networkId, contractId, secretKeys, custo
     return returnedURLs;
 };
 exports.formatLinkdropUrl = formatLinkdropUrl;
+/**
+ * Gets an account's public key given either a wallet or an account object. Note that a valid
+ *
+ * @param {Account | any } account - Either an account object or a Keypom wallet object. Only used if its an account object
+ * @param {AnyWallet | undefined } wallet, if provided by the user, otherwise undefined. If passed in, it should be used
+ *
+ * @returns {PublicKey} - A public key corresponding to the passed in account ID and wallet or account
+ *
+ * @example
+ * Getting the public key of an account object in order to make a transaction:
+ * ```js
+ * let pk = await getAccountPublicKey({account, wallet});
+ *
+ * transactions.push(
+ *   await convertBasicTransaction({
+ *       txnInfo,
+ *       signerId: account!.accountId,
+ *       signerPk: pk,
+ *   })
+ * );
+ *
+ * ```
+ * @group Utility
+ */
+const getAccountPublicKey = ({ account, wallet }) => __awaiter(void 0, void 0, void 0, function* () {
+    if (account instanceof accounts_1.Account) {
+        // account object was given by user, use it
+        return yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    }
+    else {
+        // Wallet was given by user, in which case, find the public key in accounts list
+        let walletRes = yield wallet;
+        let accounts = yield walletRes.getAccounts();
+        for (let i = 0; i < accounts.length; i++) {
+            const acc = accounts[i];
+            // passed in account will always have accountId
+            if (acc.accountId == account.accountId) {
+                return crypto_1.PublicKey.fromString(acc.publicKey);
+            }
+        }
+    }
+    return null;
+});
+exports.getAccountPublicKey = getAccountPublicKey;
 /**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
  *
@@ -665,7 +709,7 @@ const ftTransferCall = ({ account, wallet, contractId, absoluteAmount, amount, d
         });
         absoluteAmount = (0, exports.parseFTAmount)(amount, metadata.decimals);
     }
-    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pk = yield (0, exports.getAccountPublicKey)({ account, wallet });
     const txnInfo = {
         receiverId: contractId,
         signerId: account.accountId,
@@ -738,7 +782,7 @@ const nftTransferCall = ({ account, wallet, contractId, tokenIds, dropId, return
     const transactions = [];
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+        const pk = yield (0, exports.getAccountPublicKey)({ account, wallet });
         const txnInfo = {
             receiverId: contractId,
             signerId: account.accountId,

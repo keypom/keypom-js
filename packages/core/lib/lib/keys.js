@@ -141,7 +141,7 @@ const addKeys = ({ account, wallet, dropId, drop, numKeys, publicKeys, nftTokenI
     (0, checks_1.assert)(numKeys || (publicKeys === null || publicKeys === void 0 ? void 0 : publicKeys.length), "Either pass in publicKeys or set numKeys to a positive non-zero value.");
     (0, checks_1.assert)((0, checks_1.isSupportedKeypomContract)(contractId) === true, "Only the latest Keypom contract can be used to call this methods. Please update the contract");
     account = yield getAccount({ account, wallet });
-    const pubKey = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pubKey = yield (0, keypom_utils_1.getAccountPublicKey)({ account, wallet });
     const { drop_id, owner_id, required_gas, deposit_per_use, config, ft: ftData, nft: nftData, fc: fcData, next_key_id, } = drop || (yield (0, views_1.getDropInformation)({ dropId: dropId }));
     dropId = drop_id;
     const uses_per_key = (config === null || config === void 0 ? void 0 : config.uses_per_key) || 1;

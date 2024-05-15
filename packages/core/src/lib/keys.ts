@@ -17,6 +17,7 @@ import {
     ftTransferCall,
     generateKeys,
     generatePerUsePasswords,
+    getAccountPublicKey,
     key2str,
     nftTransferCall,
     toCamel,
@@ -222,10 +223,7 @@ export const addKeys = async ({
     );
 
     account = await getAccount({ account, wallet });
-    const pubKey = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
+    const pubKey = await getAccountPublicKey({account, wallet});
 
     const {
         drop_id,
