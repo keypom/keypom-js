@@ -21,6 +21,7 @@ import {
     ftTransferCall,
     generateKeys,
     generatePerUsePasswords,
+    getAccountPublicKey,
     getStorageBase,
     key2str,
     keypomView,
@@ -480,11 +481,9 @@ export const createDrop = async ({
     const deposit = !hasBalance ? requiredDeposit : "0";
 
     let transactions: Transaction[] = [];
-    const pk = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
 
+    const pk = await getAccountPublicKey({account, wallet});
+    
     assert(
         pk !== null,
         "Could not get public key from signer. Ensure you have the key in the key store."
@@ -634,10 +633,7 @@ export const deleteDrops = async ({
         "Passed in account is not a valid account object."
     );
     account = await getAccount({ account, wallet });
-    const pubKey = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
+    const pubKey = await getAccountPublicKey({account, wallet});
 
     // If the drop information isn't passed in, we should get it from the drop IDs
     if (!drops) {

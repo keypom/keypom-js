@@ -271,10 +271,7 @@ export const createNFTSeries = async ({
     const nftSeriesAccount =
         networkId == "testnet" ? "nft-v2.keypom.testnet" : "nft-v2.keypom.near";
 
-    const pk = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
+    const pk = await getAccountPublicKey({account, wallet});
     const txnInfo: BasicTransaction = {
         receiverId: nftSeriesAccount,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -443,6 +440,57 @@ export const formatLinkdropUrl = ({
     });
 
     return returnedURLs;
+};
+
+/**
+ * Gets an account's public key given either a wallet or an account object. Note that a valid 
+ *
+ * @param {Account | any } account - Either an account object or a Keypom wallet object. Only used if its an account object
+ * @param {AnyWallet | undefined } wallet, if provided by the user, otherwise undefined. If passed in, it should be used
+ *
+ * @returns {PublicKey} - A public key corresponding to the passed in account ID and wallet or account
+ *
+ * @example
+ * Getting the public key of an account object in order to make a transaction:
+ * ```js
+ * let pk = await getAccountPublicKey({account, wallet});
+ * 
+ * transactions.push(
+ *   await convertBasicTransaction({
+ *       txnInfo,
+ *       signerId: account!.accountId,
+ *       signerPk: pk,
+ *   })
+ * );
+ * 
+ * ```
+ * @group Utility
+ */
+export const getAccountPublicKey = async ({
+    account,
+    wallet
+}: {
+    account: Account | any;
+    wallet: AnyWallet | undefined;
+}): Promise<null | PublicKey> => {
+
+    if(account instanceof Account){
+        // account object was given by user, use it
+        return await account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    }else{
+        // Wallet was given by user, in which case, find the public key in accounts list
+        let walletRes = await wallet
+        let accounts = await walletRes.getAccounts();
+        for (let i = 0; i < accounts.length; i++) {
+            const acc = accounts[i];
+            // passed in account will always have accountId
+            if (acc.accountId == account.accountId) {
+                return PublicKey.fromString(acc.publicKey);
+            }
+        }
+    }
+
+    return null;
 };
 
 /**
@@ -857,10 +905,7 @@ export const ftTransferCall = async ({
         absoluteAmount = parseFTAmount(amount, metadata.decimals);
     }
 
-    const pk = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
+    const pk = await getAccountPublicKey({account, wallet});
     const txnInfo: BasicTransaction = {
         receiverId: contractId,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws
@@ -964,10 +1009,7 @@ export const nftTransferCall = async ({
 
     /// TODO batch calls in parallel where it makes sense
     for (let i = 0; i < tokenIds.length; i++) {
-        const pk = await account.connection.signer.getPublicKey(
-            account.accountId,
-            account.connection.networkId
-        );
+        const pk = await getAccountPublicKey({account, wallet});
         const txnInfo: BasicTransaction = {
             receiverId: contractId,
             signerId: account!.accountId, // We know this is not undefined since getAccount throws

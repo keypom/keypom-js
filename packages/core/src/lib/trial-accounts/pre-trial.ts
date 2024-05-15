@@ -15,6 +15,7 @@ import {
     convertBasicTransaction,
     estimateRequiredDeposit,
     generateKeys,
+    getAccountPublicKey,
     getStorageBase,
     nearArgsToYocto,
 } from "../keypom-utils";
@@ -440,10 +441,7 @@ export const createTrialAccountDrop = async ({
 
     const deposit = !hasBalance ? requiredDeposit : "0";
 
-    const pk = await account.connection.signer.getPublicKey(
-        account.accountId,
-        account.connection.networkId
-    );
+    const pk = await getAccountPublicKey({account, wallet});
     const txnInfo: BasicTransaction = {
         receiverId,
         signerId: account!.accountId, // We know this is not undefined since getAccount throws

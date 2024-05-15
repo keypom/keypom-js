@@ -242,6 +242,34 @@ export declare const formatLinkdropUrl: ({ claimPage, networkId, contractId, sec
     customURL?: string;
 }) => string[];
 /**
+ * Gets an account's public key given either a wallet or an account object. Note that a valid
+ *
+ * @param {Account | any } account - Either an account object or a Keypom wallet object. Only used if its an account object
+ * @param {AnyWallet | undefined } wallet, if provided by the user, otherwise undefined. If passed in, it should be used
+ *
+ * @returns {PublicKey} - A public key corresponding to the passed in account ID and wallet or account
+ *
+ * @example
+ * Getting the public key of an account object in order to make a transaction:
+ * ```js
+ * let pk = await getAccountPublicKey({account, wallet});
+ *
+ * transactions.push(
+ *   await convertBasicTransaction({
+ *       txnInfo,
+ *       signerId: account!.accountId,
+ *       signerPk: pk,
+ *   })
+ * );
+ *
+ * ```
+ * @group Utility
+ */
+export declare const getAccountPublicKey: ({ account, wallet }: {
+    account: Account | any;
+    wallet: AnyWallet | undefined;
+}) => Promise<null | PublicKey>;
+/**
  * Generate a sha256 hash of a passed in string. If the string is hex encoded, set the fromHex flag to true.
  *
  * @param {string} str - the string you wish to hash. By default, this should be utf8 encoded. If the string is hex encoded, set the fromHex flag to true.

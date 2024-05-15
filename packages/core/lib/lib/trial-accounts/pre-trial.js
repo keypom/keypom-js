@@ -289,7 +289,7 @@ const createTrialAccountDrop = ({ account, wallet, contractBytes, startingBalanc
         hasBalance = true;
     }
     const deposit = !hasBalance ? requiredDeposit : "0";
-    const pk = yield account.connection.signer.getPublicKey(account.accountId, account.connection.networkId);
+    const pk = yield (0, keypom_utils_1.getAccountPublicKey)({ account, wallet });
     const txnInfo = {
         receiverId,
         signerId: account.accountId,
