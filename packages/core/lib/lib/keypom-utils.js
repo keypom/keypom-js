@@ -539,7 +539,7 @@ const generateKeys = ({ numKeys, rootEntropy, metaEntropy, autoMetaNonceStart, }
             const keyPair = crypto_1.KeyPairEd25519.fromRandom();
             keyPairs.push(keyPair);
             publicKeys.push(keyPair.getPublicKey().toString());
-            secretKeys.push(keyPair.extendedSecretKey);
+            secretKeys.push(keyPair.extendedSecretKey || keyPair.secretKey);
         }
     }
     return {

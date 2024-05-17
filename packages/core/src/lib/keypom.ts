@@ -60,7 +60,7 @@ export const supportedKeypomContracts = {
         "v1.keypom.testnet": false,
         "v1-3.keypom.testnet": false,
         "v1-4.keypom.testnet": false,
-        "v2.keypom.testnet": false,
+        "v2.keypom.testnet": true,
         "v3.keypom.testnet": true,
     },
     localnet: {
@@ -98,7 +98,7 @@ export const accountMappingContract = {
     testnet: "v1.mapping.keypom.testnet",
 };
 
-const contractBase = "v3.keypom";
+const contractBase = "v2.keypom";
 let contractId = `${contractBase}.testnet`;
 let receiverId = contractId;
 
