@@ -53,8 +53,8 @@ export const supportedKeypomContracts = {
         "v1.keypom.near": false,
         "v1-3.keypom.near": false,
         "v1-4.keypom.near": false,
-        "v2.keypom.near": false,
-        "v3.keypom.near": false,
+        "v2.keypom.near": true,
+        "v3.keypom.near": true,
     },
     testnet: {
         "v1.keypom.testnet": false,
