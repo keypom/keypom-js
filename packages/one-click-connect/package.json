@@ -5,6 +5,7 @@
     "main": "lib/index.js",
     "scripts": {
         "build": "pnpm compile",
+        "build-test": "pnpm compile && ../../buildMove.sh",
         "compile": "tsc -p tsconfig.json",
         "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
         "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",

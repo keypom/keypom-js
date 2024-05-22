@@ -107,6 +107,7 @@ export function setupOneClickConnect(
             return null;
         }
 
+        // returns { accountId, secretKey?, walletId, baseUrl }
         const signInData = tryGetAccountData({ urlPattern, networkId });
         console.log("Sign in data: ", signInData);
         if (signInData === null) {
@@ -128,7 +129,7 @@ export function setupOneClickConnect(
             nearConnection,
             keyStore,
             accountId: signInData.accountId,
-            secretKey: signInData.secretKey,
+            secretKey: signInData.secretKey ? signInData.secretKey : undefined,
             walletId: signInData.walletId,
             baseUrl: signInData.baseUrl,
         });

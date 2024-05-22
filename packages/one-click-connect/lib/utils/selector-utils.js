@@ -178,19 +178,23 @@ var parseOneClickSignInFromUrl = function (_a) {
     }
     // Further split to separate accountId, secretKey, and walletId
     var credentials = parts[1].split(delimiter);
-    if (credentials.length !== 3) {
-        console.error("URL does not contain all required parameters (accountId, secretKey, walletId).");
+    // secret key may be missing --> originall had || credentials.length > 4 there as well
+    if (credentials.length !== 2 && credentials.length !== 3) {
+        console.error("URL is malformed or does not contain all required parameters (accountId, walletId).");
         return null;
     }
-    var accountId = credentials[0], secretKey = credentials[1], walletId = credentials[2];
-    // Ensure none of the parameters are empty
-    if (!accountId || !secretKey || !walletId) {
+    // set accountId, walletId always, and secretKey if present
+    var _b = credentials.length === 2
+        ? [credentials[0], undefined, credentials[1]]
+        : credentials, accountId = _b[0], secretKey = _b[1], walletId = _b[2];
+    // in condition, got rid of || ((credentials.length === 3 && !secretKey))
+    if (!accountId || !walletId) {
         console.error("Invalid or incomplete authentication data in URL.");
         return null;
     }
     return {
         accountId: accountId,
-        secretKey: secretKey,
+        secretKey: credentials.length === 3 ? secretKey : undefined,
         walletId: walletId,
         baseUrl: baseUrl,
     };

@@ -66,7 +66,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     async isSignedIn() {
-        return this.accountId !== undefined && this.accountId !== null;
+        return this.signedIn
     }
 
     getContractId(): string {
@@ -136,6 +136,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             } catch (e) {
                 console.log("e: ", e);
             }
+        }else{
+            // handles case of no secretKey
+            return this.internalSignIn(
+                this.accountId,
+                this.walletId,
+                this.secretKey
+            );
         }
 
         return [];

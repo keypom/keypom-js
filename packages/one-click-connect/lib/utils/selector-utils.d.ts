@@ -16,7 +16,7 @@ export declare const tryGetAccountData: ({ urlPattern, networkId, }: {
     networkId: string;
 }) => {
     accountId: string;
-    secretKey: string;
+    secretKey?: string | undefined;
     walletId: string;
     baseUrl: string;
 } | null;
@@ -32,7 +32,7 @@ export declare const parseOneClickSignInFromUrl: ({ baseUrl, delimiter, }: {
     delimiter: string;
 }) => {
     accountId: string;
-    secretKey: string;
+    secretKey?: string | undefined;
     walletId: string;
     baseUrl: string;
 } | null;

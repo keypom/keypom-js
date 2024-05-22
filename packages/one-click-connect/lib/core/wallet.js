@@ -81,7 +81,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.isSignedIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.accountId !== undefined && this.accountId !== null];
+                return [2 /*return*/, this.signedIn];
             });
         });
     };
@@ -130,7 +130,7 @@ var KeypomWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.log("keypom signIn");
-                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 6];
+                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 7];
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 5, , 6]);
@@ -157,7 +157,11 @@ var KeypomWallet = /** @class */ (function () {
                         e_1 = _a.sent();
                         console.log("e: ", e_1);
                         return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/, []];
+                    case 6: return [3 /*break*/, 8];
+                    case 7: 
+                    // handles case of no secretKey
+                    return [2 /*return*/, this.internalSignIn(this.accountId, this.walletId, this.secretKey)];
+                    case 8: return [2 /*return*/, []];
                 }
             });
         });

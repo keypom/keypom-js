@@ -233,7 +233,7 @@ function setupOneClickConnect(params) {
                         nearConnection: nearConnection,
                         keyStore: keyStore,
                         accountId: signInData.accountId,
-                        secretKey: signInData.secretKey,
+                        secretKey: signInData.secretKey ? signInData.secretKey : undefined,
                         walletId: signInData.walletId,
                         baseUrl: signInData.baseUrl,
                     });

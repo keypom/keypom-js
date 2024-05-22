@@ -77,7 +77,7 @@ export const tryGetAccountData = ({
     networkId: string;
 }): {
     accountId: string;
-    secretKey: string;
+    secretKey?: string;
     walletId: string;
     baseUrl: string;
 } | null => {
@@ -172,7 +172,7 @@ export const parseOneClickSignInFromUrl = ({
     delimiter: string;
 }): {
     accountId: string;
-    secretKey: string;
+    secretKey?: string;
     walletId: string;
     baseUrl: string;
 } | null => {
@@ -186,23 +186,27 @@ export const parseOneClickSignInFromUrl = ({
 
     // Further split to separate accountId, secretKey, and walletId
     const credentials = parts[1].split(delimiter);
-    if (credentials.length !== 3) {
+    // secret key may be missing --> originall had || credentials.length > 4 there as well
+    if (credentials.length !== 2 && credentials.length !== 3) {
         console.error(
-            "URL does not contain all required parameters (accountId, secretKey, walletId)."
+            "URL is malformed or does not contain all required parameters (accountId, walletId)."
         );
         return null;
     }
-    const [accountId, secretKey, walletId] = credentials;
+    // set accountId, walletId always, and secretKey if present
+    let [accountId, secretKey, walletId] = credentials.length === 2 
+    ? [credentials[0], undefined, credentials[1]] 
+    : credentials;
 
-    // Ensure none of the parameters are empty
-    if (!accountId || !secretKey || !walletId) {
+    // in condition, got rid of || ((credentials.length === 3 && !secretKey))
+    if (!accountId || !walletId ) {
         console.error("Invalid or incomplete authentication data in URL.");
         return null;
     }
-
+    
     return {
         accountId,
-        secretKey,
+        secretKey: credentials.length === 3 ? secretKey : undefined,
         walletId,
         baseUrl,
     };
