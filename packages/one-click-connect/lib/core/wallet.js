@@ -88,6 +88,9 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.getContractId = function () {
         return this.contractId || selector_utils_1.NO_CONTRACT_ID;
     };
+    KeypomWallet.prototype.getNearConnection = function () {
+        return this.nearConnection;
+    };
     KeypomWallet.prototype.setContractId = function () {
         return __awaiter(this, void 0, void 0, function () {
             var pk, accessKey, permission, receiver_id;

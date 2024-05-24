@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,9 +60,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
+var nearAPI = __importStar(require("near-api-js"));
+var borsh_1 = require("borsh");
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
 var wallet_utils_1 = require("@near-wallet-selector/wallet-utils");
+var Transaction = __importStar(require("@near-js/transactions"));
+var one_click_utils_1 = require("../utils/one-click-utils");
 exports.SUPPORTED_EXT_WALLET_DATA = {
     testnet: {
         "sweat-wallet": {},
@@ -54,37 +81,113 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
 var extSignAndSendTransactions = function (_a) {
     var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, account, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
+        var fakRequiredTxns, responses, new_key, pk_1, currentUrl, walletBaseUrl, newUrl, account_1, transformed_transactions, txn_schema, serialized, account, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     fakRequiredTxns = [];
                     responses = [];
-                    if (secretKey === undefined) {
-                        console.warn("Secret key not provided");
-                        // TODO: add access key as part of txn request
-                        return [2 /*return*/, []];
+                    if (!(secretKey === undefined)) return [3 /*break*/, 3];
+                    console.warn("Secret key not provided");
+                    console.log("anyone home?");
+                    new_key = nearAPI.KeyPair.fromRandom("ed25519");
+                    pk_1 = new_key.getPublicKey().toString();
+                    console.log("pk being added to storage: ", pk_1);
+                    (0, selector_utils_1.setLocalStoragePendingKey)({
+                        secretKey: new_key.toString(),
+                        publicKey: pk_1,
+                        accountId: accountId
+                    });
+                    currentUrl = new URL(window.location.href);
+                    console.log("current URL: ", currentUrl);
+                    walletBaseUrl = void 0;
+                    switch (walletId) {
+                        case "my-near-wallet":
+                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            break;
+                        case "meteor-wallet":
+                            // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
+                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            break;
+                        case "sweat-wallet":
+                            // walletBaseUrl = "https://wallet.sweat.finance";
+                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            break;
+                        default:
+                            throw new Error("Unsupported wallet ID: ".concat(walletId));
                     }
+                    ;
+                    console.log("wallet base url: ", walletBaseUrl);
+                    newUrl = new URL('sign', walletBaseUrl);
+                    console.log("a: ", newUrl.toString());
+                    console.log("txn to serialize: ", transactions);
                     return [4 /*yield*/, near.account(accountId)];
                 case 1:
+                    account_1 = _b.sent();
+                    console.log("occ signer: ", account_1.connection.signer);
+                    return [4 /*yield*/, (0, one_click_utils_1.testTransformTransactions)(transactions, account_1)];
+                case 2:
+                    transformed_transactions = _b.sent();
+                    try {
+                        txn_schema = Transaction.SCHEMA;
+                        console.log("obj constructor: ", transformed_transactions[0].constructor());
+                        console.log("schema transaction inside: ", txn_schema);
+                        console.log("txn: ", transformed_transactions[0]);
+                        console.log("schema at obj constructor: ", txn_schema.get(transformed_transactions[0].constructor()));
+                        serialized = (0, borsh_1.serialize)(txn_schema, transformed_transactions[0]);
+                        console.log(serialized);
+                    }
+                    catch (e) {
+                        console.log("error NEW 2: ", e);
+                    }
+                    // console.log("schema: ", nearAPI.transactions.SCHEMA)
+                    // console.log("schema keys: ", nearAPI.transactions.SCHEMA.keys())
+                    // console.log("schema transaction key 2: ", nearAPI.transactions.SCHEMA[2])
+                    // console.log("schema transaction: ", nearAPI.transactions.SCHEMA.Transaction)
+                    // console.log("schema transaction 2: ", nearAPI.transactions.SCHEMA['Transaction'])
+                    // console.log("schema transaction 3: ", nearAPI.transactions.SCHEMA.get(Transaction))
+                    // serialize(nearAPI.transactions.SCHEMA.Transaction, transactions[0])
+                    // try{
+                    //     const serializedTxn = encodeURI(JSON.stringify(transactions[0]))
+                    //     console.log(serializedTxn)
+                    // }catch(e){
+                    //     console.log("error 3: ", e)
+                    // }
+                    // newUrl.searchParams.set('transactions', transactions
+                    //     .map(transaction => serialize(nearAPI.transactions.SCHEMA, transaction))
+                    //     .map(serialized => Buffer.from(serialized).toString('base64'))
+                    //     .join(','));
+                    // console.log("b: ", newUrl.toString())
+                    // newUrl.searchParams.set('transactions', transactions
+                    //     .map(transaction => encodeURI(JSON.stringify(transaction)))
+                    //     .join(','));
+                    console.log("b: ", newUrl.toString());
+                    newUrl.searchParams.set('callbackUrl', currentUrl.href);
+                    console.log("c: ", newUrl.toString());
+                    newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                    console.log("redirecting to:", newUrl.toString());
+                    // window.location.assign(newUrl.toString());
+                    return [2 /*return*/, []];
+                case 3: return [4 /*yield*/, near.account(accountId)];
+                case 4:
                     account = _b.sent();
                     pk = (0, selector_utils_1.getPubFromSecret)(secretKey);
                     i = 0;
-                    _b.label = 2;
-                case 2:
-                    if (!(i < transactions.length)) return [3 /*break*/, 11];
-                    txn = transactions[i];
-                    return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
-                case 3:
-                    accessKey = _b.sent();
-                    return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, txn.actions)];
-                case 4:
-                    canExecuteTxn = _b.sent();
-                    console.log("canExecuteTxn", canExecuteTxn);
-                    if (!canExecuteTxn) return [3 /*break*/, 9];
                     _b.label = 5;
                 case 5:
-                    _b.trys.push([5, 7, , 8]);
+                    if (!(i < transactions.length)) return [3 /*break*/, 14];
+                    txn = transactions[i];
+                    return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
+                case 6:
+                    accessKey = _b.sent();
+                    return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, txn.actions)];
+                case 7:
+                    canExecuteTxn = _b.sent();
+                    console.log("canExecuteTxn", canExecuteTxn);
+                    if (!canExecuteTxn) return [3 /*break*/, 12];
+                    _b.label = 8;
+                case 8:
+                    _b.trys.push([8, 10, , 11]);
                     console.log("Signing transaction", txn);
                     return [4 /*yield*/, account.signAndSendTransaction({
                             receiverId: txn.receiverId,
@@ -92,23 +195,23 @@ var extSignAndSendTransactions = function (_a) {
                                 return (0, wallet_utils_1.createAction)(action);
                             }),
                         })];
-                case 6:
+                case 9:
                     response = _b.sent();
                     responses.push(response);
-                    return [3 /*break*/, 8];
-                case 7:
+                    return [3 /*break*/, 11];
+                case 10:
                     e_1 = _b.sent();
                     console.error("Error signing transaction", e_1);
                     fakRequiredTxns.push(txn);
-                    return [3 /*break*/, 8];
-                case 8: return [3 /*break*/, 10];
-                case 9:
+                    return [3 /*break*/, 11];
+                case 11: return [3 /*break*/, 13];
+                case 12:
                     fakRequiredTxns.push(txn);
-                    _b.label = 10;
-                case 10:
+                    _b.label = 13;
+                case 13:
                     i++;
-                    return [3 /*break*/, 2];
-                case 11:
+                    return [3 /*break*/, 5];
+                case 14:
                     console.log("fakRequiredTxns", fakRequiredTxns);
                     if (fakRequiredTxns.length > 0) {
                         switch (walletId) {

@@ -107,13 +107,6 @@ export function setupOneClickConnect(
             return null;
         }
 
-        // returns { accountId, secretKey?, walletId, baseUrl }
-        const signInData = tryGetAccountData({ urlPattern, networkId });
-        console.log("Sign in data: ", signInData);
-        if (signInData === null) {
-            return null;
-        }
-
         const { connect, keyStores } = nearAPI;
         const networkPreset = getNetworkPreset(networkId);
         let keyStore = new keyStores.BrowserLocalStorageKeyStore();
@@ -124,6 +117,15 @@ export function setupOneClickConnect(
             headers: {},
         };
         const nearConnection = await connect(connectionConfig);
+
+        // returns { accountId, secretKey?, walletId, baseUrl }
+        const signInData = tryGetAccountData({ urlPattern, networkId, nearConnection });
+
+        console.log("Sign in data: ", signInData);
+        if (signInData === null) {
+            return null;
+        }
+
         const keypomWallet = new KeypomWallet({
             networkId,
             nearConnection,

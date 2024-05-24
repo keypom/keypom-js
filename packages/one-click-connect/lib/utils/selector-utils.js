@@ -59,7 +59,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
+exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
 var types_1 = require("../core/types");
@@ -76,6 +76,42 @@ var setLocalStorageKeypomEnv = function (jsonData) {
     localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"), dataToWrite);
 };
 exports.setLocalStorageKeypomEnv = setLocalStorageKeypomEnv;
+var getLocalStoragePendingKey = function (near) { return __awaiter(void 0, void 0, void 0, function () {
+    var localStorageData, localStorageDataJson, accountId, accessKey, e_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                localStorageData = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
+                if (localStorageData === null)
+                    return [2 /*return*/, null];
+                localStorageDataJson = JSON.parse(localStorageData);
+                accountId = localStorageDataJson.accountId;
+                if (!(localStorageDataJson.publicKey && localStorageDataJson.secretKey)) return [3 /*break*/, 4];
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(localStorageDataJson.publicKey), "")];
+            case 2:
+                accessKey = _a.sent();
+                if (accessKey) {
+                    return [2 /*return*/, localStorageDataJson.secretKey];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                e_1 = _a.sent();
+                console.log("error: ", e_1);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/, null];
+        }
+    });
+}); };
+exports.getLocalStoragePendingKey = getLocalStoragePendingKey;
+var setLocalStoragePendingKey = function (jsonData) {
+    var dataToWrite = JSON.stringify(jsonData);
+    localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"), dataToWrite);
+    console.log("done writing");
+};
+exports.setLocalStoragePendingKey = setLocalStoragePendingKey;
 var areParamsCorrect = function (params) {
     var urlPattern = params.urlPattern, networkId = params.networkId;
     // Validate Keypom parameters
@@ -105,7 +141,7 @@ var areParamsCorrect = function (params) {
 exports.areParamsCorrect = areParamsCorrect;
 var tryGetAccountData = function (_a) {
     var _b;
-    var urlPattern = _a.urlPattern, networkId = _a.networkId;
+    var urlPattern = _a.urlPattern, networkId = _a.networkId, nearConnection = _a.nearConnection;
     var matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX); // Safe since we check the same URL before;
     var baseUrl = matches[1];
     var delimiter = matches[2];
@@ -123,8 +159,14 @@ var tryGetAccountData = function (_a) {
     }
     // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
     var curEnvData = (0, exports.getLocalStorageKeypomEnv)();
+    var secretKey = (0, exports.getLocalStoragePendingKey)(nearConnection);
+    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
     if (curEnvData !== null) {
-        return JSON.parse(curEnvData);
+        var parsedJson = JSON.parse(curEnvData);
+        if (secretKey !== null) {
+            parsedJson.secretKey = secretKey;
+        }
+        return parsedJson;
     }
     return null;
 };

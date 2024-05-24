@@ -23,6 +23,7 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     getAccountId(): string;
     isSignedIn(): Promise<boolean>;
     getContractId(): string;
+    getNearConnection(): nearAPI.Near;
     setContractId(): Promise<string>;
     signIn(): Promise<KeypomWalletAccount[]>;
     signOut(): Promise<void>;

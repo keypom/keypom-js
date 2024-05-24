@@ -1,3 +1,4 @@
+import * as nearAPI from "near-api-js";
 import { Action, Network, NetworkId } from "@near-wallet-selector/core";
 import { OneClickParams } from "../core/types";
 export declare const ONE_CLICK_URL_REGEX: RegExp;
@@ -10,10 +11,13 @@ export interface KeypomWalletAccount {
 }
 export declare const getLocalStorageKeypomEnv: () => string | null;
 export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
+export declare const getLocalStoragePendingKey: (near: nearAPI.Near) => Promise<any>;
+export declare const setLocalStoragePendingKey: (jsonData: any) => void;
 export declare const areParamsCorrect: (params: OneClickParams) => boolean;
-export declare const tryGetAccountData: ({ urlPattern, networkId, }: {
+export declare const tryGetAccountData: ({ urlPattern, networkId, nearConnection, }: {
     urlPattern: string;
     networkId: string;
+    nearConnection: nearAPI.Near;
 }) => {
     accountId: string;
     secretKey?: string | undefined;

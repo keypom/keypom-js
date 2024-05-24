@@ -73,6 +73,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.contractId || NO_CONTRACT_ID;
     }
 
+    getNearConnection(): nearAPI.Near {
+        return this.nearConnection;
+    }
+
     async setContractId(): Promise<string> {
         console.log("setContractId", this.secretKey);
         if (this.contractId !== undefined) {
@@ -87,6 +91,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         const pk = getPubFromSecret(this.secretKey);
         console.log("pk", pk);
+        
 
         const accessKey: any =
             await this.nearConnection.connection.provider.query(

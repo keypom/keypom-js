@@ -202,18 +202,13 @@ var Keypom = function (_a) {
 function setupOneClickConnect(params) {
     var _this = this;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var urlPattern, networkId, signInData, connect, keyStores, networkPreset, keyStore, connectionConfig, nearConnection, keypomWallet, contractId;
+        var urlPattern, networkId, connect, keyStores, networkPreset, keyStore, connectionConfig, nearConnection, signInData, keypomWallet, contractId;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     urlPattern = params.urlPattern, networkId = params.networkId;
                     if (!(0, selector_utils_1.areParamsCorrect)(params)) {
-                        return [2 /*return*/, null];
-                    }
-                    signInData = (0, selector_utils_1.tryGetAccountData)({ urlPattern: urlPattern, networkId: networkId });
-                    console.log("Sign in data: ", signInData);
-                    if (signInData === null) {
                         return [2 /*return*/, null];
                     }
                     connect = nearAPI.connect, keyStores = nearAPI.keyStores;
@@ -228,6 +223,11 @@ function setupOneClickConnect(params) {
                     return [4 /*yield*/, connect(connectionConfig)];
                 case 1:
                     nearConnection = _a.sent();
+                    signInData = (0, selector_utils_1.tryGetAccountData)({ urlPattern: urlPattern, networkId: networkId, nearConnection: nearConnection });
+                    console.log("Sign in data: ", signInData);
+                    if (signInData === null) {
+                        return [2 /*return*/, null];
+                    }
                     keypomWallet = new wallet_1.KeypomWallet({
                         networkId: networkId,
                         nearConnection: nearConnection,

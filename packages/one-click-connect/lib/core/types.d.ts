@@ -23,3 +23,8 @@ export type KeypomWalletInstant = InstantLinkWallet & {
     getAvailableBalance: () => Promise<bigint>;
     showModal(): any;
 };
+export type AddKeyPermission = "FullAccess" | {
+    receiverId: string;
+    allowance?: string;
+    methodNames?: Array<string>;
+};

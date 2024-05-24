@@ -28,6 +28,37 @@ export const setLocalStorageKeypomEnv = (jsonData) => {
     localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:envData`, dataToWrite);
 };
 
+export const getLocalStoragePendingKey = async (near: nearAPI.Near) => {
+    const localStorageData = localStorage.getItem(
+        `${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`
+    );
+    if(localStorageData === null) return null
+    const localStorageDataJson = JSON.parse(localStorageData);
+    const accountId = localStorageDataJson.accountId;
+
+    if(localStorageDataJson.publicKey && localStorageDataJson.secretKey){
+        try{
+            const accessKey: any = await near.connection.provider.query(
+                `access_key/${accountId}/${localStorageDataJson.publicKey}`,
+                ""
+            );
+            if(accessKey){
+                return localStorageDataJson.secretKey;
+            }
+        }catch(e){
+            console.log("error: ", e)
+        }   
+    }
+    return null;
+};
+
+
+export const setLocalStoragePendingKey = (jsonData) => {
+    const dataToWrite = JSON.stringify(jsonData);
+    localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`, dataToWrite);
+    console.log("done writing")
+}
+
 export const areParamsCorrect = (params: OneClickParams) => {
     const { urlPattern, networkId } = params;
 
@@ -72,9 +103,11 @@ export const areParamsCorrect = (params: OneClickParams) => {
 export const tryGetAccountData = ({
     urlPattern,
     networkId,
+    nearConnection,
 }: {
     urlPattern: string;
     networkId: string;
+    nearConnection: nearAPI.Near;
 }): {
     accountId: string;
     secretKey?: string;
@@ -108,11 +141,19 @@ export const tryGetAccountData = ({
         return oneClickSignInData;
     }
 
-    // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-    const curEnvData = getLocalStorageKeypomEnv();
-    if (curEnvData !== null) {
-        return JSON.parse(curEnvData);
-    }
+     // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+     const curEnvData = getLocalStorageKeypomEnv();
+     const secretKey = getLocalStoragePendingKey(nearConnection);
+
+     localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+
+     if (curEnvData !== null) {
+         let parsedJson = JSON.parse(curEnvData);
+         if (secretKey !== null) {
+             parsedJson.secretKey = secretKey;
+         }
+         return parsedJson;
+     }
 
     return null;
 };
