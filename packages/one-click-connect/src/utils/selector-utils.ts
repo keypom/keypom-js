@@ -46,7 +46,7 @@ export const getLocalStoragePendingKey = async (near: nearAPI.Near) => {
                 return localStorageDataJson.secretKey;
             }
         }catch(e){
-            console.log("error: ", e)
+            console.log("error retrieving access key: ", e)
         }   
     }
     return null;
@@ -58,6 +58,20 @@ export const setLocalStoragePendingKey = (jsonData) => {
     localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`, dataToWrite);
     console.log("done writing")
 }
+
+// allowance, methodNames, walletUrl
+export const getLocalStorageKeypomLak = () => {
+    const localStorageDataJson = localStorage.getItem(
+        `${KEYPOM_LOCAL_STORAGE_KEY}:LakData`
+    );
+    return localStorageDataJson;
+};
+
+export const setLocalStorageKeypomLak = (jsonData) => {
+    const dataToWrite = JSON.stringify(jsonData);
+
+    localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:LakData`, dataToWrite);
+};
 
 export const areParamsCorrect = (params: OneClickParams) => {
     const { urlPattern, networkId } = params;
@@ -100,7 +114,7 @@ export const areParamsCorrect = (params: OneClickParams) => {
     return true;
 };
 
-export const tryGetAccountData = ({
+export const tryGetAccountData = async ({
     urlPattern,
     networkId,
     nearConnection,
@@ -108,54 +122,75 @@ export const tryGetAccountData = ({
     urlPattern: string;
     networkId: string;
     nearConnection: nearAPI.Near;
-}): {
-    accountId: string;
-    secretKey?: string;
-    walletId: string;
-    baseUrl: string;
-} | null => {
+}): Promise<{ accountId: string; secretKey?: string; walletId: string; baseUrl: string; walletUrl?: string} | null> => {
+    
+    const parsedCurrentUrl = new URL(window.location.href);
+
     const matches = urlPattern.match(ONE_CLICK_URL_REGEX)!; // Safe since we check the same URL before;
-
+    
     const baseUrl = matches[1];
-    const delimiter = matches[2];
+    console.log("baseUrl: ", baseUrl);
 
-    // Try to sign in using one click sign-in data from URL
-    const oneClickSignInData =
-        baseUrl !== undefined
-            ? parseOneClickSignInFromUrl({ baseUrl, delimiter })
-            : null;
+     // The hash part of the URL (after #)
+    const hash = parsedCurrentUrl.hash;
 
-    if (oneClickSignInData !== null) {
-        const isModuleSupported =
-            SUPPORTED_EXT_WALLET_DATA[networkId]?.[
-                oneClickSignInData.walletId
-            ] !== undefined;
+    // Create a new URL object from the hash (to use URLSearchParams)
+    const hashUrlObj = new URL(hash.substring(1), parsedCurrentUrl.origin);
 
-        if (!isModuleSupported) {
-            console.warn(
-                `Module ID ${oneClickSignInData.walletId} is not supported on ${networkId}.`
-            );
-            return null;
+    // Get the value of the 'connection' parameter
+    const connectionParam = hashUrlObj.searchParams.get('connection');
+
+    // Sweat connection, parse accordingly
+    if (connectionParam) {
+      // Decode the Base64-encoded JSON string
+      const decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+      const connectionData = JSON.parse(decodedString);
+      console.log("parsed connection data: ", connectionData)
+
+      return { accountId: connectionData.account, secretKey: undefined, walletId: connectionData.wallet, baseUrl, walletUrl: connectionData.wallet_transaction_url }
+    }else{
+        const matches = urlPattern.match(ONE_CLICK_URL_REGEX)!; // Safe since we check the same URL before;
+    
+        const baseUrl = matches[1];
+        const delimiter = matches[2];
+        // Try to sign in using one click sign-in data from URL
+        const oneClickSignInData =
+            baseUrl !== undefined
+                ? parseOneClickSignInFromUrl({ baseUrl, delimiter })
+                : null;
+    
+        if (oneClickSignInData !== null) {
+            const isModuleSupported =
+                SUPPORTED_EXT_WALLET_DATA[networkId]?.[
+                    oneClickSignInData.walletId
+                ] !== undefined;
+    
+            if (!isModuleSupported) {
+                console.warn(
+                    `Module ID ${oneClickSignInData.walletId} is not supported on ${networkId}.`
+                );
+                return null;
+            }
+    
+            return oneClickSignInData;
         }
-
-        return oneClickSignInData;
-    }
-
-     // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-     const curEnvData = getLocalStorageKeypomEnv();
-     const secretKey = getLocalStoragePendingKey(nearConnection);
-
-     localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
-
-     if (curEnvData !== null) {
-         let parsedJson = JSON.parse(curEnvData);
-         if (secretKey !== null) {
-             parsedJson.secretKey = secretKey;
+    
+         // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+         const curEnvData = getLocalStorageKeypomEnv();
+         const secretKey = await getLocalStoragePendingKey(nearConnection);
+    
+         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+    
+         if (curEnvData !== null) {
+             let parsedJson = JSON.parse(curEnvData);
+             if (secretKey !== null) {
+                 parsedJson.secretKey = secretKey;
+             }
+             return parsedJson;
          }
-         return parsedJson;
-     }
-
-    return null;
+    
+        return null;
+    }
 };
 
 /**

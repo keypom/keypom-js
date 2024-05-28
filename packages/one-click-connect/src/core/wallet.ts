@@ -29,10 +29,15 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
 
     // Initialized in signIn
-    contractId?: string;
+    contractId: string;
     secretKey?: string;
 
     signedIn: boolean;
+
+    walletUrl?: string;
+    sendLak: boolean;
+    methodNames: string[];
+    allowance: string;
 
     public constructor({
         networkId,
@@ -42,14 +47,25 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         secretKey,
         walletId,
         baseUrl,
+        contractId,
+        walletUrl,
+        sendLak,
+        methodNames,
+        allowance
     }: {
         networkId: NetworkId;
         nearConnection: any;
         keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
         accountId: string;
+        secretKey?: string;
         walletId: string;
         baseUrl: string;
-        secretKey?: string;
+        contractId: string;
+        walletUrl?: string;
+        sendLak?: boolean;
+        methodNames?: string[];
+        allowance?: string;
+
     }) {
         this.nearConnection = nearConnection;
         this.keyStore = keyStore;
@@ -58,7 +74,12 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.secretKey = secretKey;
         this.walletId = walletId;
         this.baseUrl = baseUrl;
+        this.contractId = contractId;
         this.signedIn = false;
+        this.walletUrl = walletUrl;
+        this.sendLak = sendLak ? sendLak : true;
+        this.methodNames = methodNames ? methodNames : ["*"];
+        this.allowance = allowance ? allowance : "1000000000000000000000000";
     }
 
     getAccountId(): string {
@@ -66,52 +87,55 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     }
 
     async isSignedIn() {
+        // return this.accountId !== undefined && this.accountId !== null;
         return this.signedIn
     }
 
     getContractId(): string {
-        return this.contractId || NO_CONTRACT_ID;
+        return this.contractId;
     }
 
     getNearConnection(): nearAPI.Near {
         return this.nearConnection;
     }
 
-    async setContractId(): Promise<string> {
+    async setContractId( contractId?: string): Promise<string> {
         console.log("setContractId", this.secretKey);
-        if (this.contractId !== undefined) {
+        if (this.contractId !== contractId) {
             console.log("contractId already set", this.contractId);
             return this.contractId;
         }
 
-        if (this.secretKey === undefined) {
-            console.log("secretKey not set");
-            return NO_CONTRACT_ID;
+        if(contractId){
+            this.contractId = contractId;
+            return this.contractId
         }
 
-        const pk = getPubFromSecret(this.secretKey);
-        console.log("pk", pk);
+        return NO_CONTRACT_ID;
+
+        // const pk = getPubFromSecret(this.secretKey);
+        // console.log("pk", pk);
         
 
-        const accessKey: any =
-            await this.nearConnection.connection.provider.query(
-                `access_key/${this.accountId}/${pk}`,
-                ""
-            );
+        // const accessKey: any =
+        //     await this.nearConnection.connection.provider.query(
+        //         `access_key/${this.accountId}/${pk}`,
+        //         ""
+        //     );
 
-        console.log("accessKey", accessKey);
+        // console.log("accessKey", accessKey);
 
-        const { permission } = accessKey;
-        if (permission.FunctionCall) {
-            const { receiver_id } = permission.FunctionCall;
-            this.contractId = receiver_id;
-            console.log("contractId", this.contractId);
-            return receiver_id;
-        }
+        // const { permission } = accessKey;
+        // if (permission.FunctionCall) {
+        //     const { receiver_id } = permission.FunctionCall;
+        //     this.contractId = receiver_id;
+        //     console.log("contractId", this.contractId);
+        //     return receiver_id;
+        // }
 
-        this.contractId = NO_CONTRACT_ID;
-        console.log("full access key: contractId", this.contractId);
-        return NO_CONTRACT_ID;
+        // this.contractId = NO_CONTRACT_ID;
+        // console.log("full access key: contractId", this.contractId);
+        // return NO_CONTRACT_ID;
     }
 
     async signIn(): Promise<KeypomWalletAccount[]> {
@@ -196,12 +220,19 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
         const { transactions } = params;
 
+        console.log("wallet sign and send url: ", this.walletUrl)
+
         return await extSignAndSendTransactions({
             transactions,
             walletId: this.walletId!,
             accountId: this.accountId!,
             secretKey: this.secretKey!,
             near: this.nearConnection,
+            walletUrl: this.walletUrl,
+            sendLak: this.sendLak,
+            contractId: this.contractId,
+            methodNames: this.methodNames,
+            allowance: this.allowance
         });
     }
 

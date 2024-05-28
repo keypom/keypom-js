@@ -202,12 +202,13 @@ var Keypom = function (_a) {
 function setupOneClickConnect(params) {
     var _this = this;
     return function () { return __awaiter(_this, void 0, void 0, function () {
-        var urlPattern, networkId, connect, keyStores, networkPreset, keyStore, connectionConfig, nearConnection, signInData, keypomWallet, contractId;
+        var urlPattern, networkId, contractId, allowance, methodNames, connect, keyStores, networkPreset, keyStore, connectionConfig, nearConnection, signInData, existing_lak_data, new_lak_data, keypomWallet;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    urlPattern = params.urlPattern, networkId = params.networkId;
+                    urlPattern = params.urlPattern, networkId = params.networkId, contractId = params.contractId, allowance = params.allowance, methodNames = params.methodNames;
+                    console.log("this is real, here is my allowance: ", allowance);
                     if (!(0, selector_utils_1.areParamsCorrect)(params)) {
                         return [2 /*return*/, null];
                     }
@@ -223,8 +224,19 @@ function setupOneClickConnect(params) {
                     return [4 /*yield*/, connect(connectionConfig)];
                 case 1:
                     nearConnection = _a.sent();
-                    signInData = (0, selector_utils_1.tryGetAccountData)({ urlPattern: urlPattern, networkId: networkId, nearConnection: nearConnection });
+                    return [4 /*yield*/, (0, selector_utils_1.tryGetAccountData)({ urlPattern: urlPattern, networkId: networkId, nearConnection: nearConnection })];
+                case 2:
+                    signInData = _a.sent();
+                    existing_lak_data = (0, selector_utils_1.getLocalStorageKeypomLak)();
                     console.log("Sign in data: ", signInData);
+                    console.log(existing_lak_data);
+                    if (existing_lak_data) {
+                        new_lak_data = {
+                            walletUrl: (signInData === null || signInData === void 0 ? void 0 : signInData.walletUrl) ? signInData.walletUrl : JSON.parse(existing_lak_data).walletUrl,
+                            methodNames: methodNames ? methodNames : JSON.parse(existing_lak_data).methodNames,
+                            allowance: allowance ? allowance : JSON.parse(existing_lak_data).allowance
+                        };
+                    }
                     if (signInData === null) {
                         return [2 /*return*/, null];
                     }
@@ -236,10 +248,20 @@ function setupOneClickConnect(params) {
                         secretKey: signInData.secretKey ? signInData.secretKey : undefined,
                         walletId: signInData.walletId,
                         baseUrl: signInData.baseUrl,
+                        walletUrl: new_lak_data.walletUrl,
+                        contractId: contractId,
+                        methodNames: methodNames,
+                        allowance: allowance
                     });
-                    return [4 /*yield*/, keypomWallet.setContractId()];
-                case 2:
-                    contractId = _a.sent();
+                    (0, selector_utils_1.setLocalStorageKeypomLak)({
+                        walletUrl: keypomWallet.walletUrl,
+                        methodNames: keypomWallet.methodNames,
+                        allowance: keypomWallet.allowance
+                    });
+                    console.log("current keypom wallet: ", keypomWallet);
+                    return [4 /*yield*/, keypomWallet.setContractId(contractId)];
+                case 3:
+                    _a.sent();
                     return [2 /*return*/, {
                             id: "keypom",
                             type: "instant-link",

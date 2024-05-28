@@ -79,15 +79,15 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
 var extSignAndSendTransactions = function (_a) {
-    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
+    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near, walletUrl = _a.walletUrl, sendLak = _a.sendLak, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, new_key, pk_1, currentUrl, walletBaseUrl, newUrl, account_1, transformed_transactions, txn_schema, serialized, account, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        var fakRequiredTxns, responses, new_key, pk_1, currentUrl, walletBaseUrl, redirectUrl, _b, instructions, base64Instructions, newUrl_1, newUrl, account_1, transformed_transactions, txn_schema_1, serialized, e_1, serializedTxn, account, pk, i, txn, accessKey, canExecuteTxn, response, e_2;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
                     fakRequiredTxns = [];
                     responses = [];
-                    if (!(secretKey === undefined)) return [3 /*break*/, 3];
+                    if (!(secretKey === undefined)) return [3 /*break*/, 12];
                     console.warn("Secret key not provided");
                     console.log("anyone home?");
                     new_key = nearAPI.KeyPair.fromRandom("ed25519");
@@ -101,93 +101,111 @@ var extSignAndSendTransactions = function (_a) {
                     currentUrl = new URL(window.location.href);
                     console.log("current URL: ", currentUrl);
                     walletBaseUrl = void 0;
-                    switch (walletId) {
-                        case "my-near-wallet":
-                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                            break;
-                        case "meteor-wallet":
-                            // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
-                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                            break;
-                        case "sweat-wallet":
-                            // walletBaseUrl = "https://wallet.sweat.finance";
-                            walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                            break;
-                        default:
-                            throw new Error("Unsupported wallet ID: ".concat(walletId));
+                    redirectUrl = "";
+                    _b = walletId;
+                    switch (_b) {
+                        case "sweat-wallet": return [3 /*break*/, 1];
+                        case "my-near-wallet": return [3 /*break*/, 2];
+                        case "meteor-wallet": return [3 /*break*/, 8];
+                        case "mintbase-wallet": return [3 /*break*/, 9];
                     }
-                    ;
-                    console.log("wallet base url: ", walletBaseUrl);
-                    newUrl = new URL('sign', walletBaseUrl);
-                    console.log("a: ", newUrl.toString());
-                    console.log("txn to serialize: ", transactions);
-                    return [4 /*yield*/, near.account(accountId)];
+                    return [3 /*break*/, 10];
                 case 1:
-                    account_1 = _b.sent();
-                    console.log("occ signer: ", account_1.connection.signer);
-                    return [4 /*yield*/, (0, one_click_utils_1.testTransformTransactions)(transactions, account_1)];
+                    if (walletUrl == undefined) {
+                        console.error("Sweat URL must be provided in initialization");
+                    }
+                    else {
+                        instructions = {
+                            transactions: transactions,
+                            redirectUrl: window.location.href,
+                            limited_access_key: sendLak ? {
+                                public_key: pk_1,
+                                contractId: contractId,
+                                methodNames: methodNames,
+                                allowance: allowance
+                            } : {}
+                        };
+                        base64Instructions = Buffer.from(JSON.stringify(instructions)).toString('base64');
+                        newUrl_1 = new URL(walletUrl);
+                        newUrl_1.searchParams.set('instructions', base64Instructions);
+                        console.log("SWEAT newUrl: ", newUrl_1.toString());
+                    }
+                    return [3 /*break*/, 11];
                 case 2:
-                    transformed_transactions = _b.sent();
-                    try {
-                        txn_schema = Transaction.SCHEMA;
-                        console.log("obj constructor: ", transformed_transactions[0].constructor());
-                        console.log("schema transaction inside: ", txn_schema);
-                        console.log("txn: ", transformed_transactions[0]);
-                        console.log("schema at obj constructor: ", txn_schema.get(transformed_transactions[0].constructor()));
-                        serialized = (0, borsh_1.serialize)(txn_schema, transformed_transactions[0]);
-                        console.log(serialized);
-                    }
-                    catch (e) {
-                        console.log("error NEW 2: ", e);
-                    }
-                    // console.log("schema: ", nearAPI.transactions.SCHEMA)
-                    // console.log("schema keys: ", nearAPI.transactions.SCHEMA.keys())
-                    // console.log("schema transaction key 2: ", nearAPI.transactions.SCHEMA[2])
-                    // console.log("schema transaction: ", nearAPI.transactions.SCHEMA.Transaction)
-                    // console.log("schema transaction 2: ", nearAPI.transactions.SCHEMA['Transaction'])
-                    // console.log("schema transaction 3: ", nearAPI.transactions.SCHEMA.get(Transaction))
-                    // serialize(nearAPI.transactions.SCHEMA.Transaction, transactions[0])
-                    // try{
-                    //     const serializedTxn = encodeURI(JSON.stringify(transactions[0]))
-                    //     console.log(serializedTxn)
-                    // }catch(e){
-                    //     console.log("error 3: ", e)
-                    // }
-                    // newUrl.searchParams.set('transactions', transactions
-                    //     .map(transaction => serialize(nearAPI.transactions.SCHEMA, transaction))
-                    //     .map(serialized => Buffer.from(serialized).toString('base64'))
-                    //     .join(','));
-                    // console.log("b: ", newUrl.toString())
-                    // newUrl.searchParams.set('transactions', transactions
-                    //     .map(transaction => encodeURI(JSON.stringify(transaction)))
-                    //     .join(','));
-                    console.log("b: ", newUrl.toString());
+                    walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                    newUrl = new URL('sign', walletBaseUrl);
+                    return [4 /*yield*/, near.account(accountId)];
+                case 3:
+                    account_1 = _c.sent();
+                    _c.label = 4;
+                case 4:
+                    _c.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, (0, one_click_utils_1.transformTransactions)(transactions, account_1)];
+                case 5:
+                    transformed_transactions = _c.sent();
+                    txn_schema_1 = Transaction.SCHEMA;
+                    serialized = (0, borsh_1.serialize)(txn_schema_1, transformed_transactions[0]);
+                    newUrl.searchParams.set('transactions', transformed_transactions
+                        .map(function (transaction) { return (0, borsh_1.serialize)(txn_schema_1, transaction); })
+                        .map(function (serialized) { return Buffer.from(serialized).toString('base64'); })
+                        .join(','));
                     newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                    console.log("c: ", newUrl.toString());
                     newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
                     console.log("redirecting to:", newUrl.toString());
-                    // window.location.assign(newUrl.toString());
+                    redirectUrl = newUrl.toString();
+                    return [3 /*break*/, 7];
+                case 6:
+                    e_1 = _c.sent();
+                    console.log("error NEW 2: ", e_1);
+                    return [3 /*break*/, 7];
+                case 7: return [3 /*break*/, 11];
+                case 8:
+                    // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
+                    walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                    return [3 /*break*/, 11];
+                case 9:
+                    // walletBaseUrl = "https://wallet.sweat.finance";
+                    walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                    try {
+                        serializedTxn = encodeURI(JSON.stringify(transactions));
+                        // mintbase specific stuff
+                        // const newUrl = new URL(`${metadata.walletUrl}/sign-transaction`);
+                        // newUrl.searchParams.set('transactions_data', urlParam);
+                        // newUrl.searchParams.set('callback_url', cbUrl);
+                        // window.location.assign(newUrl.toString());
+                        console.log(serializedTxn);
+                    }
+                    catch (e) {
+                        console.log("error 3: ", e);
+                    }
+                    return [3 /*break*/, 11];
+                case 10: throw new Error("Unsupported wallet ID: ".concat(walletId));
+                case 11:
+                    ;
+                    console.log("redirect url: ", redirectUrl);
+                    if (redirectUrl !== "")
+                        window.location.assign(redirectUrl);
                     return [2 /*return*/, []];
-                case 3: return [4 /*yield*/, near.account(accountId)];
-                case 4:
-                    account = _b.sent();
+                case 12: return [4 /*yield*/, near.account(accountId)];
+                case 13:
+                    account = _c.sent();
                     pk = (0, selector_utils_1.getPubFromSecret)(secretKey);
                     i = 0;
-                    _b.label = 5;
-                case 5:
-                    if (!(i < transactions.length)) return [3 /*break*/, 14];
+                    _c.label = 14;
+                case 14:
+                    if (!(i < transactions.length)) return [3 /*break*/, 23];
                     txn = transactions[i];
                     return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(pk), "")];
-                case 6:
-                    accessKey = _b.sent();
+                case 15:
+                    accessKey = _c.sent();
                     return [4 /*yield*/, (0, selector_utils_1.keyHasPermissionForTransaction)(accessKey, txn.receiverId, txn.actions)];
-                case 7:
-                    canExecuteTxn = _b.sent();
+                case 16:
+                    canExecuteTxn = _c.sent();
                     console.log("canExecuteTxn", canExecuteTxn);
-                    if (!canExecuteTxn) return [3 /*break*/, 12];
-                    _b.label = 8;
-                case 8:
-                    _b.trys.push([8, 10, , 11]);
+                    if (!canExecuteTxn) return [3 /*break*/, 21];
+                    _c.label = 17;
+                case 17:
+                    _c.trys.push([17, 19, , 20]);
                     console.log("Signing transaction", txn);
                     return [4 /*yield*/, account.signAndSendTransaction({
                             receiverId: txn.receiverId,
@@ -195,23 +213,23 @@ var extSignAndSendTransactions = function (_a) {
                                 return (0, wallet_utils_1.createAction)(action);
                             }),
                         })];
-                case 9:
-                    response = _b.sent();
+                case 18:
+                    response = _c.sent();
                     responses.push(response);
-                    return [3 /*break*/, 11];
-                case 10:
-                    e_1 = _b.sent();
-                    console.error("Error signing transaction", e_1);
+                    return [3 /*break*/, 20];
+                case 19:
+                    e_2 = _c.sent();
+                    console.error("Error signing transaction", e_2);
                     fakRequiredTxns.push(txn);
-                    return [3 /*break*/, 11];
-                case 11: return [3 /*break*/, 13];
-                case 12:
+                    return [3 /*break*/, 20];
+                case 20: return [3 /*break*/, 22];
+                case 21:
                     fakRequiredTxns.push(txn);
-                    _b.label = 13;
-                case 13:
+                    _c.label = 22;
+                case 22:
                     i++;
-                    return [3 /*break*/, 5];
-                case 14:
+                    return [3 /*break*/, 14];
+                case 23:
                     console.log("fakRequiredTxns", fakRequiredTxns);
                     if (fakRequiredTxns.length > 0) {
                         switch (walletId) {

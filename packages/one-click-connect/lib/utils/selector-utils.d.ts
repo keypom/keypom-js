@@ -13,17 +13,20 @@ export declare const getLocalStorageKeypomEnv: () => string | null;
 export declare const setLocalStorageKeypomEnv: (jsonData: any) => void;
 export declare const getLocalStoragePendingKey: (near: nearAPI.Near) => Promise<any>;
 export declare const setLocalStoragePendingKey: (jsonData: any) => void;
+export declare const getLocalStorageKeypomLak: () => string | null;
+export declare const setLocalStorageKeypomLak: (jsonData: any) => void;
 export declare const areParamsCorrect: (params: OneClickParams) => boolean;
 export declare const tryGetAccountData: ({ urlPattern, networkId, nearConnection, }: {
     urlPattern: string;
     networkId: string;
     nearConnection: nearAPI.Near;
-}) => {
+}) => Promise<{
     accountId: string;
     secretKey?: string | undefined;
     walletId: string;
     baseUrl: string;
-} | null;
+    walletUrl?: string | undefined;
+} | null>;
 /**
  * Check if given access key allows the function call or method attempted in transaction
  * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items

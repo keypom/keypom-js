@@ -59,7 +59,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
+exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
 var types_1 = require("../core/types");
@@ -99,7 +99,7 @@ var getLocalStoragePendingKey = function (near) { return __awaiter(void 0, void 
                 return [3 /*break*/, 4];
             case 3:
                 e_1 = _a.sent();
-                console.log("error: ", e_1);
+                console.log("error retrieving access key: ", e_1);
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/, null];
         }
@@ -112,6 +112,17 @@ var setLocalStoragePendingKey = function (jsonData) {
     console.log("done writing");
 };
 exports.setLocalStoragePendingKey = setLocalStoragePendingKey;
+// allowance, methodNames, walletUrl
+var getLocalStorageKeypomLak = function () {
+    var localStorageDataJson = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"));
+    return localStorageDataJson;
+};
+exports.getLocalStorageKeypomLak = getLocalStorageKeypomLak;
+var setLocalStorageKeypomLak = function (jsonData) {
+    var dataToWrite = JSON.stringify(jsonData);
+    localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"), dataToWrite);
+};
+exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
 var areParamsCorrect = function (params) {
     var urlPattern = params.urlPattern, networkId = params.networkId;
     // Validate Keypom parameters
@@ -140,35 +151,56 @@ var areParamsCorrect = function (params) {
 };
 exports.areParamsCorrect = areParamsCorrect;
 var tryGetAccountData = function (_a) {
-    var _b;
     var urlPattern = _a.urlPattern, networkId = _a.networkId, nearConnection = _a.nearConnection;
-    var matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX); // Safe since we check the same URL before;
-    var baseUrl = matches[1];
-    var delimiter = matches[2];
-    // Try to sign in using one click sign-in data from URL
-    var oneClickSignInData = baseUrl !== undefined
-        ? (0, exports.parseOneClickSignInFromUrl)({ baseUrl: baseUrl, delimiter: delimiter })
-        : null;
-    if (oneClickSignInData !== null) {
-        var isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.walletId]) !== undefined;
-        if (!isModuleSupported) {
-            console.warn("Module ID ".concat(oneClickSignInData.walletId, " is not supported on ").concat(networkId, "."));
-            return null;
-        }
-        return oneClickSignInData;
-    }
-    // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-    var curEnvData = (0, exports.getLocalStorageKeypomEnv)();
-    var secretKey = (0, exports.getLocalStoragePendingKey)(nearConnection);
-    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
-    if (curEnvData !== null) {
-        var parsedJson = JSON.parse(curEnvData);
-        if (secretKey !== null) {
-            parsedJson.secretKey = secretKey;
-        }
-        return parsedJson;
-    }
-    return null;
+    return __awaiter(void 0, void 0, void 0, function () {
+        var parsedCurrentUrl, matches, baseUrl, hash, hashUrlObj, connectionParam, decodedString, connectionData, matches_1, baseUrl_1, delimiter, oneClickSignInData, isModuleSupported, curEnvData, secretKey, parsedJson;
+        var _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    parsedCurrentUrl = new URL(window.location.href);
+                    matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
+                    baseUrl = matches[1];
+                    console.log("baseUrl: ", baseUrl);
+                    hash = parsedCurrentUrl.hash;
+                    hashUrlObj = new URL(hash.substring(1), parsedCurrentUrl.origin);
+                    connectionParam = hashUrlObj.searchParams.get('connection');
+                    if (!connectionParam) return [3 /*break*/, 1];
+                    decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+                    connectionData = JSON.parse(decodedString);
+                    console.log("parsed connection data: ", connectionData);
+                    return [2 /*return*/, { accountId: connectionData.account, secretKey: undefined, walletId: connectionData.wallet, baseUrl: baseUrl, walletUrl: connectionData.wallet_transaction_url }];
+                case 1:
+                    matches_1 = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
+                    baseUrl_1 = matches_1[1];
+                    delimiter = matches_1[2];
+                    oneClickSignInData = baseUrl_1 !== undefined
+                        ? (0, exports.parseOneClickSignInFromUrl)({ baseUrl: baseUrl_1, delimiter: delimiter })
+                        : null;
+                    if (oneClickSignInData !== null) {
+                        isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.walletId]) !== undefined;
+                        if (!isModuleSupported) {
+                            console.warn("Module ID ".concat(oneClickSignInData.walletId, " is not supported on ").concat(networkId, "."));
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/, oneClickSignInData];
+                    }
+                    curEnvData = (0, exports.getLocalStorageKeypomEnv)();
+                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
+                case 2:
+                    secretKey = _c.sent();
+                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
+                    if (curEnvData !== null) {
+                        parsedJson = JSON.parse(curEnvData);
+                        if (secretKey !== null) {
+                            parsedJson.secretKey = secretKey;
+                        }
+                        return [2 /*return*/, parsedJson];
+                    }
+                    return [2 /*return*/, null];
+            }
+        });
+    });
 };
 exports.tryGetAccountData = tryGetAccountData;
 /**

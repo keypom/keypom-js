@@ -6,7 +6,9 @@ import type {
 } from "@near-wallet-selector/core";
 import {
     areParamsCorrect,
+    getLocalStorageKeypomLak,
     getNetworkPreset,
+    setLocalStorageKeypomLak,
     tryGetAccountData,
 } from "../utils/selector-utils";
 import { KeypomWalletInstant, isOneClickParams, OneClickParams } from "./types";
@@ -101,7 +103,9 @@ export function setupOneClickConnect(
     params: OneClickParams
 ): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
-        const { urlPattern, networkId } = params;
+        const { urlPattern, networkId, contractId, allowance, methodNames } = params;
+
+        console.log("this is real, here is my allowance: ", allowance)
 
         if (!areParamsCorrect(params)) {
             return null;
@@ -119,13 +123,24 @@ export function setupOneClickConnect(
         const nearConnection = await connect(connectionConfig);
 
         // returns { accountId, secretKey?, walletId, baseUrl }
-        const signInData = tryGetAccountData({ urlPattern, networkId, nearConnection });
-
+        const signInData = await tryGetAccountData({ urlPattern, networkId, nearConnection });
+        const existing_lak_data = getLocalStorageKeypomLak();
         console.log("Sign in data: ", signInData);
+        console.log(existing_lak_data)
+        let new_lak_data;
+        if(existing_lak_data){
+            new_lak_data = {
+               walletUrl: signInData?.walletUrl ? signInData.walletUrl : JSON.parse(existing_lak_data).walletUrl,
+               methodNames: methodNames ? methodNames : JSON.parse(existing_lak_data).methodNames,
+               allowance: allowance ? allowance : JSON.parse(existing_lak_data).allowance
+           }
+        }
+
         if (signInData === null) {
             return null;
         }
 
+        // contract ID resetting, same with walletUrl 
         const keypomWallet = new KeypomWallet({
             networkId,
             nearConnection,
@@ -134,9 +149,22 @@ export function setupOneClickConnect(
             secretKey: signInData.secretKey ? signInData.secretKey : undefined,
             walletId: signInData.walletId,
             baseUrl: signInData.baseUrl,
+            walletUrl: new_lak_data.walletUrl,
+            contractId,
+            methodNames,
+            allowance
+
         });
 
-        let contractId = await keypomWallet.setContractId();
+        setLocalStorageKeypomLak({
+            walletUrl: keypomWallet.walletUrl,
+            methodNames: keypomWallet.methodNames,
+            allowance: keypomWallet.allowance
+        })
+
+        console.log("current keypom wallet: ", keypomWallet)
+
+        await keypomWallet.setContractId(contractId);
 
         return {
             id: "keypom",

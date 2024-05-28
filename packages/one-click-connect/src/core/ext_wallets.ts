@@ -31,6 +31,11 @@ interface RequestSignTransactionsOptions {
     accountId: string;
     secretKey: string;
     near: nearAPI.Near;
+    walletUrl?: string;
+    sendLak: boolean
+    contractId: string;
+    methodNames: string[];
+    allowance: string
 }
 
 /**
@@ -42,10 +47,16 @@ export const extSignAndSendTransactions = async ({
     accountId,
     secretKey,
     near,
+    walletUrl,
+    sendLak,
+    contractId,
+    methodNames,
+    allowance
 }: RequestSignTransactionsOptions) => {
     let fakRequiredTxns: any = [];
     let responses: any = [];
 
+    // user needs access key to be added
     if (secretKey === undefined) {
         console.warn("Secret key not provided");
         console.log("anyone home?")
@@ -63,66 +74,78 @@ export const extSignAndSendTransactions = async ({
         const currentUrl = new URL(window.location.href);
         console.log("current URL: ", currentUrl)
         let walletBaseUrl: string; 
+        let redirectUrl: string = "";
         switch (walletId) {
+            case "sweat-wallet":
+                if(walletUrl == undefined){
+                    console.error("Sweat URL must be provided in initialization")
+                }else{
+                    const instructions = {
+                        transactions,
+                        redirectUrl: window.location.href,
+                        limited_access_key: sendLak ? {
+                            public_key: pk,
+                            contractId,
+                            methodNames,
+                            allowance
+                        } : {}
+                    }
+    
+                    const base64Instructions = Buffer.from(JSON.stringify(instructions)).toString('base64')
+    
+                    const newUrl = new URL(walletUrl);
+                    newUrl.searchParams.set('instructions', base64Instructions);
+                    console.log("SWEAT newUrl: ", newUrl.toString())
+                }
+                break;
             case "my-near-wallet":
                 walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                const newUrl = new URL('sign', walletBaseUrl);
+                const account = await near.account(accountId);
+
+                try{
+                    const transformed_transactions = await transformTransactions(transactions, account)
+                    const txn_schema = Transaction.SCHEMA
+                    const serialized = serialize(txn_schema, transformed_transactions[0])
+                    newUrl.searchParams.set('transactions', transformed_transactions
+                        .map(transaction => serialize(txn_schema, transaction))
+                        .map(serialized => Buffer.from(serialized).toString('base64'))
+                        .join(','));
+                    newUrl.searchParams.set('callbackUrl', currentUrl.href);
+                    newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                    console.log("redirecting to:", newUrl.toString());
+                    redirectUrl = newUrl.toString();
+                }catch(e){
+                    console.log("error NEW 2: ", e)
+                }
                 break;
             case "meteor-wallet":
                 // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
                 walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
                 break;
-            case "sweat-wallet":
+            case "mintbase-wallet":
                 // walletBaseUrl = "https://wallet.sweat.finance";
                 walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                try{
+                    const serializedTxn = encodeURI(JSON.stringify(transactions))
+
+                    // mintbase specific stuff
+                    // const newUrl = new URL(`${metadata.walletUrl}/sign-transaction`);
+                    // newUrl.searchParams.set('transactions_data', urlParam);
+                    // newUrl.searchParams.set('callback_url', cbUrl);
+                    // window.location.assign(newUrl.toString());
+                    console.log(serializedTxn)
+                }catch(e){
+                    console.log("error 3: ", e)
+                }
                 break;
             default:
                 throw new Error(`Unsupported wallet ID: ${walletId}`);
         };
 
-        console.log("wallet base url: ", walletBaseUrl)
+        console.log("redirect url: ", redirectUrl)
 
-        // add button to keypom frontend instead of using guestbook
-
-        const newUrl = new URL('sign', walletBaseUrl);
-        console.log("a: ", newUrl.toString())
-        console.log("txn to serialize: ", transactions);
-
-        const account = await near.account(accountId);
-        console.log("occ signer: ", account.connection.signer);
-        const transformed_transactions = await transformTransactions(transactions, account)
-
-        try{
-            const txn_schema = Transaction.SCHEMA
-            console.log("obj constructor: ", transformed_transactions[0].constructor());
-            console.log("schema transaction inside: ", txn_schema);
-            console.log("txn: ", transformed_transactions[0])
-            console.log("schema at obj constructor: ", txn_schema.get(transformed_transactions[0].constructor()));
-            const serialized = serialize(txn_schema, transformed_transactions[0])
-            console.log(serialized)
-        }catch(e){
-            console.log("error NEW 2: ", e)
-        }
-
-        //mintbase
-        // try{
-        //     const serializedTxn = encodeURI(JSON.stringify(transactions[0]))
-        //     console.log(serializedTxn)
-        // }catch(e){
-        //     console.log("error 3: ", e)
-        // }
-
-
-        newUrl.searchParams.set('transactions', transformed_transactions
-            .map(transaction => serialize(nearAPI.transactions.SCHEMA, transaction))
-            .map(serialized => Buffer.from(serialized).toString('base64'))
-            .join(','));
-        console.log("b: ", newUrl.toString())
-        console.log("b: ", newUrl.toString())
-        newUrl.searchParams.set('callbackUrl', currentUrl.href);
-        console.log("c: ", newUrl.toString())
-        newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
-        console.log("redirecting to:", newUrl.toString());
-        // window.location.assign(newUrl.toString());
+        if(redirectUrl !== "") window.location.assign(redirectUrl);
         return [];
     }
 

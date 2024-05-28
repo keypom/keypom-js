@@ -62,7 +62,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAction = exports.testTransformTransactions = exports.baseDecode = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
+exports.createAction = exports.transformTransactions = exports.baseDecode = exports.key2str = exports.ATTACHED_GAS_FROM_WALLET = void 0;
 var bn_js_1 = __importDefault(require("bn.js"));
 var crypto_1 = require("@near-js/crypto");
 var bs58_1 = require("bs58");
@@ -95,7 +95,7 @@ var baseDecode = function (value) {
     return new Uint8Array((0, bs58_1.decode)(value));
 };
 exports.baseDecode = baseDecode;
-var testTransformTransactions = function (transactions, account) { return __awaiter(void 0, void 0, void 0, function () {
+var transformTransactions = function (transactions, account) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, networkId, signer, provider;
     return __generator(this, function (_b) {
         _a = account.connection, networkId = _a.networkId, signer = _a.signer, provider = _a.provider;
@@ -123,7 +123,7 @@ var testTransformTransactions = function (transactions, account) { return __awai
             }); }))];
     });
 }); };
-exports.testTransformTransactions = testTransformTransactions;
+exports.transformTransactions = transformTransactions;
 var createAction = function (action) {
     switch (action.type) {
         case "CreateAccount":

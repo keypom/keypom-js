@@ -65,7 +65,7 @@ var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var networkId = _a.networkId, nearConnection = _a.nearConnection, keyStore = _a.keyStore, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl;
+        var networkId = _a.networkId, nearConnection = _a.nearConnection, keyStore = _a.keyStore, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, contractId = _a.contractId, walletUrl = _a.walletUrl, sendLak = _a.sendLak, methodNames = _a.methodNames, allowance = _a.allowance;
         this.nearConnection = nearConnection;
         this.keyStore = keyStore;
         this.networkId = networkId;
@@ -73,7 +73,12 @@ var KeypomWallet = /** @class */ (function () {
         this.secretKey = secretKey;
         this.walletId = walletId;
         this.baseUrl = baseUrl;
+        this.contractId = contractId;
         this.signedIn = false;
+        this.walletUrl = walletUrl;
+        this.sendLak = sendLak ? sendLak : true;
+        this.methodNames = methodNames ? methodNames : ["*"];
+        this.allowance = allowance ? allowance : "1000000000000000000000000";
     }
     KeypomWallet.prototype.getAccountId = function () {
         return this.accountId;
@@ -81,48 +86,30 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.isSignedIn = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                // return this.accountId !== undefined && this.accountId !== null;
                 return [2 /*return*/, this.signedIn];
             });
         });
     };
     KeypomWallet.prototype.getContractId = function () {
-        return this.contractId || selector_utils_1.NO_CONTRACT_ID;
+        return this.contractId;
     };
     KeypomWallet.prototype.getNearConnection = function () {
         return this.nearConnection;
     };
-    KeypomWallet.prototype.setContractId = function () {
+    KeypomWallet.prototype.setContractId = function (contractId) {
         return __awaiter(this, void 0, void 0, function () {
-            var pk, accessKey, permission, receiver_id;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        console.log("setContractId", this.secretKey);
-                        if (this.contractId !== undefined) {
-                            console.log("contractId already set", this.contractId);
-                            return [2 /*return*/, this.contractId];
-                        }
-                        if (this.secretKey === undefined) {
-                            console.log("secretKey not set");
-                            return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
-                        }
-                        pk = (0, selector_utils_1.getPubFromSecret)(this.secretKey);
-                        console.log("pk", pk);
-                        return [4 /*yield*/, this.nearConnection.connection.provider.query("access_key/".concat(this.accountId, "/").concat(pk), "")];
-                    case 1:
-                        accessKey = _a.sent();
-                        console.log("accessKey", accessKey);
-                        permission = accessKey.permission;
-                        if (permission.FunctionCall) {
-                            receiver_id = permission.FunctionCall.receiver_id;
-                            this.contractId = receiver_id;
-                            console.log("contractId", this.contractId);
-                            return [2 /*return*/, receiver_id];
-                        }
-                        this.contractId = selector_utils_1.NO_CONTRACT_ID;
-                        console.log("full access key: contractId", this.contractId);
-                        return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
+                console.log("setContractId", this.secretKey);
+                if (this.contractId !== contractId) {
+                    console.log("contractId already set", this.contractId);
+                    return [2 /*return*/, this.contractId];
                 }
+                if (contractId) {
+                    this.contractId = contractId;
+                    return [2 /*return*/, this.contractId];
+                }
+                return [2 /*return*/, selector_utils_1.NO_CONTRACT_ID];
             });
         });
     };
@@ -234,12 +221,18 @@ var KeypomWallet = /** @class */ (function () {
                             throw new Error("Wallet is not signed in");
                         }
                         transactions = params.transactions;
+                        console.log("wallet sign and send url: ", this.walletUrl);
                         return [4 /*yield*/, (0, ext_wallets_1.extSignAndSendTransactions)({
                                 transactions: transactions,
                                 walletId: this.walletId,
                                 accountId: this.accountId,
                                 secretKey: this.secretKey,
                                 near: this.nearConnection,
+                                walletUrl: this.walletUrl,
+                                sendLak: this.sendLak,
+                                contractId: this.contractId,
+                                methodNames: this.methodNames,
+                                allowance: this.allowance
                             })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
