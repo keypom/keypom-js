@@ -73,124 +73,140 @@ export const setLocalStorageKeypomLak = (jsonData) => {
     localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:LakData`, dataToWrite);
 };
 
-export const areParamsCorrect = (params: OneClickParams) => {
-    const { urlPattern, networkId } = params;
+// export const areParamsCorrect = (params: OneClickParams) => {
+//     const { networkId } = params;
 
-    // Validate Keypom parameters
-    if (!isOneClickParams(params)) {
-        console.error(
-            "KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format."
-        );
-        return false;
-    }
+//     // Validate Keypom parameters
+//     if (!isOneClickParams(params)) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format."
+//         );
+//         return false;
+//     }
 
-    // Additional business logic checks
-    if (!networkId || !urlPattern) {
-        console.error("KeypomWallet: networkId, and url are required.");
-        return false;
-    }
+//     // Additional business logic checks
+//     if (!networkId || !urlPattern) {
+//         console.error("KeypomWallet: networkId, and url are required.");
+//         return false;
+//     }
 
-    if (
-        urlPattern &&
-        !(
-            urlPattern.includes(":accountId") &&
-            urlPattern.includes(":secretKey") &&
-            urlPattern.includes(":walletId")
-        )
-    ) {
-        console.error(
-            "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
-        );
-        return false;
-    }
+//     if (
+//         urlPattern &&
+//         !(
+//             urlPattern.includes(":accountId") &&
+//             urlPattern.includes(":secretKey") &&
+//             urlPattern.includes(":walletId")
+//         )
+//     ) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
+//         );
+//         return false;
+//     }
 
-    const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
-    if (!matches) {
-        console.error(
-            "KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid."
-        );
-        return false;
-    }
-    return true;
-};
+//     const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
+//     if (!matches) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid."
+//         );
+//         return false;
+//     }
+//     return true;
+// };
 
-export const tryGetAccountData = async ({
-    urlPattern,
+export const tryGetSignInData = async ({
     networkId,
     nearConnection,
 }: {
-    urlPattern: string;
     networkId: string;
     nearConnection: nearAPI.Near;
-}): Promise<{ accountId: string; secretKey?: string; walletId: string; baseUrl: string; walletUrl?: string} | null> => {
+}): Promise<{ 
+    accountId: string; 
+    secretKey?: string; 
+    walletId: string; 
+    baseUrl: string; 
+    walletUrl?: string, 
+    chainId: string
+    addKey: boolean
+} | null> => {
     
-    const parsedCurrentUrl = new URL(window.location.href);
+    const currentUrlObj = new URL(window.location.href);
+    const baseUrl = `${currentUrlObj.protocol}//${currentUrlObj.host}`;
+    const connectionParam = currentUrlObj.searchParams.get('connection');
+    const addKeyParam = currentUrlObj.searchParams.get('addKey');
 
-    const matches = urlPattern.match(ONE_CLICK_URL_REGEX)!; // Safe since we check the same URL before;
-    
-    const baseUrl = matches[1];
-    console.log("baseUrl: ", baseUrl);
+    console.log("connection param: ", connectionParam)
+    console.log("addKey param: ", addKeyParam)
 
-     // The hash part of the URL (after #)
-    const hash = parsedCurrentUrl.hash;
-
-    // Create a new URL object from the hash (to use URLSearchParams)
-    const hashUrlObj = new URL(hash.substring(1), parsedCurrentUrl.origin);
-
-    // Get the value of the 'connection' parameter
-    const connectionParam = hashUrlObj.searchParams.get('connection');
-
-    // Sweat connection, parse accordingly
+    // Parse connection param if it exists
     if (connectionParam) {
-      // Decode the Base64-encoded JSON string
-      const decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
-      const connectionData = JSON.parse(decodedString);
-      console.log("parsed connection data: ", connectionData)
+        try{
+            // Decode the Base64-encoded JSON string
+            const decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+            const connectionData = JSON.parse(decodedString);
+            console.log("parsed connection data: ", connectionData)
 
-      return { accountId: connectionData.account, secretKey: undefined, walletId: connectionData.wallet, baseUrl, walletUrl: connectionData.wallet_transaction_url }
-    }else{
-        const matches = urlPattern.match(ONE_CLICK_URL_REGEX)!; // Safe since we check the same URL before;
-    
-        const baseUrl = matches[1];
-        const delimiter = matches[2];
-        // Try to sign in using one click sign-in data from URL
-        const oneClickSignInData =
-            baseUrl !== undefined
-                ? parseOneClickSignInFromUrl({ baseUrl, delimiter })
-                : null;
-    
-        if (oneClickSignInData !== null) {
+            if(connectionData.accountId === undefined || connectionData.walletId === undefined){
+                console.error("Connection data must include accountId and walletId fields");
+                return null;
+            }
+
+            // ensure wallet module is supported
             const isModuleSupported =
                 SUPPORTED_EXT_WALLET_DATA[networkId]?.[
-                    oneClickSignInData.walletId
+                    connectionData.walletId
                 ] !== undefined;
     
             if (!isModuleSupported) {
                 console.warn(
-                    `Module ID ${oneClickSignInData.walletId} is not supported on ${networkId}.`
+                    `Module ID ${connectionData.wallet} is not supported on ${networkId}.`
                 );
                 return null;
             }
-    
-            return oneClickSignInData;
+
+            // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+            const curEnvData = getLocalStorageKeypomEnv();
+            const secretKey = await getLocalStoragePendingKey(nearConnection);
+            
+            localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+            
+            if (curEnvData !== null) {
+                let parsedJson = JSON.parse(curEnvData);
+                if (secretKey !== null) {
+                    parsedJson.secretKey = secretKey;
+                }
+                return parsedJson;
+            }
+      
+            return { 
+                accountId: connectionData.accountId, 
+                secretKey, 
+                walletId: connectionData.walletId, 
+                baseUrl, 
+                walletUrl: connectionData.walletTransactionUrl, 
+                chainId: connectionData.chainId, 
+                addKey: addKeyParam === "false" ? false : true
+            };
+        }catch(e){
+            console.error("Error parsing connection data: ", e)
+            return null
         }
-    
-         // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-         const curEnvData = getLocalStorageKeypomEnv();
-         const secretKey = await getLocalStoragePendingKey(nearConnection);
-    
-         localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
-    
-         if (curEnvData !== null) {
-             let parsedJson = JSON.parse(curEnvData);
-             if (secretKey !== null) {
-                 parsedJson.secretKey = secretKey;
-             }
-             return parsedJson;
-         }
-    
-        return null;
     }
+     // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+     const curEnvData = getLocalStorageKeypomEnv();
+     const secretKey = await getLocalStoragePendingKey(nearConnection);
+
+     localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+
+     if (curEnvData !== null) {
+         let parsedJson = JSON.parse(curEnvData);
+         // if a secret key is found, add that. Update addKey if needed
+         parsedJson.secretKey = secretKey ?? parsedJson.secretKey;
+         parsedJson.addKey = addKeyParam !== "false";
+         return parsedJson;
+     }
+
+    return null;
 };
 
 /**

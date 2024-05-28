@@ -65,7 +65,7 @@ var selector_utils_1 = require("../utils/selector-utils");
 var ext_wallets_1 = require("./ext_wallets");
 var KeypomWallet = /** @class */ (function () {
     function KeypomWallet(_a) {
-        var networkId = _a.networkId, nearConnection = _a.nearConnection, keyStore = _a.keyStore, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, contractId = _a.contractId, walletUrl = _a.walletUrl, sendLak = _a.sendLak, methodNames = _a.methodNames, allowance = _a.allowance;
+        var networkId = _a.networkId, nearConnection = _a.nearConnection, keyStore = _a.keyStore, accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, contractId = _a.contractId, walletUrl = _a.walletUrl, addKey = _a.addKey, methodNames = _a.methodNames, allowance = _a.allowance, chainId = _a.chainId;
         this.nearConnection = nearConnection;
         this.keyStore = keyStore;
         this.networkId = networkId;
@@ -76,9 +76,10 @@ var KeypomWallet = /** @class */ (function () {
         this.contractId = contractId;
         this.signedIn = false;
         this.walletUrl = walletUrl;
-        this.sendLak = sendLak ? sendLak : true;
+        this.addKey = addKey ? addKey : true;
         this.methodNames = methodNames ? methodNames : ["*"];
         this.allowance = allowance ? allowance : "1000000000000000000000000";
+        this.chainId = chainId ? chainId : "near";
     }
     KeypomWallet.prototype.getAccountId = function () {
         return this.accountId;
@@ -140,7 +141,18 @@ var KeypomWallet = /** @class */ (function () {
                         });
                         console.log("keyInfoView", keyInfoView);
                         if (keyInfoView) {
-                            return [2 /*return*/, this.internalSignIn(this.accountId, this.walletId, this.secretKey)];
+                            return [2 /*return*/, this.internalSignIn({
+                                    accountId: this.accountId,
+                                    walletId: this.walletId,
+                                    secretKey: this.secretKey,
+                                    baseUrl: this.baseUrl,
+                                    walletUrl: this.walletUrl,
+                                    chainId: this.chainId,
+                                    contractId: this.contractId,
+                                    methodNames: this.methodNames,
+                                    allowance: this.allowance,
+                                    addKey: this.addKey
+                                })];
                         }
                         return [3 /*break*/, 6];
                     case 5:
@@ -150,7 +162,17 @@ var KeypomWallet = /** @class */ (function () {
                     case 6: return [3 /*break*/, 8];
                     case 7: 
                     // handles case of no secretKey
-                    return [2 /*return*/, this.internalSignIn(this.accountId, this.walletId, this.secretKey)];
+                    return [2 /*return*/, this.internalSignIn({
+                            accountId: this.accountId,
+                            walletId: this.walletId,
+                            baseUrl: this.baseUrl,
+                            walletUrl: this.walletUrl,
+                            chainId: this.chainId,
+                            contractId: this.contractId,
+                            methodNames: this.methodNames,
+                            allowance: this.allowance,
+                            addKey: this.addKey
+                        })];
                     case 8: return [2 /*return*/, []];
                 }
             });
@@ -221,7 +243,7 @@ var KeypomWallet = /** @class */ (function () {
                             throw new Error("Wallet is not signed in");
                         }
                         transactions = params.transactions;
-                        console.log("wallet sign and send url: ", this.walletUrl);
+                        console.log("wallet sign and send url: ", this);
                         return [4 /*yield*/, (0, ext_wallets_1.extSignAndSendTransactions)({
                                 transactions: transactions,
                                 walletId: this.walletId,
@@ -229,7 +251,7 @@ var KeypomWallet = /** @class */ (function () {
                                 secretKey: this.secretKey,
                                 near: this.nearConnection,
                                 walletUrl: this.walletUrl,
-                                sendLak: this.sendLak,
+                                addKey: this.addKey,
                                 contractId: this.contractId,
                                 methodNames: this.methodNames,
                                 allowance: this.allowance
@@ -277,11 +299,12 @@ var KeypomWallet = /** @class */ (function () {
             });
         });
     };
-    KeypomWallet.prototype.internalSignIn = function (accountId, walletId, secretKey) {
+    KeypomWallet.prototype.internalSignIn = function (_a) {
+        var accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, walletUrl = _a.walletUrl, chainId = _a.chainId, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance, addKey = _a.addKey;
         return __awaiter(this, void 0, void 0, function () {
             var dataToWrite, urlStart;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         console.log("internalSignIn accountId ".concat(accountId, " secretKey ").concat(secretKey, " walletId ").concat(walletId));
                         this.signedIn = true;
@@ -289,13 +312,20 @@ var KeypomWallet = /** @class */ (function () {
                             accountId: accountId,
                             secretKey: secretKey,
                             walletId: walletId,
+                            baseUrl: baseUrl,
+                            walletUrl: walletUrl,
+                            chainId: chainId,
+                            contractId: contractId,
+                            methodNames: methodNames,
+                            allowance: allowance,
+                            addKey: addKey
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         if (!secretKey) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.keyStore.setKey(this.networkId, accountId, nearAPI.KeyPair.fromString(secretKey))];
                     case 1:
-                        _a.sent();
-                        _a.label = 2;
+                        _b.sent();
+                        _b.label = 2;
                     case 2:
                         // Assuming the URL pattern follows directly after the domain and possible path
                         // Erase the OneClick Connect URL segment

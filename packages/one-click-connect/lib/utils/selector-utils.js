@@ -59,10 +59,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
+exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetSignInData = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
-var types_1 = require("../core/types");
 exports.ONE_CLICK_URL_REGEX = new RegExp("^(.*):accountId(.+):secretKey(.+):walletId(.*)$");
 exports.KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
 exports.NO_CONTRACT_ID = "no-contract";
@@ -123,78 +122,108 @@ var setLocalStorageKeypomLak = function (jsonData) {
     localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"), dataToWrite);
 };
 exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
-var areParamsCorrect = function (params) {
-    var urlPattern = params.urlPattern, networkId = params.networkId;
-    // Validate Keypom parameters
-    if (!(0, types_1.isOneClickParams)(params)) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format.");
-        return false;
-    }
-    // Additional business logic checks
-    if (!networkId || !urlPattern) {
-        console.error("KeypomWallet: networkId, and url are required.");
-        return false;
-    }
-    if (urlPattern &&
-        !(urlPattern.includes(":accountId") &&
-            urlPattern.includes(":secretKey") &&
-            urlPattern.includes(":walletId"))) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders.");
-        return false;
-    }
-    var matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
-    if (!matches) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid.");
-        return false;
-    }
-    return true;
-};
-exports.areParamsCorrect = areParamsCorrect;
-var tryGetAccountData = function (_a) {
-    var urlPattern = _a.urlPattern, networkId = _a.networkId, nearConnection = _a.nearConnection;
+// export const areParamsCorrect = (params: OneClickParams) => {
+//     const { networkId } = params;
+//     // Validate Keypom parameters
+//     if (!isOneClickParams(params)) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format."
+//         );
+//         return false;
+//     }
+//     // Additional business logic checks
+//     if (!networkId || !urlPattern) {
+//         console.error("KeypomWallet: networkId, and url are required.");
+//         return false;
+//     }
+//     if (
+//         urlPattern &&
+//         !(
+//             urlPattern.includes(":accountId") &&
+//             urlPattern.includes(":secretKey") &&
+//             urlPattern.includes(":walletId")
+//         )
+//     ) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
+//         );
+//         return false;
+//     }
+//     const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
+//     if (!matches) {
+//         console.error(
+//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid."
+//         );
+//         return false;
+//     }
+//     return true;
+// };
+var tryGetSignInData = function (_a) {
+    var networkId = _a.networkId, nearConnection = _a.nearConnection;
     return __awaiter(void 0, void 0, void 0, function () {
-        var parsedCurrentUrl, matches, baseUrl, hash, hashUrlObj, connectionParam, decodedString, connectionData, matches_1, baseUrl_1, delimiter, oneClickSignInData, isModuleSupported, curEnvData, secretKey, parsedJson;
+        var currentUrlObj, baseUrl, connectionParam, addKeyParam, decodedString, connectionData, isModuleSupported, curEnvData_1, secretKey_1, parsedJson, e_2, curEnvData, secretKey, parsedJson;
         var _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    parsedCurrentUrl = new URL(window.location.href);
-                    matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
-                    baseUrl = matches[1];
-                    console.log("baseUrl: ", baseUrl);
-                    hash = parsedCurrentUrl.hash;
-                    hashUrlObj = new URL(hash.substring(1), parsedCurrentUrl.origin);
-                    connectionParam = hashUrlObj.searchParams.get('connection');
-                    if (!connectionParam) return [3 /*break*/, 1];
+                    currentUrlObj = new URL(window.location.href);
+                    baseUrl = "".concat(currentUrlObj.protocol, "//").concat(currentUrlObj.host);
+                    connectionParam = currentUrlObj.searchParams.get('connection');
+                    addKeyParam = currentUrlObj.searchParams.get('addKey');
+                    console.log("connection param: ", connectionParam);
+                    console.log("addKey param: ", addKeyParam);
+                    if (!connectionParam) return [3 /*break*/, 4];
+                    _c.label = 1;
+                case 1:
+                    _c.trys.push([1, 3, , 4]);
                     decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
                     connectionData = JSON.parse(decodedString);
                     console.log("parsed connection data: ", connectionData);
-                    return [2 /*return*/, { accountId: connectionData.account, secretKey: undefined, walletId: connectionData.wallet, baseUrl: baseUrl, walletUrl: connectionData.wallet_transaction_url }];
-                case 1:
-                    matches_1 = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
-                    baseUrl_1 = matches_1[1];
-                    delimiter = matches_1[2];
-                    oneClickSignInData = baseUrl_1 !== undefined
-                        ? (0, exports.parseOneClickSignInFromUrl)({ baseUrl: baseUrl_1, delimiter: delimiter })
-                        : null;
-                    if (oneClickSignInData !== null) {
-                        isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.walletId]) !== undefined;
-                        if (!isModuleSupported) {
-                            console.warn("Module ID ".concat(oneClickSignInData.walletId, " is not supported on ").concat(networkId, "."));
-                            return [2 /*return*/, null];
-                        }
-                        return [2 /*return*/, oneClickSignInData];
+                    if (connectionData.accountId === undefined || connectionData.walletId === undefined) {
+                        console.error("Connection data must include accountId and walletId fields");
+                        return [2 /*return*/, null];
                     }
-                    curEnvData = (0, exports.getLocalStorageKeypomEnv)();
+                    isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[connectionData.walletId]) !== undefined;
+                    if (!isModuleSupported) {
+                        console.warn("Module ID ".concat(connectionData.wallet, " is not supported on ").concat(networkId, "."));
+                        return [2 /*return*/, null];
+                    }
+                    curEnvData_1 = (0, exports.getLocalStorageKeypomEnv)();
                     return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
                 case 2:
+                    secretKey_1 = _c.sent();
+                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
+                    if (curEnvData_1 !== null) {
+                        parsedJson = JSON.parse(curEnvData_1);
+                        if (secretKey_1 !== null) {
+                            parsedJson.secretKey = secretKey_1;
+                        }
+                        return [2 /*return*/, parsedJson];
+                    }
+                    return [2 /*return*/, {
+                            accountId: connectionData.accountId,
+                            secretKey: secretKey_1,
+                            walletId: connectionData.walletId,
+                            baseUrl: baseUrl,
+                            walletUrl: connectionData.walletTransactionUrl,
+                            chainId: connectionData.chainId,
+                            addKey: addKeyParam === "false" ? false : true
+                        }];
+                case 3:
+                    e_2 = _c.sent();
+                    console.error("Error parsing connection data: ", e_2);
+                    return [2 /*return*/, null];
+                case 4:
+                    curEnvData = (0, exports.getLocalStorageKeypomEnv)();
+                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
+                case 5:
                     secretKey = _c.sent();
                     localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
                     if (curEnvData !== null) {
                         parsedJson = JSON.parse(curEnvData);
-                        if (secretKey !== null) {
-                            parsedJson.secretKey = secretKey;
-                        }
+                        // if a secret key is found, add that. Update addKey if needed
+                        parsedJson.secretKey = secretKey !== null && secretKey !== void 0 ? secretKey : parsedJson.secretKey;
+                        parsedJson.addKey = addKeyParam !== "false";
                         return [2 /*return*/, parsedJson];
                     }
                     return [2 /*return*/, null];
@@ -202,7 +231,7 @@ var tryGetAccountData = function (_a) {
         });
     });
 };
-exports.tryGetAccountData = tryGetAccountData;
+exports.tryGetSignInData = tryGetSignInData;
 /**
  * Check if given access key allows the function call or method attempted in transaction
  * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items

@@ -79,7 +79,7 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
 var extSignAndSendTransactions = function (_a) {
-    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near, walletUrl = _a.walletUrl, sendLak = _a.sendLak, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance;
+    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near, walletUrl = _a.walletUrl, addKey = _a.addKey, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance;
     return __awaiter(void 0, void 0, void 0, function () {
         var fakRequiredTxns, responses, new_key, pk_1, currentUrl, walletBaseUrl, redirectUrl, _b, instructions, base64Instructions, newUrl_1, newUrl, account_1, transformed_transactions, txn_schema_1, serialized, e_1, serializedTxn, account, pk, i, txn, accessKey, canExecuteTxn, response, e_2;
         return __generator(this, function (_c) {
@@ -118,7 +118,7 @@ var extSignAndSendTransactions = function (_a) {
                         instructions = {
                             transactions: transactions,
                             redirectUrl: window.location.href,
-                            limited_access_key: sendLak ? {
+                            limited_access_key: addKey ? {
                                 public_key: pk_1,
                                 contractId: contractId,
                                 methodNames: methodNames,

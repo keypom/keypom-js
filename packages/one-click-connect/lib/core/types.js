@@ -47,7 +47,6 @@ exports.FAILED_EXECUTION_OUTCOME = {
 };
 var isOneClickParams = function (params) {
     return typeof params.networkId === "string" &&
-        (params.networkId === "testnet" || params.networkId === "mainnet") &&
-        typeof params.urlPattern === "string";
+        (params.networkId === "testnet" || params.networkId === "mainnet");
 };
 exports.isOneClickParams = isOneClickParams;

@@ -1,6 +1,5 @@
 import * as nearAPI from "near-api-js";
 import { Action, Network, NetworkId } from "@near-wallet-selector/core";
-import { OneClickParams } from "../core/types";
 export declare const ONE_CLICK_URL_REGEX: RegExp;
 export declare const KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
 export declare const NO_CONTRACT_ID = "no-contract";
@@ -15,9 +14,7 @@ export declare const getLocalStoragePendingKey: (near: nearAPI.Near) => Promise<
 export declare const setLocalStoragePendingKey: (jsonData: any) => void;
 export declare const getLocalStorageKeypomLak: () => string | null;
 export declare const setLocalStorageKeypomLak: (jsonData: any) => void;
-export declare const areParamsCorrect: (params: OneClickParams) => boolean;
-export declare const tryGetAccountData: ({ urlPattern, networkId, nearConnection, }: {
-    urlPattern: string;
+export declare const tryGetSignInData: ({ networkId, nearConnection, }: {
     networkId: string;
     nearConnection: nearAPI.Near;
 }) => Promise<{
@@ -26,6 +23,8 @@ export declare const tryGetAccountData: ({ urlPattern, networkId, nearConnection
     walletId: string;
     baseUrl: string;
     walletUrl?: string | undefined;
+    chainId: string;
+    addKey: boolean;
 } | null>;
 /**
  * Check if given access key allows the function call or method attempted in transaction

@@ -35,9 +35,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     signedIn: boolean;
 
     walletUrl?: string;
-    sendLak: boolean;
+    addKey: boolean;
     methodNames: string[];
     allowance: string;
+    chainId: string;
 
     public constructor({
         networkId,
@@ -49,9 +50,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         baseUrl,
         contractId,
         walletUrl,
-        sendLak,
+        addKey,
         methodNames,
-        allowance
+        allowance,
+        chainId
     }: {
         networkId: NetworkId;
         nearConnection: any;
@@ -62,9 +64,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         baseUrl: string;
         contractId: string;
         walletUrl?: string;
-        sendLak?: boolean;
+        addKey?: boolean;
         methodNames?: string[];
         allowance?: string;
+        chainId?: string;
 
     }) {
         this.nearConnection = nearConnection;
@@ -77,9 +80,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.contractId = contractId;
         this.signedIn = false;
         this.walletUrl = walletUrl;
-        this.sendLak = sendLak ? sendLak : true;
+        this.addKey = addKey ? addKey : true;
         this.methodNames = methodNames ? methodNames : ["*"];
         this.allowance = allowance ? allowance : "1000000000000000000000000";
+        this.chainId = chainId? chainId : "near";
     }
 
     getAccountId(): string {
@@ -156,22 +160,35 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 console.log("keyInfoView", keyInfoView);
 
                 if (keyInfoView) {
-                    return this.internalSignIn(
-                        this.accountId,
-                        this.walletId,
-                        this.secretKey
-                    );
+                    return this.internalSignIn({
+                        accountId: this.accountId,
+                        walletId: this.walletId,
+                        secretKey: this.secretKey,
+                        baseUrl: this.baseUrl,
+                        walletUrl: this.walletUrl,
+                        chainId: this.chainId,
+                        contractId: this.contractId,
+                        methodNames: this.methodNames, 
+                        allowance: this.allowance,
+                        addKey: this.addKey
+                    });
                 }
             } catch (e) {
                 console.log("e: ", e);
             }
         }else{
             // handles case of no secretKey
-            return this.internalSignIn(
-                this.accountId,
-                this.walletId,
-                this.secretKey
-            );
+            return this.internalSignIn({
+                accountId: this.accountId,
+                walletId: this.walletId,
+                baseUrl: this.baseUrl,
+                walletUrl: this.walletUrl,
+                chainId: this.chainId,
+                contractId: this.contractId,
+                methodNames: this.methodNames,
+                allowance: this.allowance,
+                addKey: this.addKey
+            });
         }
 
         return [];
@@ -220,7 +237,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
         const { transactions } = params;
 
-        console.log("wallet sign and send url: ", this.walletUrl)
+        console.log("wallet sign and send url: ", this)
 
         return await extSignAndSendTransactions({
             transactions,
@@ -229,7 +246,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             secretKey: this.secretKey!,
             near: this.nearConnection,
             walletUrl: this.walletUrl,
-            sendLak: this.sendLak,
+            addKey: this.addKey,
             contractId: this.contractId,
             methodNames: this.methodNames,
             allowance: this.allowance
@@ -264,11 +281,30 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // TODO:  maybe?
     }
 
-    private async internalSignIn(
+
+    private async internalSignIn({
+        accountId,
+        secretKey,
+        walletId,
+        baseUrl,
+        walletUrl,
+        chainId,
+        contractId,
+        methodNames,
+        allowance,
+        addKey
+    } : {
         accountId: string,
         walletId: string,
-        secretKey?: string
-    ): Promise<KeypomWalletAccount[]> {
+        chainId: string,
+        contractId: string,
+        methodNames: string[],
+        allowance: string,
+        addKey: boolean,
+        secretKey?: string,
+        baseUrl?: string,
+        walletUrl?: string,
+    }): Promise<KeypomWalletAccount[]> {
         console.log(
             `internalSignIn accountId ${accountId} secretKey ${secretKey} walletId ${walletId}`
         );
@@ -278,6 +314,13 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             accountId,
             secretKey,
             walletId,
+            baseUrl,
+            walletUrl,
+            chainId,
+            contractId,
+            methodNames,
+            allowance,
+            addKey
         };
         setLocalStorageKeypomEnv(dataToWrite);
 

@@ -12,10 +12,11 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     secretKey?: string;
     signedIn: boolean;
     walletUrl?: string;
-    sendLak: boolean;
+    addKey: boolean;
     methodNames: string[];
     allowance: string;
-    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, contractId, walletUrl, sendLak, methodNames, allowance }: {
+    chainId: string;
+    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, contractId, walletUrl, addKey, methodNames, allowance, chainId }: {
         networkId: NetworkId;
         nearConnection: any;
         keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
@@ -25,9 +26,10 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
         baseUrl: string;
         contractId: string;
         walletUrl?: string;
-        sendLak?: boolean;
+        addKey?: boolean;
         methodNames?: string[];
         allowance?: string;
+        chainId?: string;
     });
     getAccountId(): string;
     isSignedIn(): Promise<boolean>;

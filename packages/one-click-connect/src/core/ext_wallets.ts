@@ -32,7 +32,7 @@ interface RequestSignTransactionsOptions {
     secretKey: string;
     near: nearAPI.Near;
     walletUrl?: string;
-    sendLak: boolean
+    addKey: boolean
     contractId: string;
     methodNames: string[];
     allowance: string
@@ -48,7 +48,7 @@ export const extSignAndSendTransactions = async ({
     secretKey,
     near,
     walletUrl,
-    sendLak,
+    addKey,
     contractId,
     methodNames,
     allowance
@@ -83,7 +83,7 @@ export const extSignAndSendTransactions = async ({
                     const instructions = {
                         transactions,
                         redirectUrl: window.location.href,
-                        limited_access_key: sendLak ? {
+                        limited_access_key: addKey ? {
                             public_key: pk,
                             contractId,
                             methodNames,
