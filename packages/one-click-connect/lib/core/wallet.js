@@ -116,15 +116,15 @@ var KeypomWallet = /** @class */ (function () {
     };
     KeypomWallet.prototype.signIn = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var account, allKeys, pk_1, keyInfoView, e_1;
+            var returnVal, account, allKeys, pk_1, keyInfoView, e_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         console.log("keypom signIn");
-                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 7];
+                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 9];
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 5, , 6]);
+                        _a.trys.push([1, 7, , 8]);
                         return [4 /*yield*/, this.setContractId()];
                     case 2:
                         _a.sent();
@@ -140,29 +140,29 @@ var KeypomWallet = /** @class */ (function () {
                             return public_key === pk_1;
                         });
                         console.log("keyInfoView", keyInfoView);
-                        if (keyInfoView) {
-                            return [2 /*return*/, this.internalSignIn({
-                                    accountId: this.accountId,
-                                    walletId: this.walletId,
-                                    secretKey: this.secretKey,
-                                    baseUrl: this.baseUrl,
-                                    walletUrl: this.walletUrl,
-                                    chainId: this.chainId,
-                                    contractId: this.contractId,
-                                    methodNames: this.methodNames,
-                                    allowance: this.allowance,
-                                    addKey: this.addKey
-                                })];
-                        }
-                        return [3 /*break*/, 6];
+                        if (!keyInfoView) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.internalSignIn({
+                                accountId: this.accountId,
+                                walletId: this.walletId,
+                                secretKey: this.secretKey,
+                                baseUrl: this.baseUrl,
+                                walletUrl: this.walletUrl,
+                                chainId: this.chainId,
+                                contractId: this.contractId,
+                                methodNames: this.methodNames,
+                                allowance: this.allowance,
+                                addKey: this.addKey
+                            })];
                     case 5:
+                        returnVal = _a.sent();
+                        _a.label = 6;
+                    case 6: return [3 /*break*/, 8];
+                    case 7:
                         e_1 = _a.sent();
                         console.log("e: ", e_1);
-                        return [3 /*break*/, 6];
-                    case 6: return [3 /*break*/, 8];
-                    case 7: 
-                    // handles case of no secretKey
-                    return [2 /*return*/, this.internalSignIn({
+                        return [2 /*return*/, []];
+                    case 8: return [3 /*break*/, 11];
+                    case 9: return [4 /*yield*/, this.internalSignIn({
                             accountId: this.accountId,
                             walletId: this.walletId,
                             baseUrl: this.baseUrl,
@@ -173,7 +173,14 @@ var KeypomWallet = /** @class */ (function () {
                             allowance: this.allowance,
                             addKey: this.addKey
                         })];
-                    case 8: return [2 /*return*/, []];
+                    case 10:
+                        // handles case of no secretKey
+                        returnVal = _a.sent();
+                        _a.label = 11;
+                    case 11:
+                        console.log(returnVal);
+                        console.log("location: ", window.location.href);
+                        return [2 /*return*/, returnVal];
                 }
             });
         });

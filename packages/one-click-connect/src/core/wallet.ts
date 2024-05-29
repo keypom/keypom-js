@@ -145,6 +145,8 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
     async signIn(): Promise<KeypomWalletAccount[]> {
         console.log("keypom signIn");
 
+        let returnVal;
+
         if (this.secretKey !== undefined) {
             try {
                 await this.setContractId();
@@ -160,7 +162,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 console.log("keyInfoView", keyInfoView);
 
                 if (keyInfoView) {
-                    return this.internalSignIn({
+                    returnVal = await this.internalSignIn({
                         accountId: this.accountId,
                         walletId: this.walletId,
                         secretKey: this.secretKey,
@@ -175,10 +177,11 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 }
             } catch (e) {
                 console.log("e: ", e);
+                return []
             }
         }else{
             // handles case of no secretKey
-            return this.internalSignIn({
+            returnVal = await this.internalSignIn({
                 accountId: this.accountId,
                 walletId: this.walletId,
                 baseUrl: this.baseUrl,
@@ -191,7 +194,10 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             });
         }
 
-        return [];
+        console.log(returnVal)
+        console.log("location: ", window.location.href)
+
+        return returnVal
     }
 
     async signOut() {
