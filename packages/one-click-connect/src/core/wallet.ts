@@ -347,13 +347,34 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             try{
                 const currentUrl = new URL(window.location.href);
                 const baseUrl = currentUrl.origin;
-                console.log("origin base", baseUrl);
+
+                console.log("Before pushState:");
+                console.log("window.location.href:", window.location.href);
+                console.log("window.history.state:", window.history.state);
+
                 window.history.pushState({}, "", baseUrl + currentUrl.pathname);
-                console.log("window history post-pushState", window.history)
+
+                console.log("After pushState:");
+                console.log("window.location.href:", window.location.href);
+                console.log("window.history.state:", window.history.state);
+
             }catch(e){
                 console.log("error updating URL: ", e)
             }
         }
+
+         // Clear URL search parameters unconditionally
+        // if (window.history && window.history.pushState) {
+        //     try {
+        //         const currentUrl = new URL(window.location.href);
+        //         const baseUrl = currentUrl.origin + currentUrl.pathname;
+        //         console.log("Base URL to set:", baseUrl);
+        //         window.history.pushState({}, "", baseUrl);
+        //         console.log("Window history post-pushState", window.history);
+        //     } catch (e) {
+        //         console.log("Error updating URL:", e);
+        //     }
+        // }
         return [
             {
                 accountId: this.accountId,

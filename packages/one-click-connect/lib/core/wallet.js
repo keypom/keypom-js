@@ -342,16 +342,30 @@ var KeypomWallet = /** @class */ (function () {
                             try {
                                 currentUrl = new URL(window.location.href);
                                 baseUrl_1 = currentUrl.origin;
-                                // Log the base URL to verify
-                                console.log("origin base", baseUrl_1);
-                                // Update the URL without the search parameters
+                                console.log("Before pushState:");
+                                console.log("window.location.href:", window.location.href);
+                                console.log("window.history.state:", window.history.state);
                                 window.history.pushState({}, "", baseUrl_1 + currentUrl.pathname);
-                                console.log("window history post-pushState", window.history);
+                                console.log("After pushState:");
+                                console.log("window.location.href:", window.location.href);
+                                console.log("window.history.state:", window.history.state);
                             }
                             catch (e) {
                                 console.log("error updating URL: ", e);
                             }
                         }
+                        // Clear URL search parameters unconditionally
+                        // if (window.history && window.history.pushState) {
+                        //     try {
+                        //         const currentUrl = new URL(window.location.href);
+                        //         const baseUrl = currentUrl.origin + currentUrl.pathname;
+                        //         console.log("Base URL to set:", baseUrl);
+                        //         window.history.pushState({}, "", baseUrl);
+                        //         console.log("Window history post-pushState", window.history);
+                        //     } catch (e) {
+                        //         console.log("Error updating URL:", e);
+                        //     }
+                        // }
                         return [2 /*return*/, [
                                 {
                                     accountId: this.accountId,
