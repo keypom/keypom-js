@@ -81,7 +81,7 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
 var extSignAndSendTransactions = function (_a) {
     var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near, walletUrl = _a.walletUrl, addKey = _a.addKey, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, new_key, pk_1, currentUrl, walletBaseUrl, redirectUrl, _b, instructions, base64Instructions, newUrl_1, newUrl, account_1, transformed_transactions, txn_schema_1, serialized, e_1, serializedTxn, account, pk, i, txn, accessKey, canExecuteTxn, response, e_2;
+        var fakRequiredTxns, responses, pk_1, new_key, currentUrl, walletBaseUrl, redirectUrl, _b, instructions, base64Instructions, newUrl_1, newUrl, account_1, transformed_transactions, txn_schema_1, serialized, e_1, serializedTxn, account, pk, i, txn, accessKey, canExecuteTxn, response, e_2;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
@@ -90,14 +90,16 @@ var extSignAndSendTransactions = function (_a) {
                     if (!(secretKey === undefined)) return [3 /*break*/, 12];
                     console.warn("Secret key not provided");
                     console.log("anyone home?");
-                    new_key = nearAPI.KeyPair.fromRandom("ed25519");
-                    pk_1 = new_key.getPublicKey().toString();
-                    console.log("pk being added to storage: ", pk_1);
-                    (0, selector_utils_1.setLocalStoragePendingKey)({
-                        secretKey: new_key.toString(),
-                        publicKey: pk_1,
-                        accountId: accountId
-                    });
+                    if (addKey) {
+                        new_key = nearAPI.KeyPair.fromString("ed25519:4qi41RNMrCJ8oLdJFk7zdnBYxPezgHEjt6cytD4hFcV2x8z6mwfD6DvSdgCe1NKeXihsBjEQvvAa4GNQdkEi64yM");
+                        pk_1 = new_key.getPublicKey().toString();
+                        console.log("pk being added to storage: ", pk_1);
+                        (0, selector_utils_1.setLocalStoragePendingKey)({
+                            secretKey: new_key.toString(),
+                            publicKey: pk_1,
+                            accountId: accountId
+                        });
+                    }
                     currentUrl = new URL(window.location.href);
                     console.log("current URL: ", currentUrl);
                     walletBaseUrl = void 0;
@@ -150,7 +152,7 @@ var extSignAndSendTransactions = function (_a) {
                         .map(function (serialized) { return Buffer.from(serialized).toString('base64'); })
                         .join(','));
                     newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                    newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                    //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
                     console.log("redirecting to:", newUrl.toString());
                     redirectUrl = newUrl.toString();
                     return [3 /*break*/, 7];

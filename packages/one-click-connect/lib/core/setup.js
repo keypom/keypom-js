@@ -241,6 +241,7 @@ function setupOneClickConnect(params) {
                         methodNames: methodNames,
                         allowance: allowance,
                         chainId: signInData.chainId,
+                        addKey: signInData.addKey,
                     });
                     console.log("current keypom wallet: ", keypomWallet);
                     return [4 /*yield*/, keypomWallet.setContractId(contractId)];

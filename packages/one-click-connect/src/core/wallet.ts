@@ -53,7 +53,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         addKey,
         methodNames,
         allowance,
-        chainId
+        chainId,
     }: {
         networkId: NetworkId;
         nearConnection: any;
@@ -80,7 +80,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.contractId = contractId;
         this.signedIn = false;
         this.walletUrl = walletUrl;
-        this.addKey = addKey ? addKey : true;
+        this.addKey = addKey !== undefined && addKey !== null ? addKey : true;
         this.methodNames = methodNames ? methodNames : ["*"];
         this.allowance = allowance ? allowance : "1000000000000000000000000";
         this.chainId = chainId? chainId : "near";
@@ -334,9 +334,25 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
         // Assuming the URL pattern follows directly after the domain and possible path
         // Erase the OneClick Connect URL segment
+        // if (window.history && window.history.pushState) {
+        //     const currentUrl = new URL(window.location.href);
+        //     const baseUrl = `${currentUrl.protocol}//${currentUrl.hostname}${currentUrl.port ? ':' + currentUrl.port : ''}`;
+        //     console.log(baseUrl);
+        //     // const urlStart = window.location.href.split(this.baseUrl)[0];
+        //     // console.log("split url: ", urlStart) // This will remove everything after the base URL
+        //     window.history.pushState({}, "", baseUrl);
+        // }
+        // Check if the history API is available
         if (window.history && window.history.pushState) {
-            const urlStart = window.location.href.split(this.baseUrl)[0]; // This will remove everything after the base URL
-            window.history.pushState({}, "", urlStart);
+            try{
+                const currentUrl = new URL(window.location.href);
+                const baseUrl = currentUrl.origin;
+                console.log("origin base", baseUrl);
+                window.history.pushState({}, "", baseUrl + currentUrl.pathname);
+                console.log("window history post-pushState", window.history)
+            }catch(e){
+                console.log("error updating URL: ", e)
+            }
         }
         return [
             {

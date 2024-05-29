@@ -16,7 +16,7 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     methodNames: string[];
     allowance: string;
     chainId: string;
-    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, contractId, walletUrl, addKey, methodNames, allowance, chainId }: {
+    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, contractId, walletUrl, addKey, methodNames, allowance, chainId, }: {
         networkId: NetworkId;
         nearConnection: any;
         keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;

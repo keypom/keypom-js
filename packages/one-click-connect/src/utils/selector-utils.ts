@@ -133,12 +133,17 @@ export const tryGetSignInData = async ({
     const currentUrlObj = new URL(window.location.href);
     const baseUrl = `${currentUrlObj.protocol}//${currentUrlObj.host}`;
     const connectionParam = currentUrlObj.searchParams.get('connection');
-    const addKeyParam = currentUrlObj.searchParams.get('addKey');
-
     console.log("connection param: ", connectionParam)
-    console.log("addKey param: ", addKeyParam)
 
-    // Parse connection param if it exists
+    // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+    const curEnvData = getLocalStorageKeypomEnv();
+    const pendingSecretKey = await getLocalStoragePendingKey(nearConnection);
+    localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+
+    // start with what exists in local storage, overwrite if necessary
+    let signInData = curEnvData !== null ? JSON.parse(curEnvData) : {};
+
+    // Update signInData with connection data if it exists
     if (connectionParam) {
         try{
             // Decode the Base64-encoded JSON string
@@ -164,49 +169,38 @@ export const tryGetSignInData = async ({
                 return null;
             }
 
-            // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-            const curEnvData = getLocalStorageKeypomEnv();
-            const secretKey = await getLocalStoragePendingKey(nearConnection);
-            
-            localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
-            
-            if (curEnvData !== null) {
-                let parsedJson = JSON.parse(curEnvData);
-                if (secretKey !== null) {
-                    parsedJson.secretKey = secretKey;
-                }
-                return parsedJson;
-            }
-      
-            return { 
-                accountId: connectionData.accountId, 
-                secretKey, 
-                walletId: connectionData.walletId, 
-                baseUrl, 
-                walletUrl: connectionData.walletTransactionUrl, 
-                chainId: connectionData.chainId, 
-                addKey: addKeyParam === "false" ? false : true
-            };
+            Object.assign(signInData, {
+                accountId: connectionData.accountId,
+                walletId: connectionData.walletId,
+                walletUrl: connectionData.walletTransactionUrl,
+                chainId: connectionData.chainId,
+                baseUrl,
+                secretKey: pendingSecretKey ?? connectionData.secretKey,
+            });
+
         }catch(e){
             console.error("Error parsing connection data: ", e)
             return null
         }
     }
-     // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-     const curEnvData = getLocalStorageKeypomEnv();
-     const secretKey = await getLocalStoragePendingKey(nearConnection);
 
-     localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
+    const addKeyParam = currentUrlObj.searchParams.get('addKey');
+    if(addKeyParam){
+        const addKey = addKeyParam !== "false";
+        signInData.addKey = addKey;
+    }
 
-     if (curEnvData !== null) {
-         let parsedJson = JSON.parse(curEnvData);
-         // if a secret key is found, add that. Update addKey if needed
-         parsedJson.secretKey = secretKey ?? parsedJson.secretKey;
-         parsedJson.addKey = addKeyParam !== "false";
-         return parsedJson;
-     }
+    if(pendingSecretKey){
+        signInData.secretKey = pendingSecretKey;
+    }
 
-    return null;
+    // if signInData is empty, return null
+    if (!Object.keys(signInData).length) {
+        console.log("signin failed, returning null")
+        return null;
+    }
+
+    return signInData
 };
 
 /**

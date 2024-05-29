@@ -76,7 +76,7 @@ var KeypomWallet = /** @class */ (function () {
         this.contractId = contractId;
         this.signedIn = false;
         this.walletUrl = walletUrl;
-        this.addKey = addKey ? addKey : true;
+        this.addKey = addKey !== undefined && addKey !== null ? addKey : true;
         this.methodNames = methodNames ? methodNames : ["*"];
         this.allowance = allowance ? allowance : "1000000000000000000000000";
         this.chainId = chainId ? chainId : "near";
@@ -302,7 +302,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.internalSignIn = function (_a) {
         var accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, walletUrl = _a.walletUrl, chainId = _a.chainId, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance, addKey = _a.addKey;
         return __awaiter(this, void 0, void 0, function () {
-            var dataToWrite, urlStart;
+            var dataToWrite, currentUrl, baseUrl_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -329,9 +329,28 @@ var KeypomWallet = /** @class */ (function () {
                     case 2:
                         // Assuming the URL pattern follows directly after the domain and possible path
                         // Erase the OneClick Connect URL segment
+                        // if (window.history && window.history.pushState) {
+                        //     const currentUrl = new URL(window.location.href);
+                        //     const baseUrl = `${currentUrl.protocol}//${currentUrl.hostname}${currentUrl.port ? ':' + currentUrl.port : ''}`;
+                        //     console.log(baseUrl);
+                        //     // const urlStart = window.location.href.split(this.baseUrl)[0];
+                        //     // console.log("split url: ", urlStart) // This will remove everything after the base URL
+                        //     window.history.pushState({}, "", baseUrl);
+                        // }
+                        // Check if the history API is available
                         if (window.history && window.history.pushState) {
-                            urlStart = window.location.href.split(this.baseUrl)[0];
-                            window.history.pushState({}, "", urlStart);
+                            try {
+                                currentUrl = new URL(window.location.href);
+                                baseUrl_1 = currentUrl.origin;
+                                // Log the base URL to verify
+                                console.log("origin base", baseUrl_1);
+                                // Update the URL without the search parameters
+                                window.history.pushState({}, "", baseUrl_1 + currentUrl.pathname);
+                                console.log("window history post-pushState", window.history);
+                            }
+                            catch (e) {
+                                console.log("error updating URL: ", e);
+                            }
                         }
                         return [2 /*return*/, [
                                 {

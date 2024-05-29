@@ -161,7 +161,7 @@ exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
 var tryGetSignInData = function (_a) {
     var networkId = _a.networkId, nearConnection = _a.nearConnection;
     return __awaiter(void 0, void 0, void 0, function () {
-        var currentUrlObj, baseUrl, connectionParam, addKeyParam, decodedString, connectionData, isModuleSupported, curEnvData_1, secretKey_1, parsedJson, e_2, curEnvData, secretKey, parsedJson;
+        var currentUrlObj, baseUrl, connectionParam, curEnvData, pendingSecretKey, signInData, decodedString, connectionData, isModuleSupported, addKeyParam, addKey;
         var _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -169,64 +169,56 @@ var tryGetSignInData = function (_a) {
                     currentUrlObj = new URL(window.location.href);
                     baseUrl = "".concat(currentUrlObj.protocol, "//").concat(currentUrlObj.host);
                     connectionParam = currentUrlObj.searchParams.get('connection');
-                    addKeyParam = currentUrlObj.searchParams.get('addKey');
                     console.log("connection param: ", connectionParam);
-                    console.log("addKey param: ", addKeyParam);
-                    if (!connectionParam) return [3 /*break*/, 4];
-                    _c.label = 1;
-                case 1:
-                    _c.trys.push([1, 3, , 4]);
-                    decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
-                    connectionData = JSON.parse(decodedString);
-                    console.log("parsed connection data: ", connectionData);
-                    if (connectionData.accountId === undefined || connectionData.walletId === undefined) {
-                        console.error("Connection data must include accountId and walletId fields");
-                        return [2 /*return*/, null];
-                    }
-                    isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[connectionData.walletId]) !== undefined;
-                    if (!isModuleSupported) {
-                        console.warn("Module ID ".concat(connectionData.wallet, " is not supported on ").concat(networkId, "."));
-                        return [2 /*return*/, null];
-                    }
-                    curEnvData_1 = (0, exports.getLocalStorageKeypomEnv)();
-                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
-                case 2:
-                    secretKey_1 = _c.sent();
-                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
-                    if (curEnvData_1 !== null) {
-                        parsedJson = JSON.parse(curEnvData_1);
-                        if (secretKey_1 !== null) {
-                            parsedJson.secretKey = secretKey_1;
-                        }
-                        return [2 /*return*/, parsedJson];
-                    }
-                    return [2 /*return*/, {
-                            accountId: connectionData.accountId,
-                            secretKey: secretKey_1,
-                            walletId: connectionData.walletId,
-                            baseUrl: baseUrl,
-                            walletUrl: connectionData.walletTransactionUrl,
-                            chainId: connectionData.chainId,
-                            addKey: addKeyParam === "false" ? false : true
-                        }];
-                case 3:
-                    e_2 = _c.sent();
-                    console.error("Error parsing connection data: ", e_2);
-                    return [2 /*return*/, null];
-                case 4:
                     curEnvData = (0, exports.getLocalStorageKeypomEnv)();
                     return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
-                case 5:
-                    secretKey = _c.sent();
+                case 1:
+                    pendingSecretKey = _c.sent();
                     localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
-                    if (curEnvData !== null) {
-                        parsedJson = JSON.parse(curEnvData);
-                        // if a secret key is found, add that. Update addKey if needed
-                        parsedJson.secretKey = secretKey !== null && secretKey !== void 0 ? secretKey : parsedJson.secretKey;
-                        parsedJson.addKey = addKeyParam !== "false";
-                        return [2 /*return*/, parsedJson];
+                    signInData = curEnvData !== null ? JSON.parse(curEnvData) : {};
+                    // Update signInData with connection data if it exists
+                    if (connectionParam) {
+                        try {
+                            decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+                            connectionData = JSON.parse(decodedString);
+                            console.log("parsed connection data: ", connectionData);
+                            if (connectionData.accountId === undefined || connectionData.walletId === undefined) {
+                                console.error("Connection data must include accountId and walletId fields");
+                                return [2 /*return*/, null];
+                            }
+                            isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[connectionData.walletId]) !== undefined;
+                            if (!isModuleSupported) {
+                                console.warn("Module ID ".concat(connectionData.wallet, " is not supported on ").concat(networkId, "."));
+                                return [2 /*return*/, null];
+                            }
+                            Object.assign(signInData, {
+                                accountId: connectionData.accountId,
+                                walletId: connectionData.walletId,
+                                walletUrl: connectionData.walletTransactionUrl,
+                                chainId: connectionData.chainId,
+                                baseUrl: baseUrl,
+                                secretKey: pendingSecretKey !== null && pendingSecretKey !== void 0 ? pendingSecretKey : connectionData.secretKey,
+                            });
+                        }
+                        catch (e) {
+                            console.error("Error parsing connection data: ", e);
+                            return [2 /*return*/, null];
+                        }
                     }
-                    return [2 /*return*/, null];
+                    addKeyParam = currentUrlObj.searchParams.get('addKey');
+                    if (addKeyParam) {
+                        addKey = addKeyParam !== "false";
+                        signInData.addKey = addKey;
+                    }
+                    if (pendingSecretKey) {
+                        signInData.secretKey = pendingSecretKey;
+                    }
+                    // if signInData is empty, return null
+                    if (!Object.keys(signInData).length) {
+                        console.log("signin failed, returning null");
+                        return [2 /*return*/, null];
+                    }
+                    return [2 /*return*/, signInData];
             }
         });
     });

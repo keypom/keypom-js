@@ -61,14 +61,22 @@ export const extSignAndSendTransactions = async ({
         console.warn("Secret key not provided");
         console.log("anyone home?")
         // TODO: add access key as part of txn request
-        const new_key =  nearAPI.KeyPair.fromRandom("ed25519");
-        const pk = new_key.getPublicKey().toString()
-        console.log("pk being added to storage: ", pk);
-        setLocalStoragePendingKey({
-            secretKey: new_key.toString(),
-            publicKey: pk,
-            accountId
-        })
+
+        //keypair for testing
+//         ed25519:4qi41RNMrCJ8oLdJFk7zdnBYxPezgHEjt6cytD4hFcV2x8z6mwfD6DvSdgCe1NKeXihsBjEQvvAa4GNQdkEi64yM
+//         ed25519:7kfBxjQ7P2UQXYSzRkcAAxwDMLAjG6CYhauicas893eF
+        let pk;
+        if(addKey){
+            // const new_key =  nearAPI.KeyPair.fromRandom("ed25519");
+            const new_key = nearAPI.KeyPair.fromString("ed25519:4qi41RNMrCJ8oLdJFk7zdnBYxPezgHEjt6cytD4hFcV2x8z6mwfD6DvSdgCe1NKeXihsBjEQvvAa4GNQdkEi64yM");
+            pk = new_key.getPublicKey().toString()
+            console.log("pk being added to storage: ", pk);
+            setLocalStoragePendingKey({
+                secretKey: new_key.toString(),
+                publicKey: pk,
+                accountId
+            })
+        }
 
         // redirect to sign transaction
         const currentUrl = new URL(window.location.href);
@@ -112,7 +120,7 @@ export const extSignAndSendTransactions = async ({
                         .map(serialized => Buffer.from(serialized).toString('base64'))
                         .join(','));
                     newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                    newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                    //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
                     console.log("redirecting to:", newUrl.toString());
                     redirectUrl = newUrl.toString();
                 }catch(e){

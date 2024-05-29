@@ -144,6 +144,7 @@ export function setupOneClickConnect(
             methodNames,
             allowance,
             chainId: signInData.chainId,
+            addKey: signInData.addKey,
         });
 
         console.log("current keypom wallet: ", keypomWallet)
