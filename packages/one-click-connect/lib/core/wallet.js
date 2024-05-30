@@ -77,9 +77,9 @@ var KeypomWallet = /** @class */ (function () {
         this.signedIn = false;
         this.walletUrl = walletUrl;
         this.addKey = addKey !== undefined && addKey !== null ? addKey : true;
-        this.methodNames = methodNames ? methodNames : ["*"];
-        this.allowance = allowance ? allowance : "1000000000000000000000000";
-        this.chainId = chainId ? chainId : "near";
+        this.methodNames = methodNames || ["*"];
+        this.allowance = allowance || "1000000000000000000000000";
+        this.chainId = chainId || "near";
     }
     KeypomWallet.prototype.getAccountId = function () {
         return this.accountId;
@@ -121,7 +121,7 @@ var KeypomWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.log("keypom signIn");
-                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 9];
+                        if (!(this.secretKey !== undefined)) return [3 /*break*/, 8];
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 7, , 8]);
@@ -151,18 +151,17 @@ var KeypomWallet = /** @class */ (function () {
                                 contractId: this.contractId,
                                 methodNames: this.methodNames,
                                 allowance: this.allowance,
-                                addKey: this.addKey
+                                addKey: this.addKey,
                             })];
-                    case 5:
-                        returnVal = _a.sent();
-                        _a.label = 6;
-                    case 6: return [3 /*break*/, 8];
+                    case 5: return [2 /*return*/, _a.sent()];
+                    case 6:
+                        console.log("secret key not found for account. Defaulting to no key.");
+                        return [3 /*break*/, 8];
                     case 7:
                         e_1 = _a.sent();
                         console.log("e: ", e_1);
                         return [2 /*return*/, []];
-                    case 8: return [3 /*break*/, 11];
-                    case 9: return [4 /*yield*/, this.internalSignIn({
+                    case 8: return [4 /*yield*/, this.internalSignIn({
                             accountId: this.accountId,
                             walletId: this.walletId,
                             baseUrl: this.baseUrl,
@@ -171,16 +170,9 @@ var KeypomWallet = /** @class */ (function () {
                             contractId: this.contractId,
                             methodNames: this.methodNames,
                             allowance: this.allowance,
-                            addKey: this.addKey
+                            addKey: this.addKey,
                         })];
-                    case 10:
-                        // handles case of no secretKey
-                        returnVal = _a.sent();
-                        _a.label = 11;
-                    case 11:
-                        console.log(returnVal);
-                        console.log("location: ", window.location.href);
-                        return [2 /*return*/, returnVal];
+                    case 9: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -261,7 +253,7 @@ var KeypomWallet = /** @class */ (function () {
                                 addKey: this.addKey,
                                 contractId: this.contractId,
                                 methodNames: this.methodNames,
-                                allowance: this.allowance
+                                allowance: this.allowance,
                             })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -309,7 +301,7 @@ var KeypomWallet = /** @class */ (function () {
     KeypomWallet.prototype.internalSignIn = function (_a) {
         var accountId = _a.accountId, secretKey = _a.secretKey, walletId = _a.walletId, baseUrl = _a.baseUrl, walletUrl = _a.walletUrl, chainId = _a.chainId, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance, addKey = _a.addKey;
         return __awaiter(this, void 0, void 0, function () {
-            var dataToWrite, currentUrl, baseUrl_1;
+            var dataToWrite;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -325,7 +317,7 @@ var KeypomWallet = /** @class */ (function () {
                             contractId: contractId,
                             methodNames: methodNames,
                             allowance: allowance,
-                            addKey: addKey
+                            addKey: addKey,
                         };
                         (0, selector_utils_1.setLocalStorageKeypomEnv)(dataToWrite);
                         if (!secretKey) return [3 /*break*/, 2];
@@ -334,32 +326,18 @@ var KeypomWallet = /** @class */ (function () {
                         _b.sent();
                         _b.label = 2;
                     case 2:
+                        console.log("Data to write: ", dataToWrite);
                         // Assuming the URL pattern follows directly after the domain and possible path
                         // Erase the OneClick Connect URL segment
-                        // if (window.history && window.history.pushState) {
-                        //     const currentUrl = new URL(window.location.href);
-                        //     const baseUrl = `${currentUrl.protocol}//${currentUrl.hostname}${currentUrl.port ? ':' + currentUrl.port : ''}`;
-                        //     console.log(baseUrl);
-                        //     // const urlStart = window.location.href.split(this.baseUrl)[0];
-                        //     // console.log("split url: ", urlStart) // This will remove everything after the base URL
-                        //     window.history.pushState({}, "", baseUrl);
-                        // }
-                        // Check if the history API is available
                         if (window.history && window.history.pushState) {
-                            try {
-                                currentUrl = new URL(window.location.href);
-                                baseUrl_1 = currentUrl.origin;
-                                console.log("Before pushState:");
-                                console.log("window.location.href:", window.location.href);
-                                console.log("window.history.state:", window.history.state);
-                                window.history.pushState({}, "", baseUrl_1 + currentUrl.pathname);
-                                console.log("After pushState:");
-                                console.log("window.location.href:", window.location.href);
-                                console.log("window.history.state:", window.history.state);
-                            }
-                            catch (e) {
-                                console.log("error updating URL: ", e);
-                            }
+                            console.log("Before pushState:");
+                            console.log("window.location.href:", window.location.href);
+                            console.log("window.history.state:", window.history.state);
+                            // Update the URL to the base URL
+                            window.history.pushState({}, "", this.baseUrl);
+                            console.log("After pushState:");
+                            console.log("window.location.href:", window.location.href);
+                            console.log("window.history.state:", window.history.state);
                         }
                         // Clear URL search parameters unconditionally
                         // if (window.history && window.history.pushState) {

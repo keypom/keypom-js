@@ -68,7 +68,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         methodNames?: string[];
         allowance?: string;
         chainId?: string;
-
     }) {
         this.nearConnection = nearConnection;
         this.keyStore = keyStore;
@@ -81,9 +80,9 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         this.signedIn = false;
         this.walletUrl = walletUrl;
         this.addKey = addKey !== undefined && addKey !== null ? addKey : true;
-        this.methodNames = methodNames ? methodNames : ["*"];
-        this.allowance = allowance ? allowance : "1000000000000000000000000";
-        this.chainId = chainId? chainId : "near";
+        this.methodNames = methodNames || ["*"];
+        this.allowance = allowance || "1000000000000000000000000";
+        this.chainId = chainId || "near";
     }
 
     getAccountId(): string {
@@ -92,7 +91,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
 
     async isSignedIn() {
         // return this.accountId !== undefined && this.accountId !== null;
-        return this.signedIn
+        return this.signedIn;
     }
 
     getContractId(): string {
@@ -103,23 +102,22 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         return this.nearConnection;
     }
 
-    async setContractId( contractId?: string): Promise<string> {
+    async setContractId(contractId?: string): Promise<string> {
         console.log("setContractId", this.secretKey);
         if (this.contractId !== contractId) {
             console.log("contractId already set", this.contractId);
             return this.contractId;
         }
 
-        if(contractId){
+        if (contractId) {
             this.contractId = contractId;
-            return this.contractId
+            return this.contractId;
         }
 
         return NO_CONTRACT_ID;
 
         // const pk = getPubFromSecret(this.secretKey);
         // console.log("pk", pk);
-        
 
         // const accessKey: any =
         //     await this.nearConnection.connection.provider.query(
@@ -162,7 +160,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                 console.log("keyInfoView", keyInfoView);
 
                 if (keyInfoView) {
-                    returnVal = await this.internalSignIn({
+                    return await this.internalSignIn({
                         accountId: this.accountId,
                         walletId: this.walletId,
                         secretKey: this.secretKey,
@@ -170,34 +168,30 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
                         walletUrl: this.walletUrl,
                         chainId: this.chainId,
                         contractId: this.contractId,
-                        methodNames: this.methodNames, 
+                        methodNames: this.methodNames,
                         allowance: this.allowance,
-                        addKey: this.addKey
+                        addKey: this.addKey,
                     });
                 }
+                console.log(
+                    "secret key not found for account. Defaulting to no key."
+                );
             } catch (e) {
                 console.log("e: ", e);
-                return []
+                return [];
             }
-        }else{
-            // handles case of no secretKey
-            returnVal = await this.internalSignIn({
-                accountId: this.accountId,
-                walletId: this.walletId,
-                baseUrl: this.baseUrl,
-                walletUrl: this.walletUrl,
-                chainId: this.chainId,
-                contractId: this.contractId,
-                methodNames: this.methodNames,
-                allowance: this.allowance,
-                addKey: this.addKey
-            });
         }
-
-        console.log(returnVal)
-        console.log("location: ", window.location.href)
-
-        return returnVal
+        return await this.internalSignIn({
+            accountId: this.accountId,
+            walletId: this.walletId,
+            baseUrl: this.baseUrl,
+            walletUrl: this.walletUrl,
+            chainId: this.chainId,
+            contractId: this.contractId,
+            methodNames: this.methodNames,
+            allowance: this.allowance,
+            addKey: this.addKey,
+        });
     }
 
     async signOut() {
@@ -243,7 +237,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         }
         const { transactions } = params;
 
-        console.log("wallet sign and send url: ", this)
+        console.log("wallet sign and send url: ", this);
 
         return await extSignAndSendTransactions({
             transactions,
@@ -255,7 +249,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             addKey: this.addKey,
             contractId: this.contractId,
             methodNames: this.methodNames,
-            allowance: this.allowance
+            allowance: this.allowance,
         });
     }
 
@@ -287,7 +281,6 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         // TODO:  maybe?
     }
 
-
     private async internalSignIn({
         accountId,
         secretKey,
@@ -298,18 +291,18 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
         contractId,
         methodNames,
         allowance,
-        addKey
-    } : {
-        accountId: string,
-        walletId: string,
-        chainId: string,
-        contractId: string,
-        methodNames: string[],
-        allowance: string,
-        addKey: boolean,
-        secretKey?: string,
-        baseUrl?: string,
-        walletUrl?: string,
+        addKey,
+    }: {
+        accountId: string;
+        walletId: string;
+        chainId: string;
+        contractId: string;
+        methodNames: string[];
+        allowance: string;
+        addKey: boolean;
+        secretKey?: string;
+        baseUrl?: string;
+        walletUrl?: string;
     }): Promise<KeypomWalletAccount[]> {
         console.log(
             `internalSignIn accountId ${accountId} secretKey ${secretKey} walletId ${walletId}`
@@ -326,7 +319,7 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             contractId,
             methodNames,
             allowance,
-            addKey
+            addKey,
         };
         setLocalStorageKeypomEnv(dataToWrite);
 
@@ -338,38 +331,24 @@ export class KeypomWallet implements InstantLinkWalletBehaviour {
             );
         }
 
+        console.log("Data to write: ", dataToWrite);
+
         // Assuming the URL pattern follows directly after the domain and possible path
         // Erase the OneClick Connect URL segment
-        // if (window.history && window.history.pushState) {
-        //     const currentUrl = new URL(window.location.href);
-        //     const baseUrl = `${currentUrl.protocol}//${currentUrl.hostname}${currentUrl.port ? ':' + currentUrl.port : ''}`;
-        //     console.log(baseUrl);
-        //     // const urlStart = window.location.href.split(this.baseUrl)[0];
-        //     // console.log("split url: ", urlStart) // This will remove everything after the base URL
-        //     window.history.pushState({}, "", baseUrl);
-        // }
-        // Check if the history API is available
         if (window.history && window.history.pushState) {
-            try{
-                const currentUrl = new URL(window.location.href);
-                const baseUrl = currentUrl.origin;
+            console.log("Before pushState:");
+            console.log("window.location.href:", window.location.href);
+            console.log("window.history.state:", window.history.state);
 
-                console.log("Before pushState:");
-                console.log("window.location.href:", window.location.href);
-                console.log("window.history.state:", window.history.state);
+            // Update the URL to the base URL
+            window.history.pushState({}, "", this.baseUrl);
 
-                window.history.pushState({}, "", baseUrl + currentUrl.pathname);
-
-                console.log("After pushState:");
-                console.log("window.location.href:", window.location.href);
-                console.log("window.history.state:", window.history.state);
-
-            }catch(e){
-                console.log("error updating URL: ", e)
-            }
+            console.log("After pushState:");
+            console.log("window.location.href:", window.location.href);
+            console.log("window.history.state:", window.history.state);
         }
 
-         // Clear URL search parameters unconditionally
+        // Clear URL search parameters unconditionally
         // if (window.history && window.history.pushState) {
         //     try {
         //         const currentUrl = new URL(window.location.href);
