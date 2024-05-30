@@ -8,8 +8,8 @@ import {
 } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 import { createAction } from "@near-wallet-selector/wallet-utils";
-import * as Transaction from "@near-js/transactions";
-import { transformTransactions } from "../utils/one-click-utils";
+// import * as Transaction from "@near-js/transactions";
+// import { transformTransactions } from "../utils/one-click-utils";
 
 export const SUPPORTED_EXT_WALLET_DATA = {
     testnet: {
@@ -112,17 +112,18 @@ export const extSignAndSendTransactions = async ({
                 const account = await near.account(accountId);
 
                 try{
-                    const transformed_transactions = await transformTransactions(transactions, account)
-                    const txn_schema = Transaction.SCHEMA
-                    const serialized = serialize(txn_schema, transformed_transactions[0])
-                    newUrl.searchParams.set('transactions', transformed_transactions
-                        .map(transaction => serialize(txn_schema, transaction))
-                        .map(serialized => Buffer.from(serialized).toString('base64'))
-                        .join(','));
-                    newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                    //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
-                    console.log("redirecting to:", newUrl.toString());
-                    redirectUrl = newUrl.toString();
+                    // const transformed_transactions = await transformTransactions(transactions, account)
+                    // const txn_schema = Transaction.SCHEMA
+                    // const serialized = serialize(txn_schema, transformed_transactions[0])
+                    // newUrl.searchParams.set('transactions', transformed_transactions
+                    //     .map(transaction => serialize(txn_schema, transaction))
+                    //     .map(serialized => Buffer.from(serialized).toString('base64'))
+                    //     .join(','));
+                    // newUrl.searchParams.set('callbackUrl', currentUrl.href);
+                    // //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                    // console.log("redirecting to:", newUrl.toString());
+                    redirectUrl = "foo"
+                    // redirectUrl = newUrl.toString();
                 }catch(e){
                     console.log("error NEW 2: ", e)
                 }
