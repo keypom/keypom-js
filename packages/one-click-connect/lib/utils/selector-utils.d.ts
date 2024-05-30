@@ -14,18 +14,19 @@ export declare const getLocalStoragePendingKey: (near: nearAPI.Near) => Promise<
 export declare const setLocalStoragePendingKey: (jsonData: any) => void;
 export declare const getLocalStorageKeypomLak: () => string | null;
 export declare const setLocalStorageKeypomLak: (jsonData: any) => void;
+interface SignInData {
+    accountId: string;
+    secretKey?: string;
+    walletId: string;
+    baseUrl: string;
+    walletUrl?: string;
+    chainId: string;
+    addKey: boolean;
+}
 export declare const tryGetSignInData: ({ networkId, nearConnection, }: {
     networkId: string;
     nearConnection: nearAPI.Near;
-}) => Promise<{
-    accountId: string;
-    secretKey?: string | undefined;
-    walletId: string;
-    baseUrl: string;
-    walletUrl?: string | undefined;
-    chainId: string;
-    addKey: boolean;
-} | null>;
+}) => Promise<SignInData | null>;
 /**
  * Check if given access key allows the function call or method attempted in transaction
  * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items
@@ -44,3 +45,4 @@ export declare const parseOneClickSignInFromUrl: ({ baseUrl, delimiter, }: {
 } | null;
 export declare const getNetworkPreset: (networkId: NetworkId) => Network;
 export declare const getPubFromSecret: (secretKey: string) => string;
+export {};

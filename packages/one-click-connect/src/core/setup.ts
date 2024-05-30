@@ -104,7 +104,7 @@ export function setupOneClickConnect(
     return async () => {
         const { networkId, contractId, allowance, methodNames } = params;
 
-        console.log("this is real, here is my allowance: ", allowance)
+        console.log("this is real, here is my allowance: ", allowance);
 
         // if (!areParamsCorrect(params)) {
         //     return null;
@@ -123,20 +123,23 @@ export function setupOneClickConnect(
 
         // returns { accountId, secretKey?, walletId, baseUrl }
         // should return { accountId, secretKey?, walletId, baseUrl, walletUrl?, chainId, addKey }
-        const signInData = await tryGetSignInData({ networkId, nearConnection });
+        const signInData = await tryGetSignInData({
+            networkId,
+            nearConnection,
+        });
         console.log("Sign in data: ", signInData);
 
         if (signInData === null) {
             return null;
         }
 
-        // contract ID resetting, same with walletUrl 
+        // contract ID resetting, same with walletUrl
         const keypomWallet = new KeypomWallet({
             networkId,
             nearConnection,
             keyStore,
             accountId: signInData.accountId,
-            secretKey: signInData.secretKey ? signInData.secretKey : undefined,
+            secretKey: signInData.secretKey,
             walletId: signInData.walletId,
             baseUrl: signInData.baseUrl,
             walletUrl: signInData.walletUrl,
@@ -147,7 +150,7 @@ export function setupOneClickConnect(
             addKey: signInData.addKey,
         });
 
-        console.log("current keypom wallet: ", keypomWallet)
+        console.log("current keypom wallet: ", keypomWallet);
 
         await keypomWallet.setContractId(contractId);
 

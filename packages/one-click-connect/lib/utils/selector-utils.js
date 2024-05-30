@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -122,67 +133,30 @@ var setLocalStorageKeypomLak = function (jsonData) {
     localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"), dataToWrite);
 };
 exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
-// export const areParamsCorrect = (params: OneClickParams) => {
-//     const { networkId } = params;
-//     // Validate Keypom parameters
-//     if (!isOneClickParams(params)) {
-//         console.error(
-//             "KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format."
-//         );
-//         return false;
-//     }
-//     // Additional business logic checks
-//     if (!networkId || !urlPattern) {
-//         console.error("KeypomWallet: networkId, and url are required.");
-//         return false;
-//     }
-//     if (
-//         urlPattern &&
-//         !(
-//             urlPattern.includes(":accountId") &&
-//             urlPattern.includes(":secretKey") &&
-//             urlPattern.includes(":walletId")
-//         )
-//     ) {
-//         console.error(
-//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders."
-//         );
-//         return false;
-//     }
-//     const matches = urlPattern.match(ONE_CLICK_URL_REGEX);
-//     if (!matches) {
-//         console.error(
-//             "KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid."
-//         );
-//         return false;
-//     }
-//     return true;
-// };
 var tryGetSignInData = function (_a) {
     var networkId = _a.networkId, nearConnection = _a.nearConnection;
     return __awaiter(void 0, void 0, void 0, function () {
-        var currentUrlObj, baseUrl, connectionParam, curEnvData, pendingSecretKey, signInData, decodedString, connectionData, isModuleSupported, addKeyParam, addKey;
+        var connectionSplit, signInData, curEnvData, connectionString, decodedString, connectionData, isModuleSupported, addKeySplit, addKeyParam, addKey, pendingSecretKey;
         var _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    currentUrlObj = new URL(window.location.href);
-                    baseUrl = "".concat(currentUrlObj.protocol, "//").concat(currentUrlObj.host);
-                    connectionParam = currentUrlObj.searchParams.get('connection');
-                    console.log("connection param: ", connectionParam);
+                    connectionSplit = window.location.href.split("?connection=");
+                    signInData = null;
                     curEnvData = (0, exports.getLocalStorageKeypomEnv)();
-                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
-                case 1:
-                    pendingSecretKey = _c.sent();
-                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
-                    signInData = curEnvData !== null ? JSON.parse(curEnvData) : {};
+                    console.log("Local storage env data: ", curEnvData);
+                    if (curEnvData !== null) {
+                        signInData = __assign(__assign({}, JSON.parse(curEnvData)), { baseUrl: connectionSplit[0] });
+                    }
                     // Update signInData with connection data if it exists
-                    if (connectionParam) {
+                    if (connectionSplit.length > 1) {
+                        connectionString = connectionSplit[1];
                         try {
-                            decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+                            decodedString = Buffer.from(connectionString, "base64").toString("utf-8");
                             connectionData = JSON.parse(decodedString);
                             console.log("parsed connection data: ", connectionData);
-                            if (connectionData.accountId === undefined || connectionData.walletId === undefined) {
+                            if (connectionData.accountId === undefined ||
+                                connectionData.walletId === undefined) {
                                 console.error("Connection data must include accountId and walletId fields");
                                 return [2 /*return*/, null];
                             }
@@ -191,32 +165,37 @@ var tryGetSignInData = function (_a) {
                                 console.warn("Module ID ".concat(connectionData.wallet, " is not supported on ").concat(networkId, "."));
                                 return [2 /*return*/, null];
                             }
-                            Object.assign(signInData, {
+                            signInData = {
                                 accountId: connectionData.accountId,
                                 walletId: connectionData.walletId,
                                 walletUrl: connectionData.walletTransactionUrl,
                                 chainId: connectionData.chainId,
-                                baseUrl: baseUrl,
-                                secretKey: pendingSecretKey !== null && pendingSecretKey !== void 0 ? pendingSecretKey : connectionData.secretKey,
-                            });
+                                baseUrl: connectionSplit[0],
+                                secretKey: connectionData.secretKey,
+                                addKey: true,
+                            };
                         }
                         catch (e) {
                             console.error("Error parsing connection data: ", e);
                             return [2 /*return*/, null];
                         }
                     }
-                    addKeyParam = currentUrlObj.searchParams.get('addKey');
-                    if (addKeyParam) {
+                    if (!(signInData === null || signInData === void 0 ? void 0 : signInData.accountId) || signInData === null) {
+                        console.log("No connection found in local storage or URL. returning null");
+                        return [2 /*return*/, null];
+                    }
+                    addKeySplit = window.location.href.split("?addKey=");
+                    if (addKeySplit.length > 1) {
+                        addKeyParam = addKeySplit[1];
                         addKey = addKeyParam !== "false";
                         signInData.addKey = addKey;
                     }
+                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
+                case 1:
+                    pendingSecretKey = _c.sent();
+                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
                     if (pendingSecretKey) {
                         signInData.secretKey = pendingSecretKey;
-                    }
-                    // if signInData is empty, return null
-                    if (!Object.keys(signInData).length) {
-                        console.log("signin failed, returning null");
-                        return [2 /*return*/, null];
                     }
                     return [2 /*return*/, signInData];
             }

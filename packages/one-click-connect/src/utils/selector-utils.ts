@@ -32,32 +32,31 @@ export const getLocalStoragePendingKey = async (near: nearAPI.Near) => {
     const localStorageData = localStorage.getItem(
         `${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`
     );
-    if(localStorageData === null) return null
+    if (localStorageData === null) return null;
     const localStorageDataJson = JSON.parse(localStorageData);
     const accountId = localStorageDataJson.accountId;
 
-    if(localStorageDataJson.publicKey && localStorageDataJson.secretKey){
-        try{
+    if (localStorageDataJson.publicKey && localStorageDataJson.secretKey) {
+        try {
             const accessKey: any = await near.connection.provider.query(
                 `access_key/${accountId}/${localStorageDataJson.publicKey}`,
                 ""
             );
-            if(accessKey){
+            if (accessKey) {
                 return localStorageDataJson.secretKey;
             }
-        }catch(e){
-            console.log("error retrieving access key: ", e)
-        }   
+        } catch (e) {
+            console.log("error retrieving access key: ", e);
+        }
     }
     return null;
 };
 
-
 export const setLocalStoragePendingKey = (jsonData) => {
     const dataToWrite = JSON.stringify(jsonData);
     localStorage.setItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`, dataToWrite);
-    console.log("done writing")
-}
+    console.log("done writing");
+};
 
 // allowance, methodNames, walletUrl
 export const getLocalStorageKeypomLak = () => {
@@ -114,45 +113,55 @@ export const setLocalStorageKeypomLak = (jsonData) => {
 //     return true;
 // };
 
+interface SignInData {
+    accountId: string;
+    secretKey?: string;
+    walletId: string;
+    baseUrl: string;
+    walletUrl?: string;
+    chainId: string;
+    addKey: boolean;
+}
+
 export const tryGetSignInData = async ({
     networkId,
     nearConnection,
 }: {
     networkId: string;
     nearConnection: nearAPI.Near;
-}): Promise<{ 
-    accountId: string; 
-    secretKey?: string; 
-    walletId: string; 
-    baseUrl: string; 
-    walletUrl?: string, 
-    chainId: string
-    addKey: boolean
-} | null> => {
-    
-    const currentUrlObj = new URL(window.location.href);
-    const baseUrl = `${currentUrlObj.protocol}//${currentUrlObj.host}`;
-    const connectionParam = currentUrlObj.searchParams.get('connection');
-    console.log("connection param: ", connectionParam)
+}): Promise<SignInData | null> => {
+    const connectionSplit = window.location.href.split("?connection=");
 
-    // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
+    let signInData: SignInData | null = null;
+    // There was no connection data so fallback on local storage
     const curEnvData = getLocalStorageKeypomEnv();
-    const pendingSecretKey = await getLocalStoragePendingKey(nearConnection);
-    localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`)
-
-    // start with what exists in local storage, overwrite if necessary
-    let signInData = curEnvData !== null ? JSON.parse(curEnvData) : {};
+    console.log("Local storage env data: ", curEnvData);
+    if (curEnvData !== null) {
+        signInData = {
+            ...JSON.parse(curEnvData),
+            baseUrl: connectionSplit[0], // Need to reset baseURL so it doesn't point to outdated data
+        };
+    }
 
     // Update signInData with connection data if it exists
-    if (connectionParam) {
-        try{
+    if (connectionSplit.length > 1) {
+        let connectionString = connectionSplit[1];
+        try {
             // Decode the Base64-encoded JSON string
-            const decodedString = Buffer.from(connectionParam, 'base64').toString('utf-8');
+            const decodedString = Buffer.from(
+                connectionString,
+                "base64"
+            ).toString("utf-8");
             const connectionData = JSON.parse(decodedString);
-            console.log("parsed connection data: ", connectionData)
+            console.log("parsed connection data: ", connectionData);
 
-            if(connectionData.accountId === undefined || connectionData.walletId === undefined){
-                console.error("Connection data must include accountId and walletId fields");
+            if (
+                connectionData.accountId === undefined ||
+                connectionData.walletId === undefined
+            ) {
+                console.error(
+                    "Connection data must include accountId and walletId fields"
+                );
                 return null;
             }
 
@@ -161,7 +170,7 @@ export const tryGetSignInData = async ({
                 SUPPORTED_EXT_WALLET_DATA[networkId]?.[
                     connectionData.walletId
                 ] !== undefined;
-    
+
             if (!isModuleSupported) {
                 console.warn(
                     `Module ID ${connectionData.wallet} is not supported on ${networkId}.`
@@ -169,38 +178,42 @@ export const tryGetSignInData = async ({
                 return null;
             }
 
-            Object.assign(signInData, {
+            signInData = {
                 accountId: connectionData.accountId,
                 walletId: connectionData.walletId,
                 walletUrl: connectionData.walletTransactionUrl,
                 chainId: connectionData.chainId,
-                baseUrl,
-                secretKey: pendingSecretKey ?? connectionData.secretKey,
-            });
-
-        }catch(e){
-            console.error("Error parsing connection data: ", e)
-            return null
+                baseUrl: connectionSplit[0],
+                secretKey: connectionData.secretKey,
+                addKey: true,
+            };
+        } catch (e) {
+            console.error("Error parsing connection data: ", e);
+            return null;
         }
     }
 
-    const addKeyParam = currentUrlObj.searchParams.get('addKey');
-    if(addKeyParam){
+    if (!signInData?.accountId || signInData === null) {
+        console.log(
+            "No connection found in local storage or URL. returning null"
+        );
+        return null;
+    }
+
+    const addKeySplit = window.location.href.split("?addKey=");
+    if (addKeySplit.length > 1) {
+        const addKeyParam = addKeySplit[1];
         const addKey = addKeyParam !== "false";
         signInData.addKey = addKey;
     }
 
-    if(pendingSecretKey){
+    const pendingSecretKey = await getLocalStoragePendingKey(nearConnection);
+    localStorage.removeItem(`${KEYPOM_LOCAL_STORAGE_KEY}:pendingKey`);
+    if (pendingSecretKey) {
         signInData.secretKey = pendingSecretKey;
     }
 
-    // if signInData is empty, return null
-    if (!Object.keys(signInData).length) {
-        console.log("signin failed, returning null")
-        return null;
-    }
-
-    return signInData
+    return signInData;
 };
 
 /**
@@ -280,16 +293,17 @@ export const parseOneClickSignInFromUrl = ({
         return null;
     }
     // set accountId, walletId always, and secretKey if present
-    let [accountId, secretKey, walletId] = credentials.length === 2 
-    ? [credentials[0], undefined, credentials[1]] 
-    : credentials;
+    let [accountId, secretKey, walletId] =
+        credentials.length === 2
+            ? [credentials[0], undefined, credentials[1]]
+            : credentials;
 
     // in condition, got rid of || ((credentials.length === 3 && !secretKey))
-    if (!accountId || !walletId ) {
+    if (!accountId || !walletId) {
         console.error("Invalid or incomplete authentication data in URL.");
         return null;
     }
-    
+
     return {
         accountId,
         secretKey: credentials.length === 3 ? secretKey : undefined,

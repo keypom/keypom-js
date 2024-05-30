@@ -221,7 +221,10 @@ function setupOneClickConnect(params) {
                     return [4 /*yield*/, connect(connectionConfig)];
                 case 1:
                     nearConnection = _a.sent();
-                    return [4 /*yield*/, (0, selector_utils_1.tryGetSignInData)({ networkId: networkId, nearConnection: nearConnection })];
+                    return [4 /*yield*/, (0, selector_utils_1.tryGetSignInData)({
+                            networkId: networkId,
+                            nearConnection: nearConnection,
+                        })];
                 case 2:
                     signInData = _a.sent();
                     console.log("Sign in data: ", signInData);
@@ -233,7 +236,7 @@ function setupOneClickConnect(params) {
                         nearConnection: nearConnection,
                         keyStore: keyStore,
                         accountId: signInData.accountId,
-                        secretKey: signInData.secretKey ? signInData.secretKey : undefined,
+                        secretKey: signInData.secretKey,
                         walletId: signInData.walletId,
                         baseUrl: signInData.baseUrl,
                         walletUrl: signInData.walletUrl,
