@@ -5,6 +5,7 @@ import {
     getPubFromSecret,
     keyHasPermissionForTransaction,
     setLocalStoragePendingKey,
+    transformTransactions,
 } from "../utils/selector-utils";
 import { FAILED_EXECUTION_OUTCOME } from "./types";
 import { createAction } from "@near-wallet-selector/wallet-utils";
@@ -56,20 +57,14 @@ export const extSignAndSendTransactions = async ({
     let fakRequiredTxns: any = [];
     let responses: any = [];
 
+    const account = await near.account(accountId);
     // user needs access key to be added
     if (secretKey === undefined) {
-        console.warn("Secret key not provided");
-        console.log("anyone home?")
-        // TODO: add access key as part of txn request
-
-        //keypair for testing
-//         ed25519:4qi41RNMrCJ8oLdJFk7zdnBYxPezgHEjt6cytD4hFcV2x8z6mwfD6DvSdgCe1NKeXihsBjEQvvAa4GNQdkEi64yM
-//         ed25519:7kfBxjQ7P2UQXYSzRkcAAxwDMLAjG6CYhauicas893eF
         let pk;
         if(addKey){
-            // const new_key =  nearAPI.KeyPair.fromRandom("ed25519");
-            const new_key = nearAPI.KeyPair.fromString("ed25519:4qi41RNMrCJ8oLdJFk7zdnBYxPezgHEjt6cytD4hFcV2x8z6mwfD6DvSdgCe1NKeXihsBjEQvvAa4GNQdkEi64yM");
+            const new_key =  nearAPI.KeyPair.fromRandom("ed25519");
             pk = new_key.getPublicKey().toString()
+            console.log("secret key being added: ", new_key.toString())
             console.log("pk being added to storage: ", pk);
             setLocalStoragePendingKey({
                 secretKey: new_key.toString(),
@@ -91,8 +86,8 @@ export const extSignAndSendTransactions = async ({
                     const instructions = {
                         transactions,
                         redirectUrl: window.location.href,
-                        limited_access_key: addKey ? {
-                            public_key: pk,
+                        limitedAccessKey: addKey ? {
+                            publicKey: pk,
                             contractId,
                             methodNames,
                             allowance
@@ -104,50 +99,51 @@ export const extSignAndSendTransactions = async ({
                     const newUrl = new URL(walletUrl);
                     newUrl.searchParams.set('instructions', base64Instructions);
                     console.log("SWEAT newUrl: ", newUrl.toString())
+                    redirectUrl = newUrl.toString();
                 }
                 break;
-            case "my-near-wallet":
-                walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                const newUrl = new URL('sign', walletBaseUrl);
-                const account = await near.account(accountId);
+            // case "my-near-wallet":
+            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+            //     const newUrl = new URL('sign', walletBaseUrl);
+            //     const account = await near.account(accountId);
 
-                try{
-                    // const transformed_transactions = await transformTransactions(transactions, account)
-                    // const txn_schema = Transaction.SCHEMA
-                    // const serialized = serialize(txn_schema, transformed_transactions[0])
-                    // newUrl.searchParams.set('transactions', transformed_transactions
-                    //     .map(transaction => serialize(txn_schema, transaction))
-                    //     .map(serialized => Buffer.from(serialized).toString('base64'))
-                    //     .join(','));
-                    // newUrl.searchParams.set('callbackUrl', currentUrl.href);
-                    // //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
-                    // console.log("redirecting to:", newUrl.toString());
-                    redirectUrl = "foo"
-                    // redirectUrl = newUrl.toString();
-                }catch(e){
-                    console.log("error NEW 2: ", e)
-                }
-                break;
-            case "meteor-wallet":
-                // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
-                walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                break;
-            case "mintbase-wallet":
-                // walletBaseUrl = "https://wallet.sweat.finance";
-                walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
-                try{
-                    const serializedTxn = encodeURI(JSON.stringify(transactions))
+            //     try{
+            //         // const transformed_transactions = await transformTransactions(transactions, account)
+            //         // const txn_schema = Transaction.SCHEMA
+            //         // const serialized = serialize(txn_schema, transformed_transactions[0])
+            //         // newUrl.searchParams.set('transactions', transformed_transactions
+            //         //     .map(transaction => serialize(txn_schema, transaction))
+            //         //     .map(serialized => Buffer.from(serialized).toString('base64'))
+            //         //     .join(','));
+            //         // newUrl.searchParams.set('callbackUrl', currentUrl.href);
+            //         // //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+            //         // console.log("redirecting to:", newUrl.toString());
+            //         redirectUrl = "foo"
+            //         // redirectUrl = newUrl.toString();
+            //     }catch(e){
+            //         console.log("error NEW 2: ", e)
+            //     }
+            //     break;
+            // case "meteor-wallet":
+            //     // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
+            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+            //     break;
+            // case "mintbase-wallet":
+            //     // walletBaseUrl = "https://wallet.sweat.finance";
+            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+            //     try{
+            //         const serializedTxn = encodeURI(JSON.stringify(transactions))
 
-                    // mintbase specific stuff
-                    // const newUrl = new URL(`${metadata.walletUrl}/sign-transaction`);
-                    // newUrl.searchParams.set('transactions_data', urlParam);
-                    // newUrl.searchParams.set('callback_url', cbUrl);
-                    // window.location.assign(newUrl.toString());
-                    console.log(serializedTxn)
-                }catch(e){
-                    console.log("error 3: ", e)
-                }
-                break;
+            //         // mintbase specific stuff
+            //         // const newUrl = new URL(`${metadata.walletUrl}/sign-transaction`);
+            //         // newUrl.searchParams.set('transactions_data', urlParam);
+            //         // newUrl.searchParams.set('callback_url', cbUrl);
+            //         // window.location.assign(newUrl.toString());
+            //         console.log(serializedTxn)
+            //     }catch(e){
+            //         console.log("error 3: ", e)
+            //     }
+            //     break;
             default:
                 throw new Error(`Unsupported wallet ID: ${walletId}`);
         };
@@ -158,7 +154,6 @@ export const extSignAndSendTransactions = async ({
         return [];
     }
 
-    const account = await near.account(accountId);
     const pk = getPubFromSecret(secretKey);
     for (let i = 0; i < transactions.length; i++) {
         let txn = transactions[i];

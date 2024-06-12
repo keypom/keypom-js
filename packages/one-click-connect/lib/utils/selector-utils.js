@@ -69,10 +69,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetSignInData = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
+exports.getAccessKey = exports.createAction = exports.transformTransactions = exports.baseDecode = exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetSignInData = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
+// import { Account } from "@near-js/accounts";
+var bn_js_1 = __importDefault(require("bn.js"));
+var bs58_1 = require("bs58");
 exports.ONE_CLICK_URL_REGEX = new RegExp("^(.*):accountId(.+):secretKey(.+):walletId(.*)$");
 exports.KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
 exports.NO_CONTRACT_ID = "no-contract";
@@ -302,3 +308,87 @@ var getPubFromSecret = function (secretKey) {
     return keyPair.getPublicKey().toString();
 };
 exports.getPubFromSecret = getPubFromSecret;
+var baseDecode = function (value) {
+    return new Uint8Array((0, bs58_1.decode)(value));
+};
+exports.baseDecode = baseDecode;
+// : nearAPI.transactions.Transaction[]
+var transformTransactions = function (transactions, account) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, networkId, signer, provider;
+    return __generator(this, function (_b) {
+        _a = account.connection, networkId = _a.networkId, signer = _a.signer, provider = _a.provider;
+        console.log("utils signer: ", signer);
+        return [2 /*return*/, Promise.all(transactions.map(function (transaction, index) { return __awaiter(void 0, void 0, void 0, function () {
+                var actions, accessKey, block;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            actions = transaction.actions.map(function (action) {
+                                return (0, exports.createAction)(action);
+                            });
+                            return [4 /*yield*/, account.findAccessKey(transaction.receiverId, actions)];
+                        case 1:
+                            accessKey = _a.sent();
+                            if (!accessKey) {
+                                throw new Error("Failed to find matching key for transaction sent to ".concat(transaction.receiverId));
+                            }
+                            return [4 /*yield*/, provider.block({ finality: "final" })];
+                        case 2:
+                            block = _a.sent();
+                            return [2 /*return*/, nearAPI.transactions.createTransaction(account.accountId, nearAPI.utils.PublicKey.from(accessKey.publicKey), transaction.receiverId, accessKey.accessKey.nonce + BigInt(index) + BigInt(1), actions, (0, exports.baseDecode)(block.header.hash))];
+                    }
+                });
+            }); }))];
+    });
+}); };
+exports.transformTransactions = transformTransactions;
+var createAction = function (action) {
+    switch (action.type) {
+        case "CreateAccount":
+            return nearAPI.transactions.createAccount();
+        case "DeployContract": {
+            var code = action.params.code;
+            return nearAPI.transactions.deployContract(code);
+        }
+        case "FunctionCall": {
+            var _a = action.params, methodName = _a.methodName, args = _a.args, gas = _a.gas, deposit = _a.deposit;
+            return nearAPI.transactions.functionCall(methodName, args, new bn_js_1.default(gas), new bn_js_1.default(deposit));
+        }
+        case "Transfer": {
+            var deposit = action.params.deposit;
+            return nearAPI.transactions.transfer(new bn_js_1.default(deposit));
+        }
+        case "Stake": {
+            var _b = action.params, stake = _b.stake, publicKey = _b.publicKey;
+            return nearAPI.transactions.stake(new bn_js_1.default(stake), nearAPI.utils.PublicKey.from(publicKey));
+        }
+        case "AddKey": {
+            var _c = action.params, publicKey = _c.publicKey, accessKey = _c.accessKey;
+            return nearAPI.transactions.addKey(nearAPI.utils.PublicKey.from(publicKey), 
+            // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
+            (0, exports.getAccessKey)(accessKey.permission));
+        }
+        case "DeleteKey": {
+            var publicKey = action.params.publicKey;
+            return nearAPI.transactions.deleteKey(nearAPI.utils.PublicKey.from(publicKey));
+        }
+        case "DeleteAccount": {
+            var beneficiaryId = action.params.beneficiaryId;
+            return nearAPI.transactions.deleteAccount(beneficiaryId);
+        }
+        default:
+            throw new Error("Invalid action type");
+    }
+};
+exports.createAction = createAction;
+var getAccessKey = function (permission) {
+    if (permission === "FullAccess") {
+        return nearAPI.transactions.fullAccessKey();
+    }
+    var receiverId = permission.receiverId, _a = permission.methodNames, methodNames = _a === void 0 ? [] : _a;
+    var allowance = permission.allowance
+        ? new bn_js_1.default(permission.allowance)
+        : undefined;
+    return nearAPI.transactions.functionCallAccessKey(receiverId, methodNames, allowance);
+};
+exports.getAccessKey = getAccessKey;
