@@ -94,8 +94,8 @@ const selector = await setupWalletSelector({
         setupOneClickConnect({
             networkId: "testnet",
             contractId: "guestbook.near-examples.testnet",
-            methods: ["add_message"], // Defaults to any methods ["*"]
-            allowance: "250000000000000000000000" // Amount in Yocto, defaults to 1 NEAR
+            methods: ["add_message"], // Optional, defaults to any methods ["*"]
+            allowance: "250000000000000000000000" // Optional, access key allowance in Yocto, defaults to 1 NEAR
         })
     ],
 });
@@ -104,7 +104,9 @@ const selector = await setupWalletSelector({
 ## setupOneClickConnect Parameters
 
 -   `networkId`: Either `testnet` or `mainnet`.
--   `contractId`*: Specifies the contract that the limited access key 
+-   `contractId`: Specifies the contract that the limited access key 
+-   `methods` (*Optional*): This controls what methods any limited access keys added will be able to call. Defaults to all methods
+-   `allowance` (*Optional*): Outlines the allowance for any limited access keys added. This defaults to 1 NEAR. 
 
 ## How do I trigger OneClick Connect?
 
@@ -117,22 +119,20 @@ The string following `#connection=` is a base64 encoded stringified JSON contain
 
 ### Connection Parameters
 ```ts
- signInData = {
+ connection = {
     accountId: string,
     walletId: string,
-    secretKey: string | undefined,
-    chainId: string | undefined,
-    addKey: string | undefined,
     walletUrl: string | undefined,
+    chainId: string | undefined,
+    secretKey: string | undefined,
 };
 ```
 
--   `accountId`: Either `testnet` or `mainnet`.
--   `walletId`*: Specifies the contract that the limited access key can use
--   `secretKey`: The secret key for signing transactions on the destination dApp
--   `chainId`: Destination chain for the sign in
--   `addKey`: Determines whether or not 
--   `walletUrl`: 
+-   `accountId`: The account being signed into the destination dApp.
+-   `walletId`*: ID of the wallet being used. For example, `sweat-wallet`. 
+-   `walletUrl`: This is the URL for a wallet signing transactions.
+-   `chainId`: Destination chain for the sign in, defaults to NEAR.
+-   `secretKey`: The secret key for signing transactions on the destination dApp. If undefined, OneClick will try to add it along with the first transaction the user signs. 
   
 ### Optional Secret Key
 In the development of OneClick, it became apparent that exposing a secret key in the URL could pose a security concern in certain scenarios. For example, if the limited access key was meant to cast a vote in a DAO, then it would be imparative that the key is not exposed in order to ensure the integrity of the vote. This led to the creation of two flows, depending on your security needs. 
@@ -142,10 +142,11 @@ The first approach is the less secure method, directly exposing the secret key i
 
 1. dApp A, that the user is signed into with the full access key, creates a new limited access key for the user in the background
 2. This new key is placed into the connection object in the URL
-3. User clicks on the URL, signing them into dApp B. From here, they can instantly start signing transactions on dApp B without ever needing to open their wallet.
+3. User clicks on the URL, signing them into dApp B. From here, they can instantly start signing transactions on dApp B, using the previously generated secret key, without ever needing to open their wallet.
 
 #### Without Secret Key
 The second approach is more secure but includes an extra step. Rather than dApp A creating a limited access key before redirecting, this occurs when the user attempts to sign the first transaction on dApp B:
+
 1. dApp A creates a OneClick URL without any secret key in the connection object
 2. User clicks on URL, signing them into dApp B
 3. When the user tries to sign a transaction on dApp B, it redirects them back to their wallet to both sign the transaction and add a limited access key for dApp B.
@@ -153,11 +154,10 @@ The second approach is more secure but includes an extra step. Rather than dApp 
 
 
 #### Example Usage
+Apps can utilize OneClick Connect on any page by ensuring the URL contains the `?connection=` parameter. For instance:
+- Any navigation to a URL like `"http://app.example.com/?connection=tbin329...adwe0vjer"` will automatically trigger the sign-in process using the provided account ID, secret key, and wallet ID.
 
-Apps can utilize OneClick Connect on any page by ensuring the URL matches the specified `urlPattern`. For instance:
-- If your app is configured with urlPattern set to `"#instant-url/:accountId/:secretKey/:walletId"`, any navigation to a URL like `"http://app.example.com/#instant-url/benjiman.testnet/5aHto...7aX14G/sweat-wallet"` will automatically trigger the sign-in process using the provided account ID, secret key, and wallet ID.
-
-Similarly, this would also trigger on `"http://app.example.com/nestedPage/gallery#instant-url/benjiman.testnet/5aHto...7aX14G/sweat-wallet"`
+Similarly, this would also trigger on `"http://app.example.com/nestedPage/gallery?connection=tbin329...adwe0vjer"`
 
 ### Wallet IDs
 
@@ -165,8 +165,9 @@ Behind the scenes, Keypom will take the secret key and use it to sign transactio
 
 Currently, Keypom supports:
 
--   MyNEARWallet: `my-near-wallet`,
 -   SWEAT Wallet: `sweat-wallet`
+-   [Coming Soon] MyNEARWallet: `my-near-wallet`,
+-   [Coming Soon] Mintbase Wallet: `mintbase-wallet`,
 
 # Contributing
 
