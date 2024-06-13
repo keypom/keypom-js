@@ -189,8 +189,9 @@ var tryGetSignInData = function (_a) {
                         console.log("No connection found in local storage or URL. returning null");
                         return [2 /*return*/, null];
                     }
-                    addKeySplit = connectionSplit.length > 1 ? window.location.href.split("&addKey=") : window.location.href.split("?addKey=");
-                    ;
+                    addKeySplit = connectionSplit.length > 1
+                        ? window.location.href.split("&addKey=")
+                        : window.location.href.split("?addKey=");
                     if (addKeySplit.length > 1) {
                         addKeyParam = addKeySplit[1];
                         addKey = addKeyParam !== "false";

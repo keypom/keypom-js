@@ -3,7 +3,7 @@ import { Action, Network, NetworkId } from "@near-wallet-selector/core";
 import { SUPPORTED_EXT_WALLET_DATA } from "../core/ext_wallets";
 import { isOneClickParams, OneClickParams } from "../core/types";
 import BN from "bn.js";
-import { decode } from "bs58"
+import { decode } from "bs58";
 
 import { Transaction as wsTransaction } from "@near-wallet-selector/core";
 import { Action as wsAction } from "@near-wallet-selector/core";
@@ -153,7 +153,7 @@ export const tryGetSignInData = async ({
     if (connectionSplit.length > 1) {
         // remove addKey part if present
         let connectionString = connectionSplit[1].split("&addKey=")[0];
-        
+
         try {
             // Decode the Base64-encoded JSON string
             const decodedString = Buffer.from(
@@ -209,7 +209,10 @@ export const tryGetSignInData = async ({
     }
 
     // if connection split exists, then addKey param will be passed in as secondary
-    const addKeySplit =  connectionSplit.length > 1 ? window.location.href.split("&addKey=") : window.location.href.split("?addKey=");;
+    const addKeySplit =
+        connectionSplit.length > 1
+            ? window.location.href.split("&addKey=")
+            : window.location.href.split("?addKey=");
     if (addKeySplit.length > 1) {
         const addKeyParam = addKeySplit[1];
         const addKey = addKeyParam !== "false";
@@ -349,111 +352,120 @@ export const getPubFromSecret = (secretKey: string): string => {
     return keyPair.getPublicKey().toString();
 };
 
-export const baseDecode = (
-    value: string
-) => {
+export const baseDecode = (value: string) => {
     return new Uint8Array(decode(value));
-}
+};
 
 // : nearAPI.transactions.Transaction[]
 // MUST BE USED WITH KEY FOR TXN
-export const transformTransactions = async (transactions: wsTransaction[], account: nearAPI.Account) => {
+export const transformTransactions = async (
+    transactions: wsTransaction[],
+    account: nearAPI.Account
+) => {
     const { networkId, signer, provider } = account.connection;
-    console.log("utils signer: ", signer)
+    console.log("utils signer: ", signer);
 
     return Promise.all(
-      transactions.map(async (transaction, index) => {
-        const actions = transaction.actions.map((action) =>
-          createAction(action)
-        );
-        const accessKey = await account.findAccessKey(
-          transaction.receiverId,
-          actions,
-        );    
+        transactions.map(async (transaction, index) => {
+            const actions = transaction.actions.map((action) =>
+                createAction(action)
+            );
+            const accessKey = await account.findAccessKey(
+                transaction.receiverId,
+                actions
+            );
 
-        if (!accessKey) {
-          throw new Error(
-            `Failed to find matching key for transaction sent to ${transaction.receiverId}`
-          );
-        }
+            if (!accessKey) {
+                throw new Error(
+                    `Failed to find matching key for transaction sent to ${transaction.receiverId}`
+                );
+            }
 
-        const block = await provider.block({ finality: "final" });
+            const block = await provider.block({ finality: "final" });
 
-        return nearAPI.transactions.createTransaction(
-          account.accountId,
-          nearAPI.utils.PublicKey.from(accessKey.publicKey),
-          transaction.receiverId,
-          accessKey.accessKey.nonce + BigInt(index) + BigInt(1),
-          actions,
-          baseDecode(block.header.hash)
-        );
-      })
+            return nearAPI.transactions.createTransaction(
+                account.accountId,
+                nearAPI.utils.PublicKey.from(accessKey.publicKey),
+                transaction.receiverId,
+                accessKey.accessKey.nonce + BigInt(index) + BigInt(1),
+                actions,
+                baseDecode(block.header.hash)
+            );
+        })
     );
-    
-}
+};
 
 export const createAction = (action: wsAction) => {
-  switch (action.type) {
-    case "CreateAccount" :
-      return nearAPI.transactions.createAccount();
-    case "DeployContract": {
-      const { code } = action.params;
+    switch (action.type) {
+        case "CreateAccount":
+            return nearAPI.transactions.createAccount();
+        case "DeployContract": {
+            const { code } = action.params;
 
-      return nearAPI.transactions.deployContract(code);
-    }
-    case "FunctionCall": {
-      const { methodName, args, gas, deposit } = action.params;
+            return nearAPI.transactions.deployContract(code);
+        }
+        case "FunctionCall": {
+            const { methodName, args, gas, deposit } = action.params;
 
-      return nearAPI.transactions.functionCall(
-        methodName,
-        args,
-        new BN(gas),
-        new BN(deposit)
-      );
-    }
-    case "Transfer": {
-      const { deposit } = action.params;
+            return nearAPI.transactions.functionCall(
+                methodName,
+                args,
+                new BN(gas),
+                new BN(deposit)
+            );
+        }
+        case "Transfer": {
+            const { deposit } = action.params;
 
-      return nearAPI.transactions.transfer(new BN(deposit));
-    }
-    case "Stake": {
-      const { stake, publicKey } = action.params;
+            return nearAPI.transactions.transfer(new BN(deposit));
+        }
+        case "Stake": {
+            const { stake, publicKey } = action.params;
 
-      return nearAPI.transactions.stake(new BN(stake), nearAPI.utils.PublicKey.from(publicKey));
-    }
-    case "AddKey": {
-      const { publicKey, accessKey } = action.params;
+            return nearAPI.transactions.stake(
+                new BN(stake),
+                nearAPI.utils.PublicKey.from(publicKey)
+            );
+        }
+        case "AddKey": {
+            const { publicKey, accessKey } = action.params;
 
-      return nearAPI.transactions.addKey(
-          nearAPI.utils.PublicKey.from(publicKey),
-        // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
-        getAccessKey(accessKey.permission)
-      );
-    }
-    case "DeleteKey": {
-      const { publicKey } = action.params;
+            return nearAPI.transactions.addKey(
+                nearAPI.utils.PublicKey.from(publicKey),
+                // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
+                getAccessKey(accessKey.permission)
+            );
+        }
+        case "DeleteKey": {
+            const { publicKey } = action.params;
 
-      return nearAPI.transactions.deleteKey(nearAPI.utils.PublicKey.from(publicKey));
-    }
-    case "DeleteAccount": {
-      const { beneficiaryId } = action.params
+            return nearAPI.transactions.deleteKey(
+                nearAPI.utils.PublicKey.from(publicKey)
+            );
+        }
+        case "DeleteAccount": {
+            const { beneficiaryId } = action.params;
 
-      return nearAPI.transactions.deleteAccount(beneficiaryId);
+            return nearAPI.transactions.deleteAccount(beneficiaryId);
+        }
+        default:
+            throw new Error("Invalid action type");
     }
-    default:
-      throw new Error("Invalid action type");
-  }
 };
 
 export const getAccessKey = (permission: AddKeyPermission) => {
-  if (permission === "FullAccess") {
-    return nearAPI.transactions.fullAccessKey();
-  }
+    if (permission === "FullAccess") {
+        return nearAPI.transactions.fullAccessKey();
+    }
 
-  const { receiverId, methodNames = [] } = permission;
-  const allowance = permission.allowance
-    ? new BN(permission.allowance)
-    : undefined;
+    const { receiverId, methodNames = [] } = permission;
+    const allowance = permission.allowance
+        ? new BN(permission.allowance)
+        : undefined;
 
-  return nearAPI.transactions.functionCallAccessKey(receiverId, methodNames, allowance);
+    return nearAPI.transactions.functionCallAccessKey(
+        receiverId,
+        methodNames,
+        allowance
+    );
 };
