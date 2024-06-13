@@ -151,7 +151,9 @@ export const tryGetSignInData = async ({
 
     // Update signInData with connection data if it exists
     if (connectionSplit.length > 1) {
-        let connectionString = connectionSplit[1];
+        // remove addKey part if present
+        let connectionString = connectionSplit[1].split("&addKey=")[0];
+        
         try {
             // Decode the Base64-encoded JSON string
             const decodedString = Buffer.from(
@@ -206,7 +208,8 @@ export const tryGetSignInData = async ({
         return null;
     }
 
-    const addKeySplit = window.location.href.split("?addKey=");
+    // if connection split exists, then addKey param will be passed in as secondary
+    const addKeySplit =  connectionSplit.length > 1 ? window.location.href.split("&addKey=") : window.location.href.split("?addKey=");;
     if (addKeySplit.length > 1) {
         const addKeyParam = addKeySplit[1];
         const addKey = addKeyParam !== "false";

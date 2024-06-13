@@ -76,7 +76,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAccessKey = exports.createAction = exports.transformTransactions = exports.baseDecode = exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetSignInData = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
-// import { Account } from "@near-js/accounts";
 var bn_js_1 = __importDefault(require("bn.js"));
 var bs58_1 = require("bs58");
 exports.ONE_CLICK_URL_REGEX = new RegExp("^(.*):accountId(.+):secretKey(.+):walletId(.*)$");
@@ -156,7 +155,7 @@ var tryGetSignInData = function (_a) {
                     }
                     // Update signInData with connection data if it exists
                     if (connectionSplit.length > 1) {
-                        connectionString = connectionSplit[1];
+                        connectionString = connectionSplit[1].split("&addKey=")[0];
                         try {
                             decodedString = Buffer.from(connectionString, "base64").toString("utf-8");
                             connectionData = JSON.parse(decodedString);
@@ -190,7 +189,8 @@ var tryGetSignInData = function (_a) {
                         console.log("No connection found in local storage or URL. returning null");
                         return [2 /*return*/, null];
                     }
-                    addKeySplit = window.location.href.split("?addKey=");
+                    addKeySplit = connectionSplit.length > 1 ? window.location.href.split("&addKey=") : window.location.href.split("?addKey=");
+                    ;
                     if (addKeySplit.length > 1) {
                         addKeyParam = addKeySplit[1];
                         addKey = addKeyParam !== "false";
@@ -313,6 +313,7 @@ var baseDecode = function (value) {
 };
 exports.baseDecode = baseDecode;
 // : nearAPI.transactions.Transaction[]
+// MUST BE USED WITH KEY FOR TXN
 var transformTransactions = function (transactions, account) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, networkId, signer, provider;
     return __generator(this, function (_b) {
