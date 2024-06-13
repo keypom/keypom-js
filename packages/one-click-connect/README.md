@@ -113,29 +113,29 @@ const selector = await setupWalletSelector({
 The OneClick Connect experience will trigger on any page that matches the following URL pattern:
 
 ```
-"http://app.example.com/#connection=tbin329...adwe0vjer"
+"http://app.example.com/?connection=tbin329...adwe0vjer"
 ```
 
-The string following `#connection=` is a base64 encoded stringified JSON containing connection information. This JSON can be seen below:
+The string following `?connection=` is a base64 encoded stringified JSON containing connection information. This JSON can be seen below:
 
 ### Connection Parameters
 ```ts
- connection = {
-    accountId: string,
-    walletId: string,
-    walletTransactionUrl: string | undefined,
-    chainId: string | undefined,
-    secretKey: string | undefined,
+connection = {
+  accountId: string,
+  walletId: string,
+  walletTransactionUrl: string | undefined,
+  chainId: string | undefined,
+  secretKey: string | undefined,
 };
 ```
 
 -   `accountId`: The account being signed into the destination dApp.
--   `walletId`*: ID of the wallet being used. For example, `sweat-wallet`. 
+-   `walletId`: ID of the wallet being used. For example, `sweat-wallet`. 
 -   `walletTransactionUrl`: This is the URL for a wallet signing transactions.
 -   `chainId`: Destination chain for the sign in, defaults to NEAR.
 -   `secretKey`: The secret key for signing transactions on the destination dApp. If undefined, OneClick will try to add it along with the first transaction the user signs. 
 
-Any malformed string following `connection` that cannot be base64 decoded and JSON stringified will lead to a failed login.
+Any malformed string following `?connection=` that cannot be base64 decoded and JSON stringified will lead to a failed login.
   
 ### Optional Secret Key
 In the development of OneClick, it became apparent that exposing a secret key in the URL could pose a security concern in certain scenarios. For example, if the limited access key was meant to cast a vote in a DAO, then it would be imparative that the key is not exposed in order to ensure the integrity of the vote. This led to the creation of two flows, depending on your security needs. 
@@ -150,7 +150,7 @@ The first approach is the less secure method, directly exposing the secret key i
 #### Example Flow without Secret Key
 The second approach is more secure but includes an extra step. Rather than dApp A creating a limited access key before redirecting, this occurs when the user attempts to sign the first transaction on dApp B:
 
-1. dApp A creates a OneClick URL without any secret key in the connection object
+1. dApp A, that the user is signed into with the full access key, creates a OneClick URL without any secret key in the connection object
 2. User clicks on URL, signing them into dApp B
 3. When the user tries to sign a transaction on dApp B, it redirects them back to their wallet to both sign the transaction and add a limited access key for dApp B.
 4. Once the user signs this, and the dApp B limited access key is added, they can now proceed to sign further transactions on dApp B without needing to open their wallet. 
