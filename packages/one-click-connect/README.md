@@ -33,8 +33,8 @@ Keypom OneClick Connect is a package that allows apps to bypass the NEAR wallet 
   - [How do I trigger OneClick Connect?](#how-do-i-trigger-oneclick-connect)
     - [Connection Parameters](#connection-parameters)
     - [Optional Secret Key](#optional-secret-key)
-      - [With Secret Key](#with-secret-key)
-      - [Without Secret Key](#without-secret-key)
+      - [Example Flow with Secret Key](#example-flow-with-secret-key)
+      - [Example Flow without Secret Key](#example-flow-without-secret-key)
       - [Example Usage](#example-usage)
     - [Wallet IDs](#wallet-ids)
 - [Contributing](#contributing)
@@ -104,8 +104,8 @@ const selector = await setupWalletSelector({
 ## setupOneClickConnect Parameters
 
 -   `networkId`: Either `testnet` or `mainnet`.
--   `contractId`: Specifies the contract that the limited access key 
--   `methods` (*Optional*): This controls what methods any limited access keys added will be able to call. Defaults to all methods
+-   `contractId`: Specifies the contract that the limited access key is capable of calling.
+-   `methods` (*Optional*): This controls what methods any limited access keys added will be able to call. Defaults to all methods.
 -   `allowance` (*Optional*): Outlines the allowance for any limited access keys added. This defaults to 1 NEAR. 
 
 ## How do I trigger OneClick Connect?
@@ -115,6 +115,7 @@ The OneClick Connect experience will trigger on any page that matches the follow
 ```
 "http://app.example.com/#connection=tbin329...adwe0vjer"
 ```
+
 The string following `#connection=` is a base64 encoded stringified JSON containing connection information. This JSON can be seen below:
 
 ### Connection Parameters
@@ -122,7 +123,7 @@ The string following `#connection=` is a base64 encoded stringified JSON contain
  connection = {
     accountId: string,
     walletId: string,
-    walletUrl: string | undefined,
+    walletTransactionUrl: string | undefined,
     chainId: string | undefined,
     secretKey: string | undefined,
 };
@@ -130,21 +131,23 @@ The string following `#connection=` is a base64 encoded stringified JSON contain
 
 -   `accountId`: The account being signed into the destination dApp.
 -   `walletId`*: ID of the wallet being used. For example, `sweat-wallet`. 
--   `walletUrl`: This is the URL for a wallet signing transactions.
+-   `walletTransactionUrl`: This is the URL for a wallet signing transactions.
 -   `chainId`: Destination chain for the sign in, defaults to NEAR.
 -   `secretKey`: The secret key for signing transactions on the destination dApp. If undefined, OneClick will try to add it along with the first transaction the user signs. 
+
+Any malformed string following `connection` that cannot be base64 decoded and JSON stringified will lead to a failed login.
   
 ### Optional Secret Key
 In the development of OneClick, it became apparent that exposing a secret key in the URL could pose a security concern in certain scenarios. For example, if the limited access key was meant to cast a vote in a DAO, then it would be imparative that the key is not exposed in order to ensure the integrity of the vote. This led to the creation of two flows, depending on your security needs. 
 
-#### With Secret Key
+#### Example Flow with Secret Key
 The first approach is the less secure method, directly exposing the secret key in the URL. The compromise in security grants you a smoother user experience. The flow is as follows:
 
 1. dApp A, that the user is signed into with the full access key, creates a new limited access key for the user in the background
 2. This new key is placed into the connection object in the URL
 3. User clicks on the URL, signing them into dApp B. From here, they can instantly start signing transactions on dApp B, using the previously generated secret key, without ever needing to open their wallet.
 
-#### Without Secret Key
+#### Example Flow without Secret Key
 The second approach is more secure but includes an extra step. Rather than dApp A creating a limited access key before redirecting, this occurs when the user attempts to sign the first transaction on dApp B:
 
 1. dApp A creates a OneClick URL without any secret key in the connection object
@@ -155,7 +158,7 @@ The second approach is more secure but includes an extra step. Rather than dApp 
 
 #### Example Usage
 Apps can utilize OneClick Connect on any page by ensuring the URL contains the `?connection=` parameter. For instance:
-- Any navigation to a URL like `"http://app.example.com/?connection=tbin329...adwe0vjer"` will automatically trigger the sign-in process using the provided account ID, secret key, and wallet ID.
+- Any navigation to a URL like `"http://app.example.com/?connection=tbin329...adwe0vjer"` will automatically trigger the sign-in process using the provided connection object.
 
 Similarly, this would also trigger on `"http://app.example.com/nestedPage/gallery?connection=tbin329...adwe0vjer"`
 
