@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -58,11 +69,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetAccountData = exports.areParamsCorrect = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
+exports.getAccessKey = exports.createAction = exports.transformTransactions = exports.baseDecode = exports.getPubFromSecret = exports.getNetworkPreset = exports.parseOneClickSignInFromUrl = exports.keyHasPermissionForTransaction = exports.tryGetSignInData = exports.setLocalStorageKeypomLak = exports.getLocalStorageKeypomLak = exports.setLocalStoragePendingKey = exports.getLocalStoragePendingKey = exports.setLocalStorageKeypomEnv = exports.getLocalStorageKeypomEnv = exports.NO_CONTRACT_ID = exports.KEYPOM_LOCAL_STORAGE_KEY = exports.ONE_CLICK_URL_REGEX = void 0;
 var nearAPI = __importStar(require("near-api-js"));
 var ext_wallets_1 = require("../core/ext_wallets");
-var types_1 = require("../core/types");
+var bn_js_1 = __importDefault(require("bn.js"));
+var bs58_1 = require("bs58");
 exports.ONE_CLICK_URL_REGEX = new RegExp("^(.*):accountId(.+):secretKey(.+):walletId(.*)$");
 exports.KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
 exports.NO_CONTRACT_ID = "no-contract";
@@ -76,59 +91,124 @@ var setLocalStorageKeypomEnv = function (jsonData) {
     localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":envData"), dataToWrite);
 };
 exports.setLocalStorageKeypomEnv = setLocalStorageKeypomEnv;
-var areParamsCorrect = function (params) {
-    var urlPattern = params.urlPattern, networkId = params.networkId;
-    // Validate Keypom parameters
-    if (!(0, types_1.isOneClickParams)(params)) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. Please check the docs for the correct format.");
-        return false;
-    }
-    // Additional business logic checks
-    if (!networkId || !urlPattern) {
-        console.error("KeypomWallet: networkId, and url are required.");
-        return false;
-    }
-    if (urlPattern &&
-        !(urlPattern.includes(":accountId") &&
-            urlPattern.includes(":secretKey") &&
-            urlPattern.includes(":walletId"))) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. urlPattern string must contain `:accountId`, `:secretKey`, and `:walletId` placeholders.");
-        return false;
-    }
-    var matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX);
-    if (!matches) {
-        console.error("KeypomWallet: Invalid OneClick Params passed in. urlPattern is invalid.");
-        return false;
-    }
-    return true;
-};
-exports.areParamsCorrect = areParamsCorrect;
-var tryGetAccountData = function (_a) {
-    var _b;
-    var urlPattern = _a.urlPattern, networkId = _a.networkId;
-    var matches = urlPattern.match(exports.ONE_CLICK_URL_REGEX); // Safe since we check the same URL before;
-    var baseUrl = matches[1];
-    var delimiter = matches[2];
-    // Try to sign in using one click sign-in data from URL
-    var oneClickSignInData = baseUrl !== undefined
-        ? (0, exports.parseOneClickSignInFromUrl)({ baseUrl: baseUrl, delimiter: delimiter })
-        : null;
-    if (oneClickSignInData !== null) {
-        var isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[oneClickSignInData.walletId]) !== undefined;
-        if (!isModuleSupported) {
-            console.warn("Module ID ".concat(oneClickSignInData.walletId, " is not supported on ").concat(networkId, "."));
-            return null;
+var getLocalStoragePendingKey = function (near) { return __awaiter(void 0, void 0, void 0, function () {
+    var localStorageData, localStorageDataJson, accountId, accessKey, e_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                localStorageData = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
+                if (localStorageData === null)
+                    return [2 /*return*/, null];
+                localStorageDataJson = JSON.parse(localStorageData);
+                accountId = localStorageDataJson.accountId;
+                if (!(localStorageDataJson.publicKey && localStorageDataJson.secretKey)) return [3 /*break*/, 4];
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, near.connection.provider.query("access_key/".concat(accountId, "/").concat(localStorageDataJson.publicKey), "")];
+            case 2:
+                accessKey = _a.sent();
+                if (accessKey) {
+                    return [2 /*return*/, localStorageDataJson.secretKey];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                e_1 = _a.sent();
+                console.log("error retrieving access key: ", e_1);
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/, null];
         }
-        return oneClickSignInData;
-    }
-    // Try to sign in using data from local storage if URL does not contain valid one click sign-in data
-    var curEnvData = (0, exports.getLocalStorageKeypomEnv)();
-    if (curEnvData !== null) {
-        return JSON.parse(curEnvData);
-    }
-    return null;
+    });
+}); };
+exports.getLocalStoragePendingKey = getLocalStoragePendingKey;
+var setLocalStoragePendingKey = function (jsonData) {
+    var dataToWrite = JSON.stringify(jsonData);
+    localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"), dataToWrite);
+    console.log("done writing");
 };
-exports.tryGetAccountData = tryGetAccountData;
+exports.setLocalStoragePendingKey = setLocalStoragePendingKey;
+// allowance, methodNames, walletUrl
+var getLocalStorageKeypomLak = function () {
+    var localStorageDataJson = localStorage.getItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"));
+    return localStorageDataJson;
+};
+exports.getLocalStorageKeypomLak = getLocalStorageKeypomLak;
+var setLocalStorageKeypomLak = function (jsonData) {
+    var dataToWrite = JSON.stringify(jsonData);
+    localStorage.setItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":LakData"), dataToWrite);
+};
+exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
+var tryGetSignInData = function (_a) {
+    var networkId = _a.networkId, nearConnection = _a.nearConnection;
+    return __awaiter(void 0, void 0, void 0, function () {
+        var connectionSplit, signInData, curEnvData, connectionString, decodedString, connectionData, isModuleSupported, addKeySplit, addKeyParam, addKey, pendingSecretKey;
+        var _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    connectionSplit = window.location.href.split("?connection=");
+                    signInData = null;
+                    curEnvData = (0, exports.getLocalStorageKeypomEnv)();
+                    console.log("Local storage env data: ", curEnvData);
+                    if (curEnvData !== null) {
+                        signInData = __assign(__assign({}, JSON.parse(curEnvData)), { baseUrl: connectionSplit[0] });
+                    }
+                    // Update signInData with connection data if it exists
+                    if (connectionSplit.length > 1) {
+                        connectionString = connectionSplit[1].split("&addKey=")[0];
+                        try {
+                            decodedString = Buffer.from(connectionString, "base64").toString("utf-8");
+                            connectionData = JSON.parse(decodedString);
+                            console.log("parsed connection data: ", connectionData);
+                            if (connectionData.accountId === undefined ||
+                                connectionData.walletId === undefined) {
+                                console.error("Connection data must include accountId and walletId fields");
+                                return [2 /*return*/, null];
+                            }
+                            isModuleSupported = ((_b = ext_wallets_1.SUPPORTED_EXT_WALLET_DATA[networkId]) === null || _b === void 0 ? void 0 : _b[connectionData.walletId]) !== undefined;
+                            if (!isModuleSupported) {
+                                console.warn("Module ID ".concat(connectionData.wallet, " is not supported on ").concat(networkId, "."));
+                                return [2 /*return*/, null];
+                            }
+                            signInData = {
+                                accountId: connectionData.accountId,
+                                walletId: connectionData.walletId,
+                                walletUrl: connectionData.walletTransactionUrl,
+                                chainId: connectionData.chainId,
+                                baseUrl: connectionSplit[0],
+                                secretKey: connectionData.secretKey,
+                                addKey: true,
+                            };
+                        }
+                        catch (e) {
+                            console.error("Error parsing connection data: ", e);
+                            return [2 /*return*/, null];
+                        }
+                    }
+                    if (!(signInData === null || signInData === void 0 ? void 0 : signInData.accountId) || signInData === null) {
+                        console.log("No connection found in local storage or URL. returning null");
+                        return [2 /*return*/, null];
+                    }
+                    addKeySplit = connectionSplit.length > 1 ? window.location.href.split("&addKey=") : window.location.href.split("?addKey=");
+                    ;
+                    if (addKeySplit.length > 1) {
+                        addKeyParam = addKeySplit[1];
+                        addKey = addKeyParam !== "false";
+                        signInData.addKey = addKey;
+                    }
+                    return [4 /*yield*/, (0, exports.getLocalStoragePendingKey)(nearConnection)];
+                case 1:
+                    pendingSecretKey = _c.sent();
+                    localStorage.removeItem("".concat(exports.KEYPOM_LOCAL_STORAGE_KEY, ":pendingKey"));
+                    if (pendingSecretKey) {
+                        signInData.secretKey = pendingSecretKey;
+                    }
+                    return [2 /*return*/, signInData];
+            }
+        });
+    });
+};
+exports.tryGetSignInData = tryGetSignInData;
 /**
  * Check if given access key allows the function call or method attempted in transaction
  * @param accessKey Array of \{access_key: AccessKey, public_key: PublicKey\} items
@@ -178,19 +258,23 @@ var parseOneClickSignInFromUrl = function (_a) {
     }
     // Further split to separate accountId, secretKey, and walletId
     var credentials = parts[1].split(delimiter);
-    if (credentials.length !== 3) {
-        console.error("URL does not contain all required parameters (accountId, secretKey, walletId).");
+    // secret key may be missing --> originall had || credentials.length > 4 there as well
+    if (credentials.length !== 2 && credentials.length !== 3) {
+        console.error("URL is malformed or does not contain all required parameters (accountId, walletId).");
         return null;
     }
-    var accountId = credentials[0], secretKey = credentials[1], walletId = credentials[2];
-    // Ensure none of the parameters are empty
-    if (!accountId || !secretKey || !walletId) {
+    // set accountId, walletId always, and secretKey if present
+    var _b = credentials.length === 2
+        ? [credentials[0], undefined, credentials[1]]
+        : credentials, accountId = _b[0], secretKey = _b[1], walletId = _b[2];
+    // in condition, got rid of || ((credentials.length === 3 && !secretKey))
+    if (!accountId || !walletId) {
         console.error("Invalid or incomplete authentication data in URL.");
         return null;
     }
     return {
         accountId: accountId,
-        secretKey: secretKey,
+        secretKey: credentials.length === 3 ? secretKey : undefined,
         walletId: walletId,
         baseUrl: baseUrl,
     };
@@ -224,3 +308,88 @@ var getPubFromSecret = function (secretKey) {
     return keyPair.getPublicKey().toString();
 };
 exports.getPubFromSecret = getPubFromSecret;
+var baseDecode = function (value) {
+    return new Uint8Array((0, bs58_1.decode)(value));
+};
+exports.baseDecode = baseDecode;
+// : nearAPI.transactions.Transaction[]
+// MUST BE USED WITH KEY FOR TXN
+var transformTransactions = function (transactions, account) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, networkId, signer, provider;
+    return __generator(this, function (_b) {
+        _a = account.connection, networkId = _a.networkId, signer = _a.signer, provider = _a.provider;
+        console.log("utils signer: ", signer);
+        return [2 /*return*/, Promise.all(transactions.map(function (transaction, index) { return __awaiter(void 0, void 0, void 0, function () {
+                var actions, accessKey, block;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            actions = transaction.actions.map(function (action) {
+                                return (0, exports.createAction)(action);
+                            });
+                            return [4 /*yield*/, account.findAccessKey(transaction.receiverId, actions)];
+                        case 1:
+                            accessKey = _a.sent();
+                            if (!accessKey) {
+                                throw new Error("Failed to find matching key for transaction sent to ".concat(transaction.receiverId));
+                            }
+                            return [4 /*yield*/, provider.block({ finality: "final" })];
+                        case 2:
+                            block = _a.sent();
+                            return [2 /*return*/, nearAPI.transactions.createTransaction(account.accountId, nearAPI.utils.PublicKey.from(accessKey.publicKey), transaction.receiverId, accessKey.accessKey.nonce + BigInt(index) + BigInt(1), actions, (0, exports.baseDecode)(block.header.hash))];
+                    }
+                });
+            }); }))];
+    });
+}); };
+exports.transformTransactions = transformTransactions;
+var createAction = function (action) {
+    switch (action.type) {
+        case "CreateAccount":
+            return nearAPI.transactions.createAccount();
+        case "DeployContract": {
+            var code = action.params.code;
+            return nearAPI.transactions.deployContract(code);
+        }
+        case "FunctionCall": {
+            var _a = action.params, methodName = _a.methodName, args = _a.args, gas = _a.gas, deposit = _a.deposit;
+            return nearAPI.transactions.functionCall(methodName, args, new bn_js_1.default(gas), new bn_js_1.default(deposit));
+        }
+        case "Transfer": {
+            var deposit = action.params.deposit;
+            return nearAPI.transactions.transfer(new bn_js_1.default(deposit));
+        }
+        case "Stake": {
+            var _b = action.params, stake = _b.stake, publicKey = _b.publicKey;
+            return nearAPI.transactions.stake(new bn_js_1.default(stake), nearAPI.utils.PublicKey.from(publicKey));
+        }
+        case "AddKey": {
+            var _c = action.params, publicKey = _c.publicKey, accessKey = _c.accessKey;
+            return nearAPI.transactions.addKey(nearAPI.utils.PublicKey.from(publicKey), 
+            // TODO: Use accessKey.nonce? near-api-js seems to think 0 is fine?
+            (0, exports.getAccessKey)(accessKey.permission));
+        }
+        case "DeleteKey": {
+            var publicKey = action.params.publicKey;
+            return nearAPI.transactions.deleteKey(nearAPI.utils.PublicKey.from(publicKey));
+        }
+        case "DeleteAccount": {
+            var beneficiaryId = action.params.beneficiaryId;
+            return nearAPI.transactions.deleteAccount(beneficiaryId);
+        }
+        default:
+            throw new Error("Invalid action type");
+    }
+};
+exports.createAction = createAction;
+var getAccessKey = function (permission) {
+    if (permission === "FullAccess") {
+        return nearAPI.transactions.fullAccessKey();
+    }
+    var receiverId = permission.receiverId, _a = permission.methodNames, methodNames = _a === void 0 ? [] : _a;
+    var allowance = permission.allowance
+        ? new bn_js_1.default(permission.allowance)
+        : undefined;
+    return nearAPI.transactions.functionCallAccessKey(receiverId, methodNames, allowance);
+};
+exports.getAccessKey = getAccessKey;

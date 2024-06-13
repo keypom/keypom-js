@@ -58,13 +58,14 @@ export interface KeypomInitializeOptions {
 
 export interface OneClickParams {
     networkId: NetworkId;
-    urlPattern: string;
+    contractId: string;
+    allowance?: string
+    methodNames?: string[]
 }
 
 export const isOneClickParams = (params: OneClickParams): boolean =>
     typeof params.networkId === "string" &&
-    (params.networkId === "testnet" || params.networkId === "mainnet") &&
-    typeof params.urlPattern === "string";
+    (params.networkId === "testnet" || params.networkId === "mainnet")
 
 export type KeypomWalletInstant = InstantLinkWallet & {
     networkId: string;
@@ -75,3 +76,11 @@ export type KeypomWalletInstant = InstantLinkWallet & {
     getAvailableBalance: () => Promise<bigint>;
     showModal();
 };
+
+export type AddKeyPermission =
+  | "FullAccess"
+  | {
+      receiverId: string;
+      allowance?: string;
+      methodNames?: Array<string>;
+    };

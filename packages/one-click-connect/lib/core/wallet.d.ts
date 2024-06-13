@@ -8,22 +8,34 @@ export declare class KeypomWallet implements InstantLinkWalletBehaviour {
     baseUrl: string;
     nearConnection: nearAPI.Near;
     keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
-    contractId?: string;
+    contractId: string;
     secretKey?: string;
     signedIn: boolean;
-    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, }: {
+    walletUrl?: string;
+    addKey: boolean;
+    methodNames: string[];
+    allowance: string;
+    chainId: string;
+    constructor({ networkId, nearConnection, keyStore, accountId, secretKey, walletId, baseUrl, contractId, walletUrl, addKey, methodNames, allowance, chainId, }: {
         networkId: NetworkId;
         nearConnection: any;
         keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
         accountId: string;
+        secretKey?: string;
         walletId: string;
         baseUrl: string;
-        secretKey?: string;
+        contractId: string;
+        walletUrl?: string;
+        addKey?: boolean;
+        methodNames?: string[];
+        allowance?: string;
+        chainId?: string;
     });
     getAccountId(): string;
     isSignedIn(): Promise<boolean>;
     getContractId(): string;
-    setContractId(): Promise<string>;
+    getNearConnection(): nearAPI.Near;
+    setContractId(contractId?: string): Promise<string>;
     signIn(): Promise<KeypomWalletAccount[]>;
     signOut(): Promise<void>;
     signAndSendTransaction(params: any): Promise<any>;

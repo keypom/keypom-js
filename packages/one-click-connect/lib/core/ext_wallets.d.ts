@@ -18,9 +18,14 @@ interface RequestSignTransactionsOptions {
     accountId: string;
     secretKey: string;
     near: nearAPI.Near;
+    walletUrl?: string;
+    addKey: boolean;
+    contractId: string;
+    methodNames: string[];
+    allowance: string;
 }
 /**
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
-export declare const extSignAndSendTransactions: ({ transactions, walletId, accountId, secretKey, near, }: RequestSignTransactionsOptions) => Promise<any>;
+export declare const extSignAndSendTransactions: ({ transactions, walletId, accountId, secretKey, near, walletUrl, addKey, contractId, methodNames, allowance }: RequestSignTransactionsOptions) => Promise<any>;
 export {};

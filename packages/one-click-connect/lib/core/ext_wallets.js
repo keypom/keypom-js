@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,9 +60,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extSignAndSendTransactions = exports.SUPPORTED_EXT_WALLET_DATA = void 0;
+var nearAPI = __importStar(require("near-api-js"));
 var selector_utils_1 = require("../utils/selector-utils");
 var types_1 = require("./types");
 var wallet_utils_1 = require("@near-wallet-selector/wallet-utils");
+// import * as Transaction from "@near-js/transactions";
+// import { transformTransactions } from "../utils/one-click-utils";
 exports.SUPPORTED_EXT_WALLET_DATA = {
     testnet: {
         "sweat-wallet": {},
@@ -52,22 +78,106 @@ exports.SUPPORTED_EXT_WALLET_DATA = {
  * Requests the user to quickly sign for a transaction or batch of transactions by redirecting to the NEAR wallet.
  */
 var extSignAndSendTransactions = function (_a) {
-    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near;
+    var transactions = _a.transactions, walletId = _a.walletId, accountId = _a.accountId, secretKey = _a.secretKey, near = _a.near, walletUrl = _a.walletUrl, addKey = _a.addKey, contractId = _a.contractId, methodNames = _a.methodNames, allowance = _a.allowance;
     return __awaiter(void 0, void 0, void 0, function () {
-        var fakRequiredTxns, responses, account, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
+        var fakRequiredTxns, responses, account, pk_1, new_key, currentUrl, walletBaseUrl, redirectUrl, instructions, base64Instructions, newUrl, pk, i, txn, accessKey, canExecuteTxn, response, e_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     fakRequiredTxns = [];
                     responses = [];
-                    if (secretKey === undefined) {
-                        console.warn("Secret key not provided");
-                        // TODO: add access key as part of txn request
-                        return [2 /*return*/, []];
-                    }
                     return [4 /*yield*/, near.account(accountId)];
                 case 1:
                     account = _b.sent();
+                    // user needs access key to be added
+                    if (secretKey === undefined) {
+                        if (addKey) {
+                            new_key = nearAPI.KeyPair.fromRandom("ed25519");
+                            pk_1 = new_key.getPublicKey().toString();
+                            console.log("secret key being added: ", new_key.toString());
+                            console.log("pk being added to storage: ", pk_1);
+                            (0, selector_utils_1.setLocalStoragePendingKey)({
+                                secretKey: new_key.toString(),
+                                publicKey: pk_1,
+                                accountId: accountId
+                            });
+                        }
+                        currentUrl = new URL(window.location.href);
+                        console.log("current URL: ", currentUrl);
+                        walletBaseUrl = void 0;
+                        redirectUrl = "";
+                        switch (walletId) {
+                            case "sweat-wallet":
+                                if (walletUrl == undefined) {
+                                    console.error("Sweat URL must be provided in initialization");
+                                }
+                                else {
+                                    instructions = {
+                                        transactions: transactions,
+                                        redirectUrl: window.location.href,
+                                        limitedAccessKey: addKey ? {
+                                            publicKey: pk_1,
+                                            contractId: contractId,
+                                            methodNames: methodNames,
+                                            allowance: allowance
+                                        } : {}
+                                    };
+                                    base64Instructions = Buffer.from(JSON.stringify(instructions)).toString('base64');
+                                    newUrl = new URL(walletUrl);
+                                    newUrl.searchParams.set('instructions', base64Instructions);
+                                    console.log("SWEAT newUrl: ", newUrl.toString());
+                                    redirectUrl = newUrl.toString();
+                                }
+                                break;
+                            // case "my-near-wallet":
+                            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            //     const newUrl = new URL('sign', walletBaseUrl);
+                            //     const account = await near.account(accountId);
+                            //     try{
+                            //         // const transformed_transactions = await transformTransactions(transactions, account)
+                            //         // const txn_schema = Transaction.SCHEMA
+                            //         // const serialized = serialize(txn_schema, transformed_transactions[0])
+                            //         // newUrl.searchParams.set('transactions', transformed_transactions
+                            //         //     .map(transaction => serialize(txn_schema, transaction))
+                            //         //     .map(serialized => Buffer.from(serialized).toString('base64'))
+                            //         //     .join(','));
+                            //         // newUrl.searchParams.set('callbackUrl', currentUrl.href);
+                            //         // //newUrl.searchParams.set('limitedAccessKey', new_key.getPublicKey().toString());
+                            //         // console.log("redirecting to:", newUrl.toString());
+                            //         redirectUrl = "foo"
+                            //         // redirectUrl = newUrl.toString();
+                            //     }catch(e){
+                            //         console.log("error NEW 2: ", e)
+                            //     }
+                            //     break;
+                            // case "meteor-wallet":
+                            //     // walletBaseUrl = "https://wallet.meteorwallet.app/wallet/";
+                            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            //     break;
+                            // case "mintbase-wallet":
+                            //     // walletBaseUrl = "https://wallet.sweat.finance";
+                            //     walletBaseUrl = near.connection.networkId == "mainnet" ? "https://app.mynearwallet.com/" : "https://testnet.mynearwallet.com/";
+                            //     try{
+                            //         const serializedTxn = encodeURI(JSON.stringify(transactions))
+                            //         // mintbase specific stuff
+                            //         // const newUrl = new URL(`${metadata.walletUrl}/sign-transaction`);
+                            //         // newUrl.searchParams.set('transactions_data', urlParam);
+                            //         // newUrl.searchParams.set('callback_url', cbUrl);
+                            //         // window.location.assign(newUrl.toString());
+                            //         console.log(serializedTxn)
+                            //     }catch(e){
+                            //         console.log("error 3: ", e)
+                            //     }
+                            //     break;
+                            default:
+                                throw new Error("Unsupported wallet ID: ".concat(walletId));
+                        }
+                        ;
+                        console.log("redirect url: ", redirectUrl);
+                        if (redirectUrl !== "")
+                            window.location.assign(redirectUrl);
+                        return [2 /*return*/, []];
+                    }
                     pk = (0, selector_utils_1.getPubFromSecret)(secretKey);
                     i = 0;
                     _b.label = 2;

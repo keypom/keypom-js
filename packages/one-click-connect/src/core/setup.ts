@@ -5,9 +5,10 @@ import type {
     WalletModuleFactory,
 } from "@near-wallet-selector/core";
 import {
-    areParamsCorrect,
+    getLocalStorageKeypomLak,
     getNetworkPreset,
-    tryGetAccountData,
+    setLocalStorageKeypomLak,
+    tryGetSignInData,
 } from "../utils/selector-utils";
 import { KeypomWalletInstant, isOneClickParams, OneClickParams } from "./types";
 import { KeypomWallet } from "./wallet";
@@ -101,17 +102,13 @@ export function setupOneClickConnect(
     params: OneClickParams
 ): WalletModuleFactory<KeypomWalletInstant> {
     return async () => {
-        const { urlPattern, networkId } = params;
+        const { networkId, contractId, allowance, methodNames } = params;
 
-        if (!areParamsCorrect(params)) {
-            return null;
-        }
+        console.log("this is real, here is my allowance: ", allowance);
 
-        const signInData = tryGetAccountData({ urlPattern, networkId });
-        console.log("Sign in data: ", signInData);
-        if (signInData === null) {
-            return null;
-        }
+        // if (!areParamsCorrect(params)) {
+        //     return null;
+        // }
 
         const { connect, keyStores } = nearAPI;
         const networkPreset = getNetworkPreset(networkId);
@@ -123,6 +120,20 @@ export function setupOneClickConnect(
             headers: {},
         };
         const nearConnection = await connect(connectionConfig);
+
+        // returns { accountId, secretKey?, walletId, baseUrl }
+        // should return { accountId, secretKey?, walletId, baseUrl, walletUrl?, chainId, addKey }
+        const signInData = await tryGetSignInData({
+            networkId,
+            nearConnection,
+        });
+        console.log("Sign in data: ", signInData);
+
+        if (signInData === null) {
+            return null;
+        }
+
+        // contract ID resetting, same with walletUrl
         const keypomWallet = new KeypomWallet({
             networkId,
             nearConnection,
@@ -131,9 +142,17 @@ export function setupOneClickConnect(
             secretKey: signInData.secretKey,
             walletId: signInData.walletId,
             baseUrl: signInData.baseUrl,
+            walletUrl: signInData.walletUrl,
+            contractId,
+            methodNames,
+            allowance,
+            chainId: signInData.chainId,
+            addKey: signInData.addKey,
         });
 
-        let contractId = await keypomWallet.setContractId();
+        console.log("current keypom wallet: ", keypomWallet);
+
+        await keypomWallet.setContractId(contractId);
 
         return {
             id: "keypom",
