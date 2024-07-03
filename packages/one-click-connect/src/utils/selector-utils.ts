@@ -153,16 +153,41 @@ export const tryGetSignInData = async ({
     if (connectionSplit.length > 1) {
         // remove addKey part if present
         let connectionString = connectionSplit[1].split("&addKey=")[0];
-
+        
+        // try to decode connection string, either base64 or url encoded
+        let decodedString: string | null;
+        let connectionData;
         try {
             // Decode the Base64-encoded JSON string
-            const decodedString = Buffer.from(
+            decodedString = Buffer.from(
                 connectionString,
                 "base64"
             ).toString("utf-8");
-            const connectionData = JSON.parse(decodedString);
-            console.log("parsed connection data: ", connectionData);
+            connectionData = JSON.parse(decodedString)
+        } catch (e) {
+            // Decode the URL-encoded JSON string
+            const url = new URL(window.location.href);
+            const connectionParam = url.searchParams.get("connection");
+            if (!connectionParam) {
+                console.error("Error decoding connection data, ensure connection parameter exists and it is base64 or URL encoded");
+                return null;
+            }
+            console.log("connection param from URL: ", connectionParam)
+            decodedString = Buffer.from(
+                connectionParam,
+                "base64"
+            ).toString("utf-8");
+            connectionData = JSON.parse(decodedString)
+        }
 
+        if(!connectionData){
+            console.error("Error parsing connection data");
+            return null;
+        }
+
+        console.log("parsed connection data: ", connectionData);
+
+        try{
             if (
                 connectionData.accountId === undefined ||
                 connectionData.walletId === undefined
