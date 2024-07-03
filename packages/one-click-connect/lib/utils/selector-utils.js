@@ -141,7 +141,7 @@ exports.setLocalStorageKeypomLak = setLocalStorageKeypomLak;
 var tryGetSignInData = function (_a) {
     var networkId = _a.networkId, nearConnection = _a.nearConnection;
     return __awaiter(void 0, void 0, void 0, function () {
-        var connectionSplit, signInData, curEnvData, connectionString, decodedString, connectionData, isModuleSupported, addKeySplit, addKeyParam, addKey, pendingSecretKey;
+        var connectionSplit, signInData, curEnvData, connectionString, decodedString, connectionData, url, connectionParam, isModuleSupported, addKeySplit, addKeyParam, addKey, pendingSecretKey;
         var _b;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -156,10 +156,30 @@ var tryGetSignInData = function (_a) {
                     // Update signInData with connection data if it exists
                     if (connectionSplit.length > 1) {
                         connectionString = connectionSplit[1].split("&addKey=")[0];
+                        decodedString = void 0;
+                        connectionData = void 0;
                         try {
+                            // Decode the Base64-encoded JSON string
                             decodedString = Buffer.from(connectionString, "base64").toString("utf-8");
                             connectionData = JSON.parse(decodedString);
-                            console.log("parsed connection data: ", connectionData);
+                        }
+                        catch (e) {
+                            url = new URL(window.location.href);
+                            connectionParam = url.searchParams.get("connection");
+                            if (!connectionParam) {
+                                console.error("Error decoding connection data, ensure connection parameter exists and it is base64 or URL encoded");
+                                return [2 /*return*/, null];
+                            }
+                            console.log("connection param from URL: ", connectionParam);
+                            decodedString = Buffer.from(connectionParam, "base64").toString("utf-8");
+                            connectionData = JSON.parse(decodedString);
+                        }
+                        if (!connectionData) {
+                            console.error("Error parsing connection data");
+                            return [2 /*return*/, null];
+                        }
+                        console.log("parsed connection data: ", connectionData);
+                        try {
                             if (connectionData.accountId === undefined ||
                                 connectionData.walletId === undefined) {
                                 console.error("Connection data must include accountId and walletId fields");
