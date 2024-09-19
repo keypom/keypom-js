@@ -15,7 +15,8 @@
         "noImplicitReturns": true,
         "noUnusedLocals": true,
         "experimentalDecorators": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "skipLibCheck": true
         // "types": ["node"]
     }
 }

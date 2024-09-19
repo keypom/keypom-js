@@ -1,0 +1,50 @@
+{
+    "name": "@keypom/multichain-one-click-connect",
+    "version": "0.0.1",
+    "description": "Multichain OneClick Connect Wallet Selector Plugin",
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "pnpm compile",
+        "build-test": "pnpm compile && ../../buildMove.sh",
+        "build-test-gb": "pnpm compile && ../../buildMoveGuest.sh",
+        "compile": "tsc -p tsconfig.json",
+        "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
+        "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
+        "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
+        "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
+        "create:trial-accounts": "yarn build && node test/trial-accounts.ts",
+        "create:instant-sign-in": "yarn build && node test/instant-sign-in.ts",
+        "build-docs": "npx typedoc --options typedoc.json"
+    },
+    "author": "benkurrek, mattlockyer",
+    "license": "MIT",
+    "ava": {
+        "require": [
+            "dotenv/config"
+        ]
+    },
+    "dependencies": {
+        "@near-wallet-selector/core": "8.9.5",
+        "@near-wallet-selector/wallet-utils": "8.9.5",
+        "@walletconnect/client": "^1.8.0",
+        "@walletconnect/qrcode-modal": "^1.8.0",
+        "@walletconnect/web3-provider": "^1.8.0",
+        "bn.js": "^5.2.1",
+        "web3": "^4.13.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.0.26",
+        "ava": "^4.3.3",
+        "near-api-js": "^2.1.3",
+        "react": "^18.2.0",
+        "react-dom": "18.2.0",
+        "typedoc": "^0.23.24",
+        "typescript": "^4.8.4"
+    },
+    "peerDependencies": {
+        "near-api-js": "^2.1.3"
+    },
+    "files": [
+        "lib"
+    ]
+}
