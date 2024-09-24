@@ -1,4 +1,3 @@
-import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { Account } from "@near-js/accounts";
 import { DropConfig } from "./types/drops";
 import { FCData } from "./types/fc";

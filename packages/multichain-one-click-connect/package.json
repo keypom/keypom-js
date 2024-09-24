@@ -1,6 +1,6 @@
 {
     "name": "@keypom/multichain-one-click-connect",
-    "version": "1.0.1",
+    "version": "0.0.1",
     "description": "Multichain OneClick Connect Wallet Selector Plugin",
     "main": "lib/index.js",
     "scripts": {

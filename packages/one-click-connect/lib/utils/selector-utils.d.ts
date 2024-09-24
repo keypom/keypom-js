@@ -1,8 +1,6 @@
 import * as nearAPI from "near-api-js";
-import { Action, Network, NetworkId } from "@near-wallet-selector/core";
+import { Action } from "@near-wallet-selector/core";
 import { Transaction as wsTransaction } from "@near-wallet-selector/core";
-import { Action as wsAction } from "@near-wallet-selector/core";
-import { AddKeyPermission } from "@near-wallet-selector/core";
 export declare const ONE_CLICK_URL_REGEX: RegExp;
 export declare const KEYPOM_LOCAL_STORAGE_KEY = "keypom-one-click-connect-wallet";
 export declare const NO_CONTRACT_ID = "no-contract";
@@ -49,7 +47,7 @@ export declare const parseOneClickSignInFromUrl: ({ baseUrl, delimiter, }: {
 export declare const getNetworkPreset: (networkId: NetworkId) => Network;
 export declare const getPubFromSecret: (secretKey: string) => string;
 export declare const baseDecode: (value: string) => Uint8Array;
-export declare const transformTransactions: (transactions: wsTransaction[], account: nearAPI.Account) => Promise<nearAPI.transactions.Transaction[]>;
-export declare const createAction: (action: wsAction) => nearAPI.transactions.Action;
-export declare const getAccessKey: (permission: AddKeyPermission) => nearAPI.transactions.AccessKey;
+export declare const transformTransactions: (transactions: wsTransaction[], account: nearAPI.Account) => Promise<any[]>;
+export declare const createAction: (action: wsAction) => any;
+export declare const getAccessKey: (permission: AddKeyPermission) => any;
 export {};

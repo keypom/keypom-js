@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true, // Optional but often used together
         "module": "commonjs",
         "target": "es2015",
         "moduleResolution": "node",
