@@ -300,9 +300,9 @@ export class TrialAccountManager {
                 const signerAccount = await this.near.account(
                     this.trialAccountId!
                 );
-                const trialPubKey = KeyPair.fromString(
-                    this.trialSecretKey!
-                ).getPublicKey();
+                const trialPubKey = KeyPair.fromString(this.trialSecretKey!)
+                    .getPublicKey()
+                    .toString();
 
                 // Retrieve trial account info from the contract
                 const trialAccountInfoSnakeCase =

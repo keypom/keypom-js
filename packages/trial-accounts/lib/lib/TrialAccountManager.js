@@ -197,7 +197,9 @@ class TrialAccountManager {
         }
         return retryAsync(async () => {
             const signerAccount = await this.near.account(this.trialAccountId);
-            const trialPubKey = crypto_1.KeyPair.fromString(this.trialSecretKey).getPublicKey();
+            const trialPubKey = crypto_1.KeyPair.fromString(this.trialSecretKey)
+                .getPublicKey()
+                .toString();
             // Retrieve trial account info from the contract
             const trialAccountInfoSnakeCase = await signerAccount.viewFunction({
                 contractId: this.trialContractId,
