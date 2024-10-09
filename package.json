@@ -1,38 +1,39 @@
 {
-  "name": "@keypom-js/monorepo",
-  "author": "benkurrek, mattlockyer",
-  "private": true,
-  "engines": {
-    "node": ">=16.14.0",
-    "pnpm": ">=7"
-  },
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "build": "turbo run build",
-    "clean": "turbo run clean",
-    "lint": "turbo run lint:ts",
-    "lint:fix": "turbo run lint:ts:fix",
-    "autoclave": "rimraf packages/**/dist && rimraf packages/**/lib && rimraf packages/**/node_modules && rimraf packages/**/coverage && rimraf packages/**/.turbo && rm -rf node_modules",
-    "test": "turbo run test",
-    "release": "changeset publish",
-    "prepare": "husky install"
-  },
-  "dependencies": {
-    "borsh": "^0.7.0"
-  },
-  "devDependencies": {
-    "@changesets/changelog-github": "^0.4.6",
-    "@changesets/cli": "^2.24.4",
-    "@commitlint/cli": "^17.0.3",
-    "@commitlint/config-conventional": "^17.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.31.0",
-    "@typescript-eslint/parser": "^5.31.0",
-    "commitlint": "^17.0.3",
-    "eslint": "^8.20.0",
-    "husky": "^7.0.4",
-    "rimraf": "^3.0.2",
-    "turbo": "^1.4.5",
-    "typescript": "^4.9.4",
-    "typedoc": "^0.24.7"
-  }
+    "name": "@keypom-js/monorepo",
+    "author": "benkurrek, mattlockyer",
+    "private": true,
+    "engines": {
+        "node": ">=16.14.0",
+        "pnpm": ">=7"
+    },
+    "scripts": {
+        "preinstall": "npx only-allow pnpm",
+        "build": "turbo run build",
+        "clean": "turbo run clean",
+        "lint": "turbo run lint:ts",
+        "lint:fix": "turbo run lint:ts:fix",
+        "autoclave": "rimraf packages/**/dist && rimraf packages/**/lib && rimraf packages/**/node_modules && rimraf packages/**/coverage && rimraf packages/**/.turbo && rm -rf node_modules",
+        "test": "turbo run test",
+        "release": "changeset publish",
+        "prepare": "husky install"
+    },
+    "dependencies": {
+        "borsh": "^0.7.0"
+    },
+    "devDependencies": {
+        "@changesets/changelog-github": "^0.4.6",
+        "@changesets/cli": "^2.24.4",
+        "@commitlint/cli": "^17.0.3",
+        "@types/node": "^22.7.5",
+        "@commitlint/config-conventional": "^17.0.3",
+        "@typescript-eslint/eslint-plugin": "^5.31.0",
+        "@typescript-eslint/parser": "^5.31.0",
+        "commitlint": "^17.0.3",
+        "eslint": "^8.20.0",
+        "husky": "^7.0.4",
+        "rimraf": "^3.0.2",
+        "turbo": "^1.4.5",
+        "typescript": "^4.9.4",
+        "typedoc": "^0.24.7"
+    }
 }
