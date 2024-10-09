@@ -1,5 +1,3 @@
-// index.ts
-
 /**
  * Main entry point for the Trial Accounts package.
  *
@@ -9,8 +7,5 @@
  *
  * @packageDocumentation
  */
-
 export { TrialAccountManager } from "./lib/TrialAccountManager";
-
-// Export types for user convenience
 export * from "./lib/types";
