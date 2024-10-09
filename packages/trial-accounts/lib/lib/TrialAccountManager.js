@@ -2,6 +2,7 @@
 // lib/TrialAccountManager.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrialAccountManager = exports.retryAsync = void 0;
+const crypto_1 = require("@near-js/crypto");
 const types_1 = require("./types");
 const createTrial_1 = require("./createTrial");
 const addTrialKeys_1 = require("./addTrialKeys");
@@ -191,17 +192,18 @@ class TrialAccountManager {
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     async getTrialData() {
-        if (!this.trialAccountId) {
+        if (!this.trialAccountId || !this.trialSecretKey) {
             throw new Error("trialAccountId is required to get trial data");
         }
         return retryAsync(async () => {
             const signerAccount = await this.near.account(this.trialAccountId);
+            const trialPubKey = crypto_1.KeyPair.fromString(this.trialSecretKey).getPublicKey();
             // Retrieve trial account info from the contract
             const trialAccountInfoSnakeCase = await signerAccount.viewFunction({
                 contractId: this.trialContractId,
                 methodName: "get_trial_account_info",
                 args: {
-                    trial_account_id: this.trialAccountId,
+                    public_key: trialPubKey,
                 },
             });
             // Convert snake_case data to camelCase

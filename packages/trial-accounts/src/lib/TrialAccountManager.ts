@@ -1,7 +1,7 @@
 // lib/TrialAccountManager.ts
 
 import { Account } from "@near-js/accounts";
-import { KeyPairString } from "@near-js/crypto";
+import { KeyPairString, KeyPair } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 import {
     ActionToPerform,
@@ -292,7 +292,7 @@ export class TrialAccountManager {
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     async getTrialData(): Promise<TrialAccountInfo> {
-        if (!this.trialAccountId) {
+        if (!this.trialAccountId || !this.trialSecretKey) {
             throw new Error("trialAccountId is required to get trial data");
         }
         return retryAsync(
@@ -300,6 +300,9 @@ export class TrialAccountManager {
                 const signerAccount = await this.near.account(
                     this.trialAccountId!
                 );
+                const trialPubKey = KeyPair.fromString(
+                    this.trialSecretKey!
+                ).getPublicKey();
 
                 // Retrieve trial account info from the contract
                 const trialAccountInfoSnakeCase =
@@ -307,7 +310,7 @@ export class TrialAccountManager {
                         contractId: this.trialContractId,
                         methodName: "get_trial_account_info",
                         args: {
-                            trial_account_id: this.trialAccountId,
+                            public_key: trialPubKey,
                         },
                     });
 
