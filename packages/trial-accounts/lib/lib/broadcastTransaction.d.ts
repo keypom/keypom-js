@@ -7,6 +7,7 @@ interface BroadcastTransactionParams {
     nonce: string;
     blockHash: string;
     mpcPublicKey: string;
+    trialAccountPublicKey: string;
 }
 /**
  * Broadcasts a signed transaction to the NEAR network.

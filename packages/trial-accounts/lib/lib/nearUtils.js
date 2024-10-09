@@ -1,11 +1,10 @@
 "use strict";
 // utils.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAccount = exports.sendTransaction = exports.toSnakeCase = exports.initNear = void 0;
+exports.sendTransaction = exports.toSnakeCase = exports.initNear = void 0;
 const wallet_account_1 = require("@near-js/wallet-account");
 const transactions_1 = require("@near-js/transactions");
 const utils_1 = require("@near-js/utils");
-const crypto_1 = require("@near-js/crypto");
 /**
  * Initializes a NEAR connection using the provided configuration.
  *
@@ -54,20 +53,3 @@ async function sendTransaction({ signerAccount, receiverId, methodName, args, de
     return result;
 }
 exports.sendTransaction = sendTransaction;
-async function createAccount({ signerAccount, newAccountId, amount, config, }) {
-    const keyPair = crypto_1.KeyPair.fromRandom("ed25519");
-    const publicKey = keyPair.getPublicKey().toString();
-    await config.keyStore.setKey(config.networkId, newAccountId, keyPair);
-    await signerAccount.functionCall({
-        contractId: config.networkId === "testnet" ? "testnet" : "near",
-        methodName: "create_account",
-        args: {
-            new_account_id: newAccountId,
-            new_public_key: publicKey,
-        },
-        gas: BigInt("300000000000000"),
-        attachedDeposit: BigInt((0, utils_1.parseNearAmount)(amount)),
-    });
-    return keyPair.toString();
-}
-exports.createAccount = createAccount;

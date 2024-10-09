@@ -2,34 +2,25 @@
 
 import { Account } from "@near-js/accounts";
 import {
-  Action,
-  actionCreators,
-  createTransaction,
-  SignedTransaction,
+    Action,
+    actionCreators,
+    createTransaction,
+    SignedTransaction,
 } from "@near-js/transactions";
 import { parseNearAmount } from "@near-js/utils";
 import { PublicKey } from "@near-js/crypto";
 import bs58 from "bs58";
-import fs from "fs";
-import path from "path";
-import {
-  recoverPublicKeyFromSignature,
-  compressPublicKey,
-  createSignature,
-  hashTransaction,
-  parsePublicKey,
-} from "./cryptoUtils";
+import { createSignature, hashTransaction } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
-import { logError, logInfo, logSuccess } from "./logUtils";
+import { logInfo, logSuccess } from "./logUtils";
 
 interface BroadcastTransactionParams {
-  signerAccount: Account;
-  actionToPerform: ActionToPerform;
-  signatureResult: MPCSignature; // Signature result from the MPC
-  nonce: string;
-  blockHash: string;
-  mpcPublicKey: string; // Add this parameter
-  trialAccountPublicKey: string;
+    signerAccount: Account;
+    actionToPerform: ActionToPerform;
+    signatureResult: MPCSignature; // Signature result from the MPC
+    nonce: string;
+    blockHash: string;
+    mpcPublicKey: string; // Add this parameter
 }
 
 /**
@@ -41,116 +32,88 @@ interface BroadcastTransactionParams {
  */
 
 export async function broadcastTransaction(
-  params: BroadcastTransactionParams,
+    params: BroadcastTransactionParams
 ): Promise<void> {
-  const {
-    signerAccount,
-    actionToPerform,
-    signatureResult,
-    nonce,
-    blockHash,
-    mpcPublicKey,
-    trialAccountPublicKey,
-  } = params;
+    const {
+        signerAccount,
+        actionToPerform,
+        signatureResult,
+        nonce,
+        blockHash,
+        mpcPublicKey,
+    } = params;
 
-  const { targetContractId, methodName, args, gas, attachedDepositNear } =
-    actionToPerform;
+    const { targetContractId, methodName, args, gas, attachedDepositNear } =
+        actionToPerform;
 
-  const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
+    const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
 
-  const provider = signerAccount.connection.provider;
+    const provider = signerAccount.connection.provider;
 
-  const blockHashBytes = bs58.decode(blockHash);
+    const blockHashBytes = bs58.decode(blockHash);
 
-  const accessKeys = await signerAccount.getAccessKeys();
-  const accessKeyForSigning = accessKeys.find(
-    (key) => key.public_key === mpcPublicKey,
-  );
-
-  if (!accessKeyForSigning) {
-    throw new Error(
-      `No access key found for signing with MPC public key ${mpcPublicKey}`,
+    const accessKeys = await signerAccount.getAccessKeys();
+    const accessKeyForSigning = accessKeys.find(
+        (key) => key.public_key === mpcPublicKey
     );
-  }
 
-  logSuccess(
-    `User has correct MPC access key on their account: ${accessKeyForSigning!.public_key}`,
-  );
+    if (!accessKeyForSigning) {
+        throw new Error(
+            `No access key found for signing with MPC public key ${mpcPublicKey}`
+        );
+    }
 
-  const actions: Action[] = [
-    actionCreators.functionCall(
-      methodName,
-      serializedArgs,
-      BigInt(gas),
-      BigInt(parseNearAmount(attachedDepositNear)!),
-    ),
-  ];
+    logSuccess(
+        `User has correct MPC access key on their account: ${
+            accessKeyForSigning!.public_key
+        }`
+    );
 
-  // Collect the broadcast logs into an object
+    const actions: Action[] = [
+        actionCreators.functionCall(
+            methodName,
+            serializedArgs,
+            BigInt(gas),
+            BigInt(parseNearAmount(attachedDepositNear)!)
+        ),
+    ];
 
-  // Create the transaction
-  const transaction = createTransaction(
-    signerAccount.accountId,
-    PublicKey.fromString(mpcPublicKey), // Use MPC public key
-    targetContractId,
-    nonce,
-    actions,
-    blockHashBytes,
-  );
+    // Collect the broadcast logs into an object
 
-  // Hash the transaction to get the message to sign
-  const serializedTx = transaction.encode();
-  const txHash = hashTransaction(serializedTx);
+    // Create the transaction
+    const transaction = createTransaction(
+        signerAccount.accountId,
+        PublicKey.fromString(mpcPublicKey), // Use MPC public key
+        targetContractId,
+        nonce,
+        actions,
+        blockHashBytes
+    );
 
-  const broadcastLog = {
-    signerAccount: signerAccount.accountId,
-    targetContract: targetContractId,
-    methodName,
-    args: Array.from(serializedArgs),
-    gas,
-    deposit: attachedDepositNear,
-    publicKey: trialAccountPublicKey,
-    mpcPublicKey,
-    nonce,
-    blockHash,
-    txHash: Array.from(txHash), // Add TxHash here
-    actions: actions.map((action) => {
-      if (action.functionCall) {
-        return {
-          methodName: action.functionCall.methodName,
-          args: Array.from(action.functionCall.args),
-          gas: action.functionCall.gas.toString(),
-          deposit: action.functionCall.deposit.toString(),
-        };
-      }
-      return action;
-    }),
-  };
+    // Hash the transaction to get the message to sign
+    const serializedTx = transaction.encode();
+    const txHash = hashTransaction(serializedTx);
 
-  // Write the broadcast log to a file for comparison
-  const logsFilePath = path.join("data", `broadcast_logs.json`);
-  fs.writeFileSync(logsFilePath, JSON.stringify(broadcastLog, null, 2));
+    // Log transaction hash
+    logInfo(`=== Transaction Details ===`);
+    console.log("Transaction Hash:", Buffer.from(txHash).toString("hex"));
 
-  // Log transaction hash
-  logInfo(`=== Transaction Details ===`);
-  console.log("Transaction Hash:", Buffer.from(txHash).toString("hex"));
+    let r = signatureResult.big_r.affine_point;
+    let s = signatureResult.s.scalar;
 
-  let r = signatureResult.big_r.affine_point;
-  let s = signatureResult.s.scalar;
+    const signature = createSignature(r, s);
 
-  const signature = createSignature(r, s);
+    const signedTransaction = new SignedTransaction({
+        transaction,
+        signature,
+    });
 
-  const signedTransaction = new SignedTransaction({
-    transaction,
-    signature,
-  });
-
-  // Send the signed transaction
-  logInfo(`=== Sending Transaction ===`);
-  try {
-    const result = await provider.sendTransaction(signedTransaction);
-    console.log("Transaction Result:", result);
-  } catch (error) {
-    console.error("Error sending transaction:", error);
-  }
+    // Send the signed transaction
+    logInfo(`=== Sending Transaction ===`);
+    try {
+        const result = await provider.sendTransaction(signedTransaction);
+        console.log("Transaction Result:", result);
+    } catch (error) {
+        console.error("Error sending transaction:", error);
+    }
 }

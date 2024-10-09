@@ -9,6 +9,8 @@ const transactions_1 = require("@near-js/transactions");
 const utils_1 = require("@near-js/utils");
 const crypto_1 = require("@near-js/crypto");
 const bs58_1 = __importDefault(require("bs58"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const cryptoUtils_1 = require("./cryptoUtils");
 const logUtils_1 = require("./logUtils");
 /**
@@ -19,7 +21,7 @@ const logUtils_1 = require("./logUtils");
  * @throws Will throw an error if broadcasting fails.
  */
 async function broadcastTransaction(params) {
-    const { signerAccount, actionToPerform, signatureResult, nonce, blockHash, mpcPublicKey, } = params;
+    const { signerAccount, actionToPerform, signatureResult, nonce, blockHash, mpcPublicKey, trialAccountPublicKey, } = params;
     const { targetContractId, methodName, args, gas, attachedDepositNear } = actionToPerform;
     const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
     const provider = signerAccount.connection.provider;
@@ -40,6 +42,33 @@ async function broadcastTransaction(params) {
     // Hash the transaction to get the message to sign
     const serializedTx = transaction.encode();
     const txHash = (0, cryptoUtils_1.hashTransaction)(serializedTx);
+    const broadcastLog = {
+        signerAccount: signerAccount.accountId,
+        targetContract: targetContractId,
+        methodName,
+        args: Array.from(serializedArgs),
+        gas,
+        deposit: attachedDepositNear,
+        publicKey: trialAccountPublicKey,
+        mpcPublicKey,
+        nonce,
+        blockHash,
+        txHash: Array.from(txHash),
+        actions: actions.map((action) => {
+            if (action.functionCall) {
+                return {
+                    methodName: action.functionCall.methodName,
+                    args: Array.from(action.functionCall.args),
+                    gas: action.functionCall.gas.toString(),
+                    deposit: action.functionCall.deposit.toString(),
+                };
+            }
+            return action;
+        }),
+    };
+    // Write the broadcast log to a file for comparison
+    const logsFilePath = path_1.default.join("data", `broadcast_logs.json`);
+    fs_1.default.writeFileSync(logsFilePath, JSON.stringify(broadcastLog, null, 2));
     // Log transaction hash
     (0, logUtils_1.logInfo)(`=== Transaction Details ===`);
     console.log("Transaction Hash:", Buffer.from(txHash).toString("hex"));

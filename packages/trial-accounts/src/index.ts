@@ -10,6 +10,7 @@
  * @packageDocumentation
  */
 
+export { deployTrialContract } from "./lib/createContract";
 export { createTrial } from "./lib/createTrial";
 export { addTrialAccounts } from "./lib/addTrialKeys";
 export { activateTrialAccounts } from "./lib/activateTrial";

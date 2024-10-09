@@ -24,9 +24,3 @@ export declare function sendTransaction({ signerAccount, receiverId, methodName,
     deposit: string;
     gas: string;
 }): Promise<FinalExecutionOutcome>;
-export declare function createAccount({ signerAccount, newAccountId, amount, config, }: {
-    signerAccount: Account;
-    newAccountId: string;
-    amount: string;
-    config: Config;
-}): Promise<import("@near-js/crypto").KeyPairString>;

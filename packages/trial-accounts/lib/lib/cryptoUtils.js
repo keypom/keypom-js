@@ -66,8 +66,7 @@ exports.recoverPublicKeyFromSignature = recoverPublicKeyFromSignature;
 function compressPublicKey(publicKeyBytes) {
     const ec = new elliptic_1.ec("secp256k1");
     const keyPair = ec.keyFromPublic(publicKeyBytes);
-    const compressedKey = Buffer.from(keyPair.getPublic().encode("array", true) // 'true' for compressed
-    );
+    const compressedKey = Buffer.from(keyPair.getPublic().encode("array", true));
     return compressedKey;
 }
 exports.compressPublicKey = compressPublicKey;

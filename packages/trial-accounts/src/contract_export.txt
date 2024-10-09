@@ -1,0 +1,1114 @@
+### index.ts ###
+// index.ts
+
+/**
+ * Main entry point for the Trial Accounts package.
+ *
+ * This package provides functions to deploy trial contracts,
+ * create trials, add trial accounts, activate trial accounts,
+ * perform actions, and broadcast transactions.
+ *
+ * @packageDocumentation
+ */
+
+export { deployTrialContract } from "./lib/createContract";
+export { createTrial } from "./lib/createTrial";
+export { addTrialAccounts } from "./lib/addTrialKeys";
+export { activateTrialAccounts } from "./lib/activateTrial";
+export { performActions } from "./lib/performAction";
+export { broadcastTransaction } from "./lib/broadcastTransaction";
+export { initNear } from "./lib/nearUtils";
+export { retryAsync } from "./lib/cryptoUtils";
+
+// Export types for user convenience
+export * from "./lib/types";
+
+
+### lib/validityChecker.ts ###
+// validityChecker.ts
+
+import { ActionToPerform, TrialData } from "./types";
+import { parseNearAmount } from "@near-js/utils";
+
+/**
+ * Checks the validity of actions against trial data constraints.
+ * @param actionsToPerform - The actions to validate.
+ * @param trialData - The trial data containing constraints.
+ * @throws Will throw an error if any action is invalid.
+ */
+export function checkActionValidity(
+  actionsToPerform: ActionToPerform[],
+  trialData: TrialData,
+): void {
+  for (const action of actionsToPerform) {
+    const { targetContractId, methodName, gas, attachedDepositNear } = action;
+
+    // Check if the method is allowed
+    if (!trialData.allowedMethods.includes(methodName)) {
+      throw new Error(`Method ${methodName} is not allowed`);
+    }
+
+    // Check if the contract is allowed
+    if (!trialData.allowedContracts.includes(targetContractId)) {
+      throw new Error(`Contract ${targetContractId} is not allowed`);
+    }
+
+    // Check gas limit
+    if (trialData.maxGas && parseInt(gas) > trialData.maxGas) {
+      throw new Error(`Gas ${gas} exceeds maximum allowed ${trialData.maxGas}`);
+    }
+
+    // Check deposit limit
+    if (
+      trialData.maxDeposit &&
+      BigInt(parseNearAmount(attachedDepositNear)!) >
+        BigInt(trialData.maxDeposit)
+    ) {
+      throw new Error(
+        `Deposit ${attachedDepositNear} exceeds maximum allowed ${trialData.maxDeposit}`,
+      );
+    }
+
+    // Additional checks can be added here (e.g., usage constraints)
+  }
+}
+
+
+### lib/createTrial.ts ###
+// createTrial.ts
+
+import { Account } from "@near-js/accounts";
+import { TrialData } from "./types";
+import { sendTransaction, toSnakeCase } from "./nearUtils";
+import { parseNearAmount } from "@near-js/utils";
+
+interface CreateTrialParams {
+  signerAccount: Account;
+  contractAccountId: string;
+  trialData: TrialData;
+}
+
+/**
+ * Creates a new trial on the trial contract.
+ *
+ * @param params - The parameters required to create a trial.
+ * @returns A Promise that resolves to the trial ID.
+ * @throws Will throw an error if the trial creation fails.
+ */
+export async function createTrial(params: CreateTrialParams): Promise<number> {
+  const { signerAccount, contractAccountId, trialData } = params;
+
+  console.log("Creating trial...");
+
+  // Convert camelCase trialData to snake_case
+  const snakeCaseArgs = toSnakeCase({
+    ...trialData,
+    initial_deposit: parseNearAmount(trialData.initialDeposit),
+  });
+
+  const result = await sendTransaction({
+    signerAccount,
+    receiverId: contractAccountId,
+    methodName: "create_trial",
+    args: snakeCaseArgs,
+    deposit: "1",
+    gas: "300000000000000",
+  });
+
+  const trialId = (result.status as any).SuccessValue
+    ? parseInt(
+        Buffer.from((result.status as any).SuccessValue, "base64").toString(),
+        10,
+      )
+    : null;
+
+  if (!trialId) {
+    throw new Error("Failed to create trial");
+  }
+
+  console.log(`Trial created with ID: ${trialId}`);
+  return trialId;
+}
+
+
+### lib/createContract.ts ###
+// createContract.ts
+
+import { Account } from "@near-js/accounts";
+import { Near } from "@near-js/wallet-account";
+import { Config } from "./types";
+import { createAccountDeployContract } from "./nearUtils";
+
+interface DeployContractParams {
+  near: Near;
+  config: Config;
+  signerAccount: Account;
+  contractAccountId: string;
+  mpcContractId: string;
+  wasmFilePath: string;
+  initialBalance: string; // NEAR amount as a string
+}
+
+/**
+ * Deploys the trial contract by creating a new account and deploying the contract code.
+ *
+ * @param params - The parameters required to deploy the contract.
+ * @returns A Promise that resolves when the deployment is complete.
+ */
+export async function deployTrialContract(
+  params: DeployContractParams,
+): Promise<void> {
+  const {
+    near,
+    signerAccount,
+    contractAccountId,
+    config,
+    mpcContractId,
+    wasmFilePath,
+    initialBalance,
+  } = params;
+
+  await createAccountDeployContract({
+    config,
+    near,
+    signerAccount,
+    newAccountId: contractAccountId,
+    amount: initialBalance,
+    wasmPath: wasmFilePath,
+    methodName: "new",
+    args: {
+      mpc_contract: mpcContractId,
+      admin_account: signerAccount.accountId,
+    },
+  });
+}
+
+
+### lib/cryptoUtils.ts ###
+// cryptoUtils.ts
+
+import { ec as EC } from "elliptic";
+import { KeyType } from "@near-js/crypto";
+import bs58 from "bs58";
+import { sha256 } from "js-sha256";
+import { Signature } from "@near-js/transactions";
+import { MPCSignature } from "./types";
+
+/**
+ * Helper function to retry an async operation with exponential backoff.
+ *
+ * @param fn - The async function to retry.
+ * @param retries - Number of retries.
+ * @param delay - Initial delay in milliseconds.
+ * @param factor - Multiplicative factor for delay.
+ * @returns The result of the async function if successful.
+ * @throws The last error encountered if all retries fail.
+ */
+export async function retryAsync<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000,
+  factor: number = 2,
+): Promise<T> {
+  let attempt = 0;
+  let currentDelay = delay;
+
+  while (attempt < retries) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      attempt++;
+      if (attempt >= retries) {
+        throw error;
+      }
+      console.warn(
+        `Attempt ${attempt} failed. Retrying in ${currentDelay}ms...`,
+        `Error: ${error.message || error}`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
+      currentDelay *= factor; // Exponential backoff
+    }
+  }
+
+  // This point should never be reached
+  throw new Error("Unexpected error in retryAsync");
+}
+
+/**
+ * Recovers the public key from a signature and message hash.
+ * @param msgHash - The hash of the message.
+ * @param signature - The signature components { r, s }.
+ * @param recoveryId - The recovery ID.
+ * @returns The recovered EC KeyPair.
+ */
+export function recoverPublicKeyFromSignature(
+  msgHash: Uint8Array,
+  signature: MPCSignature,
+): EC.KeyPair {
+  const ec = new EC("secp256k1");
+  let pubKeyRecovered = ec.recoverPubKey(
+    msgHash,
+    {
+      r: Buffer.from(signature.big_r.affine_point.substring(2), "hex"),
+      s: Buffer.from(signature.s.scalar, "hex"),
+    },
+    signature.recovery_id,
+    "hex",
+  );
+
+  console.log("pubKeyRecovered", pubKeyRecovered.encode("hex"));
+  return pubKeyRecovered;
+}
+
+/**
+ * Compresses an uncompressed public key.
+ * @param publicKeyBytes - The uncompressed public key bytes.
+ * @returns The compressed public key bytes.
+ */
+export function compressPublicKey(publicKeyBytes: Buffer): Buffer {
+  const ec = new EC("secp256k1");
+  const keyPair = ec.keyFromPublic(publicKeyBytes);
+  const compressedKey = Buffer.from(
+    keyPair.getPublic().encode("array", true), // 'true' for compressed
+  );
+  return compressedKey;
+}
+
+/**
+ * Creates a NEAR Signature object from r, s, and recovery ID.
+ * @param r - The r component of the signature.
+ * @param s - The s component of the signature.
+ * @returns A NEAR Signature object.
+ */
+export function createSignature(r: string, s: string): Signature {
+  return new Signature({
+    keyType: KeyType.SECP256K1,
+    data: Buffer.concat([
+      Buffer.from(r.substring(2), "hex"),
+      Buffer.from(s, "hex"),
+      Buffer.from(r.substring(0, 2), "hex"),
+    ]),
+  });
+}
+
+/**
+ * Hashes the serialized transaction using SHA-256.
+ * @param serializedTx - The serialized transaction bytes.
+ * @returns The SHA-256 hash as a Uint8Array.
+ */
+export function hashTransaction(serializedTx: Uint8Array): Uint8Array {
+  return new Uint8Array(sha256.array(serializedTx));
+}
+
+/**
+ * Parses the NEAR public key from its string representation.
+ * @param mpcPublicKey - The NEAR-formatted public key string.
+ * @returns The decoded public key bytes.
+ */
+export function parsePublicKey(mpcPublicKey: string): Buffer {
+  // Remove 'secp256k1:' prefix and decode
+  const publicKeyBytes = bs58.decode(mpcPublicKey.replace("secp256k1:", ""));
+  return Buffer.from(publicKeyBytes);
+}
+
+
+### lib/addTrialKeys.ts ###
+// addTrialKeys.ts
+
+import { Account } from "@near-js/accounts";
+import { KeyPair } from "@near-js/crypto";
+import { sendTransaction } from "./nearUtils";
+import { Config, TrialKey } from "./types";
+
+interface AddTrialAccountsParams {
+    signerAccount: Account;
+    contractAccountId: string;
+    config: Config;
+    trialId: number;
+    numberOfKeys: number;
+}
+
+/**
+ * Adds trial accounts to the trial contract by generating key pairs and deriving MPC keys.
+ *
+ * @param params - The parameters required to add trial accounts.
+ * @returns A Promise that resolves to an array of TrialKey objects.
+ * @throws Will throw an error if adding trial keys fails.
+ */
+export async function addTrialAccounts(
+    params: AddTrialAccountsParams
+): Promise<TrialKey[]> {
+    const { signerAccount, contractAccountId, trialId, numberOfKeys, config } =
+        params;
+
+    console.log(`Adding ${numberOfKeys} trial accounts...`);
+
+    const trialKeys: TrialKey[] = [];
+
+    for (let i = 0; i < numberOfKeys; i++) {
+        // Generate a new key pair
+        const keyPair = KeyPair.fromRandom("ed25519");
+
+        // Derive the MPC public key
+        const derivationPath = keyPair.getPublicKey().toString();
+
+        const mpcPublicKey = await signerAccount.viewFunction({
+            contractId: config.mpcContractId,
+            methodName: "derived_public_key",
+            args: {
+                path: derivationPath,
+                predecessor: contractAccountId,
+            },
+        });
+
+        // Generate a trial account ID
+        const trialAccountId = `${Date.now().toString()}-trial-${i}.testnet`;
+
+        trialKeys.push({
+            trialAccountId,
+            derivationPath,
+            trialAccountSecretKey: keyPair.toString(),
+            trialAccountPublicKey: keyPair.getPublicKey().toString(),
+            mpcKey: mpcPublicKey,
+        });
+    }
+
+    // Prepare data to send to the contract
+    const keysWithMpc = trialKeys.map((trialKey) => ({
+        public_key: trialKey.trialAccountPublicKey,
+        mpc_key: trialKey.mpcKey,
+    }));
+
+    // Call the `add_trial_keys` function
+    const result = await sendTransaction({
+        signerAccount,
+        receiverId: contractAccountId,
+        methodName: "add_trial_keys",
+        args: {
+            keys: keysWithMpc,
+            trial_id: trialId,
+        },
+        deposit: "1", // Adjust deposit as needed
+        gas: "300000000000000",
+    });
+
+    if (result) {
+        console.log("Trial keys added successfully.");
+
+        return trialKeys;
+    } else {
+        throw new Error("Failed to add trial keys");
+    }
+}
+
+
+### lib/broadcastTransaction.ts ###
+// broadcastTransaction.ts
+
+import { Account } from "@near-js/accounts";
+import {
+    Action,
+    actionCreators,
+    createTransaction,
+    SignedTransaction,
+} from "@near-js/transactions";
+import { parseNearAmount } from "@near-js/utils";
+import { PublicKey } from "@near-js/crypto";
+import bs58 from "bs58";
+import { createSignature, hashTransaction } from "./cryptoUtils";
+import { ActionToPerform, MPCSignature } from "./types";
+import { logInfo, logSuccess } from "./logUtils";
+
+interface BroadcastTransactionParams {
+    signerAccount: Account;
+    actionToPerform: ActionToPerform;
+    signatureResult: MPCSignature; // Signature result from the MPC
+    nonce: string;
+    blockHash: string;
+    mpcPublicKey: string; // Add this parameter
+}
+
+/**
+ * Broadcasts a signed transaction to the NEAR network.
+ *
+ * @param params - The parameters required to broadcast the transaction.
+ * @returns A Promise that resolves when the transaction is broadcasted.
+ * @throws Will throw an error if broadcasting fails.
+ */
+
+export async function broadcastTransaction(
+    params: BroadcastTransactionParams
+): Promise<void> {
+    const {
+        signerAccount,
+        actionToPerform,
+        signatureResult,
+        nonce,
+        blockHash,
+        mpcPublicKey,
+    } = params;
+
+    const { targetContractId, methodName, args, gas, attachedDepositNear } =
+        actionToPerform;
+
+    const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
+
+    const provider = signerAccount.connection.provider;
+
+    const blockHashBytes = bs58.decode(blockHash);
+
+    const accessKeys = await signerAccount.getAccessKeys();
+    const accessKeyForSigning = accessKeys.find(
+        (key) => key.public_key === mpcPublicKey
+    );
+
+    if (!accessKeyForSigning) {
+        throw new Error(
+            `No access key found for signing with MPC public key ${mpcPublicKey}`
+        );
+    }
+
+    logSuccess(
+        `User has correct MPC access key on their account: ${
+            accessKeyForSigning!.public_key
+        }`
+    );
+
+    const actions: Action[] = [
+        actionCreators.functionCall(
+            methodName,
+            serializedArgs,
+            BigInt(gas),
+            BigInt(parseNearAmount(attachedDepositNear)!)
+        ),
+    ];
+
+    // Collect the broadcast logs into an object
+
+    // Create the transaction
+    const transaction = createTransaction(
+        signerAccount.accountId,
+        PublicKey.fromString(mpcPublicKey), // Use MPC public key
+        targetContractId,
+        nonce,
+        actions,
+        blockHashBytes
+    );
+
+    // Hash the transaction to get the message to sign
+    const serializedTx = transaction.encode();
+    const txHash = hashTransaction(serializedTx);
+
+    // Log transaction hash
+    logInfo(`=== Transaction Details ===`);
+    console.log("Transaction Hash:", Buffer.from(txHash).toString("hex"));
+
+    let r = signatureResult.big_r.affine_point;
+    let s = signatureResult.s.scalar;
+
+    const signature = createSignature(r, s);
+
+    const signedTransaction = new SignedTransaction({
+        transaction,
+        signature,
+    });
+
+    // Send the signed transaction
+    logInfo(`=== Sending Transaction ===`);
+    try {
+        const result = await provider.sendTransaction(signedTransaction);
+        console.log("Transaction Result:", result);
+    } catch (error) {
+        console.error("Error sending transaction:", error);
+    }
+}
+
+
+### lib/logUtils.ts ###
+// logUtils.ts
+
+/**
+ * ANSI escape codes for coloring console output.
+ * These codes are widely supported in modern terminals.
+ */
+
+// Reset all attributes
+const RESET = "\x1b[0m";
+
+// Regular Colors
+export const RED = "\x1b[31m";
+const GREEN = "\x1b[32m";
+const BLUE = "\x1b[34m";
+
+/**
+ * Logs a success message in green.
+ * @param message - The message to log.
+ */
+export function logSuccess(message: string): void {
+    console.log(`${GREEN}✅ ${message}${RESET}`);
+}
+
+/**
+ * Logs an error message in red.
+ * @param message - The message to log.
+ */
+export function logError(message: string): void {
+    console.log(`${RED}❌ ${message}${RESET}`);
+}
+
+/**
+ * Logs an informational message in blue.
+ * @param message - The message to log.
+ */
+export function logInfo(message: string): void {
+    console.log(`${BLUE}${message}${RESET}`);
+}
+
+/**
+ * Extracts logs from the transaction result.
+ * @param result - The transaction result object.
+ * @returns An array of log strings.
+ */
+export function extractLogsFromResult(result: any): string[] {
+    const logs: string[] = [];
+    for (const outcome of result.receipts_outcome) {
+        logs.push(...outcome.outcome.logs);
+    }
+    return logs;
+}
+
+/**
+ * Parses a single contract log into a structured object.
+ * @param log - The log string to parse.
+ * @returns A parsed log object or null if parsing fails.
+ */
+export function parseContractLog(log: string): any {
+    const parsedData: any = {};
+
+    // Remove any newlines and trim whitespace
+    let content = log.replace(/\n/g, "").trim();
+
+    // Regular expression to capture various fields from the log
+    const regex =
+        /Signer: AccountId\("(.+?)"\), Contract: AccountId\("(.+?)"\), Method: "(.+?)", Args: (\[.*?\]), Gas: NearGas \{ inner: ([0-9]+) \}, Deposit: U128\(([0-9]+)\), Public Key: PublicKey \{ data: (\[.*?\]) \}, MPC Key: PublicKey \{ data: (\[.*?\]) \}, MPC Account: AccountId\("(.+?)"\), Chain ID: (\d+), Nonce: U64\((\d+)\), Block Hash: Base58CryptoHash\((\[.*?\])\), Actions: (\[.*?\]), TxHash: (\[.*?\])$/;
+
+    const match = content.match(regex);
+
+    if (match) {
+        parsedData["Signer"] = match[1];
+        parsedData["Contract"] = match[2];
+        parsedData["Method"] = match[3];
+        parsedData["Args"] = JSON.parse(match[4]);
+        parsedData["Gas"] = match[5];
+        parsedData["Deposit"] = match[6];
+        parsedData["Public Key"] = { data: JSON.parse(match[7]) };
+        parsedData["MPC Key"] = { data: JSON.parse(match[8]) };
+        parsedData["MPC Account"] = match[9];
+        parsedData["Chain ID"] = match[10];
+        parsedData["Nonce"] = match[11];
+        parsedData["Block Hash"] = JSON.parse(match[12]);
+        parsedData["Actions"] = parseActionsString(match[13]);
+        parsedData["TxHash"] = JSON.parse(match[14]);
+    } else {
+        console.error("Failed to parse contract log:", log);
+    }
+
+    return parsedData;
+}
+
+/**
+ * Parses the Actions string from a contract log.
+ * @param actionsStr - The Actions string to parse.
+ * @returns An array of parsed action objects.
+ */
+export function parseActionsString(actionsStr: string): any[] {
+    const actions: any[] = [];
+
+    const functionCallRegex =
+        /FunctionCall\(FunctionCallAction \{ method_name: "(.*?)", args: (\[.*?\]), gas: U64\((\d+)\), deposit: U128\((\d+)\) \}\)/g;
+
+    let match: any;
+    while ((match = functionCallRegex.exec(actionsStr)) !== null) {
+        actions.push({
+            methodName: match[1],
+            args: JSON.parse(match[2]),
+            gas: match[3],
+            deposit: match[4],
+        });
+    }
+
+    return actions;
+}
+
+/**
+ * Compares two values and logs the result.
+ * @param field - The name of the field being compared.
+ * @param expected - The expected value.
+ * @param actual - The actual value.
+ * @param parseFunction - Optional function to parse or format values before comparison.
+ */
+export function compareAndLog<T>(
+    field: string,
+    expected: T,
+    actual: T,
+    parseFunction?: (value: T) => any
+): void {
+    const formattedExpected = parseFunction
+        ? parseFunction(expected)
+        : expected;
+    const formattedActual = parseFunction ? parseFunction(actual) : actual;
+
+    const isMatch =
+        JSON.stringify(formattedExpected) === JSON.stringify(formattedActual);
+
+    if (isMatch) {
+        logSuccess(`${field} match.`);
+    } else {
+        logError(`${field} mismatch!`);
+
+        // Check if the expected and actual are arrays
+        if (
+            Array.isArray(formattedExpected) &&
+            Array.isArray(formattedActual)
+        ) {
+            console.log(
+                `   Expected: ${formatArray(
+                    formattedExpected as unknown as number[]
+                )}\n`
+            );
+            console.log(
+                `   Actual:   ${formatArray(
+                    formattedActual as unknown as number[]
+                )}\n`
+            );
+        } else {
+            console.log(
+                `   Expected: ${JSON.stringify(formattedExpected, null, 2)}`
+            );
+            console.log(
+                `   Actual:   ${JSON.stringify(formattedActual, null, 2)}`
+            );
+        }
+    }
+}
+
+/**
+ * Formats an array of numbers into a multi-line, horizontally aligned string.
+ * @param array - The array to format.
+ * @param elementsPerLine - Number of elements per line.
+ * @returns A formatted string representing the array.
+ */
+function formatArray(array: number[], elementsPerLine: number = 10): string {
+    let formatted = "[";
+    for (let i = 0; i < array.length; i++) {
+        if (i % elementsPerLine === 0 && i !== 0) {
+            formatted += "\n    ";
+        }
+        formatted += `${array[i]}, `;
+    }
+    // Remove the trailing comma and space, then close the bracket
+    formatted = formatted.trim().slice(0, -1) + "]";
+    return formatted;
+}
+
+
+### lib/types.ts ###
+// types.ts
+
+import { KeyPairString } from "@near-js/crypto";
+import { UnencryptedFileSystemKeyStore } from "@near-js/keystores-node";
+
+/**
+ * Constraints on the usage of the trial accounts.
+ */
+export interface UsageConstraints {
+  maxContracts?: number;
+  maxMethods?: number;
+}
+
+/**
+ * Limits on the interactions of the trial accounts.
+ */
+export interface InteractionLimits {
+  maxInteractionsPerDay?: number;
+  totalInteractions?: number;
+}
+
+/**
+ * Condition that defines a successful function call.
+ */
+export interface FunctionSuccessCondition {
+  contractId: string;
+  methodName: string;
+  expectedReturn: string;
+}
+
+/**
+ * Conditions under which the trial account will exit.
+ */
+export interface ExitConditions {
+  transactionLimit?: number;
+  successCondition?: FunctionSuccessCondition;
+  timeLimit?: number; // timestamp in nanoseconds
+}
+
+/**
+ * Defines an action to be performed on a contract.
+ */
+export interface ActionToPerform {
+  targetContractId: string;
+  methodName: string;
+  args: any;
+  attachedDepositNear: string;
+  gas: string;
+}
+
+/**
+ * Data required to create a trial.
+ */
+export interface TrialData {
+  allowedMethods: string[];
+  allowedContracts: string[];
+  initialDeposit: string;
+  maxGas?: number;
+  maxDeposit?: string; // U128 represented as a string
+  usageConstraints?: UsageConstraints;
+  interactionLimits?: InteractionLimits;
+  exitConditions?: ExitConditions;
+  expirationTime?: number; // timestamp in nanoseconds
+  chainId: number;
+}
+
+/**
+ * Configuration required to initialize the NEAR connection and other parameters.
+ */
+export interface Config {
+  networkId: string;
+  signerAccountId: string;
+  keyStore: UnencryptedFileSystemKeyStore;
+  mpcContractId: string;
+  numberOfKeys: number;
+  dataDir: string;
+}
+
+/**
+ * Key data structure containing information about a trial key.
+ */
+export interface KeyData {
+  publicKey: string;
+  secretKey: string;
+  trialId: number;
+  mpcKey: string;
+}
+
+/**
+ * Represents a trial key along with its associated account ID and MPC key.
+ */
+export interface TrialKey {
+  trialAccountId: string;
+  derivationPath: string;
+  trialAccountSecretKey: KeyPairString;
+  trialAccountPublicKey: string;
+  mpcKey: string;
+}
+
+/**
+ * Result Type of MPC contract signature request.
+ * Representing Affine Points on eliptic curve.
+ * Example: {
+    "big_r": {
+      "affine_point": "031F2CE94AF69DF45EC96D146DB2F6D35B8743FA2E21D2450070C5C339A4CD418B"
+    },
+    "s": { "scalar": "5AE93A7C4138972B3FE8AEA1638190905C6DB5437BDE7274BEBFA41DDAF7E4F6"
+    },
+    "recovery_id": 0
+  }
+ */
+
+export interface MPCSignature {
+  big_r: { affine_point: string };
+  s: { scalar: string };
+  recovery_id: number;
+}
+
+export interface TrialDataFile {
+  trialId: string;
+  trialContractId: string;
+  trialKeys: TrialKey[];
+}
+
+
+### lib/performAction.ts ###
+// performAction.ts
+
+import { sendTransaction } from "./nearUtils";
+import { ActionToPerform, Config } from "./types";
+import { parseNearAmount } from "@near-js/utils";
+import { KeyPair, KeyPairString } from "@near-js/crypto";
+import { Near } from "@near-js/wallet-account";
+import { extractLogsFromResult, parseContractLog } from "./logUtils";
+
+interface PerformActionsParams {
+    near: Near;
+    config: Config;
+    trialAccountId: string;
+    trialAccountSecretKey: KeyPairString;
+    contractAccountId: string;
+    actionsToPerform: ActionToPerform[];
+}
+
+/**
+ * Performs one or more actions by requesting signatures from the MPC.
+ *
+ * @param params - The parameters required to perform actions.
+ * @returns A Promise that resolves to an array of signature arrays.
+ */
+export async function performActions(
+    params: PerformActionsParams
+): Promise<{ signatures: string[][]; nonces: string[]; blockHash: string }> {
+    const {
+        near,
+        config,
+        trialAccountId,
+        trialAccountSecretKey,
+        contractAccountId,
+        actionsToPerform,
+    } = params;
+
+    // Set the trial key in the keyStore
+    const keyStore: any = (near.connection.signer as any).keyStore;
+    await keyStore.setKey(
+        config.networkId,
+        contractAccountId,
+        KeyPair.fromString(trialAccountSecretKey)
+    );
+    let signerAccount = await near.account(trialAccountId);
+
+    const signatures: string[][] = [];
+    const nonces: string[] = [];
+    const contractLogs: any[] = [];
+
+    const provider = signerAccount.connection.provider;
+    const block = await provider.block({ finality: "final" });
+    const blockHash = block.header.hash;
+
+    const accessKeys = await signerAccount.getAccessKeys();
+    const accessKeyForSigning = accessKeys[0];
+    let nonce = accessKeyForSigning.access_key.nonce;
+
+    signerAccount = await near.account(contractAccountId);
+    for (const actionToPerform of actionsToPerform) {
+        const { targetContractId, methodName, args, gas, attachedDepositNear } =
+            actionToPerform;
+        nonce = BigInt(nonce) + 1n;
+
+        console.log(
+            `Performing action: ${methodName} on contract: ${targetContractId}`
+        );
+
+        const serializedArgs = Array.from(Buffer.from(JSON.stringify(args)));
+
+        // Call the perform_action method on the contract
+        const result = await sendTransaction({
+            signerAccount,
+            receiverId: contractAccountId,
+            methodName: "perform_action",
+            args: {
+                chain: "NEAR",
+                contract_id: targetContractId,
+                method_name: methodName,
+                args: serializedArgs,
+                gas,
+                deposit: parseNearAmount(attachedDepositNear),
+                nonce: nonce.toString(),
+                block_hash: blockHash,
+            },
+            deposit: "0",
+            gas,
+        });
+
+        // Extract logs from the transaction result
+        const logs = extractLogsFromResult(result);
+
+        // Find the specific log we're interested in
+        const relevantLog = logs.find((log) => log.startsWith("Signer:"));
+        if (relevantLog) {
+            // Parse the log
+            const parsedLog = parseContractLog(relevantLog);
+            contractLogs.push(parsedLog);
+        } else {
+            console.error("Relevant log not found in the transaction result.");
+        }
+
+        // Extract the signature from the transaction result
+        const sigRes = extractSignatureFromResult(result);
+        signatures.push(sigRes);
+        nonces.push(nonce.toString());
+    }
+
+    return { signatures, nonces, blockHash };
+}
+
+// Helper function to extract signature from the transaction result
+function extractSignatureFromResult(result: any): string[] {
+    const sigRes = JSON.parse(
+        Buffer.from(result.status.SuccessValue, "base64").toString()
+    );
+
+    return sigRes;
+}
+
+
+### lib/nearUtils.ts ###
+// utils.ts
+
+import { Account } from "@near-js/accounts";
+import { FinalExecutionOutcome } from "@near-js/types";
+import { Near } from "@near-js/wallet-account";
+import { Config } from "./types";
+import { Action, actionCreators } from "@near-js/transactions";
+import { parseNearAmount } from "@near-js/utils";
+
+/**
+ * Initializes a NEAR connection using the provided configuration.
+ *
+ * @param config - The configuration object containing network ID, key store, etc.
+ * @returns A Promise that resolves to a Near instance.
+ */
+export async function initNear(config: Config): Promise<Near> {
+    const nearConfig = {
+        networkId: config.networkId,
+        nodeUrl: `https://rpc.${config.networkId}.near.org`,
+        keyStore: config.keyStore,
+    };
+    const near = new Near(nearConfig);
+    return near;
+}
+
+/**
+ * Converts an object's keys from camelCase to snake_case recursively.
+ *
+ * @param obj - The object to be converted.
+ * @returns The new object with snake_case keys.
+ */
+export function toSnakeCase(obj: any): any {
+    if (Array.isArray(obj)) {
+        return obj.map((item) => toSnakeCase(item));
+    } else if (obj && typeof obj === "object" && obj.constructor === Object) {
+        return Object.keys(obj).reduce((acc: any, key: string) => {
+            const snakeKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
+            acc[snakeKey] = toSnakeCase(obj[key]);
+            return acc;
+        }, {});
+    }
+    return obj;
+}
+
+export async function sendTransaction({
+    signerAccount,
+    receiverId,
+    methodName,
+    args,
+    deposit,
+    gas,
+}: {
+    signerAccount: Account;
+    receiverId: string;
+    methodName: string;
+    args: any;
+    deposit: string;
+    gas: string;
+}): Promise<FinalExecutionOutcome> {
+    const serializedArgsBuffer = Buffer.from(JSON.stringify(args));
+    const serializedArgs = new Uint8Array(serializedArgsBuffer);
+
+    let actions: Action[] = [];
+
+    actions.push(
+        actionCreators.functionCall(
+            methodName,
+            serializedArgs,
+            BigInt(gas),
+            BigInt(parseNearAmount(deposit)!)
+        )
+    );
+
+    const result = await signerAccount.signAndSendTransaction({
+        receiverId: receiverId,
+        actions,
+    });
+
+    return result;
+}
+
+
+### lib/activateTrial.ts ###
+// activateTrial.ts
+
+import { KeyPair, KeyPairString } from "@near-js/crypto";
+import { Near } from "@near-js/wallet-account";
+import { Config } from "./types";
+import { sendTransaction } from "./nearUtils";
+
+interface ActivateTrialAccountsParams {
+  near: Near;
+  config: Config;
+  contractAccountId: string;
+  trialAccountIds: string[];
+  trialAccountSecretKeys: KeyPairString[];
+}
+
+/**
+ * Activates trial accounts on the trial contract.
+ *
+ * @param params - The parameters required to activate trial accounts.
+ * @returns A Promise that resolves when all accounts are activated.
+ * @throws Will throw an error if activation of any trial account fails.
+ */
+export async function activateTrialAccounts(
+  params: ActivateTrialAccountsParams,
+): Promise<void> {
+  const {
+    contractAccountId,
+    trialAccountIds,
+    near,
+    config,
+    trialAccountSecretKeys,
+  } = params;
+
+  console.log("Activating trial accounts...");
+
+  for (let i = 0; i < trialAccountIds.length; i++) {
+    const trialAccountId = trialAccountIds[i];
+    const trialKey = trialAccountSecretKeys[i];
+    console.log(`Activating trial account: ${trialAccountId}`);
+
+    // Set the trial key in the keyStore
+    const keyStore: any = (near.connection.signer as any).keyStore;
+    await keyStore.setKey(
+      config.networkId,
+      contractAccountId,
+      KeyPair.fromString(trialKey),
+    );
+    const signerAccount = await near.account(contractAccountId);
+
+    const result = await sendTransaction({
+      signerAccount,
+      receiverId: contractAccountId,
+      methodName: "activate_trial",
+      args: {
+        new_account_id: trialAccountId,
+      },
+      deposit: "0",
+      gas: "300000000000000",
+    });
+
+    if (result) {
+      console.log(`Trial account ${trialAccountId} activated.`);
+    } else {
+      throw new Error(`Failed to activate trial account: ${trialAccountId}`);
+    }
+  }
+}
+
+
