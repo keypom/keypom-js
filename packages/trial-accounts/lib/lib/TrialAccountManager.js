@@ -52,6 +52,7 @@ class TrialAccountManager {
      * @param params.trialContractId - The account ID of the trial contract.
      * @param params.signerAccount - The Account object used for signing transactions.
      * @param params.near - The NEAR connection instance.
+     * @param params.mpcContractId - The account ID of the MPC contract.
      * @param params.trialId - (Optional) The trial ID.
      * @param params.trialSecretKey - (Optional) The secret key for the trial account.
      * @param params.trialAccountId - (Optional) The account ID of the trial account.
@@ -62,6 +63,7 @@ class TrialAccountManager {
     constructor(params) {
         this.trialContractId = params.trialContractId;
         this.signerAccount = params.signerAccount;
+        this.mpcContractId = params.mpcContractId;
         this.near = params.near;
         this.trialId = params.trialId;
         this.trialSecretKey = params.trialSecretKey;
@@ -80,7 +82,7 @@ class TrialAccountManager {
         return retryAsync(async () => {
             const trialId = await (0, createTrial_1.createTrial)({
                 signerAccount: this.signerAccount,
-                contractAccountId: this.trialContractId,
+                trialContractId: this.trialContractId,
                 trialData,
             });
             this.trialId = trialId;
@@ -100,7 +102,8 @@ class TrialAccountManager {
         return retryAsync(async () => {
             const trialKeys = await (0, addTrialKeys_1.addTrialAccounts)({
                 signerAccount: this.signerAccount,
-                contractAccountId: this.trialContractId,
+                trialContractId: this.trialContractId,
+                mpcContractId: this.mpcContractId,
                 trialId: this.trialId,
                 numberOfKeys,
             });
@@ -125,7 +128,7 @@ class TrialAccountManager {
             }
             await (0, activateTrial_1.activateTrialAccounts)({
                 near: this.near,
-                contractAccountId: this.trialContractId,
+                trialContractId: this.trialContractId,
                 trialAccountIds: [newAccountId],
                 trialAccountSecretKeys: [this.trialSecretKey],
             });
@@ -153,7 +156,7 @@ class TrialAccountManager {
                 near: this.near,
                 trialAccountId: this.trialAccountId,
                 trialAccountSecretKey: this.trialSecretKey,
-                contractAccountId: this.trialContractId,
+                trialContractId: this.trialContractId,
                 actionsToPerform,
             });
             return result;

@@ -2,7 +2,7 @@ import { Account } from "@near-js/accounts";
 import { TrialData } from "./types";
 interface CreateTrialParams {
     signerAccount: Account;
-    contractAccountId: string;
+    trialContractId: string;
     trialData: TrialData;
 }
 /**

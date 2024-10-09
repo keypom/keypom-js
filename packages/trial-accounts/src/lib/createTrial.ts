@@ -7,7 +7,7 @@ import { parseNearAmount } from "@near-js/utils";
 
 interface CreateTrialParams {
     signerAccount: Account;
-    contractAccountId: string;
+    trialContractId: string;
     trialData: TrialData;
 }
 
@@ -19,7 +19,7 @@ interface CreateTrialParams {
  * @throws Will throw an error if the trial creation fails.
  */
 export async function createTrial(params: CreateTrialParams): Promise<number> {
-    const { signerAccount, contractAccountId, trialData } = params;
+    const { signerAccount, trialContractId, trialData } = params;
 
     console.log("Creating trial...");
 
@@ -31,7 +31,7 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
 
     const result = await sendTransaction({
         signerAccount,
-        receiverId: contractAccountId,
+        receiverId: trialContractId,
         methodName: "create_trial",
         args: snakeCaseArgs,
         deposit: "1",

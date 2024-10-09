@@ -2,7 +2,8 @@ import { Account } from "@near-js/accounts";
 import { TrialKey } from "./types";
 interface AddTrialAccountsParams {
     signerAccount: Account;
-    contractAccountId: string;
+    trialContractId: string;
+    mpcContractId: string;
     trialId: number;
     numberOfKeys: number;
 }

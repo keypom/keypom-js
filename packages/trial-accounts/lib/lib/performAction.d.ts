@@ -5,7 +5,7 @@ interface PerformActionsParams {
     near: Near;
     trialAccountId: string;
     trialAccountSecretKey: KeyPairString;
-    contractAccountId: string;
+    trialContractId: string;
     actionsToPerform: ActionToPerform[];
 }
 /**

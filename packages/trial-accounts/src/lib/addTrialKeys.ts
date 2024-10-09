@@ -7,7 +7,8 @@ import { TrialKey } from "./types";
 
 interface AddTrialAccountsParams {
     signerAccount: Account;
-    contractAccountId: string;
+    trialContractId: string;
+    mpcContractId: string;
     trialId: number;
     numberOfKeys: number;
 }
@@ -22,7 +23,13 @@ interface AddTrialAccountsParams {
 export async function addTrialAccounts(
     params: AddTrialAccountsParams
 ): Promise<TrialKey[]> {
-    const { signerAccount, contractAccountId, trialId, numberOfKeys } = params;
+    const {
+        signerAccount,
+        trialContractId,
+        mpcContractId,
+        trialId,
+        numberOfKeys,
+    } = params;
 
     console.log(`Adding ${numberOfKeys} trial accounts...`);
 
@@ -36,11 +43,11 @@ export async function addTrialAccounts(
         const derivationPath = keyPair.getPublicKey().toString();
 
         const mpcPublicKey = await signerAccount.viewFunction({
-            contractId: contractAccountId,
+            contractId: mpcContractId,
             methodName: "derived_public_key",
             args: {
                 path: derivationPath,
-                predecessor: contractAccountId,
+                predecessor: trialContractId,
             },
         });
 
@@ -65,7 +72,7 @@ export async function addTrialAccounts(
     // Call the `add_trial_keys` function
     const result = await sendTransaction({
         signerAccount,
-        receiverId: contractAccountId,
+        receiverId: trialContractId,
         methodName: "add_trial_keys",
         args: {
             keys: keysWithMpc,

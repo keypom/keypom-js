@@ -12,7 +12,7 @@ import {
     TrialAccountInfo,
 } from "./types";
 import { createTrial } from "./createTrial";
-import { addTrialAccounts } from "./addTrialKeys";
+import { addTrialAccounts as addTrialKeys } from "./addTrialKeys";
 import { activateTrialAccounts } from "./activateTrial";
 import { performActions } from "./performAction";
 import { broadcastTransaction } from "./broadcastTransaction";
@@ -65,6 +65,7 @@ export async function retryAsync<T>(
  */
 export class TrialAccountManager {
     private trialContractId: string;
+    private mpcContractId: string;
     private trialId?: number;
     private trialAccountId?: string;
     private trialSecretKey?: KeyPairString;
@@ -81,6 +82,7 @@ export class TrialAccountManager {
      * @param params.trialContractId - The account ID of the trial contract.
      * @param params.signerAccount - The Account object used for signing transactions.
      * @param params.near - The NEAR connection instance.
+     * @param params.mpcContractId - The account ID of the MPC contract.
      * @param params.trialId - (Optional) The trial ID.
      * @param params.trialSecretKey - (Optional) The secret key for the trial account.
      * @param params.trialAccountId - (Optional) The account ID of the trial account.
@@ -92,6 +94,7 @@ export class TrialAccountManager {
         trialContractId: string;
         signerAccount: Account;
         near: Near;
+        mpcContractId: string;
         trialId?: number;
         trialSecretKey?: KeyPairString;
         trialAccountId?: string;
@@ -101,6 +104,7 @@ export class TrialAccountManager {
     }) {
         this.trialContractId = params.trialContractId;
         this.signerAccount = params.signerAccount;
+        this.mpcContractId = params.mpcContractId;
         this.near = params.near;
         this.trialId = params.trialId;
         this.trialSecretKey = params.trialSecretKey;
@@ -121,7 +125,7 @@ export class TrialAccountManager {
             async () => {
                 const trialId = await createTrial({
                     signerAccount: this.signerAccount,
-                    contractAccountId: this.trialContractId,
+                    trialContractId: this.trialContractId,
                     trialData,
                 });
                 this.trialId = trialId;
@@ -145,9 +149,10 @@ export class TrialAccountManager {
         }
         return retryAsync(
             async () => {
-                const trialKeys = await addTrialAccounts({
+                const trialKeys = await addTrialKeys({
                     signerAccount: this.signerAccount,
-                    contractAccountId: this.trialContractId,
+                    trialContractId: this.trialContractId,
+                    mpcContractId: this.mpcContractId,
                     trialId: this.trialId!,
                     numberOfKeys,
                 });
@@ -183,7 +188,7 @@ export class TrialAccountManager {
 
                 await activateTrialAccounts({
                     near: this.near,
-                    contractAccountId: this.trialContractId,
+                    trialContractId: this.trialContractId,
                     trialAccountIds: [newAccountId],
                     trialAccountSecretKeys: [this.trialSecretKey!],
                 });
@@ -229,7 +234,7 @@ export class TrialAccountManager {
                     near: this.near,
                     trialAccountId: this.trialAccountId!,
                     trialAccountSecretKey: this.trialSecretKey!,
-                    contractAccountId: this.trialContractId,
+                    trialContractId: this.trialContractId,
                     actionsToPerform,
                 });
                 return result;

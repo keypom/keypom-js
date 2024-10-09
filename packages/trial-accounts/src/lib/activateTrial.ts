@@ -6,7 +6,7 @@ import { sendTransaction } from "./nearUtils";
 
 interface ActivateTrialAccountsParams {
     near: Near;
-    contractAccountId: string;
+    trialContractId: string;
     trialAccountIds: string[];
     trialAccountSecretKeys: KeyPairString[];
 }
@@ -21,7 +21,7 @@ interface ActivateTrialAccountsParams {
 export async function activateTrialAccounts(
     params: ActivateTrialAccountsParams
 ): Promise<void> {
-    const { contractAccountId, trialAccountIds, near, trialAccountSecretKeys } =
+    const { trialContractId, trialAccountIds, near, trialAccountSecretKeys } =
         params;
 
     console.log("Activating trial accounts...");
@@ -35,14 +35,14 @@ export async function activateTrialAccounts(
         const keyStore: any = (near.connection.signer as any).keyStore;
         await keyStore.setKey(
             near.connection.networkId,
-            contractAccountId,
+            trialContractId,
             KeyPair.fromString(trialKey)
         );
-        const signerAccount = await near.account(contractAccountId);
+        const signerAccount = await near.account(trialContractId);
 
         const result = await sendTransaction({
             signerAccount,
-            receiverId: contractAccountId,
+            receiverId: trialContractId,
             methodName: "activate_trial",
             args: {
                 new_account_id: trialAccountId,

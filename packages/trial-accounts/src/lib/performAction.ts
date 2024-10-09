@@ -11,7 +11,7 @@ interface PerformActionsParams {
     near: Near;
     trialAccountId: string;
     trialAccountSecretKey: KeyPairString;
-    contractAccountId: string;
+    trialContractId: string;
     actionsToPerform: ActionToPerform[];
 }
 
@@ -28,7 +28,7 @@ export async function performActions(
         near,
         trialAccountId,
         trialAccountSecretKey,
-        contractAccountId,
+        trialContractId,
         actionsToPerform,
     } = params;
 
@@ -36,7 +36,7 @@ export async function performActions(
     const keyStore: any = (near.connection.signer as any).keyStore;
     await keyStore.setKey(
         near.connection.networkId,
-        contractAccountId,
+        trialContractId,
         KeyPair.fromString(trialAccountSecretKey)
     );
     let signerAccount = await near.account(trialAccountId);
@@ -53,7 +53,7 @@ export async function performActions(
     const accessKeyForSigning = accessKeys[0];
     let nonce = accessKeyForSigning.access_key.nonce;
 
-    signerAccount = await near.account(contractAccountId);
+    signerAccount = await near.account(trialContractId);
     for (const actionToPerform of actionsToPerform) {
         const { targetContractId, methodName, args, gas, attachedDepositNear } =
             actionToPerform;
@@ -68,7 +68,7 @@ export async function performActions(
         // Call the perform_action method on the contract
         const result = await sendTransaction({
             signerAccount,
-            receiverId: contractAccountId,
+            receiverId: trialContractId,
             methodName: "perform_action",
             args: {
                 chain: "NEAR",

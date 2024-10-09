@@ -20,6 +20,7 @@ export declare function retryAsync<T>(fn: () => Promise<T>, retries?: number, de
  */
 export declare class TrialAccountManager {
     private trialContractId;
+    private mpcContractId;
     private trialId?;
     private trialAccountId?;
     private trialSecretKey?;
@@ -34,6 +35,7 @@ export declare class TrialAccountManager {
      * @param params.trialContractId - The account ID of the trial contract.
      * @param params.signerAccount - The Account object used for signing transactions.
      * @param params.near - The NEAR connection instance.
+     * @param params.mpcContractId - The account ID of the MPC contract.
      * @param params.trialId - (Optional) The trial ID.
      * @param params.trialSecretKey - (Optional) The secret key for the trial account.
      * @param params.trialAccountId - (Optional) The account ID of the trial account.
@@ -45,6 +47,7 @@ export declare class TrialAccountManager {
         trialContractId: string;
         signerAccount: Account;
         near: Near;
+        mpcContractId: string;
         trialId?: number;
         trialSecretKey?: KeyPairString;
         trialAccountId?: string;

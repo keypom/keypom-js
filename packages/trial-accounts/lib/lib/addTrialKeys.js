@@ -12,7 +12,7 @@ const nearUtils_1 = require("./nearUtils");
  * @throws Will throw an error if adding trial keys fails.
  */
 async function addTrialAccounts(params) {
-    const { signerAccount, contractAccountId, trialId, numberOfKeys } = params;
+    const { signerAccount, trialContractId, mpcContractId, trialId, numberOfKeys, } = params;
     console.log(`Adding ${numberOfKeys} trial accounts...`);
     const trialKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
@@ -21,11 +21,11 @@ async function addTrialAccounts(params) {
         // Derive the MPC public key
         const derivationPath = keyPair.getPublicKey().toString();
         const mpcPublicKey = await signerAccount.viewFunction({
-            contractId: contractAccountId,
+            contractId: mpcContractId,
             methodName: "derived_public_key",
             args: {
                 path: derivationPath,
-                predecessor: contractAccountId,
+                predecessor: trialContractId,
             },
         });
         // Generate a trial account ID
@@ -46,7 +46,7 @@ async function addTrialAccounts(params) {
     // Call the `add_trial_keys` function
     const result = await (0, nearUtils_1.sendTransaction)({
         signerAccount,
-        receiverId: contractAccountId,
+        receiverId: trialContractId,
         methodName: "add_trial_keys",
         args: {
             keys: keysWithMpc,

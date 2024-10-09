@@ -13,10 +13,10 @@ const logUtils_1 = require("./logUtils");
  * @returns A Promise that resolves to an array of signature arrays.
  */
 async function performActions(params) {
-    const { near, trialAccountId, trialAccountSecretKey, contractAccountId, actionsToPerform, } = params;
+    const { near, trialAccountId, trialAccountSecretKey, trialContractId, actionsToPerform, } = params;
     // Set the trial key in the keyStore
     const keyStore = near.connection.signer.keyStore;
-    await keyStore.setKey(near.connection.networkId, contractAccountId, crypto_1.KeyPair.fromString(trialAccountSecretKey));
+    await keyStore.setKey(near.connection.networkId, trialContractId, crypto_1.KeyPair.fromString(trialAccountSecretKey));
     let signerAccount = await near.account(trialAccountId);
     const signatures = [];
     const nonces = [];
@@ -27,7 +27,7 @@ async function performActions(params) {
     const accessKeys = await signerAccount.getAccessKeys();
     const accessKeyForSigning = accessKeys[0];
     let nonce = accessKeyForSigning.access_key.nonce;
-    signerAccount = await near.account(contractAccountId);
+    signerAccount = await near.account(trialContractId);
     for (const actionToPerform of actionsToPerform) {
         const { targetContractId, methodName, args, gas, attachedDepositNear } = actionToPerform;
         nonce = BigInt(nonce) + 1n;
@@ -36,7 +36,7 @@ async function performActions(params) {
         // Call the perform_action method on the contract
         const result = await (0, nearUtils_1.sendTransaction)({
             signerAccount,
-            receiverId: contractAccountId,
+            receiverId: trialContractId,
             methodName: "perform_action",
             args: {
                 chain: "NEAR",

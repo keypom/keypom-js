@@ -13,7 +13,7 @@ const utils_1 = require("@near-js/utils");
  * @throws Will throw an error if the trial creation fails.
  */
 async function createTrial(params) {
-    const { signerAccount, contractAccountId, trialData } = params;
+    const { signerAccount, trialContractId, trialData } = params;
     console.log("Creating trial...");
     // Convert camelCase trialData to snake_case
     const snakeCaseArgs = (0, types_1.toSnakeCase)({
@@ -22,7 +22,7 @@ async function createTrial(params) {
     });
     const result = await (0, nearUtils_1.sendTransaction)({
         signerAccount,
-        receiverId: contractAccountId,
+        receiverId: trialContractId,
         methodName: "create_trial",
         args: snakeCaseArgs,
         deposit: "1",
