@@ -2,7 +2,7 @@
 
 import { Account } from "@near-js/accounts";
 import { KeyPair } from "@near-js/crypto";
-import { sendTransaction } from "./nearUtils";
+import { sendTransaction } from "./networks/near";
 import { TrialKey } from "./types";
 
 interface AddTrialAccountsParams {

@@ -3,17 +3,6 @@ import { KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 import { ActionToPerform, TrialData, TrialKey, MPCSignature, TrialAccountInfo } from "./types";
 /**
- * Helper function to retry an async operation with exponential backoff.
- *
- * @param fn - The async function to retry.
- * @param retries - Number of retries.
- * @param delay - Initial delay in milliseconds.
- * @param factor - Multiplicative factor for delay.
- * @returns The result of the async function if successful.
- * @throws The last error encountered if all retries fail.
- */
-export declare function retryAsync<T>(fn: () => Promise<T>, retries?: number, delay?: number, factor?: number): Promise<T>;
-/**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
  * activate trial accounts, perform actions, and broadcast transactions.
@@ -32,16 +21,6 @@ export declare class TrialAccountManager {
     /**
      * Constructs a new TrialAccountManager.
      * @param params - Parameters for initializing the manager.
-     * @param params.trialContractId - The account ID of the trial contract.
-     * @param params.signerAccount - The Account object used for signing transactions.
-     * @param params.near - The NEAR connection instance.
-     * @param params.mpcContractId - The account ID of the MPC contract.
-     * @param params.trialId - (Optional) The trial ID.
-     * @param params.trialSecretKey - (Optional) The secret key for the trial account.
-     * @param params.trialAccountId - (Optional) The account ID of the trial account.
-     * @param params.maxRetries - Maximum retries for retry logic.
-     * @param params.initialDelayMs - Initial delay for retry logic in milliseconds.
-     * @param params.backoffFactor - Exponential backoff factor for retries.
      */
     constructor(params: {
         trialContractId: string;
@@ -88,7 +67,7 @@ export declare class TrialAccountManager {
         blockHash: string;
     }>;
     /**
-     * Broadcasts a signed transaction to the NEAR network with retry logic.
+     * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
      *
      * @param params - The parameters required to broadcast the transaction.
      * @returns A Promise that resolves when the transaction is broadcasted.

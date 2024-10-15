@@ -1,11 +1,10 @@
-// performAction.ts
+// lib/performAction.ts
 
-import { sendTransaction } from "./nearUtils";
-import { ActionToPerform } from "./types";
+import { sendTransaction } from "./networks/near";
+import { ActionToPerform, MPCSignature } from "./types";
 import { parseNearAmount } from "@near-js/utils";
 import { KeyPair, KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
-import { extractLogsFromResult, parseContractLog } from "./logUtils";
 
 interface PerformActionsParams {
     near: Near;
@@ -21,9 +20,11 @@ interface PerformActionsParams {
  * @param params - The parameters required to perform actions.
  * @returns A Promise that resolves to an array of signature arrays.
  */
-export async function performActions(
-    params: PerformActionsParams
-): Promise<{ signatures: string[][]; nonces: string[]; blockHash: string }> {
+export async function performActions(params: PerformActionsParams): Promise<{
+    signatures: MPCSignature[];
+    nonces: string[];
+    blockHash: string;
+}> {
     const {
         near,
         trialAccountId,
@@ -39,11 +40,10 @@ export async function performActions(
         trialContractId,
         KeyPair.fromString(trialAccountSecretKey)
     );
-    let signerAccount = await near.account(trialAccountId);
+    let signerAccount = await near.account(trialContractId);
 
-    const signatures: string[][] = [];
+    const signatures: MPCSignature[] = [];
     const nonces: string[] = [];
-    const contractLogs: any[] = [];
 
     const provider = signerAccount.connection.provider;
     const block = await provider.block({ finality: "final" });
@@ -53,64 +53,87 @@ export async function performActions(
     const accessKeyForSigning = accessKeys[0];
     let nonce = accessKeyForSigning.access_key.nonce;
 
-    signerAccount = await near.account(trialContractId);
     for (const actionToPerform of actionsToPerform) {
-        const { targetContractId, methodName, args, gas, attachedDepositNear } =
-            actionToPerform;
         nonce = BigInt(nonce) + 1n;
 
         console.log(
-            `Performing action: ${methodName} on contract: ${targetContractId}`
+            `Performing action: ${actionToPerform.methodName} on contract: ${actionToPerform.targetContractId}`
         );
 
-        const serializedArgs = Array.from(Buffer.from(JSON.stringify(args)));
+        if (actionToPerform.chain === "NEAR") {
+            const serializedArgs = Array.from(
+                Buffer.from(JSON.stringify(actionToPerform.args))
+            );
 
-        // Call the perform_action method on the contract
-        const result = await sendTransaction({
-            signerAccount,
-            receiverId: trialContractId,
-            methodName: "perform_action",
-            args: {
-                chain: "NEAR",
-                contract_id: targetContractId,
-                method_name: methodName,
-                args: serializedArgs,
-                gas,
-                deposit: parseNearAmount(attachedDepositNear),
-                nonce: nonce.toString(),
-                block_hash: blockHash,
-            },
-            deposit: "0",
-            gas,
-        });
+            // Call the perform_action method on the contract
+            const result = await sendTransaction({
+                signerAccount,
+                receiverId: trialContractId,
+                methodName: "call_near_contract",
+                args: {
+                    contract_id: actionToPerform.targetContractId,
+                    method_name: actionToPerform.methodName,
+                    args: serializedArgs,
+                    gas: actionToPerform.gas,
+                    deposit: parseNearAmount(
+                        actionToPerform.attachedDepositNear!
+                    ),
+                    signing_key: accessKeyForSigning.public_key,
+                    mpc_account_id: trialAccountId,
+                    nonce: nonce.toString(),
+                    block_hash: blockHash,
+                },
+                deposit: "0",
+                gas: "300000000000000",
+            });
 
-        // Extract logs from the transaction result
-        const logs = extractLogsFromResult(result);
+            // Extract the signature from the transaction result
+            const sigRes = extractSignatureFromResult(result);
+            signatures.push(sigRes);
+            nonces.push(nonce.toString());
+        } else if (actionToPerform.chain === "EVM") {
+            // Implement logic for EVM actions
+            // Prepare the arguments as per the contract's expectations
+            const result = await sendTransaction({
+                signerAccount,
+                receiverId: trialContractId,
+                methodName: "call_evm_contract",
+                args: {
+                    contract_address: actionToPerform.targetContractId,
+                    method_name: actionToPerform.methodName,
+                    method_params: actionToPerform.args.methodParams,
+                    args: actionToPerform.args.args,
+                    gas_limit: actionToPerform.gasLimit,
+                    value: actionToPerform.value,
+                    chain_id: actionToPerform.args.chainId,
+                    nonce: nonce.toString(),
+                    max_fee_per_gas: actionToPerform.args.maxFeePerGas,
+                    max_priority_fee_per_gas:
+                        actionToPerform.args.maxPriorityFeePerGas,
+                    access_list: actionToPerform.args.accessList,
+                },
+                deposit: "0",
+                gas: "300000000000000",
+            });
 
-        // Find the specific log we're interested in
-        const relevantLog = logs.find((log) => log.startsWith("Signer:"));
-        if (relevantLog) {
-            // Parse the log
-            const parsedLog = parseContractLog(relevantLog);
-            contractLogs.push(parsedLog);
+            // Handle the result, extract signatures, etc.
+            const sigRes = extractSignatureFromResult(result);
+            signatures.push(sigRes);
+            nonces.push(nonce.toString());
         } else {
-            console.error("Relevant log not found in the transaction result.");
+            throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
         }
-
-        // Extract the signature from the transaction result
-        const sigRes = extractSignatureFromResult(result);
-        signatures.push(sigRes);
-        nonces.push(nonce.toString());
     }
 
     return { signatures, nonces, blockHash };
 }
 
 // Helper function to extract signature from the transaction result
-function extractSignatureFromResult(result: any): string[] {
+function extractSignatureFromResult(result: any): MPCSignature {
     const sigRes = JSON.parse(
         Buffer.from(result.status.SuccessValue, "base64").toString()
     );
+    console.log("Signature: ", sigRes);
 
     return sigRes;
 }

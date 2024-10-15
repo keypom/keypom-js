@@ -3,16 +3,13 @@
     <picture>
       <img src="https://cloudflare-ipfs.com/ipfs/bafybeightypuoqly32gsrivh4efckhdv6wsefiynpnonlem6ts3ypgdm7e" height="128">
     </picture>
-    <h1 align="center">Keypom Core SDK</h1>
+    <h1 align="center">Keypom Multichain Trial Accounts</h1>
   </a>
 </p>
 
 <p align="center">
   <a aria-label="Made by Ben Kurrek" href="https://github.com/BenKurrek">
     <img src="https://img.shields.io/badge/MADE%20BY-Ben%20Kurrek-000000.svg?style=for-the-badge">
-  </a>
-  <a aria-label="Made by Matt Lockyer" href="https://github.com/mattlockyer">
-    <img src="https://img.shields.io/badge/MADE%20BY-Matt%20Lockyer-000000.svg?style=for-the-badge">
   </a>
   <a aria-label="License" href="https://github.com/keypom/keypom-js/blob/main/LICENSE">
     <img alt="" src="https://img.shields.io/badge/License-GNU%20GPL-green?style=for-the-badge">
@@ -22,182 +19,166 @@
   </a>
 </p>
 
-The core package serves as a way to interact with Keypom through a set of easy to use methods that abstract away the complexities of the protocol. The package includes ways to:
-- Create drops of all kinds
-- Claim drops
-- Create and use trial accounts
-- View information about drops and keys
-- Delete drops and refund assets
-- Manage user balances
+The **Keypom Trial Accounts SDK** provides a seamless way to interact with NEAR trial accounts through a set of easy-to-use methods. This SDK abstracts the complexities involved in creating and managing trial accounts, allowing developers to focus on building their applications. With this package, you can:
+
+-   Deploy trial contracts
+-   Create trials with customizable constraints
+-   Add and activate trial accounts
+-   Perform actions on behalf of trial accounts
+-   Broadcast transactions signed via Multi-Party Computation (MPC)
+-   Manage usage statistics and exit conditions for trial accounts
 
 # Table of Contents
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-  - [View Methods & Utility Functions Only](#view-methods--utility-functions-only)
-  - [Funder Object](#funder-object)
-  - [Customized KeyStore & Multiple Signers](#customized-keystore--multiple-signers)
-- [Costs](#costs)
-    - [Per Drop](#per-drop)
-    - [Per Key](#per-key)
-- [Contributing](#contributing)
+
+-   [Installation](#installation)
+-   [Getting Started](#getting-started)
+    -   [Initialization](#initialization)
+    -   [Usage Examples](#usage-examples)
+        -   [Creating a Trial](#creating-a-trial)
+        -   [Adding and Activating Trial Accounts](#adding-and-activating-trial-accounts)
+        -   [Performing Actions](#performing-actions)
+    -   [Configuration](#configuration)
+    -   [Retry Logic](#retry-logic)
+-   [Concepts](#concepts)
+    -   [Trial Accounts](#trial-accounts)
+    -   [MPC Integration](#mpc-integration)
+    -   [Usage Constraints](#usage-constraints)
+-   [Contributing](#contributing)
+-   [License](#license)
 
 ---
 
 # Installation
 
-To install the Keypom Core SDK, run the following command:
+To install the Keypom Trial Accounts SDK, run the following command:
 
 ```bash
-npm install @keypom/core
+npm install @keypom/trial-accounts
 # or
-yarn add @keypom/core
+yarn add @keypom/trial-accounts
 # or
-pnpm add @keypom/core
+pnpm add @keypom/trial-accounts
 ```
 
 # Getting Started
 
-The first thing you must *always* do when using the SDK is to call `initKeypom`. This will initialize the package state and establish a connection to the NEAR blockchain. 
+The first step in using the SDK is to initialize the `TrialAccountManager` class. This class provides methods to manage trial accounts and interact with the trial contract.
 
-By default, the SDK will create a new [InMemoryKeyStore](https://github.com/near/near-api-js/blob/master/packages/keystores/src/in_memory_key_store.ts) to sign transactions with. Thus, if you don't pass in a `funder` object, you won't be able to sign transactions and can only invoke utility and view methods. Alternatively, if you'd like to use a different keystore, you can pass in a customized `near` object to the initialization function.
+## Initialization
 
-With the SDK, every function that requires transactions to be signed can be carried through in 1 of two ways:
-1. Passing in an [Account](https://github.com/near/near-api-js/blob/master/packages/accounts/src/account.ts) object into the function whose keys are kept in the SDK's keystore.
-2. Passing in a `funder` object once during initialization whose keys will be kept in the SDK's [InMemoryKeyStore](https://github.com/near/near-api-js/blob/master/packages/keystores/src/in_memory_key_store.ts).
-
-## View Methods & Utility Functions Only
-
-If your only purpose is to query information from the chain or use Keypom's utility functions such as `generateKeys`, you don't need to pass in a `near` or `funder` object to `initKeypom`:
+You need to create an instance of `TrialAccountManager` by providing the necessary parameters:
 
 ```js
-await initKeypom({
-    network: "testnet"
+import { TrialAccountManager } from "@keypom/trial-accounts";
+import { Near, Account } from "@near-js/wallet-account";
+import { UnencryptedFileSystemKeyStore } from "@near-js/keystores-node";
+import path from "path";
+import os from "os";
+
+// Set up NEAR connection
+const homedir = os.homedir();
+const credentialsPath = path.join(homedir, ".near-credentials");
+const keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
+const near = new Near({
+    networkId: "testnet",
+    keyStore,
+    nodeUrl: "https://rpc.testnet.near.org",
 });
 
-const keys = await generateKeys({
-    numKeys: 1
-})
-console.log('keys: ', keys)
+const signerAccount = await near.account("your-account.testnet");
 
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
+const trialManager = new TrialAccountManager({
+    trialContractId: "trial-contract.your-account.testnet",
+    mpcContractId: "v1.signer-prod.testnet",
+    signerAccount,
+    near,
+});
 ```
 
-## Funder Object
+-   `trialContractId`: The account ID where the trial contract is deployed.
+-   `mpcContractId`: The account ID of the MPC contract.
+-   `signerAccount`: An instance of `Account` used for signing transactions.
+-   `near`: The NEAR connection instance.
 
-If you have the private key of an account that you'd like to use to sign transactions with, you can pass in a `funder` object to `initKeypom`. The private key can either be hardcoded or passed in through environment variables / secrets.
+## Usage Examples
 
-Using this method, you only need to pass the funder object once on initialization and can freely invoke any of the SDK methods moving forward. To update the funder object, you can call `updateFunder` and pass in different information.
+### Creating a Trial
+
+Create a new trial with specific constraints:
 
 ```js
-await initKeypom({
-    network: "testnet",
-    funder: {
-        accountId: "benji_demo.testnet",
-        secretKey: "ed25519:5yARProkcALbxaSQ66aYZMSBPWL9uPBmkoQGjV3oi2ddQDMh1teMAbz7jqNV9oVyMy7kZNREjYvWPqjcA6LW9Jb1"
-    }
+const trialId = await trialManager.createTrial({;
+    near,
+    signerAccount,
+    contractAccountId: "trial-contract.your-account.testnet",
+    mpcContractId: "v1.signer-prod.testnet",
+    wasmFilePath: "./out/trials.wasm",
+    initialBalance: "50",
 });
-
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
-
-const {keys} = await createDrop({
-    numKeys: 1,
-    depositPerUseNEAR: 1
-})
-console.log('keys: ', keys)
 ```
 
-## Customized KeyStore & Multiple Signers
+### Adding and Activating Trial Accounts
 
-Passing in a custom `near` object when initializing Keypom has several benefits as seen below:
-- If you have multiple accounts that will be signing transactions and don't want to keep calling `updateFunder`.
-- You don't want to hardcode the private key in the `funder` object.
-- You have a keystore containing keys that will be used to sign transactions already in scope.
+Add trial accounts to the trial and activate them:
 
-In this case, you can pass in an existing `near` object and then pass in `Account` objects when calling the SDK methods.
+TODO
 
-```js
-let keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);  
-let nearConfig = {
-    networkId: NETWORK_ID,
-    keyStore: keyStore,
-    nodeUrl: `https://rpc.${NETWORK_ID}.near.org`,
-    walletUrl: `https://wallet.${NETWORK_ID}.near.org`,
-    helperUrl: `https://helper.${NETWORK_ID}.near.org`,
-    explorerUrl: `https://explorer.${NETWORK_ID}.near.org`,
-};  
-let near = new Near(nearConfig);
+### Performing Actions
 
+Perform actions on behalf of the trial account:
 
-await initKeypom({
-    near
-});
+TODO
 
-const dropSupply = await getKeyTotalSupply();
-console.log('dropSupply: ', dropSupply)
+## Configuration
 
-const fundingAccount = new Account(near.connection, funderAccountId);
-const {keys} = await createDrop({
-    account: fundingAccount,
-    numKeys: 1,
-    depositPerUseNEAR: 1
-})
-console.log('keys: ', keys)
-```
+You can customize the retry logic and other parameters through the `TrialAccountManager` constructor or using setter methods:
 
-# Costs
+TODO
 
-It is important to note that the Keypom contracts are 100% **FEE FREE** and will remain that way for the *forseeable future*. These contracts are a public good and are meant to inspire change in the NEAR ecosystem.
+-   `maxRetries`: Maximum number of retries for operations.
+-   `initialDelayMs`: Initial delay before retrying (in milliseconds).
+-   `backoffFactor`: Exponential backoff factor.
 
-With that being said, there are several mandatory costs that must be taken into account when using Keypom. These costs are broken down into two categories: per key and per drop.
+## Retry Logic
 
-> **NOTE:** Creating an empty drop and then adding 100 keys in separate calls will incur the same cost as creating a drop with 100 keys in the same call.
+All methods in `TrialAccountManager` include built-in retry logic to handle transient errors and network issues. You can adjust the retry settings as shown above.
 
-## Per Drop
+# Concepts
 
-When creating an empty drop, there is only one cost to keep in mind regardless of the drop type:
-- Storage cost (**~0.006 $NEAR** for simple drops)
+## Trial Accounts
 
-## Per Key
-Whenever keys are added to a drop (either when the drop is first created or at a later date), the costs are outlined below.
+Trial accounts are temporary NEAR accounts with predefined constraints and usage limits. They are ideal for onboarding users without requiring them to have NEAR tokens upfront.
 
-### Key Costs for Simple Drop
+## MPC Integration
 
-- $NEAR sent whenever the key is used (can be 0).
-- Access key allowance (**~0.0187 $NEAR per use**).
-- Storage for creating access key (**0.001 $NEAR**).
-- Storage cost (**~0.006 $NEAR** for simple drops)
+The SDK integrates with an MPC (Multi-Party Computation) service to securely sign transactions on behalf of trial accounts without exposing private keys.
 
-### Additional Costs for NFT Drops
+## Usage Constraints
 
-Since keys aren't registered for use until **after** the contract has received the NFT, we don't know how much storage the token IDs will use on the contract. To combat this, the Keypom contract will automatically measure the storage used up for storing each token ID in the `nft_on_transfer` function and that $NEAR will be taken from the funder's balance.
+When creating a trial, you can specify various constraints:
 
-### Additional Costs for FT Drops
+-   **Allowed Methods**: Restrict which contract methods can be called.
+-   **Allowed Contracts**: Restrict which contracts can be interacted with.
+-   **Usage Limits**: Define maximum gas, deposit, interactions per day, etc.
+-   **Exit Conditions**: Specify conditions under which the trial account expires or is deactivated.
 
-Since accounts claiming FTs may or may not be registered on the Fungible Token contract, Keypom will automatically try to register **all** accounts. This means that the drop creators must front the cost of registering users depending on the `storage_balance_bounds` returned from the FT contract. This applies to every use for every key.
+Example:
 
-In addition, Keypom must be registered on the FT contract. If you create a FT drop and are the first person to ever do so for a specific FT contract on Keypom, Keypom will be automatically registered when the drop is created. This is a one time cost and once it is done, no other account will need to register Keypom for that specific FT contract.
-
-### Additional Costs for FC Drops
-
-Drop creators have a ton of customization available to them when creation Function Call drops. A cost that they might incur is the attached deposit being sent alongside the function call. Keypom will charge creators for all the attached deposits they specify.
-
-> **NOTE:** The storage costs are dynamically calculated and will vary depending on the information you store on-chain.
+TODO
 
 # Contributing
 
-First off, thanks for taking the time to contribute! Contributions are what makes the open-source community such an amazing place to learn, inspire, and create. Any contributions you make will benefit everybody else and are **greatly appreciated**.
+We welcome contributions to the Keypom Trial Accounts SDK! Please follow these guidelines:
 
-Please try to create bug reports that are:
-
-- _Reproducible._ Include steps to reproduce the problem.
-- _Specific._ Include as much detail as possible: which version, what environment, etc.
-- _Unique._ Do not duplicate existing opened issues.
-- _Scoped to a Single Bug._ One bug per report.
-
-You can use [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli) to check for common markdown style inconsistency.
+-   **Bug Reports**: Submit detailed bug reports with steps to reproduce.
+-   **Feature Requests**: Open issues for feature enhancements with use cases.
+-   **Pull Requests**: Ensure your code passes linting and tests before submitting.
 
 # License
 
 This project is licensed under the **GPL License**.
+
+---
+
+Thank you for using the Keypom Trial Accounts SDK! If you have any questions or need assistance, feel free to join our [community](https://t.me/+OqI-cKxQU05lZDIx) or open an issue on GitHub.
+

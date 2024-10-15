@@ -1,4 +1,4 @@
-// broadcastTransaction.ts
+// lib/broadcastTransaction.ts
 
 import { Account } from "@near-js/accounts";
 import {
@@ -12,7 +12,9 @@ import { PublicKey } from "@near-js/crypto";
 import bs58 from "bs58";
 import { createSignature, hashTransaction } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
-import { logInfo, logSuccess } from "./logUtils";
+import { logInfo } from "./logUtils";
+import { ethers, TransactionResponse } from "ethers";
+import { FinalExecutionOutcome } from "@near-js/types";
 
 interface BroadcastTransactionParams {
     signerAccount: Account;
@@ -20,20 +22,19 @@ interface BroadcastTransactionParams {
     signatureResult: MPCSignature; // Signature result from the MPC
     nonce: string;
     blockHash: string;
-    mpcPublicKey: string; // Add this parameter
+    mpcPublicKey: string;
 }
 
 /**
- * Broadcasts a signed transaction to the NEAR network.
+ * Broadcasts a signed transaction to the NEAR or EVM network.
  *
  * @param params - The parameters required to broadcast the transaction.
  * @returns A Promise that resolves when the transaction is broadcasted.
  * @throws Will throw an error if broadcasting fails.
  */
-
 export async function broadcastTransaction(
     params: BroadcastTransactionParams
-): Promise<void> {
+): Promise<TransactionResponse | FinalExecutionOutcome> {
     const {
         signerAccount,
         actionToPerform,
@@ -43,77 +44,79 @@ export async function broadcastTransaction(
         mpcPublicKey,
     } = params;
 
-    const { targetContractId, methodName, args, gas, attachedDepositNear } =
-        actionToPerform;
+    if (actionToPerform.chain === "NEAR") {
+        const { targetContractId, methodName, args, gas, attachedDepositNear } =
+            actionToPerform;
 
-    const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
-
-    const provider = signerAccount.connection.provider;
-
-    const blockHashBytes = bs58.decode(blockHash);
-
-    const accessKeys = await signerAccount.getAccessKeys();
-    const accessKeyForSigning = accessKeys.find(
-        (key) => key.public_key === mpcPublicKey
-    );
-
-    if (!accessKeyForSigning) {
-        throw new Error(
-            `No access key found for signing with MPC public key ${mpcPublicKey}`
+        const serializedArgs = new Uint8Array(
+            Buffer.from(JSON.stringify(args))
         );
-    }
 
-    logSuccess(
-        `User has correct MPC access key on their account: ${
-            accessKeyForSigning!.public_key
-        }`
-    );
+        const provider = signerAccount.connection.provider;
 
-    const actions: Action[] = [
-        actionCreators.functionCall(
-            methodName,
-            serializedArgs,
-            BigInt(gas),
-            BigInt(parseNearAmount(attachedDepositNear)!)
-        ),
-    ];
+        const blockHashBytes = bs58.decode(blockHash);
 
-    // Collect the broadcast logs into an object
+        const actions: Action[] = [
+            actionCreators.functionCall(
+                methodName,
+                serializedArgs,
+                BigInt(gas!),
+                BigInt(parseNearAmount(attachedDepositNear!)!)
+            ),
+        ];
 
-    // Create the transaction
-    const transaction = createTransaction(
-        signerAccount.accountId,
-        PublicKey.fromString(mpcPublicKey), // Use MPC public key
-        targetContractId,
-        nonce,
-        actions,
-        blockHashBytes
-    );
+        const transaction = createTransaction(
+            signerAccount.accountId,
+            PublicKey.fromString(mpcPublicKey), // Use MPC public key
+            targetContractId,
+            nonce,
+            actions,
+            blockHashBytes
+        );
 
-    // Hash the transaction to get the message to sign
-    const serializedTx = transaction.encode();
-    const txHash = hashTransaction(serializedTx);
+        // Hash the transaction to get the message to sign
+        const serializedTx = transaction.encode();
+        const txHash = hashTransaction(serializedTx);
+        console.log(`=== Message to sign: ${txHash} ===`);
 
-    // Log transaction hash
-    logInfo(`=== Transaction Details ===`);
-    console.log("Transaction Hash:", Buffer.from(txHash).toString("hex"));
+        // Create the signature
+        let r = signatureResult.big_r.affine_point;
+        let s = signatureResult.s.scalar;
 
-    let r = signatureResult.big_r.affine_point;
-    let s = signatureResult.s.scalar;
+        const signature = createSignature(r, s);
 
-    const signature = createSignature(r, s);
+        const signedTransaction = new SignedTransaction({
+            transaction,
+            signature,
+        });
 
-    const signedTransaction = new SignedTransaction({
-        transaction,
-        signature,
-    });
+        // Send the signed transaction
+        logInfo(`=== Sending NEAR Transaction ===`);
+        return await provider.sendTransaction(signedTransaction);
+    } else if (actionToPerform.chain === "EVM") {
+        // Implement logic to broadcast EVM transactions using ethers.js
+        const provider = new ethers.JsonRpcProvider(/* RPC URL */);
+        const wallet = new ethers.Wallet(mpcPublicKey, provider);
 
-    // Send the signed transaction
-    logInfo(`=== Sending Transaction ===`);
-    try {
-        const result = await provider.sendTransaction(signedTransaction);
-        console.log("Transaction Result:", result);
-    } catch (error) {
-        console.error("Error sending transaction:", error);
+        const tx = {
+            to: actionToPerform.targetContractId,
+            data: actionToPerform.args.data,
+            gasLimit: actionToPerform.gasLimit!,
+            value: actionToPerform.value || "0",
+            nonce: parseInt(nonce),
+            chainId: actionToPerform.args.chainId,
+            maxFeePerGas: actionToPerform.args.maxFeePerGas,
+            maxPriorityFeePerGas: actionToPerform.args.maxPriorityFeePerGas,
+            type: 2, // EIP-1559 transaction
+        };
+
+        // Sign the transaction with the signature from MPC
+        const signedTx = await wallet.signTransaction(tx);
+
+        // Send the signed transaction
+        logInfo(`=== Sending EVM Transaction ===`);
+        return await provider.broadcastTransaction(signedTx);
+    } else {
+        throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }
 }

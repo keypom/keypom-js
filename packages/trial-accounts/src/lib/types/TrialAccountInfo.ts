@@ -1,3 +1,5 @@
+// lib/types/TrialAccountInfo.ts
+
 import { TrialData } from "./TrialData";
 
 /**

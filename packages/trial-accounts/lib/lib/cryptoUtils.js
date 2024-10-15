@@ -4,25 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parsePublicKey = exports.hashTransaction = exports.createSignature = exports.compressPublicKey = void 0;
-const elliptic_1 = require("elliptic");
+exports.parsePublicKey = exports.hashTransaction = exports.createSignature = void 0;
 const crypto_1 = require("@near-js/crypto");
 const bs58_1 = __importDefault(require("bs58"));
 const js_sha256_1 = require("js-sha256");
 const transactions_1 = require("@near-js/transactions");
-/**
- * Compresses an uncompressed public key.
- * @param publicKeyBytes - The uncompressed public key bytes.
- * @returns The compressed public key bytes.
- */
-function compressPublicKey(publicKeyBytes) {
-    const ec = new elliptic_1.ec("secp256k1");
-    const keyPair = ec.keyFromPublic(publicKeyBytes);
-    const compressedKey = Buffer.from(keyPair.getPublic().encode("array", true) // 'true' for compressed
-    );
-    return compressedKey;
-}
-exports.compressPublicKey = compressPublicKey;
 /**
  * Creates a NEAR Signature object from r, s, and recovery ID.
  * @param r - The r component of the signature.

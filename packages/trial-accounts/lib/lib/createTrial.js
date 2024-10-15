@@ -1,9 +1,9 @@
 "use strict";
-// createTrial.ts
+// lib/createTrial.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTrial = void 0;
 const types_1 = require("./types");
-const nearUtils_1 = require("./nearUtils");
+const near_1 = require("./networks/near");
 const utils_1 = require("@near-js/utils");
 /**
  * Creates a new trial on the trial contract.
@@ -15,12 +15,27 @@ const utils_1 = require("@near-js/utils");
 async function createTrial(params) {
     const { signerAccount, trialContractId, trialData } = params;
     console.log("Creating trial...");
-    // Convert camelCase trialData to snake_case
+    // Serialize chain constraints appropriately
+    const { chainConstraints, ...restTrialData } = trialData;
+    let serializedChainConstraints;
+    if (chainConstraints.NEAR) {
+        serializedChainConstraints = {
+            NEAR: (0, types_1.toSnakeCase)(chainConstraints.NEAR),
+        };
+    }
+    else if (chainConstraints.EVM) {
+        serializedChainConstraints = { EVM: (0, types_1.toSnakeCase)(chainConstraints.EVM) };
+    }
+    else {
+        throw new Error("chainConstraints must have either NEAR or EVM defined");
+    }
+    // Convert camelCase trialData to snake_case and include chain_constraints
     const snakeCaseArgs = (0, types_1.toSnakeCase)({
-        ...trialData,
+        ...restTrialData,
         initial_deposit: (0, utils_1.parseNearAmount)(trialData.initialDeposit),
+        chain_constraints: serializedChainConstraints,
     });
-    const result = await (0, nearUtils_1.sendTransaction)({
+    const result = await (0, near_1.sendTransaction)({
         signerAccount,
         receiverId: trialContractId,
         methodName: "create_trial",
@@ -31,7 +46,7 @@ async function createTrial(params) {
     const trialId = result.status.SuccessValue
         ? parseInt(Buffer.from(result.status.SuccessValue, "base64").toString(), 10)
         : null;
-    if (!trialId) {
+    if (trialId === null) {
         throw new Error("Failed to create trial");
     }
     console.log(`Trial created with ID: ${trialId}`);

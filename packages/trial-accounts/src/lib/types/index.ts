@@ -1,3 +1,5 @@
+// lib/types/index.ts
+
 export * from "./TrialAccountInfo";
 export * from "./Constraints";
 export * from "./ActionToPerform";

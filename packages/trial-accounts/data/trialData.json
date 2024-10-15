@@ -1,0 +1,13 @@
+{
+  "trialId": 1,
+  "trialContractId": "1729021924865-trial-contract.testnet",
+  "trialKeys": [
+    {
+      "trialAccountId": "1729021959325-trial-0.testnet",
+      "derivationPath": "ed25519:He2gAkTE8FSxeLriHJNhMvv3vrrA9ucTsgh9RxQ9ZSWx",
+      "trialAccountSecretKey": "ed25519:5PuAQH6fAUyPvPmppB6C4Nx5BYg8WddFNdYRdgiGXM2KekGPeWxrsuBLfvE8eoY6KxT1pBnjhUP2qk1kAg6hMSBe",
+      "trialAccountPublicKey": "ed25519:He2gAkTE8FSxeLriHJNhMvv3vrrA9ucTsgh9RxQ9ZSWx",
+      "mpcKey": "secp256k1:HQnK3TFu1FZSqpZT5UH3sYi3w2CxCj9AaYDMhYeaivs3cYquxnb9xgGBRF1MWmq8ZSgHkYRhMzTtbyciA8KPyVz"
+    }
+  ]
+}

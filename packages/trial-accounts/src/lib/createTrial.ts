@@ -1,8 +1,8 @@
-// createTrial.ts
+// lib/createTrial.ts
 
 import { Account } from "@near-js/accounts";
 import { toSnakeCase, TrialData } from "./types";
-import { sendTransaction } from "./nearUtils";
+import { sendTransaction } from "./networks/near";
 import { parseNearAmount } from "@near-js/utils";
 
 interface CreateTrialParams {
@@ -23,10 +23,27 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
 
     console.log("Creating trial...");
 
-    // Convert camelCase trialData to snake_case
+    // Serialize chain constraints appropriately
+    const { chainConstraints, ...restTrialData } = trialData;
+
+    let serializedChainConstraints: any;
+    if (chainConstraints.NEAR) {
+        serializedChainConstraints = {
+            NEAR: toSnakeCase(chainConstraints.NEAR),
+        };
+    } else if (chainConstraints.EVM) {
+        serializedChainConstraints = { EVM: toSnakeCase(chainConstraints.EVM) };
+    } else {
+        throw new Error(
+            "chainConstraints must have either NEAR or EVM defined"
+        );
+    }
+
+    // Convert camelCase trialData to snake_case and include chain_constraints
     const snakeCaseArgs = toSnakeCase({
-        ...trialData,
+        ...restTrialData,
         initial_deposit: parseNearAmount(trialData.initialDeposit),
+        chain_constraints: serializedChainConstraints,
     });
 
     const result = await sendTransaction({
@@ -48,7 +65,7 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
           )
         : null;
 
-    if (!trialId) {
+    if (trialId === null) {
         throw new Error("Failed to create trial");
     }
 

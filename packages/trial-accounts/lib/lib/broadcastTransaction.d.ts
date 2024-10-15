@@ -9,7 +9,7 @@ interface BroadcastTransactionParams {
     mpcPublicKey: string;
 }
 /**
- * Broadcasts a signed transaction to the NEAR network.
+ * Broadcasts a signed transaction to the NEAR or EVM network.
  *
  * @param params - The parameters required to broadcast the transaction.
  * @returns A Promise that resolves when the transaction is broadcasted.

@@ -1,7 +1,7 @@
 "use strict";
 // lib/TrialAccountManager.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TrialAccountManager = exports.retryAsync = void 0;
+exports.TrialAccountManager = void 0;
 const crypto_1 = require("@near-js/crypto");
 const types_1 = require("./types");
 const createTrial_1 = require("./createTrial");
@@ -11,37 +11,6 @@ const performAction_1 = require("./performAction");
 const broadcastTransaction_1 = require("./broadcastTransaction");
 const validityChecker_1 = require("./validityChecker");
 /**
- * Helper function to retry an async operation with exponential backoff.
- *
- * @param fn - The async function to retry.
- * @param retries - Number of retries.
- * @param delay - Initial delay in milliseconds.
- * @param factor - Multiplicative factor for delay.
- * @returns The result of the async function if successful.
- * @throws The last error encountered if all retries fail.
- */
-async function retryAsync(fn, retries = 3, delay = 1000, factor = 2) {
-    let attempt = 0;
-    let currentDelay = delay;
-    while (attempt < retries) {
-        try {
-            return await fn();
-        }
-        catch (error) {
-            attempt++;
-            if (attempt >= retries) {
-                throw error;
-            }
-            console.warn(`Attempt ${attempt} failed. Retrying in ${currentDelay}ms...`, `Error: ${error.message || error}`);
-            await new Promise((resolve) => setTimeout(resolve, currentDelay));
-            currentDelay *= factor; // Exponential backoff
-        }
-    }
-    // This point should never be reached
-    throw new Error("Unexpected error in retryAsync");
-}
-exports.retryAsync = retryAsync;
-/**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
  * activate trial accounts, perform actions, and broadcast transactions.
@@ -50,16 +19,6 @@ class TrialAccountManager {
     /**
      * Constructs a new TrialAccountManager.
      * @param params - Parameters for initializing the manager.
-     * @param params.trialContractId - The account ID of the trial contract.
-     * @param params.signerAccount - The Account object used for signing transactions.
-     * @param params.near - The NEAR connection instance.
-     * @param params.mpcContractId - The account ID of the MPC contract.
-     * @param params.trialId - (Optional) The trial ID.
-     * @param params.trialSecretKey - (Optional) The secret key for the trial account.
-     * @param params.trialAccountId - (Optional) The account ID of the trial account.
-     * @param params.maxRetries - Maximum retries for retry logic.
-     * @param params.initialDelayMs - Initial delay for retry logic in milliseconds.
-     * @param params.backoffFactor - Exponential backoff factor for retries.
      */
     constructor(params) {
         this.trialContractId = params.trialContractId;
@@ -164,7 +123,7 @@ class TrialAccountManager {
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
     }
     /**
-     * Broadcasts a signed transaction to the NEAR network with retry logic.
+     * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
      *
      * @param params - The parameters required to broadcast the transaction.
      * @returns A Promise that resolves when the transaction is broadcasted.
@@ -242,3 +201,33 @@ class TrialAccountManager {
     }
 }
 exports.TrialAccountManager = TrialAccountManager;
+/**
+ * Helper function to retry an async operation with exponential backoff.
+ *
+ * @param fn - The async function to retry.
+ * @param retries - Number of retries.
+ * @param delay - Initial delay in milliseconds.
+ * @param factor - Multiplicative factor for delay.
+ * @returns The result of the async function if successful.
+ * @throws The last error encountered if all retries fail.
+ */
+async function retryAsync(fn, retries = 3, delay = 1000, factor = 2) {
+    let attempt = 0;
+    let currentDelay = delay;
+    while (attempt < retries) {
+        try {
+            return await fn();
+        }
+        catch (error) {
+            attempt++;
+            if (attempt >= retries) {
+                throw error;
+            }
+            console.warn(`Attempt ${attempt} failed. Retrying in ${currentDelay}ms...`, `Error: ${error.message || error}`);
+            await new Promise((resolve) => setTimeout(resolve, currentDelay));
+            currentDelay *= factor; // Exponential backoff
+        }
+    }
+    // This point should never be reached
+    throw new Error("Unexpected error in retryAsync");
+}

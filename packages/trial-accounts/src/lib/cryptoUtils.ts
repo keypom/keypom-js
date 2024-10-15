@@ -1,24 +1,9 @@
 // cryptoUtils.ts
 
-import { ec as EC } from "elliptic";
 import { KeyType } from "@near-js/crypto";
 import bs58 from "bs58";
 import { sha256 } from "js-sha256";
 import { Signature } from "@near-js/transactions";
-
-/**
- * Compresses an uncompressed public key.
- * @param publicKeyBytes - The uncompressed public key bytes.
- * @returns The compressed public key bytes.
- */
-export function compressPublicKey(publicKeyBytes: Buffer): Buffer {
-    const ec = new EC("secp256k1");
-    const keyPair = ec.keyFromPublic(publicKeyBytes);
-    const compressedKey = Buffer.from(
-        keyPair.getPublic().encode("array", true) // 'true' for compressed
-    );
-    return compressedKey;
-}
 
 /**
  * Creates a NEAR Signature object from r, s, and recovery ID.

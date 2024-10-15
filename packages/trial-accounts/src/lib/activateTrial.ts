@@ -2,7 +2,7 @@
 
 import { KeyPair, KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
-import { sendTransaction } from "./nearUtils";
+import { sendTransaction } from "./networks/near";
 
 interface ActivateTrialAccountsParams {
     near: Near;

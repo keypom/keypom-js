@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTrialAccounts = void 0;
 const crypto_1 = require("@near-js/crypto");
-const nearUtils_1 = require("./nearUtils");
+const near_1 = require("./networks/near");
 /**
  * Adds trial accounts to the trial contract by generating key pairs and deriving MPC keys.
  *
@@ -44,7 +44,7 @@ async function addTrialAccounts(params) {
         mpc_key: trialKey.mpcKey,
     }));
     // Call the `add_trial_keys` function
-    const result = await (0, nearUtils_1.sendTransaction)({
+    const result = await (0, near_1.sendTransaction)({
         signerAccount,
         receiverId: trialContractId,
         methodName: "add_trial_keys",

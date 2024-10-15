@@ -1,5 +1,5 @@
 "use strict";
-// utils.ts
+// lib/types/util.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.toSnakeCase = exports.convertKeysToCamelCase = exports.snakeToCamel = void 0;
 // Utility to convert a string from snake_case to camelCase
@@ -19,7 +19,7 @@ function convertKeysToCamelCase(obj) {
             return result;
         }, {});
     }
-    return obj; // return if neither object nor array
+    return obj; // Return if neither object nor array
 }
 exports.convertKeysToCamelCase = convertKeysToCamelCase;
 /**

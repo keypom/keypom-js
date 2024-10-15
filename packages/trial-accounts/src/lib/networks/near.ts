@@ -1,4 +1,4 @@
-// utils.ts
+// networks/utils.ts
 
 import { Account } from "@near-js/accounts";
 import { FinalExecutionOutcome } from "@near-js/types";

@@ -6,6 +6,8 @@
     "scripts": {
         "build": "pnpm compile",
         "compile": "tsc -p tsconfig.json",
+        "deploy:simple": "ts-node deploy/main.ts simple",
+        "deploy:advanced": "ts-node deploy/main.ts advanced",
         "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
         "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
         "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
@@ -15,19 +17,13 @@
     "author": "benkurrek",
     "license": "MIT",
     "dependencies": {
-        "@ethereumjs/common": "^4.4.0",
-        "@ethereumjs/tx": "^5.3.0",
-        "@ethereumjs/util": "^9.1.0",
-        "@ethersproject/rlp": "^5.7.0",
-        "@types/elliptic": "^6.4.18",
-        "bitcoinjs-lib": "^6.1.6",
         "bs58": "^6.0.0",
-        "ethers": "^6.13.2",
         "hash.js": "^1.1.7",
+        "viem": "^2.21.16",
+        "ethers": "^6.13.4",
         "js-sha256": "^0.11.0",
         "js-sha3": "^0.9.3",
-        "tweetnacl-util": "^0.15.1",
-        "web3": "^4.12.1"
+        "tweetnacl-util": "^0.15.1"
     },
     "ava": {
         "require": [

@@ -17,46 +17,8 @@ import { activateTrialAccounts } from "./activateTrial";
 import { performActions } from "./performAction";
 import { broadcastTransaction } from "./broadcastTransaction";
 import { checkActionValidity } from "./validityChecker";
-
-/**
- * Helper function to retry an async operation with exponential backoff.
- *
- * @param fn - The async function to retry.
- * @param retries - Number of retries.
- * @param delay - Initial delay in milliseconds.
- * @param factor - Multiplicative factor for delay.
- * @returns The result of the async function if successful.
- * @throws The last error encountered if all retries fail.
- */
-export async function retryAsync<T>(
-    fn: () => Promise<T>,
-    retries: number = 3,
-    delay: number = 1000,
-    factor: number = 2
-): Promise<T> {
-    let attempt = 0;
-    let currentDelay = delay;
-
-    while (attempt < retries) {
-        try {
-            return await fn();
-        } catch (error: any) {
-            attempt++;
-            if (attempt >= retries) {
-                throw error;
-            }
-            console.warn(
-                `Attempt ${attempt} failed. Retrying in ${currentDelay}ms...`,
-                `Error: ${error.message || error}`
-            );
-            await new Promise((resolve) => setTimeout(resolve, currentDelay));
-            currentDelay *= factor; // Exponential backoff
-        }
-    }
-
-    // This point should never be reached
-    throw new Error("Unexpected error in retryAsync");
-}
+import { TransactionResponse } from "ethers";
+import { FinalExecutionOutcome } from "@near-js/types";
 
 /**
  * Class to manage trial accounts and trials.
@@ -79,16 +41,6 @@ export class TrialAccountManager {
     /**
      * Constructs a new TrialAccountManager.
      * @param params - Parameters for initializing the manager.
-     * @param params.trialContractId - The account ID of the trial contract.
-     * @param params.signerAccount - The Account object used for signing transactions.
-     * @param params.near - The NEAR connection instance.
-     * @param params.mpcContractId - The account ID of the MPC contract.
-     * @param params.trialId - (Optional) The trial ID.
-     * @param params.trialSecretKey - (Optional) The secret key for the trial account.
-     * @param params.trialAccountId - (Optional) The account ID of the trial account.
-     * @param params.maxRetries - Maximum retries for retry logic.
-     * @param params.initialDelayMs - Initial delay for retry logic in milliseconds.
-     * @param params.backoffFactor - Exponential backoff factor for retries.
      */
     constructor(params: {
         trialContractId: string;
@@ -207,7 +159,7 @@ export class TrialAccountManager {
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
     async performActions(actionsToPerform: ActionToPerform[]): Promise<{
-        signatures: string[][];
+        signatures: MPCSignature[];
         nonces: string[];
         blockHash: string;
     }> {
@@ -246,7 +198,7 @@ export class TrialAccountManager {
     }
 
     /**
-     * Broadcasts a signed transaction to the NEAR network with retry logic.
+     * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
      *
      * @param params - The parameters required to broadcast the transaction.
      * @returns A Promise that resolves when the transaction is broadcasted.
@@ -256,7 +208,7 @@ export class TrialAccountManager {
         signatureResult: MPCSignature;
         nonce: string;
         blockHash: string;
-    }): Promise<void> {
+    }): Promise<TransactionResponse | FinalExecutionOutcome> {
         return retryAsync(
             async () => {
                 if (!this.trialAccountId || !this.trialSecretKey) {
@@ -271,7 +223,7 @@ export class TrialAccountManager {
                 const trialAccountInfo: TrialAccountInfo =
                     await this.getTrialData();
 
-                await broadcastTransaction({
+                return await broadcastTransaction({
                     signerAccount,
                     actionToPerform: params.actionToPerform,
                     signatureResult: params.signatureResult,
@@ -362,4 +314,44 @@ export class TrialAccountManager {
         this.initialDelayMs = initialDelayMs;
         this.backoffFactor = backoffFactor;
     }
+}
+
+/**
+ * Helper function to retry an async operation with exponential backoff.
+ *
+ * @param fn - The async function to retry.
+ * @param retries - Number of retries.
+ * @param delay - Initial delay in milliseconds.
+ * @param factor - Multiplicative factor for delay.
+ * @returns The result of the async function if successful.
+ * @throws The last error encountered if all retries fail.
+ */
+async function retryAsync<T>(
+    fn: () => Promise<T>,
+    retries: number = 3,
+    delay: number = 1000,
+    factor: number = 2
+): Promise<T> {
+    let attempt = 0;
+    let currentDelay = delay;
+
+    while (attempt < retries) {
+        try {
+            return await fn();
+        } catch (error: any) {
+            attempt++;
+            if (attempt >= retries) {
+                throw error;
+            }
+            console.warn(
+                `Attempt ${attempt} failed. Retrying in ${currentDelay}ms...`,
+                `Error: ${error.message || error}`
+            );
+            await new Promise((resolve) => setTimeout(resolve, currentDelay));
+            currentDelay *= factor; // Exponential backoff
+        }
+    }
+
+    // This point should never be reached
+    throw new Error("Unexpected error in retryAsync");
 }

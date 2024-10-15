@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activateTrialAccounts = void 0;
 const crypto_1 = require("@near-js/crypto");
-const nearUtils_1 = require("./nearUtils");
+const near_1 = require("./networks/near");
 /**
  * Activates trial accounts on the trial contract.
  *
@@ -22,7 +22,7 @@ async function activateTrialAccounts(params) {
         const keyStore = near.connection.signer.keyStore;
         await keyStore.setKey(near.connection.networkId, trialContractId, crypto_1.KeyPair.fromString(trialKey));
         const signerAccount = await near.account(trialContractId);
-        const result = await (0, nearUtils_1.sendTransaction)({
+        const result = await (0, near_1.sendTransaction)({
             signerAccount,
             receiverId: trialContractId,
             methodName: "activate_trial",
