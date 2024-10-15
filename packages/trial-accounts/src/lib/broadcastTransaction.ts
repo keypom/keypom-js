@@ -65,9 +65,11 @@ export async function broadcastTransaction(
             ),
         ];
 
+        const mpcPubKey = PublicKey.fromString(mpcPublicKey);
+        const signerAccountId = signerAccount.accountId;
         const transaction = createTransaction(
-            signerAccount.accountId,
-            PublicKey.fromString(mpcPublicKey), // Use MPC public key
+            signerAccountId,
+            mpcPubKey,
             targetContractId,
             nonce,
             actions,

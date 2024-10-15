@@ -5,7 +5,7 @@ import { writeToFile } from "./utils/fileOps";
 import path from "path";
 import fs from "fs";
 import { logError, logInfo, logSuccess } from "./utils/logUtils";
-import { initNear } from "./utils/nearUtils";
+import { initNear, isFinalExecutionOutcome } from "./utils/nearUtils";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { TransactionResponse } from "ethers";
 
@@ -89,7 +89,11 @@ async function main() {
             `Actions performed successfully for ${trialKey.trialAccountId}`
         );
         for (const result of results) {
-            console.log(result);
+            if (isFinalExecutionOutcome(result)) {
+                console.log(
+                    `https://testnet.nearblocks.io/txns/${result.transaction.hash}#execution`
+                );
+            }
         }
     }
 

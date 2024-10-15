@@ -12,7 +12,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729022897457-trial-contract.testnet",
+    trialContractId: "1729024431656-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",
@@ -36,7 +36,7 @@ export const actionsToPerform: ActionToPerform[] = [
         chain: "NEAR",
         targetContractId: "guestbook.near-examples.testnet",
         methodName: "add_message",
-        args: { text: "Hello from the simple config!" },
+        args: { text: "Hello from the MPC Trial Account Simple Config!" },
         attachedDepositNear: "1",
         gas: "300000000000000",
     },

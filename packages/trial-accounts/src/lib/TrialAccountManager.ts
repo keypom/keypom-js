@@ -217,11 +217,12 @@ export class TrialAccountManager {
                     );
                 }
 
+                const trialAccountInfo: TrialAccountInfo =
+                    await this.getTrialData();
+
                 const signerAccount = await this.near.account(
                     this.trialAccountId
                 );
-                const trialAccountInfo: TrialAccountInfo =
-                    await this.getTrialData();
 
                 return await broadcastTransaction({
                     signerAccount,

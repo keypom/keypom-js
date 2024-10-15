@@ -27,10 +27,10 @@ export async function performActions(params: PerformActionsParams): Promise<{
 }> {
     const {
         near,
-        trialAccountId,
         trialAccountSecretKey,
         trialContractId,
         actionsToPerform,
+        trialAccountId,
     } = params;
 
     // Set the trial key in the keyStore
@@ -40,11 +40,12 @@ export async function performActions(params: PerformActionsParams): Promise<{
         trialContractId,
         KeyPair.fromString(trialAccountSecretKey)
     );
-    let signerAccount = await near.account(trialContractId);
 
     const signatures: MPCSignature[] = [];
     const nonces: string[] = [];
 
+    // Temporarily set the signer to the trial account to get the access key info
+    let signerAccount = await near.account(trialAccountId);
     const provider = signerAccount.connection.provider;
     const block = await provider.block({ finality: "final" });
     const blockHash = block.header.hash;
@@ -53,6 +54,8 @@ export async function performActions(params: PerformActionsParams): Promise<{
     const accessKeyForSigning = accessKeys[0];
     let nonce = accessKeyForSigning.access_key.nonce;
 
+    // set the signer back to the trial contract to actually perform the call_*_contract methods using the proxy key
+    signerAccount = await near.account(trialContractId);
     for (const actionToPerform of actionsToPerform) {
         nonce = BigInt(nonce) + 1n;
 
@@ -78,8 +81,6 @@ export async function performActions(params: PerformActionsParams): Promise<{
                     deposit: parseNearAmount(
                         actionToPerform.attachedDepositNear!
                     ),
-                    signing_key: accessKeyForSigning.public_key,
-                    mpc_account_id: trialAccountId,
                     nonce: nonce.toString(),
                     block_hash: blockHash,
                 },
