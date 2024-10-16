@@ -99,25 +99,11 @@ export async function broadcastTransaction(
         // Implement logic to broadcast EVM transactions using ethers.js
         const provider = new ethers.JsonRpcProvider(/* RPC URL */);
         const wallet = new ethers.Wallet(mpcPublicKey, provider);
-
-        const tx = {
-            to: actionToPerform.targetContractId,
-            data: actionToPerform.args.data,
-            gasLimit: actionToPerform.gasLimit!,
-            value: actionToPerform.value || "0",
-            nonce: parseInt(nonce),
-            chainId: actionToPerform.args.chainId,
-            maxFeePerGas: actionToPerform.args.maxFeePerGas,
-            maxPriorityFeePerGas: actionToPerform.args.maxPriorityFeePerGas,
-            type: 2, // EIP-1559 transaction
-        };
-
-        // Sign the transaction with the signature from MPC
-        const signedTx = await wallet.signTransaction(tx);
+        console.log(`wallet: ${wallet.address}`);
 
         // Send the signed transaction
         logInfo(`=== Sending EVM Transaction ===`);
-        return await provider.broadcastTransaction(signedTx);
+        return await provider.broadcastTransaction("");
     } else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }

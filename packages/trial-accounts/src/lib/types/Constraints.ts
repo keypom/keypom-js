@@ -36,31 +36,3 @@ export interface ExitConditions {
     successCondition?: FunctionSuccessCondition;
     timeLimit?: number; // Timestamp in nanoseconds
 }
-
-/**
- * Enum representing chain constraints.
- */
-export interface ChainConstraints {
-    NEAR?: NearConstraints;
-    EVM?: EvmConstraints;
-}
-
-/**
- * Constraints specific to NEAR.
- */
-export interface NearConstraints {
-    allowedMethods: string[];
-    allowedContracts: string[];
-    maxGas?: string; // Represented as a string
-    maxDeposit?: string; // Represented as a string
-}
-
-/**
- * Constraints specific to EVM.
- */
-export interface EvmConstraints {
-    allowedMethods: string[]; // Function signatures or names
-    allowedContracts: string[]; // Ethereum addresses as strings
-    maxGas?: string; // Represented as a string
-    maxValue?: string; // Represented as a string
-}

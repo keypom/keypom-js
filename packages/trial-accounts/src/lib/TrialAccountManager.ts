@@ -171,6 +171,10 @@ export class TrialAccountManager {
         return retryAsync(
             async () => {
                 const trialAccountInfo = await this.getTrialData();
+                console.log(
+                    "trialAccountInfo",
+                    JSON.stringify(trialAccountInfo)
+                );
 
                 if (!this.trialId) {
                     throw new Error("trialId is required to perform actions");

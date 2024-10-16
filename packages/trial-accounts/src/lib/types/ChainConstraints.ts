@@ -1,20 +1,19 @@
-// lib/types/Constraints.ts
+// lib/types/ChainConstraints.ts
 
-export type ChainConstraints = {
-    NEAR?: NearConstraints;
-    EVM?: EvmConstraints;
-};
+export type ExtChainConstraints =
+    | { NEAR: NEARConstraints }
+    | { EVM: ExtEVMConstraints };
 
-export interface NearConstraints {
+export interface NEARConstraints {
     allowedMethods: string[];
     allowedContracts: string[];
-    maxGas?: string; // Represented as a string
-    maxDeposit?: string; // Represented as a string
+    maxGas: string | null;
+    maxDeposit: string | null;
 }
 
-export interface EvmConstraints {
+export interface ExtEVMConstraints {
     allowedMethods: string[];
-    allowedContracts: string[]; // Ethereum addresses as strings
-    maxGas?: string; // Represented as a string
-    maxValue?: string; // Represented as a string
+    allowedContracts: string[];
+    maxGas: number | null;
+    maxValue: string | null;
 }

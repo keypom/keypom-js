@@ -13,7 +13,7 @@ export function checkActionValidity(
     actionsToPerform: ActionToPerform[],
     trialData: TrialData
 ): void {
-    const chainConstraints = trialData.chainConstraints;
+    const chainConstraints = trialData.constraintsByChainId;
 
     for (const action of actionsToPerform) {
         const { targetContractId, methodName } = action;

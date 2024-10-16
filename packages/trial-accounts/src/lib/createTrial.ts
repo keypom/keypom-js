@@ -21,29 +21,12 @@ interface CreateTrialParams {
 export async function createTrial(params: CreateTrialParams): Promise<number> {
     const { signerAccount, trialContractId, trialData } = params;
 
-    console.log("Creating trial...");
+    const { constraintsByChainId, ...restTrialData } = trialData;
 
-    // Serialize chain constraints appropriately
-    const { chainConstraints, ...restTrialData } = trialData;
-
-    let serializedChainConstraints: any;
-    if (chainConstraints.NEAR) {
-        serializedChainConstraints = {
-            NEAR: toSnakeCase(chainConstraints.NEAR),
-        };
-    } else if (chainConstraints.EVM) {
-        serializedChainConstraints = { EVM: toSnakeCase(chainConstraints.EVM) };
-    } else {
-        throw new Error(
-            "chainConstraints must have either NEAR or EVM defined"
-        );
-    }
-
-    // Convert camelCase trialData to snake_case and include chain_constraints
     const snakeCaseArgs = toSnakeCase({
         ...restTrialData,
         initial_deposit: parseNearAmount(trialData.initialDeposit),
-        chain_constraints: serializedChainConstraints,
+        chain_constraints: constraintsByChainId, // Use chainConstraints directly
     });
 
     const result = await sendTransaction({

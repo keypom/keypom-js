@@ -93,7 +93,10 @@ export async function performActions(params: PerformActionsParams): Promise<{
             signatures.push(sigRes);
             nonces.push(nonce.toString());
         } else if (actionToPerform.chain === "EVM") {
-            // Implement logic for EVM actions
+            if (!actionToPerform.chainId) {
+                throw new Error("chainId is not defined for EVM actions");
+            }
+
             // Prepare the arguments as per the contract's expectations
             const result = await sendTransaction({
                 signerAccount,
@@ -102,16 +105,16 @@ export async function performActions(params: PerformActionsParams): Promise<{
                 args: {
                     contract_address: actionToPerform.targetContractId,
                     method_name: actionToPerform.methodName,
-                    method_params: actionToPerform.args.methodParams,
-                    args: actionToPerform.args.args,
+                    method_params: actionToPerform.methodParams,
+                    args: actionToPerform.args,
                     gas_limit: actionToPerform.gasLimit,
                     value: actionToPerform.value,
-                    chain_id: actionToPerform.args.chainId,
+                    chain_id: actionToPerform.chainId,
                     nonce: nonce.toString(),
-                    max_fee_per_gas: actionToPerform.args.maxFeePerGas,
+                    max_fee_per_gas: actionToPerform.maxFeePerGas,
                     max_priority_fee_per_gas:
-                        actionToPerform.args.maxPriorityFeePerGas,
-                    access_list: actionToPerform.args.accessList,
+                        actionToPerform.maxPriorityFeePerGas,
+                    access_list: actionToPerform.accessList,
                 },
                 deposit: "0",
                 gas: "300000000000000",

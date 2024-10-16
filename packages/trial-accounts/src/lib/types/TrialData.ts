@@ -4,19 +4,22 @@ import {
     UsageConstraints,
     InteractionLimits,
     ExitConditions,
-    ChainConstraints,
 } from "./Constraints";
+
+import { ExtEVMConstraints, NEARConstraints } from "./ChainConstraints";
 
 /**
  * Data required to create a trial.
  */
 export interface TrialData {
-    chainConstraints: ChainConstraints;
-    usageConstraints?: UsageConstraints;
-    interactionLimits?: InteractionLimits;
-    exitConditions?: ExitConditions;
-    expirationTime?: number; // Timestamp in nanoseconds
-    initialDeposit: string; // NEAR amount represented as a string
-    chainId: number;
-    creatorAccountId?: string; // Added to match Rust struct
+    constraintsByChainId: {
+        NEAR?: NEARConstraints;
+        EVM?: ExtEVMConstraints;
+    };
+    usageConstraints: UsageConstraints | null;
+    interactionLimits: InteractionLimits | null;
+    exitConditions: ExitConditions | null;
+    expirationTime: number | null;
+    initialDeposit: string;
+    creatorAccountId?: string;
 }

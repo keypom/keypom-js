@@ -12,7 +12,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729024431656-trial-contract.testnet",
+    trialContractId: "1729091154828-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",
@@ -21,14 +21,19 @@ export const config: Config = {
 };
 
 export const trialData: TrialData = {
-    chainConstraints: {
+    constraintsByChainId: {
         NEAR: {
             allowedMethods: ["add_message"],
             allowedContracts: ["guestbook.near-examples.testnet"],
+            maxGas: null,
+            maxDeposit: null,
         },
     },
+    usageConstraints: null,
+    interactionLimits: null,
+    exitConditions: null,
+    expirationTime: null,
     initialDeposit: "10",
-    chainId: 1313161555,
 };
 
 export const actionsToPerform: ActionToPerform[] = [
