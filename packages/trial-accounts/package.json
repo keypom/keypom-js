@@ -8,6 +8,7 @@
         "compile": "tsc -p tsconfig.json",
         "deploy:near": "ts-node deploy/main.ts nearSimple",
         "deploy:evm": "ts-node deploy/main.ts evmSimple",
+        "broadcast:evm": "ts-node deploy/broadcastSig.ts evmSimple",
         "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
         "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
         "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
@@ -18,9 +19,9 @@
     "license": "MIT",
     "dependencies": {
         "bs58": "^6.0.0",
-        "hash.js": "^1.1.7",
-        "viem": "^2.21.16",
+        "elliptic": "^6.5.7",
         "ethers": "^6.13.4",
+        "hash.js": "^1.1.7",
         "js-sha256": "^0.11.0",
         "js-sha3": "^0.9.3",
         "tweetnacl-util": "^0.15.1"
@@ -40,6 +41,7 @@
         "@near-js/utils": "1.0.0",
         "@near-js/wallet-account": "1.3.0",
         "ava": "^4.3.3",
+        "dotenv": "^16.0.3",
         "eslint": "^8.39.0",
         "typedoc": "^0.23.24",
         "typescript": "^4.8.4"

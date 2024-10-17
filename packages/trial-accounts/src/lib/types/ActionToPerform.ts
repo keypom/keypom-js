@@ -1,12 +1,12 @@
 // lib/types/ActionToPerform.ts
 
-import { SerializableParam, SerializableToken, AccessList } from "./EVMTypes";
+import { AccessList } from "./EVMTypes";
 
 export interface ActionToPerform {
     chain: ChainType;
     methodName: string;
-    methodParams?: SerializableParam[]; // Updated type
-    args?: SerializableToken[] | Record<string, any>; // Updated type
+    args?: any[] | Record<string, any>; // Simplify args input
+    abi?: any[]; // Optionally provide ABI
     gasLimit?: string; // For EVM, represented as a string
     value?: string; // For EVM, represented as a string
     chainId?: number; // For EVM, represented as a number

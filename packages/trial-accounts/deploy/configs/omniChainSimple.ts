@@ -6,7 +6,6 @@ import os from "os";
 import { Config } from "./type";
 import { TrialData, ActionToPerform, AccessList } from "../../src/index";
 import { BASE_NFT_ABI } from "../abis/baseNFT";
-import { parseUnits } from "ethers";
 
 const homedir = os.homedir();
 const CREDENTIALS_DIR = ".near-credentials";
@@ -14,7 +13,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729174754928-trial-contract.testnet",
+    trialContractId: "1729096456039-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",
@@ -24,6 +23,12 @@ export const config: Config = {
 
 export const trialData: TrialData = {
     constraintsByChainId: {
+        NEAR: {
+            allowedMethods: ["add_message"],
+            allowedContracts: ["guestbook.near-examples.testnet"],
+            maxGas: null,
+            maxDeposit: null,
+        },
         EVM: {
             chainId: 84532,
             allowedMethods: ["multiAddressLazyMint"],
@@ -54,10 +59,10 @@ export const actionsToPerform: ActionToPerform[] = [
         methodName: "multiAddressLazyMint",
         args,
         abi: BASE_NFT_ABI, // Provide the ABI of the contract
-        gasLimit: "100000", // Adjust as needed
+        gasLimit: "1000000", // Adjust as needed
         value: "0", // If no ETH is sent along with the transaction
-        maxFeePerGas: parseUnits("20", "gwei").toString(),
-        maxPriorityFeePerGas: parseUnits("2", "gwei").toString(),
+        maxFeePerGas: "20000000000", // 20 Gwei in wei
+        maxPriorityFeePerGas: "2000000000", // 2 Gwei in wei
         accessList: accessList,
     },
 ];

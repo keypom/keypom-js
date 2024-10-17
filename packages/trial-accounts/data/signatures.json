@@ -1,0 +1,17 @@
+{
+  "signatures": [
+    {
+      "big_r": {
+        "affine_point": "03DB0A6E4158319ED0B3085DAEDD42B713CA096B8EB8038846E934C50E9C7C6020"
+      },
+      "s": {
+        "scalar": "4EEE0432FED964BED3D22F2A0BBD95C5FA69B05AA13711C7F38014751474BEEC"
+      },
+      "recovery_id": 1
+    }
+  ],
+  "nonces": [
+    "1"
+  ],
+  "blockHash": "BPbmXXpfcjZCyvwet6GV6u8rx3s6dk1JGTmY6UjPbPQK"
+}

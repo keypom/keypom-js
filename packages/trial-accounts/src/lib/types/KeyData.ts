@@ -14,7 +14,6 @@ export interface KeyData {
  * Represents a trial key along with its associated account ID and MPC key.
  */
 export interface TrialKey {
-    trialAccountId: string;
     derivationPath: string;
     trialAccountSecretKey: KeyPairString;
     trialAccountPublicKey: string;

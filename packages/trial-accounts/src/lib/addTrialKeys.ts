@@ -50,12 +50,9 @@ export async function addTrialAccounts(
                 predecessor: trialContractId,
             },
         });
-
-        // Generate a trial account ID
-        const trialAccountId = `${Date.now().toString()}-trial-${i}.testnet`;
+        console.log(`Derived MPC public key: ${mpcPublicKey}`);
 
         trialKeys.push({
-            trialAccountId,
             derivationPath,
             trialAccountSecretKey: keyPair.toString(),
             trialAccountPublicKey: keyPair.getPublicKey().toString(),

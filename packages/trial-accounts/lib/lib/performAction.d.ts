@@ -1,4 +1,4 @@
-import { ActionToPerform } from "./types";
+import { ActionToPerform, MPCSignature } from "./types";
 import { KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 interface PerformActionsParams {
@@ -15,7 +15,7 @@ interface PerformActionsParams {
  * @returns A Promise that resolves to an array of signature arrays.
  */
 export declare function performActions(params: PerformActionsParams): Promise<{
-    signatures: string[][];
+    signatures: MPCSignature[];
     nonces: string[];
     blockHash: string;
 }>;

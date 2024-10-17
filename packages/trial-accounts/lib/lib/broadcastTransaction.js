@@ -29,8 +29,13 @@ async function broadcastTransaction(params) {
         const actions = [
             transactions_1.actionCreators.functionCall(methodName, serializedArgs, BigInt(gas), BigInt((0, utils_1.parseNearAmount)(attachedDepositNear))),
         ];
-        const transaction = (0, transactions_1.createTransaction)(signerAccount.accountId, crypto_1.PublicKey.fromString(mpcPublicKey), // Use MPC public key
-        targetContractId, nonce, actions, blockHashBytes);
+        const mpcPubKey = crypto_1.PublicKey.fromString(mpcPublicKey);
+        const signerAccountId = signerAccount.accountId;
+        const transaction = (0, transactions_1.createTransaction)(signerAccountId, mpcPubKey, targetContractId, nonce, actions, blockHashBytes);
+        // Hash the transaction to get the message to sign
+        const serializedTx = transaction.encode();
+        const txHash = (0, cryptoUtils_1.hashTransaction)(serializedTx);
+        console.log(`=== Message to sign: ${txHash} ===`);
         // Create the signature
         let r = signatureResult.big_r.affine_point;
         let s = signatureResult.s.scalar;
@@ -41,40 +46,16 @@ async function broadcastTransaction(params) {
         });
         // Send the signed transaction
         (0, logUtils_1.logInfo)(`=== Sending NEAR Transaction ===`);
-        try {
-            const result = await provider.sendTransaction(signedTransaction);
-            console.log("Transaction Result:", result);
-        }
-        catch (error) {
-            console.error("Error sending NEAR transaction:", error);
-        }
+        return await provider.sendTransaction(signedTransaction);
     }
     else if (actionToPerform.chain === "EVM") {
         // Implement logic to broadcast EVM transactions using ethers.js
         const provider = new ethers_1.ethers.JsonRpcProvider( /* RPC URL */);
         const wallet = new ethers_1.ethers.Wallet(mpcPublicKey, provider);
-        const tx = {
-            to: actionToPerform.targetContractId,
-            data: actionToPerform.args.data,
-            gasLimit: actionToPerform.gasLimit,
-            value: actionToPerform.value || "0",
-            nonce: parseInt(nonce),
-            chainId: actionToPerform.args.chainId,
-            maxFeePerGas: actionToPerform.args.maxFeePerGas,
-            maxPriorityFeePerGas: actionToPerform.args.maxPriorityFeePerGas,
-            type: 2, // EIP-1559 transaction
-        };
-        // Sign the transaction with the signature from MPC
-        const signedTx = await wallet.signTransaction(tx);
+        console.log(`wallet: ${wallet.address}`);
         // Send the signed transaction
         (0, logUtils_1.logInfo)(`=== Sending EVM Transaction ===`);
-        try {
-            const txResponse = await provider.broadcastTransaction(signedTx);
-            console.log("Transaction Result:", txResponse);
-        }
-        catch (error) {
-            console.error("Error sending EVM transaction:", error);
-        }
+        return await provider.broadcastTransaction("");
     }
     else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);

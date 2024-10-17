@@ -1,6 +1,5 @@
 // lib/broadcastTransaction.ts
 
-import { Account } from "@near-js/accounts";
 import {
     Action,
     actionCreators,
@@ -13,16 +12,29 @@ import bs58 from "bs58";
 import { createSignature, hashTransaction } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
 import { logInfo } from "./logUtils";
-import { ethers, TransactionResponse } from "ethers";
+import {
+    ethers,
+    Interface,
+    JsonRpcProvider,
+    recoverAddress,
+    Transaction,
+    TransactionResponse,
+} from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
+import { Near } from "@near-js/wallet-account";
 
 interface BroadcastTransactionParams {
-    signerAccount: Account;
+    nearConnection: Near;
+    chainId: string;
+    signerAccountId: string;
     actionToPerform: ActionToPerform;
     signatureResult: MPCSignature; // Signature result from the MPC
     nonce: string;
     blockHash: string;
     mpcPublicKey: string;
+
+    // EVM Specific
+    providerUrl?: string;
 }
 
 /**
@@ -36,9 +48,12 @@ export async function broadcastTransaction(
     params: BroadcastTransactionParams
 ): Promise<TransactionResponse | FinalExecutionOutcome> {
     const {
-        signerAccount,
+        nearConnection,
+        signerAccountId,
         actionToPerform,
         signatureResult,
+        providerUrl,
+        chainId,
         nonce,
         blockHash,
         mpcPublicKey,
@@ -52,6 +67,7 @@ export async function broadcastTransaction(
             Buffer.from(JSON.stringify(args))
         );
 
+        const signerAccount = await nearConnection.account(signerAccountId);
         const provider = signerAccount.connection.provider;
 
         const blockHashBytes = bs58.decode(blockHash);
@@ -66,7 +82,6 @@ export async function broadcastTransaction(
         ];
 
         const mpcPubKey = PublicKey.fromString(mpcPublicKey);
-        const signerAccountId = signerAccount.accountId;
         const transaction = createTransaction(
             signerAccountId,
             mpcPubKey,
@@ -96,14 +111,74 @@ export async function broadcastTransaction(
         logInfo(`=== Sending NEAR Transaction ===`);
         return await provider.sendTransaction(signedTransaction);
     } else if (actionToPerform.chain === "EVM") {
-        // Implement logic to broadcast EVM transactions using ethers.js
-        const provider = new ethers.JsonRpcProvider(/* RPC URL */);
-        const wallet = new ethers.Wallet(mpcPublicKey, provider);
-        console.log(`wallet: ${wallet.address}`);
+        if (!providerUrl) {
+            throw new Error("providerUrl is required for EVM transactions");
+        }
+
+        // Initialize provider
+        const provider = new JsonRpcProvider(
+            providerUrl,
+            parseInt(chainId, 10)
+        );
+
+        // Encode function call data
+        const contractInterface = new Interface(actionToPerform.abi);
+        const data = contractInterface.encodeFunctionData(
+            actionToPerform.methodName,
+            actionToPerform.args as any[]
+        );
+
+        // Construct transaction data
+        const transactionData = {
+            nonce: parseInt(nonce, 10),
+            gasLimit: BigInt(actionToPerform.gasLimit || "0"),
+            maxFeePerGas: BigInt(actionToPerform.maxFeePerGas || "0"),
+            maxPriorityFeePerGas: BigInt(actionToPerform.maxPriorityFeePerGas),
+            to: actionToPerform.targetContractId,
+            data: data,
+            value: BigInt(actionToPerform.value || "0"),
+            chainId: parseInt(chainId, 10),
+            type: 2, // EIP-1559 transaction
+            accessList: actionToPerform.accessList || [],
+        };
+
+        // Create Transaction object
+        const tx = Transaction.from(transactionData);
+        const hexPayload = ethers.keccak256(
+            ethers.getBytes(tx.unsignedSerialized)
+        );
+        const serializedTxHash = Buffer.from(hexPayload.substring(2), "hex");
+
+        const signature = ethers.Signature.from({
+            r:
+                "0x" +
+                Buffer.from(
+                    signatureResult.big_r.affine_point.substring(2),
+                    "hex"
+                ).toString("hex"),
+            s:
+                "0x" +
+                Buffer.from(signatureResult.s.scalar, "hex").toString("hex"),
+            v: signatureResult.recovery_id + (parseInt(chainId) * 2 + 35),
+        });
+
+        // Sign the transaction
+        tx.signature = signature;
+
+        // Get the serialized transaction
+        const serializedTx = tx.serialized;
 
         // Send the signed transaction
         logInfo(`=== Sending EVM Transaction ===`);
-        return await provider.broadcastTransaction("");
+        const recoveryAddress = recoverAddress(serializedTxHash, signature);
+        if (recoveryAddress !== signerAccountId) {
+            throw new Error(
+                `Recovery address ${recoveryAddress} does not match signer address ${signerAccountId}`
+            );
+        }
+
+        logInfo(`Sending transaction from: ${recoveryAddress}`);
+        return await provider.send("eth_sendRawTransaction", [serializedTx]);
     } else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }

@@ -23,6 +23,7 @@ export interface TrialAccountInfo {
     trialId: number;
     trialData: TrialData;
     mpcKey: string;
-    accountId: string | null;
+    accountIdByChainId: AccountIdByChainId;
     usageStats: UsageStats;
 }
+export type AccountIdByChainId = Record<string, string>;

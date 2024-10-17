@@ -9,6 +9,7 @@ interface ActivateTrialAccountsParams {
     trialContractId: string;
     trialAccountIds: string[];
     trialAccountSecretKeys: KeyPairString[];
+    chainIds: string[];
 }
 
 /**
@@ -24,12 +25,10 @@ export async function activateTrialAccounts(
     const { trialContractId, trialAccountIds, near, trialAccountSecretKeys } =
         params;
 
-    console.log("Activating trial accounts...");
-
     for (let i = 0; i < trialAccountIds.length; i++) {
         const trialAccountId = trialAccountIds[i];
         const trialKey = trialAccountSecretKeys[i];
-        console.log(`Activating trial account: ${trialAccountId}`);
+        const chainId = params.chainIds[i];
 
         // Set the trial key in the keyStore
         const keyStore: any = (near.connection.signer as any).keyStore;
@@ -46,14 +45,13 @@ export async function activateTrialAccounts(
             methodName: "activate_trial",
             args: {
                 new_account_id: trialAccountId,
+                chain_id: chainId.toString(),
             },
             deposit: "0",
             gas: "300000000000000",
         });
 
-        if (result) {
-            console.log(`Trial account ${trialAccountId} activated.`);
-        } else {
+        if (!result) {
             throw new Error(
                 `Failed to activate trial account: ${trialAccountId}`
             );

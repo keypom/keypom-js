@@ -2,6 +2,8 @@ import { Account } from "@near-js/accounts";
 import { KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 import { ActionToPerform, TrialData, TrialKey, MPCSignature, TrialAccountInfo } from "./types";
+import { TransactionResponse } from "ethers";
+import { FinalExecutionOutcome } from "@near-js/types";
 /**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
@@ -35,6 +37,23 @@ export declare class TrialAccountManager {
         backoffFactor?: number;
     });
     /**
+     * View function on the trial contract with retry logic.
+     *
+     * @param contractId - The ID of the contract to view.
+     * @param methodName - The name of the method to view.
+     * @param args - The arguments to pass to the method.
+     *
+     * @returns A Promise that resolves to the result of the view function.
+     *
+     * @throws Will throw an error if the view function fails.
+     * @throws Will throw an error if the view function exceeds the maximum number of retries.
+     */
+    viewFunction({ contractId, methodName, args }: {
+        contractId: any;
+        methodName: any;
+        args: any;
+    }): Promise<any>;
+    /**
      * Creates a new trial on the trial contract with retry logic.
      *
      * @param trialData - The trial data containing constraints.
@@ -54,7 +73,7 @@ export declare class TrialAccountManager {
      * @param newAccountId - The account ID of the new trial account.
      * @returns A Promise that resolves when the account is activated.
      */
-    activateTrialAccounts(newAccountId: string): Promise<void>;
+    activateTrialAccounts(newAccountId: string, chainId: string): Promise<void>;
     /**
      * Performs one or more actions by requesting signatures from the MPC with retry logic.
      *
@@ -62,7 +81,7 @@ export declare class TrialAccountManager {
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
     performActions(actionsToPerform: ActionToPerform[]): Promise<{
-        signatures: string[][];
+        signatures: MPCSignature[];
         nonces: string[];
         blockHash: string;
     }>;
@@ -77,13 +96,19 @@ export declare class TrialAccountManager {
         signatureResult: MPCSignature;
         nonce: string;
         blockHash: string;
-    }): Promise<void>;
+    }): Promise<TransactionResponse | FinalExecutionOutcome>;
     /**
      * Retrieves the trial account info and converts it to camelCase with retry logic.
      *
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     getTrialData(): Promise<TrialAccountInfo>;
+    /**
+     * Derives the ETH address from the passed in derivation path.
+     * @param trialSecretKey - The secret key for the trial account.
+     * @returns The ETH address.
+     */
+    deriveEthAddress(trialSecretKey: KeyPairString): Promise<string>;
     /**
      * Sets the trial account credentials.
      * @param trialAccountId - The trial account ID.

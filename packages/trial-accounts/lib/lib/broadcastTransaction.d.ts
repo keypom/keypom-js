@@ -1,5 +1,7 @@
 import { Account } from "@near-js/accounts";
 import { ActionToPerform, MPCSignature } from "./types";
+import { TransactionResponse } from "ethers";
+import { FinalExecutionOutcome } from "@near-js/types";
 interface BroadcastTransactionParams {
     signerAccount: Account;
     actionToPerform: ActionToPerform;
@@ -15,5 +17,5 @@ interface BroadcastTransactionParams {
  * @returns A Promise that resolves when the transaction is broadcasted.
  * @throws Will throw an error if broadcasting fails.
  */
-export declare function broadcastTransaction(params: BroadcastTransactionParams): Promise<void>;
+export declare function broadcastTransaction(params: BroadcastTransactionParams): Promise<TransactionResponse | FinalExecutionOutcome>;
 export {};

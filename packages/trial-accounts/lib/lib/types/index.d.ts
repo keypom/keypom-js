@@ -1,3 +1,4 @@
+export * from "./EVMTypes";
 export * from "./TrialAccountInfo";
 export * from "./Constraints";
 export * from "./ActionToPerform";

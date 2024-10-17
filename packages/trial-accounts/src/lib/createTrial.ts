@@ -4,6 +4,7 @@ import { Account } from "@near-js/accounts";
 import { toSnakeCase, TrialData } from "./types";
 import { sendTransaction } from "./networks/near";
 import { parseNearAmount } from "@near-js/utils";
+import { ExtEVMConstraints, NEARConstraints } from "./types/ChainConstraints";
 
 interface CreateTrialParams {
     signerAccount: Account;
@@ -21,12 +22,35 @@ interface CreateTrialParams {
 export async function createTrial(params: CreateTrialParams): Promise<number> {
     const { signerAccount, trialContractId, trialData } = params;
 
+    // Type guard to check if value is ExtEVMConstraints
+    const isExtEVMConstraints = (
+        value: NEARConstraints | ExtEVMConstraints
+    ): value is ExtEVMConstraints => {
+        return (value as ExtEVMConstraints).chainId !== undefined;
+    };
+
+    // Transform constraintsByChainId to use chain ID directly if it's EVM
+    const transformedConstraints = Object.entries(
+        trialData.constraintsByChainId
+    ).reduce((acc, [key, value]) => {
+        if (key === "EVM" && isExtEVMConstraints(value)) {
+            // Now TypeScript knows that value is ExtEVMConstraints
+            const evmConstraints = value;
+            acc[evmConstraints.chainId] = { ...evmConstraints };
+            // @ts-ignore
+            delete acc[evmConstraints.chainId].chainId; // Remove chainId as it's now used as the key
+        } else {
+            acc[key] = value;
+        }
+        return acc;
+    }, {} as Record<string | number, NEARConstraints | ExtEVMConstraints>);
+
     const { constraintsByChainId, ...restTrialData } = trialData;
 
     const snakeCaseArgs = toSnakeCase({
         ...restTrialData,
         initial_deposit: parseNearAmount(trialData.initialDeposit),
-        chain_constraints: constraintsByChainId, // Use chainConstraints directly
+        chain_constraints: transformedConstraints, // Use transformed constraints here
     });
 
     const result = await sendTransaction({

@@ -8,14 +8,17 @@ export interface SerializableParam {
 export type SerializableParamType =
     | { type: "Address" }
     | { type: "Bytes" }
-    | { type: "Int"; size: number }
-    | { type: "Uint"; size: number }
+    | { type: "Int"; value: number }
+    | { type: "Uint"; value: number }
     | { type: "Bool" }
     | { type: "String" }
-    | { type: "Array"; inner: SerializableParamType }
-    | { type: "FixedBytes"; size: number }
-    | { type: "FixedArray"; inner: SerializableParamType; size: number }
-    | { type: "Tuple"; components: SerializableParamType[] };
+    | { type: "Array"; value: SerializableParamType }
+    | { type: "FixedBytes"; value: number }
+    | {
+          type: "FixedArray";
+          value: { inner: SerializableParamType; size: number };
+      }
+    | { type: "Tuple"; value: SerializableParamType[] };
 
 export type SerializableToken =
     | { type: "Address"; value: string } // address as hex string

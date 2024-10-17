@@ -1,14 +1,17 @@
-/**
- * Defines an action to be performed on a contract.
- */
+import { AccessList } from "./EVMTypes";
 export interface ActionToPerform {
     chain: ChainType;
-    targetContractId: string;
     methodName: string;
-    args: any;
-    attachedDepositNear?: string;
-    gas?: string;
+    args?: any[] | Record<string, any>;
+    abi?: any[];
     gasLimit?: string;
     value?: string;
+    chainId?: number;
+    maxFeePerGas?: string;
+    maxPriorityFeePerGas?: string;
+    accessList?: AccessList;
+    targetContractId: string;
+    attachedDepositNear?: string;
+    gas?: string;
 }
 export type ChainType = "NEAR" | "EVM";

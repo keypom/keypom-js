@@ -16,6 +16,11 @@ import { addTrialAccounts as addTrialKeys } from "./addTrialKeys";
 import { activateTrialAccounts } from "./activateTrial";
 import { performActions } from "./performAction";
 import { broadcastTransaction } from "./broadcastTransaction";
+import {
+    deriveChildPublicKey,
+    najPublicKeyStrToUncompressedHexPoint,
+    uncompressedHexPointToEvmAddress,
+} from "./mpcUtils/kdf";
 import { checkActionValidity } from "./validityChecker";
 import { TransactionResponse } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
@@ -64,6 +69,34 @@ export class TrialAccountManager {
         this.maxRetries = params.maxRetries ?? 3; // Default to 3 retries
         this.initialDelayMs = params.initialDelayMs ?? 1000; // Default to 1 second
         this.backoffFactor = params.backoffFactor ?? 2; // Default backoff factor of 2
+    }
+
+    /**
+     * View function on the trial contract with retry logic.
+     *
+     * @param contractId - The ID of the contract to view.
+     * @param methodName - The name of the method to view.
+     * @param args - The arguments to pass to the method.
+     *
+     * @returns A Promise that resolves to the result of the view function.
+     *
+     * @throws Will throw an error if the view function fails.
+     * @throws Will throw an error if the view function exceeds the maximum number of retries.
+     */
+    async viewFunction({ contractId, methodName, args }) {
+        return retryAsync(
+            async () => {
+                const signerAccount = await this.near.account("foo");
+                return await signerAccount.viewFunction({
+                    contractId,
+                    methodName,
+                    args,
+                });
+            },
+            this.maxRetries,
+            this.initialDelayMs,
+            this.backoffFactor
+        );
     }
 
     /**
@@ -122,7 +155,10 @@ export class TrialAccountManager {
      * @param newAccountId - The account ID of the new trial account.
      * @returns A Promise that resolves when the account is activated.
      */
-    async activateTrialAccounts(newAccountId: string): Promise<void> {
+    async activateTrialAccounts(
+        newAccountId: string,
+        chainId: string
+    ): Promise<void> {
         if (this.trialSecretKey === null || this.trialSecretKey === undefined) {
             throw new Error(
                 "trialSecretKey is required to activate trial accounts"
@@ -131,10 +167,11 @@ export class TrialAccountManager {
         return retryAsync(
             async () => {
                 const trialAccountInfo = await this.getTrialData();
-                if (trialAccountInfo.accountId !== null) {
+                const trialAccountId = trialAccountInfo[chainId];
+                if (trialAccountId) {
                     throw new Error(
                         "trial account is already activated. accountId: " +
-                            trialAccountInfo.accountId
+                            trialAccountId
                     );
                 }
 
@@ -143,6 +180,7 @@ export class TrialAccountManager {
                     trialContractId: this.trialContractId,
                     trialAccountIds: [newAccountId],
                     trialAccountSecretKeys: [this.trialSecretKey!],
+                    chainIds: [chainId],
                 });
                 this.trialAccountId = newAccountId;
             },
@@ -158,7 +196,10 @@ export class TrialAccountManager {
      * @param actionsToPerform - Array of actions to perform.
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
-    async performActions(actionsToPerform: ActionToPerform[]): Promise<{
+    async performActions(
+        actionsToPerform: ActionToPerform[],
+        evmProviderUrl?: string
+    ): Promise<{
         signatures: MPCSignature[];
         nonces: string[];
         blockHash: string;
@@ -171,10 +212,6 @@ export class TrialAccountManager {
         return retryAsync(
             async () => {
                 const trialAccountInfo = await this.getTrialData();
-                console.log(
-                    "trialAccountInfo",
-                    JSON.stringify(trialAccountInfo)
-                );
 
                 if (!this.trialId) {
                     throw new Error("trialId is required to perform actions");
@@ -183,7 +220,9 @@ export class TrialAccountManager {
                 // Check validity of actions
                 checkActionValidity(
                     actionsToPerform,
-                    trialAccountInfo.trialData
+                    trialAccountInfo.trialData,
+                    trialAccountInfo.usageStats,
+                    Date.now()
                 );
 
                 const result = await performActions({
@@ -191,6 +230,7 @@ export class TrialAccountManager {
                     trialAccountId: this.trialAccountId!,
                     trialAccountSecretKey: this.trialSecretKey!,
                     trialContractId: this.trialContractId,
+                    evmProviderUrl,
                     actionsToPerform,
                 });
                 return result;
@@ -210,12 +250,15 @@ export class TrialAccountManager {
     async broadcastTransaction(params: {
         actionToPerform: ActionToPerform;
         signatureResult: MPCSignature;
+        signerAccountId: string;
+        providerUrl?: string;
+        chainId: string;
         nonce: string;
         blockHash: string;
     }): Promise<TransactionResponse | FinalExecutionOutcome> {
         return retryAsync(
             async () => {
-                if (!this.trialAccountId || !this.trialSecretKey) {
+                if (!this.trialSecretKey) {
                     throw new Error(
                         "trialAccountId and trialSecretKey are required to broadcast transaction"
                     );
@@ -224,14 +267,27 @@ export class TrialAccountManager {
                 const trialAccountInfo: TrialAccountInfo =
                     await this.getTrialData();
 
-                const signerAccount = await this.near.account(
-                    this.trialAccountId
-                );
+                if (
+                    trialAccountInfo.accountIdByChainId[params.chainId] !==
+                    params.signerAccountId
+                ) {
+                    throw new Error(
+                        "Mismatch between trialAccountId and signerAccount. Found: " +
+                            trialAccountInfo.accountIdByChainId[
+                                params.chainId
+                            ] +
+                            " Expected: " +
+                            params.signerAccountId
+                    );
+                }
 
                 return await broadcastTransaction({
-                    signerAccount,
+                    nearConnection: this.near,
+                    signerAccountId: params.signerAccountId,
                     actionToPerform: params.actionToPerform,
                     signatureResult: params.signatureResult,
+                    providerUrl: params.providerUrl,
+                    chainId: params.chainId,
                     nonce: params.nonce,
                     blockHash: params.blockHash,
                     mpcPublicKey: trialAccountInfo.mpcKey,
@@ -249,27 +305,23 @@ export class TrialAccountManager {
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     async getTrialData(): Promise<TrialAccountInfo> {
-        if (!this.trialAccountId || !this.trialSecretKey) {
+        if (!this.trialSecretKey) {
             throw new Error("trialAccountId is required to get trial data");
         }
         return retryAsync(
             async () => {
-                const signerAccount = await this.near.account(
-                    this.trialAccountId!
-                );
                 const trialPubKey = KeyPair.fromString(this.trialSecretKey!)
                     .getPublicKey()
                     .toString();
 
                 // Retrieve trial account info from the contract
-                const trialAccountInfoSnakeCase =
-                    await signerAccount.viewFunction({
-                        contractId: this.trialContractId,
-                        methodName: "get_trial_account_info",
-                        args: {
-                            public_key: trialPubKey,
-                        },
-                    });
+                const trialAccountInfoSnakeCase = await this.viewFunction({
+                    contractId: this.trialContractId,
+                    methodName: "get_trial_account_info",
+                    args: {
+                        public_key: trialPubKey,
+                    },
+                });
 
                 // Convert snake_case data to camelCase
                 const trialAccountInfoCamelCase: TrialAccountInfo =
@@ -281,6 +333,67 @@ export class TrialAccountManager {
             this.initialDelayMs,
             this.backoffFactor
         );
+    }
+
+    /**
+     * Retrieves the account ID for the given chain ID
+     *
+     * @returns A Promise that resolves to the accountId
+     */
+    async getTrialAccountIdForChain(
+        trialAccountSecretKey: KeyPairString,
+        chainId: string
+    ): Promise<string> {
+        return retryAsync(
+            async () => {
+                const trialPubKey = KeyPair.fromString(trialAccountSecretKey)
+                    .getPublicKey()
+                    .toString();
+
+                // Retrieve trial account info from the contract
+                const trialAccountInfoSnakeCase = await this.viewFunction({
+                    contractId: this.trialContractId,
+                    methodName: "get_trial_account_info",
+                    args: {
+                        public_key: trialPubKey,
+                    },
+                });
+
+                // Convert snake_case data to camelCase
+                const trialAccountInfoCamelCase: TrialAccountInfo =
+                    convertKeysToCamelCase(trialAccountInfoSnakeCase);
+
+                return trialAccountInfoCamelCase.accountIdByChainId[chainId];
+            },
+            this.maxRetries,
+            this.initialDelayMs,
+            this.backoffFactor
+        );
+    }
+
+    /**
+     * Derives the ETH address from the passed in derivation path.
+     * @param trialSecretKey - The secret key for the trial account.
+     * @returns The ETH address.
+     */
+    async deriveEthAddress(trialSecretKey: KeyPairString): Promise<string> {
+        const rootPublicKey = await this.viewFunction({
+            contractId: this.mpcContractId,
+            methodName: "public_key",
+            args: {},
+        });
+
+        const trialPubKey = KeyPair.fromString(trialSecretKey)
+            .getPublicKey()
+            .toString();
+
+        const publicKey = deriveChildPublicKey(
+            najPublicKeyStrToUncompressedHexPoint(rootPublicKey),
+            this.trialContractId,
+            trialPubKey
+        );
+
+        return uncompressedHexPointToEvmAddress(publicKey);
     }
 
     /**

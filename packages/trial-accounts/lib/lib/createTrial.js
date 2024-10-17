@@ -14,26 +14,29 @@ const utils_1 = require("@near-js/utils");
  */
 async function createTrial(params) {
     const { signerAccount, trialContractId, trialData } = params;
-    console.log("Creating trial...");
-    // Serialize chain constraints appropriately
-    const { chainConstraints, ...restTrialData } = trialData;
-    let serializedChainConstraints;
-    if (chainConstraints.NEAR) {
-        serializedChainConstraints = {
-            NEAR: (0, types_1.toSnakeCase)(chainConstraints.NEAR),
-        };
-    }
-    else if (chainConstraints.EVM) {
-        serializedChainConstraints = { EVM: (0, types_1.toSnakeCase)(chainConstraints.EVM) };
-    }
-    else {
-        throw new Error("chainConstraints must have either NEAR or EVM defined");
-    }
-    // Convert camelCase trialData to snake_case and include chain_constraints
+    // Type guard to check if value is ExtEVMConstraints
+    const isExtEVMConstraints = (value) => {
+        return value.chainId !== undefined;
+    };
+    // Transform constraintsByChainId to use chain ID directly if it's EVM
+    const transformedConstraints = Object.entries(trialData.constraintsByChainId).reduce((acc, [key, value]) => {
+        if (key === "EVM" && isExtEVMConstraints(value)) {
+            // Now TypeScript knows that value is ExtEVMConstraints
+            const evmConstraints = value;
+            acc[evmConstraints.chainId] = { ...evmConstraints };
+            // @ts-ignore
+            delete acc[evmConstraints.chainId].chainId; // Remove chainId as it's now used as the key
+        }
+        else {
+            acc[key] = value;
+        }
+        return acc;
+    }, {});
+    const { constraintsByChainId, ...restTrialData } = trialData;
     const snakeCaseArgs = (0, types_1.toSnakeCase)({
         ...restTrialData,
         initial_deposit: (0, utils_1.parseNearAmount)(trialData.initialDeposit),
-        chain_constraints: serializedChainConstraints,
+        chain_constraints: transformedConstraints, // Use transformed constraints here
     });
     const result = await (0, near_1.sendTransaction)({
         signerAccount,
