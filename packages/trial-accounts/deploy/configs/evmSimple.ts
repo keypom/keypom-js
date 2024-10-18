@@ -14,7 +14,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729285079158-trial-contract.testnet",
+    trialContractId: "1729287545589-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",

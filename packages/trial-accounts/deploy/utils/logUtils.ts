@@ -130,23 +130,29 @@ export function compareAndLog<T>(
 
     let isMatch = false;
 
-    // Handle byte array vs. hex string comparison
-    if (
-        Array.isArray(formattedExpected) &&
-        typeof formattedActual === "string"
-    ) {
-        // Convert byte array to hex string
-        const expectedHex =
-            "0x" + Buffer.from(formattedExpected).toString("hex");
-        isMatch = expectedHex.toLowerCase() === formattedActual.toLowerCase();
+    // Handle byte array comparison directly
+    if (Array.isArray(formattedExpected) && Array.isArray(formattedActual)) {
+        // Compare arrays as JSON
+        isMatch =
+            JSON.stringify(formattedExpected) ===
+            JSON.stringify(formattedActual);
     } else if (
         typeof formattedExpected === "string" &&
         Array.isArray(formattedActual)
     ) {
-        // Convert byte array to hex string
+        // Convert byte array to hex string for comparison with string
         const actualHex = "0x" + Buffer.from(formattedActual).toString("hex");
         isMatch = formattedExpected.toLowerCase() === actualHex.toLowerCase();
+    } else if (
+        Array.isArray(formattedExpected) &&
+        typeof formattedActual === "string"
+    ) {
+        // Convert byte array to hex string for comparison with string
+        const expectedHex =
+            "0x" + Buffer.from(formattedExpected).toString("hex");
+        isMatch = expectedHex.toLowerCase() === formattedActual.toLowerCase();
     } else {
+        // Default comparison for non-array values
         isMatch =
             JSON.stringify(formattedExpected) ===
             JSON.stringify(formattedActual);
@@ -156,8 +162,6 @@ export function compareAndLog<T>(
         console.log(`✅ ${field} match.`);
     } else {
         console.error(`❌ ${field} mismatch!`);
-
-        // Display the expected and actual values
         console.log(
             `   Expected: ${JSON.stringify(formattedExpected, null, 2)}`
         );

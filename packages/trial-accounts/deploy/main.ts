@@ -24,12 +24,13 @@ async function test() {
             LOG_STR_GAS_LIMIT: 100000
             LOG_STR_CONTRACT: [206, 180, 12, 233, 151, 159, 47, 4, 64, 49, 117, 156, 202, 90, 62, 44, 63, 192, 76, 66]
             LOG_STR_VALUE: 0
-            LOG_STR_INPUT: [189, 241, 178, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 206, 180, 12, 233, 151, 159, 47, 4, 64, 49, 117, 156, 202, 90, 62, 44, 63, 192, 76, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            LOG_STR_INPUT: [226, 146, 39, 16]
             LOG_STR_ACCESS_LIST: []
-            LOG_STR_FUNCTION: Function { name: "multiAddressLazyMint", inputs: [Param { name: "addresses", kind: Array(Address), internal_type: None }, Param { name: "seriesIds", kind: Uint(256), internal_type: None }, Param { name: "data", kind: Bytes, internal_type: None }], outputs: [], constant: Some(false), state_mutability: NonPayable }
-            LOG_STR_ABI_PARAMS: [Param { name: "addresses", kind: Array(Address), internal_type: None }, Param { name: "seriesIds", kind: Uint(256), internal_type: None }, Param { name: "data", kind: Bytes, internal_type: None }]
-            LOG_STR_ABI_ARGS: [Array([Address(0xceb40ce9979f2f044031759cca5a3e2c3fc04c42)]), Uint(1), Bytes([])]
-            LOG_STR_HASH: [14, 160, 2, 118, 47, 29, 140, 231, 5, 11, 191, 84, 128, 142, 141, 160, 9, 148, 10, 251, 72, 19, 16, 254, 100, 172, 119, 233, 116, 136, 141, 229]`;
+            LOG_STR_FUNCTION: Function { name: "multiAddressLazyMintNone", inputs: [], outputs: [], constant: Some(false), state_mutability: NonPayable }
+            LOG_STR_ABI_PARAMS: []
+            LOG_STR_ABI_ARGS: []
+            LOG_STR_HASH: [107, 224, 213, 86, 0, 244, 178, 145, 233, 75, 236, 131, 174, 31, 31, 254, 59, 73, 206, 213, 238, 169, 172, 152, 158, 107, 248, 250, 86, 189, 254, 84],
+            LOG_STR_TXN_BYTES: [2, 240, 131, 1, 74, 52, 1, 132, 119, 53, 148, 0, 133, 4, 168, 23, 200, 0, 131, 1, 134, 160, 148, 206, 180, 12, 233, 151, 159, 47, 4, 64, 49, 117, 156, 202, 90, 62, 44, 63, 192, 76, 66, 128, 132, 226, 146, 39, 16, 192]`;
 
     const foo = parseContractLog(log);
     console.log(foo);
@@ -124,7 +125,7 @@ async function main() {
 
                 await sponsorWallet.sendTransaction({
                     to: evmAddress,
-                    value: parseEther("0.00004"),
+                    value: parseEther("0.004"),
                 });
 
                 accountId = evmAddress;

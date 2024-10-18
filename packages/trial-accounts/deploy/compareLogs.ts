@@ -97,14 +97,7 @@ function compareLogs() {
     compareAndLog(
         "Hashed Payload",
         contractLog["Hashed Payload"],
-        clientLog["Hashed Payload"],
-        (value) => {
-            // Handle byte array or hex string
-            if (Array.isArray(value)) {
-                return "0x" + Buffer.from(value).toString("hex");
-            }
-            return value.toLowerCase();
-        }
+        clientLog["Hashed Payload"]
     );
 
     console.log("\nLog comparison complete.");

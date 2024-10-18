@@ -158,8 +158,10 @@ export async function broadcastTransaction(
 
         // Create Transaction object
         const tx = Transaction.from(transactionData);
+
         // Get the serialized transaction
         const unsignedTx = tx.unsignedSerialized;
+        console.log("unsignedTx", unsignedTx);
         const txHash = ethers.keccak256(unsignedTx);
 
         const payload = getBytes(txHash);
@@ -177,24 +179,30 @@ export async function broadcastTransaction(
         clientLog["Gas Limit"] = BigInt(
             actionToPerform.gasLimit || "0"
         ).toString();
-        clientLog["Contract Address"] = actionToPerform.targetContractId;
+
+        // Convert the contract address, input data, and hashed payload to arrays of numbers
+        clientLog["Contract Address"] = hexStringToNumberArray(
+            actionToPerform.targetContractId
+        );
         clientLog["Value"] = BigInt(actionToPerform.value || "0").toString();
-        clientLog["Input Data"] = data;
+        clientLog["Input Data"] = hexStringToNumberArray(data);
         clientLog["Access List"] = actionToPerform.accessList || [];
-        clientLog["Function"] = functionData;
+        clientLog["Function"] = functionData; // This will stay as an object
         clientLog["ABI Parameters"] = contractInterface.getAbiCoder();
         clientLog["ABI Args"] = JSON.stringify(actionToPerform.args);
-        clientLog["Hashed Payload"] = txHash;
+        clientLog["Hashed Payload"] = hexStringToNumberArray(txHash);
+        clientLog["TXN Bytes"] = hexStringToNumberArray(unsignedTx);
         console.log(clientLog);
         console.log("Signature: ", signatureResult);
 
-        const sig = {
+        const sig = ethers.Signature.from({
             r:
                 "0x" +
                 signatureResult.big_r.affine_point.substring(2).toLowerCase(),
             s: "0x" + signatureResult.s.scalar.toLowerCase(),
             v: signatureResult.recovery_id,
-        };
+        });
+        tx.signature = sig;
         const recoveryAddress = recoverAddress(payload, sig);
 
         // Send the signed transaction
@@ -206,14 +214,23 @@ export async function broadcastTransaction(
         }
 
         logInfo(`Sending transaction from: ${recoveryAddress}`);
-        let result;
-        try {
-            result = await provider.send("eth_sendRawTransaction", [
-                tx.serialized,
-            ]);
-        } catch (e) {}
+        const result = await provider.send("eth_sendRawTransaction", [
+            tx.serialized,
+        ]);
         return { result, clientLog };
     } else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }
+}
+
+// Helper function to convert hex string (e.g. "0x...") to an array of numbers
+function hexStringToNumberArray(hexString) {
+    if (hexString.startsWith("0x")) {
+        hexString = hexString.slice(2);
+    }
+    const bytes = [];
+    for (let i = 0; i < hexString.length; i += 2) {
+        bytes.push(parseInt(hexString.substr(i, 2), 16));
+    }
+    return bytes;
 }
