@@ -7,6 +7,7 @@ import { parseNearAmount } from "@near-js/utils";
 import { KeyPair, KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 import { JsonRpcProvider, VoidSigner } from "ethers";
+import { extractLogsFromResult, parseContractLog } from "./logUtils";
 
 interface PerformActionsParams {
     near: Near;
@@ -27,6 +28,7 @@ export async function performActions(params: PerformActionsParams): Promise<{
     signatures: MPCSignature[];
     nonces: string[];
     blockHash: string;
+    contractLogs: string[];
 }> {
     const {
         near,
@@ -47,17 +49,15 @@ export async function performActions(params: PerformActionsParams): Promise<{
     // set the signer to the trial contract to actually perform the call_*_contract methods using the proxy key
     const signerAccount = await near.account(trialContractId);
 
-    const signatures: MPCSignature[] = [];
-    const nonces: string[] = [];
     const provider = signerAccount.connection.provider;
     const block = await provider.block({ finality: "final" });
     const blockHash = block.header.hash;
 
+    const signatures: MPCSignature[] = [];
+    const nonces: string[] = [];
+    const contractLogs: string[] = [];
     for (const actionToPerform of actionsToPerform) {
         if (actionToPerform.chain === "NEAR") {
-            const signatures: MPCSignature[] = [];
-            const nonces: string[] = [];
-
             // Get the trial user's near account access key info to get the nonce
             let trialUserNearAccount = await near.account(trialAccountId);
             const accessKeys = await trialUserNearAccount.getAccessKeys();
@@ -91,6 +91,22 @@ export async function performActions(params: PerformActionsParams): Promise<{
 
             // Extract the signature from the transaction result
             const sigRes = extractSignatureFromResult(result);
+
+            const logs = extractLogsFromResult(result);
+            // Find the specific log we're interested in
+            const relevantLog = logs.find((log) =>
+                log.includes("LOG_STR_CHAIN_ID")
+            );
+            if (relevantLog) {
+                // Parse the log
+                const parsedLog = parseContractLog(relevantLog);
+                contractLogs.push(parsedLog);
+            } else {
+                console.error(
+                    "Relevant log not found in the transaction result."
+                );
+            }
+
             signatures.push(sigRes);
             nonces.push(nonce.toString());
         } else if (actionToPerform.chain === "EVM") {
@@ -148,12 +164,27 @@ export async function performActions(params: PerformActionsParams): Promise<{
             const sigRes = extractSignatureFromResult(result);
             signatures.push(sigRes);
             nonces.push(nonce.toString());
+
+            const logs = extractLogsFromResult(result);
+            // Find the specific log we're interested in
+            const relevantLog = logs.find((log) =>
+                log.includes("LOG_STR_CHAIN_ID")
+            );
+            if (relevantLog) {
+                // Parse the log
+                const parsedLog = parseContractLog(relevantLog);
+                contractLogs.push(parsedLog);
+            } else {
+                console.error(
+                    "Relevant log not found in the transaction result."
+                );
+            }
         } else {
             throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
         }
     }
 
-    return { signatures, nonces, blockHash };
+    return { signatures, nonces, blockHash, contractLogs };
 }
 
 // Helper function to extract signature from the transaction result
@@ -161,7 +192,6 @@ function extractSignatureFromResult(result: any): MPCSignature {
     const sigRes = JSON.parse(
         Buffer.from(result.status.SuccessValue, "base64").toString()
     );
-    console.log("Signature: ", sigRes);
 
     return sigRes;
 }

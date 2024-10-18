@@ -203,6 +203,7 @@ export class TrialAccountManager {
         signatures: MPCSignature[];
         nonces: string[];
         blockHash: string;
+        contractLogs: string[];
     }> {
         if (!this.trialAccountId || !this.trialSecretKey) {
             throw new Error(
@@ -255,7 +256,10 @@ export class TrialAccountManager {
         chainId: string;
         nonce: string;
         blockHash: string;
-    }): Promise<TransactionResponse | FinalExecutionOutcome> {
+    }): Promise<{
+        result: TransactionResponse | FinalExecutionOutcome;
+        clientLog: any;
+    }> {
         return retryAsync(
             async () => {
                 if (!this.trialSecretKey) {
@@ -377,23 +381,33 @@ export class TrialAccountManager {
      * @returns The ETH address.
      */
     async deriveEthAddress(trialSecretKey: KeyPairString): Promise<string> {
-        const rootPublicKey = await this.viewFunction({
+        const path = KeyPair.fromString(trialSecretKey)
+            .getPublicKey()
+            .toString();
+
+        const rootKey = await this.viewFunction({
             contractId: this.mpcContractId,
             methodName: "public_key",
             args: {},
         });
 
-        const trialPubKey = KeyPair.fromString(trialSecretKey)
-            .getPublicKey()
-            .toString();
-
-        const publicKey = deriveChildPublicKey(
-            najPublicKeyStrToUncompressedHexPoint(rootPublicKey),
+        // Convert root public key to uncompressed hex point
+        const rootUncompressedHexPoint =
+            najPublicKeyStrToUncompressedHexPoint(rootKey);
+        // Derive child public key using root public key, signerId, and path
+        const derivedUncompressedHexPoint = deriveChildPublicKey(
+            rootUncompressedHexPoint,
             this.trialContractId,
-            trialPubKey
+            path
+        );
+        // Convert derived public key to EVM address
+        const evmAddressFromDerivedKey = uncompressedHexPointToEvmAddress(
+            derivedUncompressedHexPoint
         );
 
-        return uncompressedHexPointToEvmAddress(publicKey);
+        console.log(`Predecessor: ${this.trialContractId}\nPath: ${path}`);
+
+        return evmAddressFromDerivedKey;
     }
 
     /**

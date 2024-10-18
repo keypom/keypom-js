@@ -1,0 +1,24 @@
+{
+  "Chain ID": 84532,
+  "Nonce": 1,
+  "Max Priority Fee Per Gas": "2000000000",
+  "Max Fee Per Gas": "20000000000",
+  "Gas Limit": "100000",
+  "Contract Address": "0xCeb40Ce9979f2F044031759cCA5a3e2C3fc04c42",
+  "Value": "0",
+  "Input Data": "0xe2922710",
+  "Access List": [],
+  "Function": {
+    "type": "function",
+    "inputs": [],
+    "name": "multiAddressLazyMintNone",
+    "constant": false,
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "payable": false,
+    "gas": null
+  },
+  "ABI Parameters": {},
+  "ABI Args": "[]",
+  "Hashed Payload": "0xc842fa9e01084aefaa3185f4c7098eff056ecb89f6fdc62593d1b6dc4ff1f6f6"
+}

@@ -50,40 +50,53 @@ export function extractLogsFromResult(result: any): string[] {
     return logs;
 }
 
-/**
- * Parses a single contract log into a structured object.
- * @param log - The log string to parse.
- * @returns A parsed log object or null if parsing fails.
- */
 export function parseContractLog(log: string): any {
     const parsedData: any = {};
 
     // Remove any newlines and trim whitespace
     let content = log.replace(/\n/g, "").trim();
 
-    // Regular expression to capture various fields from the log
+    // Regular expression to capture the specific log variables
     const regex =
-        /Signer: AccountId\("(.+?)"\), Contract: AccountId\("(.+?)"\), Method: "(.+?)", Args: (\[.*?\]), Gas: NearGas \{ inner: ([0-9]+) \}, Deposit: U128\(([0-9]+)\), Public Key: PublicKey \{ data: (\[.*?\]) \}, MPC Key: PublicKey \{ data: (\[.*?\]) \}, MPC Account: AccountId\("(.+?)"\), Chain ID: (\d+), Nonce: U64\((\d+)\), Block Hash: Base58CryptoHash\((\[.*?\])\), Actions: (\[.*?\]), TxHash: (\[.*?\])$/;
+        /LOG_STR_CHAIN_ID: (\d+)\s*LOG_STR_NONCE: (\d+)\s*LOG_STR_MAX_PRIORITY_FEE_PER_GAS: (\d+)\s*LOG_STR_MAX_FEE_PER_GAS: (\d+)\s*LOG_STR_GAS_LIMIT: (\d+)\s*LOG_STR_CONTRACT: \[(.*?)\]\s*LOG_STR_VALUE: (\d+)\s*LOG_STR_INPUT: \[(.*?)\]\s*LOG_STR_ACCESS_LIST: \[.*?\]\s*LOG_STR_FUNCTION: (.*?)\s*LOG_STR_ABI_PARAMS: (.*?)\s*LOG_STR_ABI_ARGS: (.*?)\s*LOG_STR_HASH: \[(.*?)\]/;
 
     const match = content.match(regex);
 
     if (match) {
-        parsedData["Signer"] = match[1];
-        parsedData["Contract"] = match[2];
-        parsedData["Method"] = match[3];
-        parsedData["Args"] = JSON.parse(match[4]);
-        parsedData["Gas"] = match[5];
-        parsedData["Deposit"] = match[6];
-        parsedData["Public Key"] = { data: JSON.parse(match[7]) };
-        parsedData["MPC Key"] = { data: JSON.parse(match[8]) };
-        parsedData["MPC Account"] = match[9];
-        parsedData["Chain ID"] = match[10];
-        parsedData["Nonce"] = match[11];
-        parsedData["Block Hash"] = JSON.parse(match[12]);
-        parsedData["Actions"] = parseActionsString(match[13]);
-        parsedData["TxHash"] = JSON.parse(match[14]);
+        parsedData["Chain ID"] = match[1];
+        parsedData["Nonce"] = match[2];
+        parsedData["Max Priority Fee Per Gas"] = match[3];
+        parsedData["Max Fee Per Gas"] = match[4];
+        parsedData["Gas Limit"] = match[5];
+
+        // Parse Contract Address as an array of integers
+        parsedData["Contract Address"] = match[6]
+            .split(",")
+            .map((value: string) => parseInt(value.trim(), 10));
+
+        parsedData["Value"] = match[7];
+
+        // Parse Input Data as an array of integers
+        parsedData["Input Data"] = match[8]
+            .split(",")
+            .map((value: string) => parseInt(value.trim(), 10));
+
+        // Parse Function
+        parsedData["Function"] = match[9].trim();
+
+        // Parse ABI Parameters
+        parsedData["ABI Parameters"] = match[10].trim();
+
+        // Parse ABI Args
+        parsedData["ABI Args"] = match[11].trim();
+
+        // Parse Hashed Payload as an array of integers
+        parsedData["Hashed Payload"] = match[12]
+            .split(",")
+            .map((value: string) => parseInt(value.trim(), 10));
     } else {
         console.error("Failed to parse contract log:", log);
+        return null;
     }
 
     return parsedData;
@@ -111,75 +124,4 @@ export function parseActionsString(actionsStr: string): any[] {
     }
 
     return actions;
-}
-
-/**
- * Compares two values and logs the result.
- * @param field - The name of the field being compared.
- * @param expected - The expected value.
- * @param actual - The actual value.
- * @param parseFunction - Optional function to parse or format values before comparison.
- */
-export function compareAndLog<T>(
-    field: string,
-    expected: T,
-    actual: T,
-    parseFunction?: (value: T) => any
-): void {
-    const formattedExpected = parseFunction
-        ? parseFunction(expected)
-        : expected;
-    const formattedActual = parseFunction ? parseFunction(actual) : actual;
-
-    const isMatch =
-        JSON.stringify(formattedExpected) === JSON.stringify(formattedActual);
-
-    if (isMatch) {
-        logSuccess(`${field} match.`);
-    } else {
-        logError(`${field} mismatch!`);
-
-        // Check if the expected and actual are arrays
-        if (
-            Array.isArray(formattedExpected) &&
-            Array.isArray(formattedActual)
-        ) {
-            console.log(
-                `   Expected: ${formatArray(
-                    formattedExpected as unknown as number[]
-                )}\n`
-            );
-            console.log(
-                `   Actual:   ${formatArray(
-                    formattedActual as unknown as number[]
-                )}\n`
-            );
-        } else {
-            console.log(
-                `   Expected: ${JSON.stringify(formattedExpected, null, 2)}`
-            );
-            console.log(
-                `   Actual:   ${JSON.stringify(formattedActual, null, 2)}`
-            );
-        }
-    }
-}
-
-/**
- * Formats an array of numbers into a multi-line, horizontally aligned string.
- * @param array - The array to format.
- * @param elementsPerLine - Number of elements per line.
- * @returns A formatted string representing the array.
- */
-function formatArray(array: number[], elementsPerLine: number = 10): string {
-    let formatted = "[";
-    for (let i = 0; i < array.length; i++) {
-        if (i % elementsPerLine === 0 && i !== 0) {
-            formatted += "\n    ";
-        }
-        formatted += `${array[i]}, `;
-    }
-    // Remove the trailing comma and space, then close the bracket
-    formatted = formatted.trim().slice(0, -1) + "]";
-    return formatted;
 }

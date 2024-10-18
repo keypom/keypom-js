@@ -82,17 +82,19 @@ async function main() {
                 trialAccountSecretKey
             );
 
-            results.push(
+            const { result, clientLog } =
                 await trialManager.broadcastTransaction({
                     actionToPerform: action,
                     providerUrl,
                     signerAccountId: accountId!,
-                    chainId,
+                    chainId: chainId!,
                     signatureResult: signatures[0],
                     nonce: nonces[0],
                     blockHash,
-                })
-            );
+                });
+
+            writeToFile(clientLog, config.dataDir, "clientLog.json");
+            results.push(result);
             logSuccess(`Actions performed successfully for ${accountId!}.`);
         }
 

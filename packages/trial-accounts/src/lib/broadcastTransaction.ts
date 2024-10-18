@@ -14,10 +14,12 @@ import { ActionToPerform, MPCSignature } from "./types";
 import { logInfo } from "./logUtils";
 import {
     ethers,
+    getBytes,
     Interface,
     JsonRpcProvider,
     recoverAddress,
     Transaction,
+    TransactionLike,
     TransactionResponse,
 } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
@@ -46,7 +48,10 @@ interface BroadcastTransactionParams {
  */
 export async function broadcastTransaction(
     params: BroadcastTransactionParams
-): Promise<TransactionResponse | FinalExecutionOutcome> {
+): Promise<{
+    result: TransactionResponse | FinalExecutionOutcome;
+    clientLog: any;
+}> {
     const {
         nearConnection,
         signerAccountId,
@@ -60,6 +65,10 @@ export async function broadcastTransaction(
     } = params;
 
     if (actionToPerform.chain === "NEAR") {
+        if (signatureResult instanceof Uint8Array) {
+            throw new Error("Signature result must be a string");
+        }
+
         const { targetContractId, methodName, args, gas, attachedDepositNear } =
             actionToPerform;
 
@@ -109,7 +118,8 @@ export async function broadcastTransaction(
 
         // Send the signed transaction
         logInfo(`=== Sending NEAR Transaction ===`);
-        return await provider.sendTransaction(signedTransaction);
+        const result = await provider.sendTransaction(signedTransaction);
+        return { result, clientLog: "" };
     } else if (actionToPerform.chain === "EVM") {
         if (!providerUrl) {
             throw new Error("providerUrl is required for EVM transactions");
@@ -123,13 +133,17 @@ export async function broadcastTransaction(
 
         // Encode function call data
         const contractInterface = new Interface(actionToPerform.abi);
+        const functionData = contractInterface.getFunction(
+            actionToPerform.methodName,
+            actionToPerform.args as any[]
+        );
         const data = contractInterface.encodeFunctionData(
             actionToPerform.methodName,
             actionToPerform.args as any[]
         );
 
         // Construct transaction data
-        const transactionData = {
+        const transactionData: TransactionLike<string> = {
             nonce: parseInt(nonce, 10),
             gasLimit: BigInt(actionToPerform.gasLimit || "0"),
             maxFeePerGas: BigInt(actionToPerform.maxFeePerGas || "0"),
@@ -144,41 +158,61 @@ export async function broadcastTransaction(
 
         // Create Transaction object
         const tx = Transaction.from(transactionData);
-        const hexPayload = ethers.keccak256(
-            ethers.getBytes(tx.unsignedSerialized)
-        );
-        const serializedTxHash = Buffer.from(hexPayload.substring(2), "hex");
+        // Get the serialized transaction
+        const unsignedTx = tx.unsignedSerialized;
+        const txHash = ethers.keccak256(unsignedTx);
 
-        const signature = ethers.Signature.from({
+        const payload = getBytes(txHash);
+
+        // Log transaction information
+        const clientLog = {};
+        clientLog["Chain ID"] = parseInt(chainId, 10);
+        clientLog["Nonce"] = parseInt(nonce, 10);
+        clientLog["Max Priority Fee Per Gas"] = BigInt(
+            actionToPerform.maxPriorityFeePerGas
+        ).toString();
+        clientLog["Max Fee Per Gas"] = BigInt(
+            actionToPerform.maxFeePerGas
+        ).toString();
+        clientLog["Gas Limit"] = BigInt(
+            actionToPerform.gasLimit || "0"
+        ).toString();
+        clientLog["Contract Address"] = actionToPerform.targetContractId;
+        clientLog["Value"] = BigInt(actionToPerform.value || "0").toString();
+        clientLog["Input Data"] = data;
+        clientLog["Access List"] = actionToPerform.accessList || [];
+        clientLog["Function"] = functionData;
+        clientLog["ABI Parameters"] = contractInterface.getAbiCoder();
+        clientLog["ABI Args"] = JSON.stringify(actionToPerform.args);
+        clientLog["Hashed Payload"] = txHash;
+        console.log(clientLog);
+        console.log("Signature: ", signatureResult);
+
+        const sig = {
             r:
                 "0x" +
-                Buffer.from(
-                    signatureResult.big_r.affine_point.substring(2),
-                    "hex"
-                ).toString("hex"),
-            s:
-                "0x" +
-                Buffer.from(signatureResult.s.scalar, "hex").toString("hex"),
-            v: signatureResult.recovery_id + (parseInt(chainId) * 2 + 35),
-        });
-
-        // Sign the transaction
-        tx.signature = signature;
-
-        // Get the serialized transaction
-        const serializedTx = tx.serialized;
+                signatureResult.big_r.affine_point.substring(2).toLowerCase(),
+            s: "0x" + signatureResult.s.scalar.toLowerCase(),
+            v: signatureResult.recovery_id,
+        };
+        const recoveryAddress = recoverAddress(payload, sig);
 
         // Send the signed transaction
         logInfo(`=== Sending EVM Transaction ===`);
-        const recoveryAddress = recoverAddress(serializedTxHash, signature);
         if (recoveryAddress !== signerAccountId) {
-            throw new Error(
+            console.log(
                 `Recovery address ${recoveryAddress} does not match signer address ${signerAccountId}`
             );
         }
 
         logInfo(`Sending transaction from: ${recoveryAddress}`);
-        return await provider.send("eth_sendRawTransaction", [serializedTx]);
+        let result;
+        try {
+            result = await provider.send("eth_sendRawTransaction", [
+                tx.serialized,
+            ]);
+        } catch (e) {}
+        return { result, clientLog };
     } else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }

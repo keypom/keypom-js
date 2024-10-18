@@ -1,5 +1,6 @@
 // lib/types/index.ts
 
+export * from "./BigInts";
 export * from "./EVMTypes";
 export * from "./TrialAccountInfo";
 export * from "./Constraints";
