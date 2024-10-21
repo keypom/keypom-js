@@ -1,0 +1,21 @@
+{
+  "signatures": [
+    {
+      "big_r": {
+        "affine_point": "0236990B1F85489B86A310C610F3606FF22D7B16CDBAF8890F6FB48F2F7D78A1E7"
+      },
+      "s": {
+        "scalar": "1C3E1A98D0F916BA9971258EFE47B3D8F17D4557824A7625D4066778397CFD7A"
+      },
+      "recovery_id": 0
+    }
+  ],
+  "txnDatas": [
+    {
+      "nonce": "0",
+      "gasLimit": "39890",
+      "maxFeePerGas": "184955154",
+      "maxPriorityFeePerGas": "1000000"
+    }
+  ]
+}
