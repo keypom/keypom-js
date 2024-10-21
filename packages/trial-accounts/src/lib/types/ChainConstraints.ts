@@ -9,6 +9,7 @@ export interface NEARConstraints {
     allowedContracts: string[];
     maxGas: string | null;
     maxDeposit: string | null;
+    initialDeposit: string;
 }
 
 export interface ExtEVMConstraints {
@@ -17,4 +18,5 @@ export interface ExtEVMConstraints {
     allowedContracts: string[];
     maxGas: number | null;
     maxValue: string | null;
+    initialDeposit: bigint;
 }

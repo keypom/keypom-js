@@ -13,7 +13,7 @@ export function getSponsorEVMWallet(
     const privateKeyBytes = Uint8Array.from(Buffer.from(hexPrivateKey, "hex"));
 
     // Initialize provider
-    const provider = new JsonRpcProvider(providerUrl, chainId);
+    const provider = new JsonRpcProvider(providerUrl, parseInt(chainId, 10));
 
     // Create the wallet using the private key bytes
     const SPONSOR_WALLET = new ethers.Wallet(

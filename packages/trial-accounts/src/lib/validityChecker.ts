@@ -3,6 +3,7 @@
 import { ActionToPerform, TrialData, UsageStats } from "./types";
 import { parseNearAmount } from "@near-js/utils";
 import { ExtEVMConstraints, NEARConstraints } from "./types/ChainConstraints";
+import { TransactionData } from "./performAction";
 
 /**
  * Checks the validity of actions against trial data constraints.
@@ -14,6 +15,7 @@ import { ExtEVMConstraints, NEARConstraints } from "./types/ChainConstraints";
  */
 export function checkActionValidity(
     actionsToPerform: ActionToPerform[],
+    txnDatas: TransactionData[],
     trialData: TrialData,
     usageStats: UsageStats,
     currentTimestamp: number // in nanoseconds
@@ -28,7 +30,9 @@ export function checkActionValidity(
 
     const cumulativeUsageStats = { ...usageStats };
 
+    let iterationCount = 0;
     for (const action of actionsToPerform) {
+        const txnData = txnDatas[iterationCount];
         // Update total interactions
         cumulativeUsageStats.totalInteractions += 1;
 
@@ -144,10 +148,10 @@ export function checkActionValidity(
             }
 
             // Check gas limit
-            if (evmConstraints.maxGas && action.gasLimit) {
-                if (BigInt(action.gasLimit) > BigInt(evmConstraints.maxGas)) {
+            if (evmConstraints.maxGas && txnData.gasLimit) {
+                if (BigInt(txnData.gasLimit) > BigInt(evmConstraints.maxGas)) {
                     throw new Error(
-                        `Gas limit ${action.gasLimit} exceeds maximum allowed ${evmConstraints.maxGas}`
+                        `Gas limit ${txnData.gasLimit} exceeds maximum allowed ${evmConstraints.maxGas}`
                     );
                 }
             }
@@ -162,10 +166,10 @@ export function checkActionValidity(
             }
 
             // Update usage statistics
-            if (action.gasLimit) {
+            if (txnData.gasLimit) {
                 cumulativeUsageStats.gasUsed = (
                     BigInt(cumulativeUsageStats.gasUsed) +
-                    BigInt(action.gasLimit)
+                    BigInt(txnData.gasLimit)
                 ).toString();
             }
 
@@ -178,6 +182,7 @@ export function checkActionValidity(
         } else {
             throw new Error("Chain constraints mismatch or unsupported chain");
         }
+        iterationCount += 1;
     }
 
     // After processing all actions, check if any usage constraints are exceeded

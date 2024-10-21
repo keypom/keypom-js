@@ -1,42 +1,20 @@
 // src/main.ts
 
-import { TrialAccountManager } from "../src/index";
+import { ActionToPerform, TrialAccountManager, TrialData } from "../src/index";
 import { writeToFile } from "./utils/fileOps";
 import path from "path";
 import fs from "fs";
 import { logError, logInfo, logSuccess } from "./utils/logUtils";
 import { initNear, isFinalExecutionOutcome } from "./utils/nearUtils";
 import { FinalExecutionOutcome } from "@near-js/types";
-import { parseEther, TransactionResponse } from "ethers";
+import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
 import { getSponsorEVMWallet } from "./utils/evmUtils";
-import { parseContractLog } from "../src/lib/logUtils";
+import { Config } from "./configs/type";
 
 // Load environment variables from .env file
 loadEnv();
 
-// @ts-ignore
-async function test() {
-    const log = `LOG_STR_CHAIN_ID: 84532
-            LOG_STR_NONCE: 1
-            LOG_STR_MAX_PRIORITY_FEE_PER_GAS: 2000000000
-            LOG_STR_MAX_FEE_PER_GAS: 20000000000
-            LOG_STR_GAS_LIMIT: 100000
-            LOG_STR_CONTRACT: [206, 180, 12, 233, 151, 159, 47, 4, 64, 49, 117, 156, 202, 90, 62, 44, 63, 192, 76, 66]
-            LOG_STR_VALUE: 0
-            LOG_STR_INPUT: [226, 146, 39, 16]
-            LOG_STR_ACCESS_LIST: []
-            LOG_STR_FUNCTION: Function { name: "multiAddressLazyMintNone", inputs: [], outputs: [], constant: Some(false), state_mutability: NonPayable }
-            LOG_STR_ABI_PARAMS: []
-            LOG_STR_ABI_ARGS: []
-            LOG_STR_HASH: [107, 224, 213, 86, 0, 244, 178, 145, 233, 75, 236, 131, 174, 31, 31, 254, 59, 73, 206, 213, 238, 169, 172, 152, 158, 107, 248, 250, 86, 189, 254, 84],
-            LOG_STR_TXN_BYTES: [2, 240, 131, 1, 74, 52, 1, 132, 119, 53, 148, 0, 133, 4, 168, 23, 200, 0, 131, 1, 134, 160, 148, 206, 180, 12, 233, 151, 159, 47, 4, 64, 49, 117, 156, 202, 90, 62, 44, 63, 192, 76, 66, 128, 132, 226, 146, 39, 16, 192]`;
-
-    const foo = parseContractLog(log);
-    console.log(foo);
-}
-
-// @ts-ignore
 async function main() {
     // Parse config name from command line arguments
     const args = process.argv.slice(2);
@@ -53,9 +31,15 @@ async function main() {
         logError(`Config file not found: ${configPath}`);
         process.exit(1);
     }
-    const { config, trialData, actionsToPerform } = await import(
-        `./configs/${configName}`
-    );
+    const {
+        config,
+        trialData,
+        actionsToPerform,
+    }: {
+        config: Config;
+        trialData: TrialData;
+        actionsToPerform: ActionToPerform[];
+    } = await import(`./configs/${configName}`);
 
     // Initialize NEAR connection
     logInfo("Initializing NEAR connection...");
@@ -100,7 +84,7 @@ async function main() {
             let accountId: string | undefined = undefined;
 
             if (action.chain === "EVM") {
-                chainId = action.chainId;
+                chainId = action.chainId!.toString();
                 // get the derived EVM address from the derivation path
                 const evmAddress = await trialManager.deriveEthAddress(
                     trialKey.trialAccountSecretKey
@@ -125,7 +109,7 @@ async function main() {
 
                 await sponsorWallet.sendTransaction({
                     to: evmAddress,
-                    value: parseEther("0.004"),
+                    value: trialData.initialDeposit,
                 });
 
                 accountId = evmAddress;
@@ -148,26 +132,30 @@ async function main() {
             );
 
             const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
-            const { signatures, nonces, blockHash, contractLogs } =
+            const { signatures, txnDatas, contractLogs } =
                 await trialManager.performActions([action], providerUrl);
 
             const dataToWrite = {
                 signatures,
-                nonces,
-                blockHash,
+                txnDatas,
             };
+            console.log("Data to write:", dataToWrite);
             writeToFile(dataToWrite, config.dataDir, "signatures.json");
-            writeToFile(contractLogs[0], config.dataDir, "contractLogs.json");
+            if (contractLogs.length > 0) {
+                writeToFile(
+                    contractLogs[0],
+                    config.dataDir,
+                    "contractLogs.json"
+                );
+            }
 
             const { result, clientLog } =
                 await trialManager.broadcastTransaction({
                     actionToPerform: action,
                     providerUrl,
                     signerAccountId: accountId!,
-                    chainId: chainId!,
                     signatureResult: signatures[0],
-                    nonce: nonces[0],
-                    blockHash,
+                    txnData: txnDatas[0],
                 });
 
             writeToFile(clientLog, config.dataDir, "clientLog.json");
@@ -186,7 +174,7 @@ async function main() {
                     `https://testnet.nearblocks.io/txns/${result.transaction.hash}#execution`
                 );
             } else {
-                console.log(`https://sepolia.etherscan.io/tx/${result}`);
+                console.log(`https://sepolia.basescan.org/tx/${result}`);
             }
         }
 

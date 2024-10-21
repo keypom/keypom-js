@@ -5,6 +5,7 @@ import path from "path";
 import os from "os";
 import { Config } from "./type";
 import { TrialData, ActionToPerform } from "../../src/index";
+import { parseNearAmount } from "@near-js/utils";
 
 const homedir = os.homedir();
 const CREDENTIALS_DIR = ".near-credentials";
@@ -12,7 +13,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729174754928-trial-contract.testnet",
+    trialContractId: "1729518655055-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",
@@ -27,13 +28,13 @@ export const trialData: TrialData = {
             allowedContracts: ["guestbook.near-examples.testnet"],
             maxGas: null,
             maxDeposit: null,
+            initialDeposit: parseNearAmount("10")!,
         },
     },
     usageConstraints: null,
     interactionLimits: null,
     exitConditions: null,
     expirationTime: null,
-    initialDeposit: "10",
 };
 
 export const actionsToPerform: ActionToPerform[] = [
@@ -41,7 +42,7 @@ export const actionsToPerform: ActionToPerform[] = [
         chain: "NEAR",
         targetContractId: "guestbook.near-examples.testnet",
         methodName: "add_message",
-        args: { text: "Hello from the MPC Trial Account Simple Config!" },
+        args: { text: "Hello from the MPC Trial Account Near Config!" },
         attachedDepositNear: "1",
         gas: "300000000000000",
     },

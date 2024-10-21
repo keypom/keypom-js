@@ -3,7 +3,6 @@
 import { Account } from "@near-js/accounts";
 import { toSnakeCase, TrialData } from "./types";
 import { sendTransaction } from "./networks/near";
-import { parseNearAmount } from "@near-js/utils";
 import { ExtEVMConstraints, NEARConstraints } from "./types/ChainConstraints";
 
 interface CreateTrialParams {
@@ -49,7 +48,7 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
 
     const snakeCaseArgs = toSnakeCase({
         ...restTrialData,
-        initial_deposit: parseNearAmount(trialData.initialDeposit),
+        initial_deposit: trialData.initialDeposit.toString(),
         chain_constraints: transformedConstraints, // Use transformed constraints here
     });
 

@@ -14,14 +14,13 @@ import {
 import { createTrial } from "./createTrial";
 import { addTrialAccounts as addTrialKeys } from "./addTrialKeys";
 import { activateTrialAccounts } from "./activateTrial";
-import { performActions } from "./performAction";
+import { performActions, TransactionData } from "./performAction";
 import { broadcastTransaction } from "./broadcastTransaction";
 import {
     deriveChildPublicKey,
     najPublicKeyStrToUncompressedHexPoint,
     uncompressedHexPointToEvmAddress,
 } from "./mpcUtils/kdf";
-import { checkActionValidity } from "./validityChecker";
 import { TransactionResponse } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
 
@@ -201,8 +200,7 @@ export class TrialAccountManager {
         evmProviderUrl?: string
     ): Promise<{
         signatures: MPCSignature[];
-        nonces: string[];
-        blockHash: string;
+        txnDatas: TransactionData[];
         contractLogs: string[];
     }> {
         if (!this.trialAccountId || !this.trialSecretKey) {
@@ -218,16 +216,9 @@ export class TrialAccountManager {
                     throw new Error("trialId is required to perform actions");
                 }
 
-                // Check validity of actions
-                checkActionValidity(
-                    actionsToPerform,
-                    trialAccountInfo.trialData,
-                    trialAccountInfo.usageStats,
-                    Date.now()
-                );
-
                 const result = await performActions({
                     near: this.near,
+                    trialAccountInfo,
                     trialAccountId: this.trialAccountId!,
                     trialAccountSecretKey: this.trialSecretKey!,
                     trialContractId: this.trialContractId,
@@ -253,9 +244,7 @@ export class TrialAccountManager {
         signatureResult: MPCSignature;
         signerAccountId: string;
         providerUrl?: string;
-        chainId: string;
-        nonce: string;
-        blockHash: string;
+        txnData: TransactionData;
     }): Promise<{
         result: TransactionResponse | FinalExecutionOutcome;
         clientLog: any;
@@ -271,15 +260,17 @@ export class TrialAccountManager {
                 const trialAccountInfo: TrialAccountInfo =
                     await this.getTrialData();
 
+                const chainId = params.actionToPerform.chainId
+                    ? params.actionToPerform.chainId.toString()
+                    : "NEAR";
+
                 if (
-                    trialAccountInfo.accountIdByChainId[params.chainId] !==
+                    trialAccountInfo.accountIdByChainId[chainId] !==
                     params.signerAccountId
                 ) {
                     throw new Error(
                         "Mismatch between trialAccountId and signerAccount. Found: " +
-                            trialAccountInfo.accountIdByChainId[
-                                params.chainId
-                            ] +
+                            trialAccountInfo.accountIdByChainId[chainId] +
                             " Expected: " +
                             params.signerAccountId
                     );
@@ -291,9 +282,8 @@ export class TrialAccountManager {
                     actionToPerform: params.actionToPerform,
                     signatureResult: params.signatureResult,
                     providerUrl: params.providerUrl,
-                    chainId: params.chainId,
-                    nonce: params.nonce,
-                    blockHash: params.blockHash,
+                    chainId,
+                    txnData: params.txnData,
                     mpcPublicKey: trialAccountInfo.mpcKey,
                 });
             },
@@ -404,8 +394,6 @@ export class TrialAccountManager {
         const evmAddressFromDerivedKey = uncompressedHexPointToEvmAddress(
             derivedUncompressedHexPoint
         );
-
-        console.log(`Predecessor: ${this.trialContractId}\nPath: ${path}`);
 
         return evmAddressFromDerivedKey;
     }

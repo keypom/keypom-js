@@ -70,28 +70,8 @@ function compareLogs() {
     compareAndLog(
         "Input Data",
         contractLog["Input Data"],
-        clientLog["Input Data"],
-        (value) => {
-            // Handle byte array or hex string
-            if (Array.isArray(value)) {
-                return "0x" + Buffer.from(value).toString("hex");
-            }
-            return value.toLowerCase();
-        }
+        clientLog["Input Data"]
     );
-
-    console.log("\nComparing Function...");
-    compareAndLog("Function", contractLog["Function"], clientLog["Function"]);
-
-    console.log("\nComparing ABI Parameters...");
-    compareAndLog(
-        "ABI Parameters",
-        contractLog["ABI Parameters"],
-        clientLog["ABI Parameters"]
-    );
-
-    console.log("\nComparing ABI Args...");
-    compareAndLog("ABI Args", contractLog["ABI Args"], clientLog["ABI Args"]);
 
     console.log("\nComparing Hashed Payload...");
     compareAndLog(

@@ -1,9 +1,51 @@
-import { Interface, ParamType } from "ethers";
+import {
+    ethers,
+    Interface,
+    JsonRpcProvider,
+    ParamType,
+    VoidSigner,
+} from "ethers";
+import { ActionToPerform } from "./types";
 import {
     SerializableParam,
     SerializableToken,
     SerializableParamType,
 } from "./types/EVMTypes";
+
+export async function esimateGasParams(
+    provider: JsonRpcProvider,
+    signer: VoidSigner,
+    actionToPerform: ActionToPerform
+) {
+    const nonce = await signer.getNonce();
+    const destinationContract = new ethers.Contract(
+        actionToPerform.targetContractId,
+        actionToPerform.abi as any,
+        provider
+    );
+
+    const actionFunction = destinationContract.getFunction(
+        actionToPerform.methodName
+    );
+    const estimatedGas = await actionFunction.estimateGas(
+        ...actionToPerform.args
+    );
+
+    const feeData = await provider.getFeeData();
+    // 20% buffer
+    const gasLimit = (estimatedGas * BigInt(12)) / BigInt(10);
+    const maxPriorityFeePerGas =
+        feeData.maxPriorityFeePerGas ?? ethers.parseUnits("50", "gwei");
+    const maxFeePerGas =
+        feeData.maxFeePerGas ?? ethers.parseUnits("10", "gwei");
+
+    return {
+        nonce,
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+    };
+}
 
 /**
  * Converts method name and arguments into SerializableParam[] and SerializableToken[].
@@ -67,27 +109,29 @@ export function encodeMethodParams(
 function convertParamTypeToSerializableParamType(
     type: string
 ): SerializableParamType {
-    if (type === "address") {
-        return { type: "Address" };
-    } else if (type === "bytes") {
-        return { type: "Bytes" };
-    } else if (type.startsWith("uint")) {
-        const value = parseInt(type.slice(4)) || 256;
-        return { type: "Uint", value };
-    } else if (type.startsWith("int")) {
-        const value = parseInt(type.slice(3)) || 256;
-        return { type: "Int", value };
-    } else if (type === "bool") {
-        return { type: "Bool" };
-    } else if (type === "string") {
-        return { type: "String" };
-    } else if (type.endsWith("[]")) {
+    if (type.endsWith("[]")) {
         const innerType = type.slice(0, -2);
         return {
             type: "Array",
             value: convertParamTypeToSerializableParamType(innerType),
         };
-    } else if (type.startsWith("bytes") && type.length > 5) {
+    } else if (type === "address") {
+        return { type: "Address" };
+    } else if (type === "bytes") {
+        return { type: "Bytes" };
+    } else if (/^uint(\d+)?$/.test(type)) {
+        const bits = type.slice(4) || "256";
+        const value = parseInt(bits);
+        return { type: "Uint", value };
+    } else if (/^int(\d+)?$/.test(type)) {
+        const bits = type.slice(3) || "256";
+        const value = parseInt(bits);
+        return { type: "Int", value };
+    } else if (type === "bool") {
+        return { type: "Bool" };
+    } else if (type === "string") {
+        return { type: "String" };
+    } else if (/^bytes(\d+)$/.test(type)) {
         const value = parseInt(type.slice(5));
         return { type: "FixedBytes", value };
     } else {
@@ -105,19 +149,7 @@ function convertValueToSerializableToken(
     type: string,
     value: any
 ): SerializableToken {
-    if (type === "address") {
-        return { type: "Address", value: value };
-    } else if (type === "bytes") {
-        return { type: "Bytes", value: value };
-    } else if (type.startsWith("uint")) {
-        return { type: "Uint", value: value.toString() };
-    } else if (type.startsWith("int")) {
-        return { type: "Int", value: value.toString() };
-    } else if (type === "bool") {
-        return { type: "Bool", value: value };
-    } else if (type === "string") {
-        return { type: "String", value: value };
-    } else if (type.endsWith("[]")) {
+    if (type.endsWith("[]")) {
         const innerType = type.slice(0, -2);
         if (!Array.isArray(value)) {
             throw new Error(`Expected array for type ${type}`);
@@ -126,7 +158,19 @@ function convertValueToSerializableToken(
             convertValueToSerializableToken(innerType, item)
         );
         return { type: "Array", value: items };
-    } else if (type.startsWith("bytes") && type.length > 5) {
+    } else if (type === "address") {
+        return { type: "Address", value: value };
+    } else if (type === "bytes") {
+        return { type: "Bytes", value: value };
+    } else if (/^uint(\d+)?$/.test(type)) {
+        return { type: "Uint", value: value.toString() };
+    } else if (/^int(\d+)?$/.test(type)) {
+        return { type: "Int", value: value.toString() };
+    } else if (type === "bool") {
+        return { type: "Bool", value: value };
+    } else if (type === "string") {
+        return { type: "String", value: value };
+    } else if (/^bytes(\d+)$/.test(type)) {
         return { type: "FixedBytes", value: value };
     } else {
         throw new Error(`Unsupported type: ${type}`);

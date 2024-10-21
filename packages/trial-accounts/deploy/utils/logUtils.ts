@@ -159,12 +159,50 @@ export function compareAndLog<T>(
     }
 
     if (isMatch) {
-        console.log(`✅ ${field} match.`);
+        logSuccess(`${field} match.`);
     } else {
-        console.error(`❌ ${field} mismatch!`);
-        console.log(
-            `   Expected: ${JSON.stringify(formattedExpected, null, 2)}`
-        );
-        console.log(`   Actual:   ${JSON.stringify(formattedActual, null, 2)}`);
+        logError(`${field} mismatch!`);
+        // Check if the expected and actual are arrays
+        if (
+            Array.isArray(formattedExpected) &&
+            Array.isArray(formattedActual)
+        ) {
+            console.log(
+                `   Contract: ${formatArray(
+                    formattedExpected as unknown as number[]
+                )}\n`
+            );
+            console.log(
+                `   Client:   ${formatArray(
+                    formattedActual as unknown as number[]
+                )}\n`
+            );
+        } else {
+            console.log(
+                `   Contract: ${JSON.stringify(formattedExpected, null, 2)}`
+            );
+            console.log(
+                `   Client:   ${JSON.stringify(formattedActual, null, 2)}`
+            );
+        }
     }
+}
+
+/**
+ * Formats an array of numbers into a multi-line, horizontally aligned string.
+ * @param array - The array to format.
+ * @param elementsPerLine - Number of elements per line.
+ * @returns A formatted string representing the array.
+ */
+function formatArray(array: number[], elementsPerLine: number = 10): string {
+    let formatted = "[";
+    for (let i = 0; i < array.length; i++) {
+        if (i % elementsPerLine === 0 && i !== 0) {
+            formatted += "\n    ";
+        }
+        formatted += `${array[i]}, `;
+    }
+    // Remove the trailing comma and space, then close the bracket
+    formatted = formatted.trim().slice(0, -1) + "]";
+    return formatted;
 }

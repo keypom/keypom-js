@@ -11,7 +11,7 @@ import { PublicKey } from "@near-js/crypto";
 import bs58 from "bs58";
 import { createSignature, hashTransaction } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
-import { logInfo } from "./logUtils";
+import { logInfo, logSuccess } from "./logUtils";
 import {
     ethers,
     getBytes,
@@ -24,6 +24,7 @@ import {
 } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { Near } from "@near-js/wallet-account";
+import { TransactionData } from "./performAction";
 
 interface BroadcastTransactionParams {
     nearConnection: Near;
@@ -31,8 +32,7 @@ interface BroadcastTransactionParams {
     signerAccountId: string;
     actionToPerform: ActionToPerform;
     signatureResult: MPCSignature; // Signature result from the MPC
-    nonce: string;
-    blockHash: string;
+    txnData: TransactionData;
     mpcPublicKey: string;
 
     // EVM Specific
@@ -59,8 +59,7 @@ export async function broadcastTransaction(
         signatureResult,
         providerUrl,
         chainId,
-        nonce,
-        blockHash,
+        txnData,
         mpcPublicKey,
     } = params;
 
@@ -77,9 +76,10 @@ export async function broadcastTransaction(
         );
 
         const signerAccount = await nearConnection.account(signerAccountId);
+        console.log("Signer Account", signerAccount);
         const provider = signerAccount.connection.provider;
 
-        const blockHashBytes = bs58.decode(blockHash);
+        const blockHashBytes = bs58.decode(txnData.blockHash!);
 
         const actions: Action[] = [
             actionCreators.functionCall(
@@ -89,16 +89,18 @@ export async function broadcastTransaction(
                 BigInt(parseNearAmount(attachedDepositNear!)!)
             ),
         ];
+        console.log("Actions", actions);
 
         const mpcPubKey = PublicKey.fromString(mpcPublicKey);
         const transaction = createTransaction(
             signerAccountId,
             mpcPubKey,
             targetContractId,
-            nonce,
+            txnData.nonce,
             actions,
             blockHashBytes
         );
+        console.log("Transaction", transaction);
 
         // Hash the transaction to get the message to sign
         const serializedTx = transaction.encode();
@@ -144,10 +146,10 @@ export async function broadcastTransaction(
 
         // Construct transaction data
         const transactionData: TransactionLike<string> = {
-            nonce: parseInt(nonce, 10),
-            gasLimit: BigInt(actionToPerform.gasLimit || "0"),
-            maxFeePerGas: BigInt(actionToPerform.maxFeePerGas || "0"),
-            maxPriorityFeePerGas: BigInt(actionToPerform.maxPriorityFeePerGas),
+            nonce: parseInt(txnData.nonce, 10),
+            gasLimit: BigInt(txnData.gasLimit),
+            maxFeePerGas: BigInt(txnData.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(txnData.maxPriorityFeePerGas),
             to: actionToPerform.targetContractId,
             data: data,
             value: BigInt(actionToPerform.value || "0"),
@@ -161,7 +163,6 @@ export async function broadcastTransaction(
 
         // Get the serialized transaction
         const unsignedTx = tx.unsignedSerialized;
-        console.log("unsignedTx", unsignedTx);
         const txHash = ethers.keccak256(unsignedTx);
 
         const payload = getBytes(txHash);
@@ -169,16 +170,12 @@ export async function broadcastTransaction(
         // Log transaction information
         const clientLog = {};
         clientLog["Chain ID"] = parseInt(chainId, 10);
-        clientLog["Nonce"] = parseInt(nonce, 10);
+        clientLog["Nonce"] = parseInt(txnData.nonce, 10);
         clientLog["Max Priority Fee Per Gas"] = BigInt(
-            actionToPerform.maxPriorityFeePerGas
+            txnData.maxPriorityFeePerGas
         ).toString();
-        clientLog["Max Fee Per Gas"] = BigInt(
-            actionToPerform.maxFeePerGas
-        ).toString();
-        clientLog["Gas Limit"] = BigInt(
-            actionToPerform.gasLimit || "0"
-        ).toString();
+        clientLog["Max Fee Per Gas"] = BigInt(txnData.maxFeePerGas).toString();
+        clientLog["Gas Limit"] = BigInt(txnData.gasLimit || "0").toString();
 
         // Convert the contract address, input data, and hashed payload to arrays of numbers
         clientLog["Contract Address"] = hexStringToNumberArray(
@@ -192,8 +189,6 @@ export async function broadcastTransaction(
         clientLog["ABI Args"] = JSON.stringify(actionToPerform.args);
         clientLog["Hashed Payload"] = hexStringToNumberArray(txHash);
         clientLog["TXN Bytes"] = hexStringToNumberArray(unsignedTx);
-        console.log(clientLog);
-        console.log("Signature: ", signatureResult);
 
         const sig = ethers.Signature.from({
             r:
@@ -207,9 +202,13 @@ export async function broadcastTransaction(
 
         // Send the signed transaction
         logInfo(`=== Sending EVM Transaction ===`);
-        if (recoveryAddress !== signerAccountId) {
-            console.log(
+        if (recoveryAddress.toLowerCase() !== signerAccountId.toLowerCase()) {
+            throw new Error(
                 `Recovery address ${recoveryAddress} does not match signer address ${signerAccountId}`
+            );
+        } else {
+            logSuccess(
+                `Recovery address ${recoveryAddress} matches signer address ${signerAccountId}`
             );
         }
 

@@ -31,8 +31,6 @@ export async function addTrialAccounts(
         numberOfKeys,
     } = params;
 
-    console.log(`Adding ${numberOfKeys} trial accounts...`);
-
     const trialKeys: TrialKey[] = [];
 
     for (let i = 0; i < numberOfKeys; i++) {
@@ -50,7 +48,6 @@ export async function addTrialAccounts(
                 predecessor: trialContractId,
             },
         });
-        console.log(`Derived MPC public key: ${mpcPublicKey}`);
 
         trialKeys.push({
             derivationPath,
@@ -80,8 +77,6 @@ export async function addTrialAccounts(
     });
 
     if (result) {
-        console.log("Trial keys added successfully.");
-
         return trialKeys;
     } else {
         throw new Error("Failed to add trial keys");

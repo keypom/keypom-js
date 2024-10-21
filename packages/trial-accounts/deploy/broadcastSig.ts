@@ -1,6 +1,6 @@
 // src/main.ts
 
-import { TrialAccountManager } from "../src/index";
+import { MPCSignature, TrialAccountManager } from "../src/index";
 import { readFromFile, writeToFile } from "./utils/fileOps";
 import path from "path";
 import fs from "fs";
@@ -9,6 +9,7 @@ import { initNear, isFinalExecutionOutcome } from "./utils/nearUtils";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
+import { TransactionData } from "../src/lib/performAction";
 
 // Load environment variables from .env file
 loadEnv();
@@ -54,28 +55,26 @@ async function main() {
         config.dataDir,
         "trialData.json"
     );
-    const { signatures, nonces, blockHash } = readFromFile(
-        config.dataDir,
-        "signatures.json"
-    );
+    const {
+        signatures,
+        txnDatas,
+    }: { signatures: MPCSignature[]; txnDatas: TransactionData[] } =
+        readFromFile(config.dataDir, "signatures.json");
 
     let results: Array<FinalExecutionOutcome | TransactionResponse> = [];
     for (const trialKey of trialKeys) {
         const trialAccountSecretKey = trialKey.trialAccountSecretKey;
 
+        let iter = 0;
         for (const action of actionsToPerform) {
             const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
-            const chainId = action.chainId.toString();
+
+            const chainId =
+                action.chain === "NEAR" ? "NEAR" : action.chain.toString();
             const accountId = await trialManager.getTrialAccountIdForChain(
                 trialAccountSecretKey,
                 chainId
             );
-
-            console.log("accountId", accountId);
-            console.log("trialAccountSecretKey", trialAccountSecretKey);
-            console.log("Signatures", signatures);
-            console.log("Nonce", nonces);
-            console.log("Block Hash", blockHash);
 
             trialManager.setTrialAccountCredentials(
                 accountId,
@@ -89,8 +88,7 @@ async function main() {
                     signerAccountId: accountId!,
                     chainId: chainId!,
                     signatureResult: signatures[0],
-                    nonce: nonces[0],
-                    blockHash,
+                    txnData: txnDatas[iter++],
                 });
 
             writeToFile(clientLog, config.dataDir, "clientLog.json");
@@ -108,6 +106,8 @@ async function main() {
                     // @ts-ignore
                     `https://testnet.nearblocks.io/txns/${result.transaction.hash}#execution`
                 );
+            } else {
+                console.log(`https://sepolia.basescan.org/tx/${result}`);
             }
         }
     }
