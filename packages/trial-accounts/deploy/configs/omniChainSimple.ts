@@ -15,7 +15,7 @@ const credentialsPath = path.join(homedir, CREDENTIALS_DIR);
 
 export const config: Config = {
     networkId: "testnet",
-    trialContractId: "1729518655055-trial-contract.testnet",
+    trialContractId: "1729530318593-trial-contract.testnet",
     signerAccountId: "benjiman.testnet",
     keyStore: new UnencryptedFileSystemKeyStore(credentialsPath),
     mpcContractId: "v1.signer-prod.testnet",
@@ -49,16 +49,24 @@ export const trialData: TrialData = {
 
 // ARGUMENTS TO THE FUNCTION CALL
 const _message = "Hello from the MPC Trial Account EVM Config!";
-const args = [_message];
+const evmArgs = [_message];
 
 const accessList: AccessList = [];
 export const actionsToPerform: ActionToPerform[] = [
+    {
+        chain: "NEAR",
+        targetContractId: "guestbook.near-examples.testnet",
+        methodName: "add_message",
+        args: { text: "Hello from the MPC Trial Account Near Config!" },
+        attachedDepositNear: "1",
+        gas: "300000000000000",
+    },
     {
         chain: "EVM",
         chainId: 84532,
         targetContractId: "0xdf5c3bd628a11C97BB25d441D8b6d9Ce974dc552",
         methodName: "setMessage",
-        args,
+        args: evmArgs,
         abi: BASE_GUESTBOOK_ABI, // Provide the ABI of the contract
         value: "0", // If no ETH is sent along with the transaction
         accessList: accessList,

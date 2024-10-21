@@ -109,7 +109,7 @@ async function main() {
 
                 await sponsorWallet.sendTransaction({
                     to: evmAddress,
-                    value: trialData.initialDeposit,
+                    value: trialData.constraintsByChainId.EVM?.initialDeposit,
                 });
 
                 accountId = evmAddress;

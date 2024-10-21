@@ -36,6 +36,8 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
             // Now TypeScript knows that value is ExtEVMConstraints
             const evmConstraints = value;
             acc[evmConstraints.chainId] = { ...evmConstraints };
+            acc[evmConstraints.chainId].initialDeposit =
+                acc[evmConstraints.chainId].initialDeposit.toString();
             // @ts-ignore
             delete acc[evmConstraints.chainId].chainId; // Remove chainId as it's now used as the key
         } else {
@@ -48,7 +50,6 @@ export async function createTrial(params: CreateTrialParams): Promise<number> {
 
     const snakeCaseArgs = toSnakeCase({
         ...restTrialData,
-        initial_deposit: trialData.initialDeposit.toString(),
         chain_constraints: transformedConstraints, // Use transformed constraints here
     });
 

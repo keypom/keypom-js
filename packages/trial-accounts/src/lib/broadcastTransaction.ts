@@ -9,7 +9,7 @@ import {
 import { parseNearAmount } from "@near-js/utils";
 import { PublicKey } from "@near-js/crypto";
 import bs58 from "bs58";
-import { createSignature, hashTransaction } from "./cryptoUtils";
+import { createSignature } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
 import { logInfo, logSuccess } from "./logUtils";
 import {
@@ -76,7 +76,6 @@ export async function broadcastTransaction(
         );
 
         const signerAccount = await nearConnection.account(signerAccountId);
-        console.log("Signer Account", signerAccount);
         const provider = signerAccount.connection.provider;
 
         const blockHashBytes = bs58.decode(txnData.blockHash!);
@@ -89,7 +88,6 @@ export async function broadcastTransaction(
                 BigInt(parseNearAmount(attachedDepositNear!)!)
             ),
         ];
-        console.log("Actions", actions);
 
         const mpcPubKey = PublicKey.fromString(mpcPublicKey);
         const transaction = createTransaction(
@@ -100,12 +98,6 @@ export async function broadcastTransaction(
             actions,
             blockHashBytes
         );
-        console.log("Transaction", transaction);
-
-        // Hash the transaction to get the message to sign
-        const serializedTx = transaction.encode();
-        const txHash = hashTransaction(serializedTx);
-        console.log(`=== Message to sign: ${txHash} ===`);
 
         // Create the signature
         let r = signatureResult.big_r.affine_point;
