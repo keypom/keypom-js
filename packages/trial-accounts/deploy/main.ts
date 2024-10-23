@@ -11,6 +11,7 @@ import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
 import { getSponsorEVMWallet } from "./utils/evmUtils";
 import { Config } from "./configs/type";
+import { NetworkId } from "@near-wallet-selector/core";
 
 // Load environment variables from .env file
 loadEnv();
@@ -44,26 +45,32 @@ async function main() {
     // Initialize NEAR connection
     logInfo("Initializing NEAR connection...");
     const near = await initNear(config);
-    const signerAccount = await near.account(config.signerAccountId);
+    const signingAccount = await near.account(config.signerAccountId);
 
     // Create TrialAccountManager instance
     const trialManager = new TrialAccountManager({
         trialContractId: config.trialContractId,
         mpcContractId: config.mpcContractId,
-        signerAccount,
-        near,
+        networkId: config.networkId as NetworkId,
         maxRetries: 5,
         initialDelayMs: 2000,
         backoffFactor: 2,
     });
     // Create a trial
     logInfo("Creating a trial...");
-    const trialId = await trialManager.createTrial(trialData);
+    const trialId = await trialManager.createTrial({
+        trialData,
+        signingAccount,
+    });
     logSuccess(`Trial created with ID: ${trialId}`);
 
     // Add trial accounts
     logInfo("Adding trial accounts...");
-    const trialKeys = await trialManager.addTrialAccounts(config.numberOfKeys);
+    const trialKeys = await trialManager.addTrialAccounts({
+        trialId,
+        signingAccount,
+        numberOfKeys: config.numberOfKeys,
+    });
     logSuccess(`Added ${trialKeys.length} trial accounts.`);
 
     // Prepare trial data to write to file
@@ -118,13 +125,12 @@ async function main() {
                 chainId = "NEAR";
             }
 
-            // Set trial account credentials
-            trialManager.setTrialAccountCredentials(
-                accountId!,
-                trialKey.trialAccountSecretKey
-            );
             logInfo(`Activating trial account: ${accountId!}`);
-            await trialManager.activateTrialAccounts(accountId!, chainId!);
+            await trialManager.activateTrialAccounts({
+                trialAccountSecretKey: trialKey.trialAccountSecretKey,
+                newAccountId: accountId!,
+                chainId,
+            });
             logSuccess(`Trial account ${accountId!} activated.`);
 
             logInfo(
@@ -133,7 +139,11 @@ async function main() {
 
             const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
             const { signatures, txnDatas, contractLogs } =
-                await trialManager.performActions([action], providerUrl);
+                await trialManager.performActions({
+                    trialAccountSecretKey: trialKey.trialAccountSecretKey,
+                    actionsToPerform: [action],
+                    evmProviderUrl: providerUrl,
+                });
 
             const dataToWrite = {
                 signatures,
@@ -141,7 +151,7 @@ async function main() {
             };
             console.log("Data to write:", dataToWrite);
             writeToFile(dataToWrite, config.dataDir, "signatures.json");
-            if (contractLogs.length > 0) {
+            if (contractLogs) {
                 writeToFile(
                     contractLogs[0],
                     config.dataDir,
@@ -151,9 +161,9 @@ async function main() {
 
             const { result, clientLog } =
                 await trialManager.broadcastTransaction({
+                    trialAccountSecretKey: trialKey.trialAccountSecretKey,
                     actionToPerform: action,
                     providerUrl,
-                    signerAccountId: accountId!,
                     signatureResult: signatures[0],
                     txnData: txnDatas[0],
                 });

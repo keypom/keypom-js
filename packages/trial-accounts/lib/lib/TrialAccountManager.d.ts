@@ -1,10 +1,11 @@
 import { Account } from "@near-js/accounts";
 import { KeyPairString } from "@near-js/crypto";
-import { Near } from "@near-js/wallet-account";
 import { ActionToPerform, TrialData, TrialKey, MPCSignature, TrialAccountInfo } from "./types";
 import { TransactionData } from "./performAction";
+import { Wallet as SelectorWallet, NetworkId } from "@near-wallet-selector/core";
 import { TransactionResponse } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
+export type SigningAccount = Account | SelectorWallet;
 /**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
@@ -13,10 +14,6 @@ import { FinalExecutionOutcome } from "@near-js/types";
 export declare class TrialAccountManager {
     private trialContractId;
     private mpcContractId;
-    private trialId?;
-    private trialAccountId?;
-    private trialSecretKey?;
-    private signerAccount;
     private near;
     private maxRetries;
     private initialDelayMs;
@@ -27,12 +24,8 @@ export declare class TrialAccountManager {
      */
     constructor(params: {
         trialContractId: string;
-        signerAccount: Account;
-        near: Near;
         mpcContractId: string;
-        trialId?: number;
-        trialSecretKey?: KeyPairString;
-        trialAccountId?: string;
+        networkId: NetworkId;
         maxRetries?: number;
         initialDelayMs?: number;
         backoffFactor?: number;
@@ -60,31 +53,46 @@ export declare class TrialAccountManager {
      * @param trialData - The trial data containing constraints.
      * @returns A Promise that resolves to the trial ID.
      */
-    createTrial(trialData: TrialData): Promise<number>;
+    createTrial({ trialData, signingAccount, }: {
+        trialData: TrialData;
+        signingAccount: SigningAccount;
+    }): Promise<number>;
     /**
      * Adds trial accounts to the trial contract by generating key pairs with retry logic.
      *
      * @param numberOfKeys - Number of trial accounts to add.
      * @returns A Promise that resolves to an array of TrialKey objects.
      */
-    addTrialAccounts(numberOfKeys: number): Promise<TrialKey[]>;
+    addTrialAccounts({ trialId, numberOfKeys, signingAccount, }: {
+        trialId: number;
+        numberOfKeys: number;
+        signingAccount: SigningAccount;
+    }): Promise<TrialKey[]>;
     /**
      * Activates a trial account on the trial contract with retry logic.
      *
      * @param newAccountId - The account ID of the new trial account.
      * @returns A Promise that resolves when the account is activated.
      */
-    activateTrialAccounts(newAccountId: string, chainId: string): Promise<void>;
+    activateTrialAccounts({ trialAccountSecretKey, newAccountId, chainId, }: {
+        trialAccountSecretKey: KeyPairString;
+        newAccountId: string;
+        chainId?: string;
+    }): Promise<void>;
     /**
      * Performs one or more actions by requesting signatures from the MPC with retry logic.
      *
      * @param actionsToPerform - Array of actions to perform.
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
-    performActions(actionsToPerform: ActionToPerform[], evmProviderUrl?: string): Promise<{
+    performActions({ trialAccountSecretKey, actionsToPerform, evmProviderUrl, }: {
+        trialAccountSecretKey: KeyPairString;
+        actionsToPerform: ActionToPerform[];
+        evmProviderUrl?: string;
+    }): Promise<{
         signatures: MPCSignature[];
         txnDatas: TransactionData[];
-        contractLogs: string[];
+        contractLogs?: string[];
     }>;
     /**
      * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
@@ -93,9 +101,9 @@ export declare class TrialAccountManager {
      * @returns A Promise that resolves when the transaction is broadcasted.
      */
     broadcastTransaction(params: {
+        trialAccountSecretKey: KeyPairString;
         actionToPerform: ActionToPerform;
         signatureResult: MPCSignature;
-        signerAccountId: string;
         providerUrl?: string;
         txnData: TransactionData;
     }): Promise<{
@@ -107,7 +115,7 @@ export declare class TrialAccountManager {
      *
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
-    getTrialData(): Promise<TrialAccountInfo>;
+    getTrialData(trialSecretKey: KeyPairString): Promise<TrialAccountInfo>;
     /**
      * Retrieves the account ID for the given chain ID
      *
@@ -120,17 +128,6 @@ export declare class TrialAccountManager {
      * @returns The ETH address.
      */
     deriveEthAddress(trialSecretKey: KeyPairString): Promise<string>;
-    /**
-     * Sets the trial account credentials.
-     * @param trialAccountId - The trial account ID.
-     * @param trialSecretKey - The secret key for the trial account.
-     */
-    setTrialAccountCredentials(trialAccountId: string, trialSecretKey: KeyPairString): void;
-    /**
-     * Sets the trial ID.
-     * @param trialId - The trial ID.
-     */
-    setTrialId(trialId: number): void;
     /**
      * Sets the retry logic configuration.
      * @param maxRetries - The maximum number of retries.

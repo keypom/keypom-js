@@ -1,18 +1,15 @@
-import { Account } from "@near-js/accounts";
 import { TrialKey } from "./types";
 interface AddTrialAccountsParams {
-    signerAccount: Account;
     trialContractId: string;
     mpcContractId: string;
-    trialId: number;
     numberOfKeys: number;
+    viewFunction: any;
 }
 /**
- * Adds trial accounts to the trial contract by generating key pairs and deriving MPC keys.
+ * Generates the trial key data needed to add trial accounts.
  *
- * @param params - The parameters required to add trial accounts.
+ * @param params - The number of keys to generate.
  * @returns A Promise that resolves to an array of TrialKey objects.
- * @throws Will throw an error if adding trial keys fails.
  */
-export declare function addTrialAccounts(params: AddTrialAccountsParams): Promise<TrialKey[]>;
+export declare function generateTrialKeys(params: AddTrialAccountsParams): Promise<TrialKey[]>;
 export {};

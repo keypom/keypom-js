@@ -1,5 +1,4 @@
 import { ActionToPerform, MPCSignature, TrialAccountInfo } from "./types";
-import { KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 export interface TransactionData {
     nonce: string;
@@ -10,10 +9,7 @@ export interface TransactionData {
 }
 interface PerformActionsParams {
     near: Near;
-    trialAccountId: string;
-    trialAccountSecretKey: KeyPairString;
     trialAccountInfo: TrialAccountInfo;
-    trialContractId: string;
     actionsToPerform: ActionToPerform[];
     evmProviderUrl?: string;
 }
@@ -23,9 +19,9 @@ interface PerformActionsParams {
  * @param params - The parameters required to perform actions.
  * @returns A Promise that resolves to an array of signature arrays.
  */
-export declare function performActions(params: PerformActionsParams): Promise<{
-    signatures: MPCSignature[];
+export declare function generateActionArgs(params: PerformActionsParams): Promise<{
     txnDatas: TransactionData[];
-    contractLogs: string[];
+    txnArgs: any[];
 }>;
+export declare function extractSignatureFromResult(result: any): MPCSignature;
 export {};

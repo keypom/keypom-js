@@ -3,13 +3,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrialAccountManager = void 0;
 const crypto_1 = require("@near-js/crypto");
+const wallet_account_1 = require("@near-js/wallet-account");
 const types_1 = require("./types");
 const createTrial_1 = require("./createTrial");
-const addTrialKeys_1 = require("./addTrialKeys");
 const activateTrial_1 = require("./activateTrial");
+const addTrialKeys_1 = require("./addTrialKeys");
 const performAction_1 = require("./performAction");
 const broadcastTransaction_1 = require("./broadcastTransaction");
 const kdf_1 = require("./mpcUtils/kdf");
+const keystores_1 = require("@near-js/keystores");
+const near_1 = require("./networks/near");
 /**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
@@ -22,15 +25,16 @@ class TrialAccountManager {
      */
     constructor(params) {
         this.trialContractId = params.trialContractId;
-        this.signerAccount = params.signerAccount;
         this.mpcContractId = params.mpcContractId;
-        this.near = params.near;
-        this.trialId = params.trialId;
-        this.trialSecretKey = params.trialSecretKey;
-        this.trialAccountId = params.trialAccountId;
         this.maxRetries = params.maxRetries ?? 3; // Default to 3 retries
         this.initialDelayMs = params.initialDelayMs ?? 1000; // Default to 1 second
         this.backoffFactor = params.backoffFactor ?? 2; // Default backoff factor of 2
+        const near = new wallet_account_1.Near({
+            networkId: params.networkId,
+            nodeUrl: "https://rpc.testnet.near.org",
+            keyStore: new keystores_1.InMemoryKeyStore(),
+        });
+        this.near = near;
     }
     /**
      * View function on the trial contract with retry logic.
@@ -60,16 +64,25 @@ class TrialAccountManager {
      * @param trialData - The trial data containing constraints.
      * @returns A Promise that resolves to the trial ID.
      */
-    async createTrial(trialData) {
-        return retryAsync(async () => {
-            const trialId = await (0, createTrial_1.createTrial)({
-                signerAccount: this.signerAccount,
-                trialContractId: this.trialContractId,
-                trialData,
+    async createTrial({ trialData, signingAccount, }) {
+        const fnArgs = (0, createTrial_1.getCreateTrialParams)(trialData);
+        const result = await retryAsync(async () => {
+            return await (0, near_1.sendTransaction)({
+                signerAccount: signingAccount,
+                receiverId: this.trialContractId,
+                methodName: "create_trial",
+                args: fnArgs,
+                deposit: "1",
+                gas: "300000000000000",
             });
-            this.trialId = trialId;
-            return trialId;
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
+        const trialId = result.status.SuccessValue
+            ? parseInt(Buffer.from(result.status.SuccessValue, "base64").toString(), 10)
+            : null;
+        if (trialId === null) {
+            throw new Error("Failed to create trial");
+        }
+        return trialId;
     }
     /**
      * Adds trial accounts to the trial contract by generating key pairs with retry logic.
@@ -77,20 +90,38 @@ class TrialAccountManager {
      * @param numberOfKeys - Number of trial accounts to add.
      * @returns A Promise that resolves to an array of TrialKey objects.
      */
-    async addTrialAccounts(numberOfKeys) {
-        if (this.trialId === null || this.trialId === undefined) {
-            throw new Error("trialId is required to add trial accounts");
-        }
-        return retryAsync(async () => {
-            const trialKeys = await (0, addTrialKeys_1.addTrialAccounts)({
-                signerAccount: this.signerAccount,
-                trialContractId: this.trialContractId,
-                mpcContractId: this.mpcContractId,
-                trialId: this.trialId,
-                numberOfKeys,
+    async addTrialAccounts({ trialId, numberOfKeys, signingAccount, }) {
+        const trialKeys = await (0, addTrialKeys_1.generateTrialKeys)({
+            trialContractId: this.trialContractId,
+            mpcContractId: this.mpcContractId,
+            numberOfKeys,
+            viewFunction: this.viewFunction.bind(this),
+        });
+        // Prepare data to send to the contract
+        const keysWithMpc = trialKeys.map((trialKey) => ({
+            public_key: trialKey.trialAccountPublicKey,
+            mpc_key: trialKey.mpcKey,
+        }));
+        const result = await retryAsync(async () => {
+            // Call the `add_trial_keys` function
+            return await (0, near_1.sendTransaction)({
+                signerAccount: signingAccount,
+                receiverId: this.trialContractId,
+                methodName: "add_trial_keys",
+                args: {
+                    keys: keysWithMpc,
+                    trial_id: trialId,
+                },
+                deposit: "1",
+                gas: "300000000000000",
             });
-            return trialKeys;
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
+        if (result.status.SuccessValue !== undefined) {
+            return trialKeys;
+        }
+        else {
+            throw new Error(`Failed to add trial accounts: ${JSON.stringify(result.status)}`);
+        }
     }
     /**
      * Activates a trial account on the trial contract with retry logic.
@@ -98,25 +129,21 @@ class TrialAccountManager {
      * @param newAccountId - The account ID of the new trial account.
      * @returns A Promise that resolves when the account is activated.
      */
-    async activateTrialAccounts(newAccountId, chainId) {
-        if (this.trialSecretKey === null || this.trialSecretKey === undefined) {
-            throw new Error("trialSecretKey is required to activate trial accounts");
+    async activateTrialAccounts({ trialAccountSecretKey, newAccountId, chainId, }) {
+        const trialAccountInfo = await this.getTrialData(trialAccountSecretKey);
+        const trialAccountId = trialAccountInfo[chainId];
+        if (trialAccountId) {
+            throw new Error("trial account is already activated. accountId: " +
+                trialAccountId);
         }
         return retryAsync(async () => {
-            const trialAccountInfo = await this.getTrialData();
-            const trialAccountId = trialAccountInfo[chainId];
-            if (trialAccountId) {
-                throw new Error("trial account is already activated. accountId: " +
-                    trialAccountId);
-            }
             await (0, activateTrial_1.activateTrialAccounts)({
                 near: this.near,
                 trialContractId: this.trialContractId,
                 trialAccountIds: [newAccountId],
-                trialAccountSecretKeys: [this.trialSecretKey],
+                trialAccountSecretKeys: [trialAccountSecretKey],
                 chainIds: [chainId],
             });
-            this.trialAccountId = newAccountId;
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
     }
     /**
@@ -125,26 +152,57 @@ class TrialAccountManager {
      * @param actionsToPerform - Array of actions to perform.
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
-    async performActions(actionsToPerform, evmProviderUrl) {
-        if (!this.trialAccountId || !this.trialSecretKey) {
-            throw new Error("trialAccountId and trialSecretKey are required to perform actions");
-        }
-        return retryAsync(async () => {
-            const trialAccountInfo = await this.getTrialData();
-            if (!this.trialId) {
-                throw new Error("trialId is required to perform actions");
+    async performActions({ trialAccountSecretKey, actionsToPerform, evmProviderUrl, }) {
+        const trialAccountInfo = await this.getTrialData(trialAccountSecretKey);
+        const { txnArgs, txnDatas } = await (0, performAction_1.generateActionArgs)({
+            near: this.near,
+            trialAccountInfo,
+            evmProviderUrl,
+            actionsToPerform,
+        });
+        // Set the trial key in the keyStore
+        const keyStore = this.near.connection.signer.keyStore;
+        await keyStore.setKey(this.near.connection.networkId, this.trialContractId, crypto_1.KeyPair.fromString(trialAccountSecretKey));
+        // set the signer to the trial contract to actually perform the call_*_contract methods using the proxy key
+        const signerAccount = await this.near.account(this.trialContractId);
+        const signatures = await retryAsync(async () => {
+            const signatures = [];
+            let iter = 0;
+            for (const actionToPerform of actionsToPerform) {
+                const args = txnArgs[iter];
+                if (actionToPerform.chain === "NEAR") {
+                    // Call the perform_action method on the contract
+                    const result = await (0, near_1.sendTransaction)({
+                        signerAccount,
+                        receiverId: this.trialContractId,
+                        methodName: "call_near_contract",
+                        args,
+                        deposit: "0",
+                        gas: "300000000000000",
+                    });
+                    // Extract the signature from the transaction result
+                    const sigRes = (0, performAction_1.extractSignatureFromResult)(result);
+                    signatures.push(sigRes);
+                }
+                else if (actionToPerform.chain === "EVM") {
+                    // Prepare the arguments as per the contract's expectations
+                    const result = await (0, near_1.sendTransaction)({
+                        signerAccount,
+                        receiverId: this.trialContractId,
+                        methodName: "call_evm_contract",
+                        args,
+                        deposit: "0",
+                        gas: "300000000000000",
+                    });
+                    // Handle the result, extract signatures, etc.
+                    const sigRes = (0, performAction_1.extractSignatureFromResult)(result);
+                    signatures.push(sigRes);
+                }
             }
-            const result = await (0, performAction_1.performActions)({
-                near: this.near,
-                trialAccountInfo,
-                trialAccountId: this.trialAccountId,
-                trialAccountSecretKey: this.trialSecretKey,
-                trialContractId: this.trialContractId,
-                evmProviderUrl,
-                actionsToPerform,
-            });
-            return result;
+            iter++;
+            return signatures;
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
+        return { signatures, txnDatas };
     }
     /**
      * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
@@ -153,24 +211,18 @@ class TrialAccountManager {
      * @returns A Promise that resolves when the transaction is broadcasted.
      */
     async broadcastTransaction(params) {
+        const trialAccountInfo = await this.getTrialData(params.trialAccountSecretKey);
+        const chainId = params.actionToPerform.chainId
+            ? params.actionToPerform.chainId.toString()
+            : "NEAR";
+        const trialAccountId = trialAccountInfo.accountIdByChainId[chainId];
+        if (!trialAccountId) {
+            throw new Error(`No trial account found for chain ${chainId}`);
+        }
         return retryAsync(async () => {
-            if (!this.trialSecretKey) {
-                throw new Error("trialAccountId and trialSecretKey are required to broadcast transaction");
-            }
-            const trialAccountInfo = await this.getTrialData();
-            const chainId = params.actionToPerform.chainId
-                ? params.actionToPerform.chainId.toString()
-                : "NEAR";
-            if (trialAccountInfo.accountIdByChainId[chainId] !==
-                params.signerAccountId) {
-                throw new Error("Mismatch between trialAccountId and signerAccount. Found: " +
-                    trialAccountInfo.accountIdByChainId[chainId] +
-                    " Expected: " +
-                    params.signerAccountId);
-            }
             return await (0, broadcastTransaction_1.broadcastTransaction)({
                 nearConnection: this.near,
-                signerAccountId: params.signerAccountId,
+                signerAccountId: trialAccountId,
                 actionToPerform: params.actionToPerform,
                 signatureResult: params.signatureResult,
                 providerUrl: params.providerUrl,
@@ -185,12 +237,9 @@ class TrialAccountManager {
      *
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
-    async getTrialData() {
-        if (!this.trialSecretKey) {
-            throw new Error("trialAccountId is required to get trial data");
-        }
+    async getTrialData(trialSecretKey) {
         return retryAsync(async () => {
-            const trialPubKey = crypto_1.KeyPair.fromString(this.trialSecretKey)
+            const trialPubKey = crypto_1.KeyPair.fromString(trialSecretKey)
                 .getPublicKey()
                 .toString();
             // Retrieve trial account info from the contract
@@ -250,22 +299,6 @@ class TrialAccountManager {
         // Convert derived public key to EVM address
         const evmAddressFromDerivedKey = (0, kdf_1.uncompressedHexPointToEvmAddress)(derivedUncompressedHexPoint);
         return evmAddressFromDerivedKey;
-    }
-    /**
-     * Sets the trial account credentials.
-     * @param trialAccountId - The trial account ID.
-     * @param trialSecretKey - The secret key for the trial account.
-     */
-    setTrialAccountCredentials(trialAccountId, trialSecretKey) {
-        this.trialAccountId = trialAccountId;
-        this.trialSecretKey = trialSecretKey;
-    }
-    /**
-     * Sets the trial ID.
-     * @param trialId - The trial ID.
-     */
-    setTrialId(trialId) {
-        this.trialId = trialId;
     }
     /**
      * Sets the retry logic configuration.

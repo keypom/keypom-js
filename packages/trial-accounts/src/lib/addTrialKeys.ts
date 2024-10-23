@@ -1,35 +1,26 @@
 // addTrialKeys.ts
 
-import { Account } from "@near-js/accounts";
 import { KeyPair } from "@near-js/crypto";
-import { sendTransaction } from "./networks/near";
 import { TrialKey } from "./types";
 
 interface AddTrialAccountsParams {
-    signerAccount: Account;
     trialContractId: string;
     mpcContractId: string;
-    trialId: number;
     numberOfKeys: number;
+    viewFunction: any;
 }
 
 /**
- * Adds trial accounts to the trial contract by generating key pairs and deriving MPC keys.
+ * Generates the trial key data needed to add trial accounts.
  *
- * @param params - The parameters required to add trial accounts.
+ * @param params - The number of keys to generate.
  * @returns A Promise that resolves to an array of TrialKey objects.
- * @throws Will throw an error if adding trial keys fails.
  */
-export async function addTrialAccounts(
+export async function generateTrialKeys(
     params: AddTrialAccountsParams
 ): Promise<TrialKey[]> {
-    const {
-        signerAccount,
-        trialContractId,
-        mpcContractId,
-        trialId,
-        numberOfKeys,
-    } = params;
+    const { trialContractId, mpcContractId, numberOfKeys, viewFunction } =
+        params;
 
     const trialKeys: TrialKey[] = [];
 
@@ -40,7 +31,7 @@ export async function addTrialAccounts(
         // Derive the MPC public key
         const derivationPath = keyPair.getPublicKey().toString();
 
-        const mpcPublicKey = await signerAccount.viewFunction({
+        const mpcPublicKey = await viewFunction({
             contractId: mpcContractId,
             methodName: "derived_public_key",
             args: {
@@ -57,28 +48,5 @@ export async function addTrialAccounts(
         });
     }
 
-    // Prepare data to send to the contract
-    const keysWithMpc = trialKeys.map((trialKey) => ({
-        public_key: trialKey.trialAccountPublicKey,
-        mpc_key: trialKey.mpcKey,
-    }));
-
-    // Call the `add_trial_keys` function
-    const result = await sendTransaction({
-        signerAccount,
-        receiverId: trialContractId,
-        methodName: "add_trial_keys",
-        args: {
-            keys: keysWithMpc,
-            trial_id: trialId,
-        },
-        deposit: "1", // Adjust deposit as needed
-        gas: "300000000000000",
-    });
-
-    if (result) {
-        return trialKeys;
-    } else {
-        throw new Error("Failed to add trial keys");
-    }
+    return trialKeys;
 }

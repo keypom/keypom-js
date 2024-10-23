@@ -1,12 +1,12 @@
 {
-  "trialId": 2,
+  "trialId": 9,
   "trialContractId": "1729530318593-trial-contract.testnet",
   "trialKeys": [
     {
-      "derivationPath": "ed25519:5hY6Qo7Cdqrci2D9ca4FLCq4sEE7NLGpzJnhfNixgCg1",
-      "trialAccountSecretKey": "ed25519:3T7j7iwYBcqRMnDxBYnaFGTpVVR6xqr4EWtjDkzrVZnVRHpd8AtQ7aLp8dHDitL9p9BWKos8qRWqKweBUm87k7Xo",
-      "trialAccountPublicKey": "ed25519:5hY6Qo7Cdqrci2D9ca4FLCq4sEE7NLGpzJnhfNixgCg1",
-      "mpcKey": "secp256k1:5XuMAqKMGcoMKDnmmzS6nBfnPDR2yTRAbg1nGPzSqrqqqtSsW4G6cjjxMWZGWuveNh58o8UrrqXZmzpJF6gXbyig"
+      "derivationPath": "ed25519:9xrvJyLfEtUTH7GqdWfd13HZHsQMTk8AUQE1HYzfkS85",
+      "trialAccountSecretKey": "ed25519:2Heu41fb9xiPo5fZt1Lqqeq3tUKDxwc9F4WfhF46ScqjM4Vtmw2CH6HQotXMXPAkUE6REHpPMStGXKhy3LiTD9W5",
+      "trialAccountPublicKey": "ed25519:9xrvJyLfEtUTH7GqdWfd13HZHsQMTk8AUQE1HYzfkS85",
+      "mpcKey": "secp256k1:4NfGKQW9E5L3cG5E4mWsvPZeLH2sPvfBBm3v1NsAtwTaFGPTmaodi2cfRVDArKXfJc9wiKw5ZTs8Abv2w6e5r3Vv"
     }
   ]
 }

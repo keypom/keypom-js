@@ -5,11 +5,12 @@ import { readFromFile, writeToFile } from "./utils/fileOps";
 import path from "path";
 import fs from "fs";
 import { logError, logInfo, logSuccess } from "./utils/logUtils";
-import { initNear, isFinalExecutionOutcome } from "./utils/nearUtils";
+import { isFinalExecutionOutcome } from "./utils/nearUtils";
 import { FinalExecutionOutcome } from "@near-js/types";
 import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
 import { TransactionData } from "../src/lib/performAction";
+import { NetworkId } from "@near-wallet-selector/core";
 
 // Load environment variables from .env file
 loadEnv();
@@ -34,17 +35,11 @@ async function main() {
         `./configs/${configName}`
     );
 
-    // Initialize NEAR connection
-    logInfo("Initializing NEAR connection...");
-    const near = await initNear(config);
-    const signerAccount = await near.account(config.signerAccountId);
-
     // Create TrialAccountManager instance
     const trialManager = new TrialAccountManager({
         trialContractId: config.trialContractId,
         mpcContractId: config.mpcContractId,
-        signerAccount,
-        near,
+        networkId: config.networkId as NetworkId,
         maxRetries: 5,
         initialDelayMs: 2000,
         backoffFactor: 2,
@@ -69,31 +64,18 @@ async function main() {
         for (const action of actionsToPerform) {
             const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
 
-            const chainId =
-                action.chain === "NEAR" ? "NEAR" : action.chain.toString();
-            const accountId = await trialManager.getTrialAccountIdForChain(
-                trialAccountSecretKey,
-                chainId
-            );
-
-            trialManager.setTrialAccountCredentials(
-                accountId,
-                trialAccountSecretKey
-            );
-
             const { result, clientLog } =
                 await trialManager.broadcastTransaction({
+                    trialAccountSecretKey,
                     actionToPerform: action,
                     providerUrl,
-                    signerAccountId: accountId!,
-                    chainId: chainId!,
                     signatureResult: signatures[0],
                     txnData: txnDatas[iter++],
                 });
 
             writeToFile(clientLog, config.dataDir, "clientLog.json");
             results.push(result);
-            logSuccess(`Actions performed successfully for ${accountId!}.`);
+            logSuccess(`Actions performed successfully.`);
         }
 
         logSuccess(

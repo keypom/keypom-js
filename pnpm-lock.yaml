@@ -152,6 +152,9 @@ importers:
 
   packages/trial-accounts:
     dependencies:
+      '@near-wallet-selector/core':
+        specifier: ^8.9.13
+        version: 8.9.13(@near-js/providers@0.2.3)(near-api-js@2.1.4)
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -180,6 +183,9 @@ importers:
       '@near-js/crypto':
         specifier: 1.4.0
         version: 1.4.0
+      '@near-js/keystores':
+        specifier: 0.2.1
+        version: 0.2.1
       '@near-js/keystores-browser':
         specifier: 0.2.0
         version: 0.2.0
@@ -437,6 +443,9 @@ packages:
   '@near-js/crypto@1.4.0':
     resolution: {integrity: sha512-2SYS7LyFz2/y8idqAyyS4jf3pn6zFg4tLbOq9OlB+MTZhvsnUcWW+HLznyBytp6dW8lAQ03E+Ew0bYfJSCIJJw==}
 
+  '@near-js/crypto@1.4.1':
+    resolution: {integrity: sha512-hbricJD0H8nwu63Zw16UZQg3ms2W9NwDBsLt3OEtudTcu9q1MRrVZWc7ATjdmTvhkcgmouEFc6oLBsOxnmSLCA==}
+
   '@near-js/keystores-browser@0.0.11':
     resolution: {integrity: sha512-AQ86ST+keKjM5iektKLXu3q94lN8pG6R/LXVoIgm5/hi63n2QzhAd0XlUj9fcyPrfoGOckwUu6pFtXPbveBypw==}
 
@@ -466,6 +475,9 @@ packages:
 
   '@near-js/keystores@0.2.0':
     resolution: {integrity: sha512-vZiyx9whLlA7/EDdkZGf//0AL2FWAUyGpVhWIHcbJZwQ7DNcjpkb0tRydFp8Yk4bb7kcYnoyksSeRx9kQUMyjA==}
+
+  '@near-js/keystores@0.2.1':
+    resolution: {integrity: sha512-KTeqSB+gx5LZNC9VGtHDe+aEiJts6e3nctMnnn/gqIgvW7KJ+BzcmTZZpxCmQLcy+s7hHSpzmyTVRkaCuYjCcQ==}
 
   '@near-js/providers@0.0.7':
     resolution: {integrity: sha512-qj16Ey+vSw7lHE85xW+ykYJoLPr4A6Q/TsfpwhJLS6zBInSC6sKVqPO1L8bK4VA/yB7V7JJPor9UVCWgRXdNEA==}
@@ -506,6 +518,9 @@ packages:
   '@near-js/types@0.3.0':
     resolution: {integrity: sha512-IwayA5Wa4+hryo22AuAYIu5a/nOAheF/Bmz9kpuouX9L4he+Tc8xAt5NfE60zXG7tsukAw1QAaHE1kBzhmwtKw==}
 
+  '@near-js/types@0.3.1':
+    resolution: {integrity: sha512-8qIA7ynAEAuVFNAQc0cqz2xRbfyJH3PaAG5J2MgPPhD18lu/tCGd6pzYg45hjhtiJJRFDRjh/FUWKS+ZiIIxUw==}
+
   '@near-js/utils@0.0.4':
     resolution: {integrity: sha512-mPUEPJbTCMicGitjEGvQqOe8AS7O4KkRCxqd0xuE/X6gXF1jz1pYMZn4lNUeUz2C84YnVSGLAM0o9zcN6Y4hiA==}
 
@@ -520,6 +535,9 @@ packages:
 
   '@near-js/utils@1.0.0':
     resolution: {integrity: sha512-4dd6fDgWZnG+0VSKPBA3czEQdi9UotepdwcEKLTbXepIL1FX2ZlQV6HVi7KYmrAVwv1ims11vGnWzJWKy46ULw==}
+
+  '@near-js/utils@1.0.1':
+    resolution: {integrity: sha512-MzCAspVJJLrURnSbq059s6cWon2/qbbBVl+Ib1yBOMTs/6EuJ7GRvuSmtmSB7l9Hjjmz8Imn1aB2q3RVYZSbrA==}
 
   '@near-js/wallet-account@0.0.7':
     resolution: {integrity: sha512-tmRyieG/wHmuNkg/WGFyKD6iH6atHPbY0rZ5OjOIiteuhZEPgp+z8OBpiQ4qumTa63q46aj/QVSQL0J3+JmBfw==}
@@ -3012,6 +3030,15 @@ snapshots:
       randombytes: 2.1.0
       secp256k1: 5.0.0
 
+  '@near-js/crypto@1.4.1':
+    dependencies:
+      '@near-js/types': 0.3.1
+      '@near-js/utils': 1.0.1
+      '@noble/curves': 1.2.0
+      borsh: 1.0.0
+      randombytes: 2.1.0
+      secp256k1: 5.0.0
+
   '@near-js/keystores-browser@0.0.11':
     dependencies:
       '@near-js/crypto': 1.2.3
@@ -3061,6 +3088,11 @@ snapshots:
     dependencies:
       '@near-js/crypto': 1.4.0
       '@near-js/types': 0.3.0
+
+  '@near-js/keystores@0.2.1':
+    dependencies:
+      '@near-js/crypto': 1.4.1
+      '@near-js/types': 0.3.1
 
   '@near-js/providers@0.0.7':
     dependencies:
@@ -3156,6 +3188,8 @@ snapshots:
 
   '@near-js/types@0.3.0': {}
 
+  '@near-js/types@0.3.1': {}
+
   '@near-js/utils@0.0.4':
     dependencies:
       '@near-js/types': 0.0.4
@@ -3187,6 +3221,13 @@ snapshots:
   '@near-js/utils@1.0.0':
     dependencies:
       '@near-js/types': 0.3.0
+      bs58: 4.0.0
+      depd: 2.0.0
+      mustache: 4.0.0
+
+  '@near-js/utils@1.0.1':
+    dependencies:
+      '@near-js/types': 0.3.1
       bs58: 4.0.0
       depd: 2.0.0
       mustache: 4.0.0

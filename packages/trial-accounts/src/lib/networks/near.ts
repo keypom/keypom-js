@@ -1,9 +1,15 @@
 // networks/utils.ts
 
-import { Account } from "@near-js/accounts";
 import { FinalExecutionOutcome } from "@near-js/types";
-import { Action, actionCreators } from "@near-js/transactions";
+import {
+    Action as AccountAction,
+    actionCreators,
+    FunctionCallPermission,
+} from "@near-js/transactions";
 import { parseNearAmount } from "@near-js/utils";
+import { SigningAccount } from "../TrialAccountManager";
+import { Account } from "@near-js/accounts";
+import { Action as WalletAction } from "@near-wallet-selector/core";
 
 export async function sendTransaction({
     signerAccount,
@@ -13,7 +19,7 @@ export async function sendTransaction({
     deposit,
     gas,
 }: {
-    signerAccount: Account;
+    signerAccount: SigningAccount;
     receiverId: string;
     methodName: string;
     args: any;
@@ -23,7 +29,7 @@ export async function sendTransaction({
     const serializedArgsBuffer = Buffer.from(JSON.stringify(args));
     const serializedArgs = new Uint8Array(serializedArgsBuffer);
 
-    let actions: Action[] = [];
+    let actions: AccountAction[] = [];
 
     actions.push(
         actionCreators.functionCall(
@@ -34,10 +40,113 @@ export async function sendTransaction({
         )
     );
 
-    const result = await signerAccount.signAndSendTransaction({
-        receiverId: receiverId,
-        actions,
-    });
+    let result: any;
+    if (isAccount(signerAccount)) {
+        result = await signerAccount.signAndSendTransaction({
+            receiverId: receiverId,
+            actions,
+        });
+    } else {
+        const transformedActions =
+            transformAccountActionsToWalletActions(actions);
+        result = await signerAccount.signAndSendTransaction({
+            receiverId: receiverId,
+            actions: transformedActions,
+        });
+    }
 
     return result;
+}
+
+function isAccount(account: any): account is Account {
+    return account instanceof Account;
+}
+
+// Function to transform AccountActions to WalletActions
+function transformAccountActionsToWalletActions(
+    accountActions: AccountAction[]
+): WalletAction[] {
+    return accountActions.map((action) => {
+        switch (action.enum) {
+            case "CreateAccount":
+                return {
+                    type: "CreateAccount",
+                };
+            case "DeployContract":
+                return {
+                    type: "DeployContract",
+                    params: {
+                        code: action.deployContract!.code,
+                    },
+                };
+            case "FunctionCall":
+                return {
+                    type: "FunctionCall",
+                    params: {
+                        methodName: action.functionCall!.methodName,
+                        args: JSON.parse(
+                            Buffer.from(action.functionCall!.args).toString(
+                                "utf8"
+                            )
+                        ),
+                        gas: action.functionCall!.gas.toString(),
+                        deposit: action.functionCall!.deposit.toString(),
+                    },
+                };
+            case "Transfer":
+                return {
+                    type: "Transfer",
+                    params: {
+                        deposit: action.transfer!.deposit.toString(),
+                    },
+                };
+            case "Stake":
+                return {
+                    type: "Stake",
+                    params: {
+                        stake: action.stake!.stake.toString(),
+                        publicKey: action.stake!.publicKey.toString(),
+                    },
+                };
+            case "AddKey":
+                return {
+                    type: "AddKey",
+                    params: {
+                        publicKey: action.addKey!.publicKey.toString(),
+                        accessKey: {
+                            permission:
+                                action.addKey!.accessKey.permission instanceof
+                                FunctionCallPermission
+                                    ? {
+                                          receiverId:
+                                              action.addKey!.accessKey
+                                                  .permission.receiverId,
+                                          allowance:
+                                              action.addKey!.accessKey.permission.allowance?.toString(),
+                                          methodNames:
+                                              action.addKey!.accessKey
+                                                  .permission.methodNames,
+                                      }
+                                    : "FullAccess",
+                        },
+                    },
+                };
+            case "DeleteKey":
+                return {
+                    type: "DeleteKey",
+                    params: {
+                        publicKey: action.deleteKey!.publicKey.toString(),
+                    },
+                };
+            case "DeleteAccount":
+                return {
+                    type: "DeleteAccount",
+                    params: {
+                        beneficiaryId: action.deleteAccount!.beneficiaryId,
+                    },
+                };
+            default:
+                throw new Error(`Unsupported action type: ${action.enum}`);
+        }
+    });
 }

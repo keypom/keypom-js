@@ -1,16 +1,8 @@
-import { Account } from "@near-js/accounts";
 import { TrialData } from "./types";
-interface CreateTrialParams {
-    signerAccount: Account;
-    trialContractId: string;
-    trialData: TrialData;
-}
 /**
- * Creates a new trial on the trial contract.
+ * Generates the arguments for creating a trial.
  *
  * @param params - The parameters required to create a trial.
- * @returns A Promise that resolves to the trial ID.
- * @throws Will throw an error if the trial creation fails.
+ * @returns A Record containing the arguments for creating a trial.
  */
-export declare function createTrial(params: CreateTrialParams): Promise<number>;
-export {};
+export declare function getCreateTrialParams(trialData: TrialData): Record<string, any>;
