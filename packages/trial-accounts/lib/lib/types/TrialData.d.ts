@@ -12,6 +12,5 @@ export interface TrialData {
     interactionLimits: InteractionLimits | null;
     exitConditions: ExitConditions | null;
     expirationTime: number | null;
-    initialDeposit: string;
     creatorAccountId?: string;
 }

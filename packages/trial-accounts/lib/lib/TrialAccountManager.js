@@ -10,7 +10,6 @@ const activateTrial_1 = require("./activateTrial");
 const performAction_1 = require("./performAction");
 const broadcastTransaction_1 = require("./broadcastTransaction");
 const kdf_1 = require("./mpcUtils/kdf");
-const validityChecker_1 = require("./validityChecker");
 /**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
@@ -115,6 +114,7 @@ class TrialAccountManager {
                 trialContractId: this.trialContractId,
                 trialAccountIds: [newAccountId],
                 trialAccountSecretKeys: [this.trialSecretKey],
+                chainIds: [chainId],
             });
             this.trialAccountId = newAccountId;
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
@@ -125,23 +125,22 @@ class TrialAccountManager {
      * @param actionsToPerform - Array of actions to perform.
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
-    async performActions(actionsToPerform) {
+    async performActions(actionsToPerform, evmProviderUrl) {
         if (!this.trialAccountId || !this.trialSecretKey) {
             throw new Error("trialAccountId and trialSecretKey are required to perform actions");
         }
         return retryAsync(async () => {
             const trialAccountInfo = await this.getTrialData();
-            console.log("trialAccountInfo", JSON.stringify(trialAccountInfo));
             if (!this.trialId) {
                 throw new Error("trialId is required to perform actions");
             }
-            // Check validity of actions
-            (0, validityChecker_1.checkActionValidity)(actionsToPerform, trialAccountInfo.trialData, trialAccountInfo.usageStats, Date.now());
             const result = await (0, performAction_1.performActions)({
                 near: this.near,
+                trialAccountInfo,
                 trialAccountId: this.trialAccountId,
                 trialAccountSecretKey: this.trialSecretKey,
                 trialContractId: this.trialContractId,
+                evmProviderUrl,
                 actionsToPerform,
             });
             return result;
@@ -155,17 +154,28 @@ class TrialAccountManager {
      */
     async broadcastTransaction(params) {
         return retryAsync(async () => {
-            if (!this.trialAccountId || !this.trialSecretKey) {
+            if (!this.trialSecretKey) {
                 throw new Error("trialAccountId and trialSecretKey are required to broadcast transaction");
             }
             const trialAccountInfo = await this.getTrialData();
-            const signerAccount = await this.near.account(this.trialAccountId);
+            const chainId = params.actionToPerform.chainId
+                ? params.actionToPerform.chainId.toString()
+                : "NEAR";
+            if (trialAccountInfo.accountIdByChainId[chainId] !==
+                params.signerAccountId) {
+                throw new Error("Mismatch between trialAccountId and signerAccount. Found: " +
+                    trialAccountInfo.accountIdByChainId[chainId] +
+                    " Expected: " +
+                    params.signerAccountId);
+            }
             return await (0, broadcastTransaction_1.broadcastTransaction)({
-                signerAccount,
+                nearConnection: this.near,
+                signerAccountId: params.signerAccountId,
                 actionToPerform: params.actionToPerform,
                 signatureResult: params.signatureResult,
-                nonce: params.nonce,
-                blockHash: params.blockHash,
+                providerUrl: params.providerUrl,
+                chainId,
+                txnData: params.txnData,
                 mpcPublicKey: trialAccountInfo.mpcKey,
             });
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
@@ -176,16 +186,15 @@ class TrialAccountManager {
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     async getTrialData() {
-        if (!this.trialAccountId || !this.trialSecretKey) {
+        if (!this.trialSecretKey) {
             throw new Error("trialAccountId is required to get trial data");
         }
         return retryAsync(async () => {
-            const signerAccount = await this.near.account(this.trialAccountId);
             const trialPubKey = crypto_1.KeyPair.fromString(this.trialSecretKey)
                 .getPublicKey()
                 .toString();
             // Retrieve trial account info from the contract
-            const trialAccountInfoSnakeCase = await signerAccount.viewFunction({
+            const trialAccountInfoSnakeCase = await this.viewFunction({
                 contractId: this.trialContractId,
                 methodName: "get_trial_account_info",
                 args: {
@@ -198,21 +207,49 @@ class TrialAccountManager {
         }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
     }
     /**
+     * Retrieves the account ID for the given chain ID
+     *
+     * @returns A Promise that resolves to the accountId
+     */
+    async getTrialAccountIdForChain(trialAccountSecretKey, chainId) {
+        return retryAsync(async () => {
+            const trialPubKey = crypto_1.KeyPair.fromString(trialAccountSecretKey)
+                .getPublicKey()
+                .toString();
+            // Retrieve trial account info from the contract
+            const trialAccountInfoSnakeCase = await this.viewFunction({
+                contractId: this.trialContractId,
+                methodName: "get_trial_account_info",
+                args: {
+                    public_key: trialPubKey,
+                },
+            });
+            // Convert snake_case data to camelCase
+            const trialAccountInfoCamelCase = (0, types_1.convertKeysToCamelCase)(trialAccountInfoSnakeCase);
+            return trialAccountInfoCamelCase.accountIdByChainId[chainId];
+        }, this.maxRetries, this.initialDelayMs, this.backoffFactor);
+    }
+    /**
      * Derives the ETH address from the passed in derivation path.
      * @param trialSecretKey - The secret key for the trial account.
      * @returns The ETH address.
      */
     async deriveEthAddress(trialSecretKey) {
-        const rootPublicKey = await this.viewFunction({
+        const path = crypto_1.KeyPair.fromString(trialSecretKey)
+            .getPublicKey()
+            .toString();
+        const rootKey = await this.viewFunction({
             contractId: this.mpcContractId,
             methodName: "public_key",
             args: {},
         });
-        const trialPubKey = crypto_1.KeyPair.fromString(trialSecretKey)
-            .getPublicKey()
-            .toString();
-        const publicKey = (0, kdf_1.deriveChildPublicKey)((0, kdf_1.najPublicKeyStrToUncompressedHexPoint)(rootPublicKey), this.trialContractId, trialPubKey);
-        return (0, kdf_1.uncompressedHexPointToEvmAddress)(publicKey);
+        // Convert root public key to uncompressed hex point
+        const rootUncompressedHexPoint = (0, kdf_1.najPublicKeyStrToUncompressedHexPoint)(rootKey);
+        // Derive child public key using root public key, signerId, and path
+        const derivedUncompressedHexPoint = (0, kdf_1.deriveChildPublicKey)(rootUncompressedHexPoint, this.trialContractId, path);
+        // Convert derived public key to EVM address
+        const evmAddressFromDerivedKey = (0, kdf_1.uncompressedHexPointToEvmAddress)(derivedUncompressedHexPoint);
+        return evmAddressFromDerivedKey;
     }
     /**
      * Sets the trial account credentials.

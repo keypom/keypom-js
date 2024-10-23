@@ -1,4 +1,12 @@
+import { JsonRpcProvider, VoidSigner } from "ethers";
+import { ActionToPerform } from "./types";
 import { SerializableParam, SerializableToken } from "./types/EVMTypes";
+export declare function esimateGasParams(provider: JsonRpcProvider, signer: VoidSigner, actionToPerform: ActionToPerform): Promise<{
+    nonce: number;
+    gasLimit: bigint;
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
+}>;
 /**
  * Converts method name and arguments into SerializableParam[] and SerializableToken[].
  * @param methodName - The name of the method.

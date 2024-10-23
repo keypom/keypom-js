@@ -11,7 +11,7 @@ const utils_1 = require("@near-js/utils");
  * @param currentTimestamp - The current timestamp in nanoseconds.
  * @throws Will throw an error if any action is invalid.
  */
-function checkActionValidity(actionsToPerform, trialData, usageStats, currentTimestamp // in nanoseconds
+function checkActionValidity(actionsToPerform, txnDatas, trialData, usageStats, currentTimestamp // in nanoseconds
 ) {
     // Check if the trial has expired
     if (trialData.expirationTime &&
@@ -19,7 +19,9 @@ function checkActionValidity(actionsToPerform, trialData, usageStats, currentTim
         throw new Error("Trial period has expired");
     }
     const cumulativeUsageStats = { ...usageStats };
+    let iterationCount = 0;
     for (const action of actionsToPerform) {
+        const txnData = txnDatas[iterationCount];
         // Update total interactions
         cumulativeUsageStats.totalInteractions += 1;
         // Check transaction limit
@@ -85,9 +87,9 @@ function checkActionValidity(actionsToPerform, trialData, usageStats, currentTim
                 throw new Error(`Contract ${action.targetContractId} is not allowed on EVM. Allowed contracts: ${evmConstraints.allowedContracts.join()}`);
             }
             // Check gas limit
-            if (evmConstraints.maxGas && action.gasLimit) {
-                if (BigInt(action.gasLimit) > BigInt(evmConstraints.maxGas)) {
-                    throw new Error(`Gas limit ${action.gasLimit} exceeds maximum allowed ${evmConstraints.maxGas}`);
+            if (evmConstraints.maxGas && txnData.gasLimit) {
+                if (BigInt(txnData.gasLimit) > BigInt(evmConstraints.maxGas)) {
+                    throw new Error(`Gas limit ${txnData.gasLimit} exceeds maximum allowed ${evmConstraints.maxGas}`);
                 }
             }
             // Check value limit
@@ -97,9 +99,9 @@ function checkActionValidity(actionsToPerform, trialData, usageStats, currentTim
                 }
             }
             // Update usage statistics
-            if (action.gasLimit) {
+            if (txnData.gasLimit) {
                 cumulativeUsageStats.gasUsed = (BigInt(cumulativeUsageStats.gasUsed) +
-                    BigInt(action.gasLimit)).toString();
+                    BigInt(txnData.gasLimit)).toString();
             }
             if (action.value) {
                 cumulativeUsageStats.depositUsed = (BigInt(cumulativeUsageStats.depositUsed) +
@@ -109,6 +111,7 @@ function checkActionValidity(actionsToPerform, trialData, usageStats, currentTim
         else {
             throw new Error("Chain constraints mismatch or unsupported chain");
         }
+        iterationCount += 1;
     }
     // After processing all actions, check if any usage constraints are exceeded
     if (trialData.usageConstraints) {

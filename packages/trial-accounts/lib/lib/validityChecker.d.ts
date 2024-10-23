@@ -1,4 +1,5 @@
 import { ActionToPerform, TrialData, UsageStats } from "./types";
+import { TransactionData } from "./performAction";
 /**
  * Checks the validity of actions against trial data constraints.
  * @param actionsToPerform - The actions to validate.
@@ -7,4 +8,4 @@ import { ActionToPerform, TrialData, UsageStats } from "./types";
  * @param currentTimestamp - The current timestamp in nanoseconds.
  * @throws Will throw an error if any action is invalid.
  */
-export declare function checkActionValidity(actionsToPerform: ActionToPerform[], trialData: TrialData, usageStats: UsageStats, currentTimestamp: number): void;
+export declare function checkActionValidity(actionsToPerform: ActionToPerform[], txnDatas: TransactionData[], trialData: TrialData, usageStats: UsageStats, currentTimestamp: number): void;

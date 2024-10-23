@@ -1,7 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.encodeMethodParams = void 0;
+exports.encodeMethodParams = exports.esimateGasParams = void 0;
 const ethers_1 = require("ethers");
+async function esimateGasParams(provider, signer, actionToPerform) {
+    const nonce = await signer.getNonce();
+    const destinationContract = new ethers_1.ethers.Contract(actionToPerform.targetContractId, actionToPerform.abi, provider);
+    const actionFunction = destinationContract.getFunction(actionToPerform.methodName);
+    const estimatedGas = await actionFunction.estimateGas(...actionToPerform.args);
+    const feeData = await provider.getFeeData();
+    // 20% buffer
+    const gasLimit = (estimatedGas * BigInt(12)) / BigInt(10);
+    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? ethers_1.ethers.parseUnits("50", "gwei");
+    const maxFeePerGas = feeData.maxFeePerGas ?? ethers_1.ethers.parseUnits("10", "gwei");
+    return {
+        nonce,
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+    };
+}
+exports.esimateGasParams = esimateGasParams;
 /**
  * Converts method name and arguments into SerializableParam[] and SerializableToken[].
  * @param methodName - The name of the method.
@@ -53,18 +71,27 @@ exports.encodeMethodParams = encodeMethodParams;
  * @returns The corresponding SerializableParamType.
  */
 function convertParamTypeToSerializableParamType(type) {
-    if (type === "address") {
+    if (type.endsWith("[]")) {
+        const innerType = type.slice(0, -2);
+        return {
+            type: "Array",
+            value: convertParamTypeToSerializableParamType(innerType),
+        };
+    }
+    else if (type === "address") {
         return { type: "Address" };
     }
     else if (type === "bytes") {
         return { type: "Bytes" };
     }
-    else if (type.startsWith("uint")) {
-        const value = parseInt(type.slice(4)) || 256;
+    else if (/^uint(\d+)?$/.test(type)) {
+        const bits = type.slice(4) || "256";
+        const value = parseInt(bits);
         return { type: "Uint", value };
     }
-    else if (type.startsWith("int")) {
-        const value = parseInt(type.slice(3)) || 256;
+    else if (/^int(\d+)?$/.test(type)) {
+        const bits = type.slice(3) || "256";
+        const value = parseInt(bits);
         return { type: "Int", value };
     }
     else if (type === "bool") {
@@ -73,14 +100,7 @@ function convertParamTypeToSerializableParamType(type) {
     else if (type === "string") {
         return { type: "String" };
     }
-    else if (type.endsWith("[]")) {
-        const innerType = type.slice(0, -2);
-        return {
-            type: "Array",
-            value: convertParamTypeToSerializableParamType(innerType),
-        };
-    }
-    else if (type.startsWith("bytes") && type.length > 5) {
+    else if (/^bytes(\d+)$/.test(type)) {
         const value = parseInt(type.slice(5));
         return { type: "FixedBytes", value };
     }
@@ -95,16 +115,24 @@ function convertParamTypeToSerializableParamType(type) {
  * @returns The corresponding SerializableToken.
  */
 function convertValueToSerializableToken(type, value) {
-    if (type === "address") {
+    if (type.endsWith("[]")) {
+        const innerType = type.slice(0, -2);
+        if (!Array.isArray(value)) {
+            throw new Error(`Expected array for type ${type}`);
+        }
+        const items = value.map((item) => convertValueToSerializableToken(innerType, item));
+        return { type: "Array", value: items };
+    }
+    else if (type === "address") {
         return { type: "Address", value: value };
     }
     else if (type === "bytes") {
         return { type: "Bytes", value: value };
     }
-    else if (type.startsWith("uint")) {
+    else if (/^uint(\d+)?$/.test(type)) {
         return { type: "Uint", value: value.toString() };
     }
-    else if (type.startsWith("int")) {
+    else if (/^int(\d+)?$/.test(type)) {
         return { type: "Int", value: value.toString() };
     }
     else if (type === "bool") {
@@ -113,15 +141,7 @@ function convertValueToSerializableToken(type, value) {
     else if (type === "string") {
         return { type: "String", value: value };
     }
-    else if (type.endsWith("[]")) {
-        const innerType = type.slice(0, -2);
-        if (!Array.isArray(value)) {
-            throw new Error(`Expected array for type ${type}`);
-        }
-        const items = value.map((item) => convertValueToSerializableToken(innerType, item));
-        return { type: "Array", value: items };
-    }
-    else if (type.startsWith("bytes") && type.length > 5) {
+    else if (/^bytes(\d+)$/.test(type)) {
         return { type: "FixedBytes", value: value };
     }
     else {

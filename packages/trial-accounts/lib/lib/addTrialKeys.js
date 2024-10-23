@@ -13,7 +13,6 @@ const near_1 = require("./networks/near");
  */
 async function addTrialAccounts(params) {
     const { signerAccount, trialContractId, mpcContractId, trialId, numberOfKeys, } = params;
-    console.log(`Adding ${numberOfKeys} trial accounts...`);
     const trialKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
         // Generate a new key pair
@@ -28,7 +27,6 @@ async function addTrialAccounts(params) {
                 predecessor: trialContractId,
             },
         });
-        console.log(`Derived MPC public key: ${mpcPublicKey}`);
         trialKeys.push({
             derivationPath,
             trialAccountSecretKey: keyPair.toString(),
@@ -54,7 +52,6 @@ async function addTrialAccounts(params) {
         gas: "300000000000000",
     });
     if (result) {
-        console.log("Trial keys added successfully.");
         return trialKeys;
     }
     else {

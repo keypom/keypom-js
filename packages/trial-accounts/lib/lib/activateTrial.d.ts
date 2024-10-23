@@ -5,6 +5,7 @@ interface ActivateTrialAccountsParams {
     trialContractId: string;
     trialAccountIds: string[];
     trialAccountSecretKeys: KeyPairString[];
+    chainIds: string[];
 }
 /**
  * Activates trial accounts on the trial contract.

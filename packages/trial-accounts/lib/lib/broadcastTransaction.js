@@ -20,22 +20,21 @@ const ethers_1 = require("ethers");
  * @throws Will throw an error if broadcasting fails.
  */
 async function broadcastTransaction(params) {
-    const { signerAccount, actionToPerform, signatureResult, nonce, blockHash, mpcPublicKey, } = params;
+    const { nearConnection, signerAccountId, actionToPerform, signatureResult, providerUrl, chainId, txnData, mpcPublicKey, } = params;
     if (actionToPerform.chain === "NEAR") {
+        if (signatureResult instanceof Uint8Array) {
+            throw new Error("Signature result must be a string");
+        }
         const { targetContractId, methodName, args, gas, attachedDepositNear } = actionToPerform;
         const serializedArgs = new Uint8Array(Buffer.from(JSON.stringify(args)));
+        const signerAccount = await nearConnection.account(signerAccountId);
         const provider = signerAccount.connection.provider;
-        const blockHashBytes = bs58_1.default.decode(blockHash);
+        const blockHashBytes = bs58_1.default.decode(txnData.blockHash);
         const actions = [
             transactions_1.actionCreators.functionCall(methodName, serializedArgs, BigInt(gas), BigInt((0, utils_1.parseNearAmount)(attachedDepositNear))),
         ];
         const mpcPubKey = crypto_1.PublicKey.fromString(mpcPublicKey);
-        const signerAccountId = signerAccount.accountId;
-        const transaction = (0, transactions_1.createTransaction)(signerAccountId, mpcPubKey, targetContractId, nonce, actions, blockHashBytes);
-        // Hash the transaction to get the message to sign
-        const serializedTx = transaction.encode();
-        const txHash = (0, cryptoUtils_1.hashTransaction)(serializedTx);
-        console.log(`=== Message to sign: ${txHash} ===`);
+        const transaction = (0, transactions_1.createTransaction)(signerAccountId, mpcPubKey, targetContractId, txnData.nonce, actions, blockHashBytes);
         // Create the signature
         let r = signatureResult.big_r.affine_point;
         let s = signatureResult.s.scalar;
@@ -46,19 +45,90 @@ async function broadcastTransaction(params) {
         });
         // Send the signed transaction
         (0, logUtils_1.logInfo)(`=== Sending NEAR Transaction ===`);
-        return await provider.sendTransaction(signedTransaction);
+        const result = await provider.sendTransaction(signedTransaction);
+        return { result, clientLog: "" };
     }
     else if (actionToPerform.chain === "EVM") {
-        // Implement logic to broadcast EVM transactions using ethers.js
-        const provider = new ethers_1.ethers.JsonRpcProvider( /* RPC URL */);
-        const wallet = new ethers_1.ethers.Wallet(mpcPublicKey, provider);
-        console.log(`wallet: ${wallet.address}`);
+        if (!providerUrl) {
+            throw new Error("providerUrl is required for EVM transactions");
+        }
+        // Initialize provider
+        const provider = new ethers_1.JsonRpcProvider(providerUrl, parseInt(chainId, 10));
+        // Encode function call data
+        const contractInterface = new ethers_1.Interface(actionToPerform.abi);
+        const functionData = contractInterface.getFunction(actionToPerform.methodName, actionToPerform.args);
+        const data = contractInterface.encodeFunctionData(actionToPerform.methodName, actionToPerform.args);
+        // Construct transaction data
+        const transactionData = {
+            nonce: parseInt(txnData.nonce, 10),
+            gasLimit: BigInt(txnData.gasLimit),
+            maxFeePerGas: BigInt(txnData.maxFeePerGas),
+            maxPriorityFeePerGas: BigInt(txnData.maxPriorityFeePerGas),
+            to: actionToPerform.targetContractId,
+            data: data,
+            value: BigInt(actionToPerform.value || "0"),
+            chainId: parseInt(chainId, 10),
+            type: 2,
+            accessList: actionToPerform.accessList || [],
+        };
+        // Create Transaction object
+        const tx = ethers_1.Transaction.from(transactionData);
+        // Get the serialized transaction
+        const unsignedTx = tx.unsignedSerialized;
+        const txHash = ethers_1.ethers.keccak256(unsignedTx);
+        const payload = (0, ethers_1.getBytes)(txHash);
+        // Log transaction information
+        const clientLog = {};
+        clientLog["Chain ID"] = parseInt(chainId, 10);
+        clientLog["Nonce"] = parseInt(txnData.nonce, 10);
+        clientLog["Max Priority Fee Per Gas"] = BigInt(txnData.maxPriorityFeePerGas).toString();
+        clientLog["Max Fee Per Gas"] = BigInt(txnData.maxFeePerGas).toString();
+        clientLog["Gas Limit"] = BigInt(txnData.gasLimit || "0").toString();
+        // Convert the contract address, input data, and hashed payload to arrays of numbers
+        clientLog["Contract Address"] = hexStringToNumberArray(actionToPerform.targetContractId);
+        clientLog["Value"] = BigInt(actionToPerform.value || "0").toString();
+        clientLog["Input Data"] = hexStringToNumberArray(data);
+        clientLog["Access List"] = actionToPerform.accessList || [];
+        clientLog["Function"] = functionData; // This will stay as an object
+        clientLog["ABI Parameters"] = contractInterface.getAbiCoder();
+        clientLog["ABI Args"] = JSON.stringify(actionToPerform.args);
+        clientLog["Hashed Payload"] = hexStringToNumberArray(txHash);
+        clientLog["TXN Bytes"] = hexStringToNumberArray(unsignedTx);
+        const sig = ethers_1.ethers.Signature.from({
+            r: "0x" +
+                signatureResult.big_r.affine_point.substring(2).toLowerCase(),
+            s: "0x" + signatureResult.s.scalar.toLowerCase(),
+            v: signatureResult.recovery_id,
+        });
+        tx.signature = sig;
+        const recoveryAddress = (0, ethers_1.recoverAddress)(payload, sig);
         // Send the signed transaction
         (0, logUtils_1.logInfo)(`=== Sending EVM Transaction ===`);
-        return await provider.broadcastTransaction("");
+        if (recoveryAddress.toLowerCase() !== signerAccountId.toLowerCase()) {
+            throw new Error(`Recovery address ${recoveryAddress} does not match signer address ${signerAccountId}`);
+        }
+        else {
+            (0, logUtils_1.logSuccess)(`Recovery address ${recoveryAddress} matches signer address ${signerAccountId}`);
+        }
+        (0, logUtils_1.logInfo)(`Sending transaction from: ${recoveryAddress}`);
+        const result = await provider.send("eth_sendRawTransaction", [
+            tx.serialized,
+        ]);
+        return { result, clientLog };
     }
     else {
         throw new Error(`Unsupported chain type: ${actionToPerform.chain}`);
     }
 }
 exports.broadcastTransaction = broadcastTransaction;
+// Helper function to convert hex string (e.g. "0x...") to an array of numbers
+function hexStringToNumberArray(hexString) {
+    if (hexString.startsWith("0x")) {
+        hexString = hexString.slice(2);
+    }
+    const bytes = [];
+    for (let i = 0; i < hexString.length; i += 2) {
+        bytes.push(parseInt(hexString.substr(i, 2), 16));
+    }
+    return bytes;
+}

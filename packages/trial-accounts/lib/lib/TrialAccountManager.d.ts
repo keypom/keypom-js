@@ -2,6 +2,7 @@ import { Account } from "@near-js/accounts";
 import { KeyPairString } from "@near-js/crypto";
 import { Near } from "@near-js/wallet-account";
 import { ActionToPerform, TrialData, TrialKey, MPCSignature, TrialAccountInfo } from "./types";
+import { TransactionData } from "./performAction";
 import { TransactionResponse } from "ethers";
 import { FinalExecutionOutcome } from "@near-js/types";
 /**
@@ -80,10 +81,10 @@ export declare class TrialAccountManager {
      * @param actionsToPerform - Array of actions to perform.
      * @returns A Promise that resolves with signatures, nonces, and block hash.
      */
-    performActions(actionsToPerform: ActionToPerform[]): Promise<{
+    performActions(actionsToPerform: ActionToPerform[], evmProviderUrl?: string): Promise<{
         signatures: MPCSignature[];
-        nonces: string[];
-        blockHash: string;
+        txnDatas: TransactionData[];
+        contractLogs: string[];
     }>;
     /**
      * Broadcasts a signed transaction to the NEAR or EVM network with retry logic.
@@ -94,15 +95,25 @@ export declare class TrialAccountManager {
     broadcastTransaction(params: {
         actionToPerform: ActionToPerform;
         signatureResult: MPCSignature;
-        nonce: string;
-        blockHash: string;
-    }): Promise<TransactionResponse | FinalExecutionOutcome>;
+        signerAccountId: string;
+        providerUrl?: string;
+        txnData: TransactionData;
+    }): Promise<{
+        result: TransactionResponse | FinalExecutionOutcome;
+        clientLog: any;
+    }>;
     /**
      * Retrieves the trial account info and converts it to camelCase with retry logic.
      *
      * @returns A Promise that resolves to the trial data in camelCase format.
      */
     getTrialData(): Promise<TrialAccountInfo>;
+    /**
+     * Retrieves the account ID for the given chain ID
+     *
+     * @returns A Promise that resolves to the accountId
+     */
+    getTrialAccountIdForChain(trialAccountSecretKey: KeyPairString, chainId: string): Promise<string>;
     /**
      * Derives the ETH address from the passed in derivation path.
      * @param trialSecretKey - The secret key for the trial account.

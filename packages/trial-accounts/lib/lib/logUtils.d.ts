@@ -20,11 +20,6 @@ export declare function logInfo(message: string): void;
  * @returns An array of log strings.
  */
 export declare function extractLogsFromResult(result: any): string[];
-/**
- * Parses a single contract log into a structured object.
- * @param log - The log string to parse.
- * @returns A parsed log object or null if parsing fails.
- */
 export declare function parseContractLog(log: string): any;
 /**
  * Parses the Actions string from a contract log.
@@ -32,11 +27,3 @@ export declare function parseContractLog(log: string): any;
  * @returns An array of parsed action objects.
  */
 export declare function parseActionsString(actionsStr: string): any[];
-/**
- * Compares two values and logs the result.
- * @param field - The name of the field being compared.
- * @param expected - The expected value.
- * @param actual - The actual value.
- * @param parseFunction - Optional function to parse or format values before comparison.
- */
-export declare function compareAndLog<T>(field: string, expected: T, actual: T, parseFunction?: (value: T) => any): void;

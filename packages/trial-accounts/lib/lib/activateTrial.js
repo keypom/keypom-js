@@ -13,11 +13,10 @@ const near_1 = require("./networks/near");
  */
 async function activateTrialAccounts(params) {
     const { trialContractId, trialAccountIds, near, trialAccountSecretKeys } = params;
-    console.log("Activating trial accounts...");
     for (let i = 0; i < trialAccountIds.length; i++) {
         const trialAccountId = trialAccountIds[i];
         const trialKey = trialAccountSecretKeys[i];
-        console.log(`Activating trial account: ${trialAccountId}`);
+        const chainId = params.chainIds[i];
         // Set the trial key in the keyStore
         const keyStore = near.connection.signer.keyStore;
         await keyStore.setKey(near.connection.networkId, trialContractId, crypto_1.KeyPair.fromString(trialKey));
@@ -28,14 +27,12 @@ async function activateTrialAccounts(params) {
             methodName: "activate_trial",
             args: {
                 new_account_id: trialAccountId,
+                chain_id: chainId.toString(),
             },
             deposit: "0",
             gas: "300000000000000",
         });
-        if (result) {
-            console.log(`Trial account ${trialAccountId} activated.`);
-        }
-        else {
+        if (!result) {
             throw new Error(`Failed to activate trial account: ${trialAccountId}`);
         }
     }
