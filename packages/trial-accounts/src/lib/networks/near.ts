@@ -41,14 +41,19 @@ export async function sendTransaction({
     );
 
     let result: any;
+    console.log("Signer account", signerAccount);
     if (isAccount(signerAccount)) {
+        console.log("is Account");
         result = await signerAccount.signAndSendTransaction({
             receiverId: receiverId,
             actions,
         });
     } else {
+        console.log("Is wallet");
+        console.log("actions", actions);
         const transformedActions =
             transformAccountActionsToWalletActions(actions);
+        console.log("transformedActions", transformedActions);
         result = await signerAccount.signAndSendTransaction({
             receiverId: receiverId,
             actions: transformedActions,
@@ -68,18 +73,18 @@ function transformAccountActionsToWalletActions(
 ): WalletAction[] {
     return accountActions.map((action) => {
         switch (action.enum) {
-            case "CreateAccount":
+            case "createAccount":
                 return {
                     type: "CreateAccount",
                 };
-            case "DeployContract":
+            case "deployContract":
                 return {
                     type: "DeployContract",
                     params: {
                         code: action.deployContract!.code,
                     },
                 };
-            case "FunctionCall":
+            case "functionCall":
                 return {
                     type: "FunctionCall",
                     params: {
@@ -93,14 +98,14 @@ function transformAccountActionsToWalletActions(
                         deposit: action.functionCall!.deposit.toString(),
                     },
                 };
-            case "Transfer":
+            case "transfer":
                 return {
                     type: "Transfer",
                     params: {
                         deposit: action.transfer!.deposit.toString(),
                     },
                 };
-            case "Stake":
+            case "stake":
                 return {
                     type: "Stake",
                     params: {
@@ -108,7 +113,7 @@ function transformAccountActionsToWalletActions(
                         publicKey: action.stake!.publicKey.toString(),
                     },
                 };
-            case "AddKey":
+            case "addKey":
                 return {
                     type: "AddKey",
                     params: {
@@ -131,14 +136,14 @@ function transformAccountActionsToWalletActions(
                         },
                     },
                 };
-            case "DeleteKey":
+            case "deleteKey":
                 return {
                     type: "DeleteKey",
                     params: {
                         publicKey: action.deleteKey!.publicKey.toString(),
                     },
                 };
-            case "DeleteAccount":
+            case "deleteAccount":
                 return {
                     type: "DeleteAccount",
                     params: {

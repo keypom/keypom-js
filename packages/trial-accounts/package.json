@@ -1,6 +1,6 @@
 {
     "name": "@keypom/trial-accounts",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Core library for interacting with and creating Multichain Trial Accounts",
     "main": "lib/index.js",
     "scripts": {
