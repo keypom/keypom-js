@@ -15,7 +15,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TrialAccountManager = void 0;
+exports.setupKeypomTrialSelector = exports.TrialAccountManager = void 0;
 /**
  * Main entry point for the Trial Accounts package.
  *
@@ -27,5 +27,7 @@ exports.TrialAccountManager = void 0;
  */
 var TrialAccountManager_1 = require("./lib/TrialAccountManager");
 Object.defineProperty(exports, "TrialAccountManager", { enumerable: true, get: function () { return TrialAccountManager_1.TrialAccountManager; } });
+var setup_1 = require("./lib/wallet-selector/setup");
+Object.defineProperty(exports, "setupKeypomTrialSelector", { enumerable: true, get: function () { return setup_1.setupKeypomTrialSelector; } });
 // Export types for user convenience
 __exportStar(require("./lib/types"), exports);

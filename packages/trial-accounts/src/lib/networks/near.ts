@@ -157,3 +157,17 @@ function transformAccountActionsToWalletActions(
         }
     });
 }
+
+export function isFinalExecutionOutcome(
+    result: any
+): result is FinalExecutionOutcome {
+    return (
+        result &&
+        typeof result === "object" &&
+        "final_execution_status" in result &&
+        "status" in result &&
+        "transaction" in result &&
+        "transaction_outcome" in result &&
+        "receipts_outcome" in result
+    );
+}

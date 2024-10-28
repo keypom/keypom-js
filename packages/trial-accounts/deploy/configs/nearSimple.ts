@@ -5,7 +5,7 @@ import path from "path";
 import os from "os";
 import { Config } from "./type";
 import { TrialData, ActionToPerform } from "../../src/index";
-import { parseNearAmount } from "@near-js/utils";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 const homedir = os.homedir();
 const CREDENTIALS_DIR = ".near-credentials";

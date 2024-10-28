@@ -8,4 +8,5 @@
  * @packageDocumentation
  */
 export { TrialAccountManager } from "./lib/TrialAccountManager";
+export { setupKeypomTrialSelector } from "./lib/wallet-selector/setup";
 export * from "./lib/types";

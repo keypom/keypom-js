@@ -8,3 +8,4 @@ export declare function sendTransaction({ signerAccount, receiverId, methodName,
     deposit: string;
     gas: string;
 }): Promise<FinalExecutionOutcome>;
+export declare function isFinalExecutionOutcome(result: any): result is FinalExecutionOutcome;

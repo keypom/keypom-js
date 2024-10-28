@@ -6,18 +6,39 @@ import {
 } from "@near-wallet-selector/core";
 import {
     KEYPOM_LOCAL_STORAGE_KEY,
+    getLocalStorageKeypomEnv,
     setLocalStorageKeypomEnv,
+    parseOneClickSignInFromUrl,
+    getNetworkPreset,
     NO_CONTRACT_ID,
     KeypomWalletAccount,
     getPubFromSecret,
 } from "../utils/selector-utils";
-import { extSignAndSendTransactions } from "./ext_wallets";
+import {
+    SUPPORTED_EXT_WALLET_DATA,
+    extSignAndSendTransactions,
+} from "./ext_wallets";
 
 export class KeypomWallet implements InstantLinkWalletBehaviour {
     networkId: NetworkId;
-    trialAccountSecretKey: KeyPairString;
+    accountId: string;
+    walletId: string;
+    baseUrl: string;
+
+    nearConnection: nearAPI.Near;
     keyStore: nearAPI.keyStores.BrowserLocalStorageKeyStore;
+
+    // Initialized in signIn
+    contractId: string;
+    secretKey?: string;
+
     signedIn: boolean;
+
+    walletUrl?: string;
+    addKey: boolean;
+    methodNames: string[];
+    allowance: string;
+    chainId: string;
 
     public constructor({
         networkId,

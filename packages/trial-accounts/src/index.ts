@@ -11,6 +11,7 @@
  */
 
 export { TrialAccountManager } from "./lib/TrialAccountManager";
+export { setupKeypomTrialSelector } from "./lib/wallet-selector/setup";
 
 // Export types for user convenience
 export * from "./lib/types";

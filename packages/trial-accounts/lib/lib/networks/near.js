@@ -1,7 +1,7 @@
 "use strict";
 // networks/utils.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendTransaction = void 0;
+exports.isFinalExecutionOutcome = exports.sendTransaction = void 0;
 const transaction_1 = require("near-api-js/lib/transaction");
 const format_1 = require("near-api-js/lib/utils/format");
 const near_api_js_1 = require("near-api-js");
@@ -113,3 +113,13 @@ function transformAccountActionsToWalletActions(accountActions) {
         }
     });
 }
+function isFinalExecutionOutcome(result) {
+    return (result &&
+        typeof result === "object" &&
+        "final_execution_status" in result &&
+        "status" in result &&
+        "transaction" in result &&
+        "transaction_outcome" in result &&
+        "receipts_outcome" in result);
+}
+exports.isFinalExecutionOutcome = isFinalExecutionOutcome;
