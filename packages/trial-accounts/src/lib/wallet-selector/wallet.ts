@@ -64,14 +64,16 @@ export class KeypomTrialSelector implements InstantLinkWalletBehaviour {
     }
 
     async signAndSendTransaction(params: any) {
+        console.log("Sign and send transaction", params);
         const actionToPerform: ActionToPerform = {
-            chain: "NEAR",
-            methodName: params.actions[0].methodName,
-            args: params.actions[0].args,
-            targetContractId: params.receiverId!,
-            attachedDepositNear: params.actions[0].deposit || "0",
-            gas: params.actions[0].gas || "30000000000000",
+            chain: "NEAR" as ChainType,
+            methodName: params.actions[0].params.methodName,
+            args: params.actions[0].params.args,
+            targetContractId: params.receiverId,
+            attachedDepositNear: params.actions[0].params.deposit || "0",
+            gas: params.actions[0].params.gas || "30000000000000",
         };
+        console.log("Action to perform", actionToPerform);
 
         const { signatures, txnDatas } = await this.trialManager.performActions(
             {
@@ -86,6 +88,7 @@ export class KeypomTrialSelector implements InstantLinkWalletBehaviour {
             signatureResult: signatures[0],
             txnData: txnDatas[0],
         });
+        console.log("Result", result);
 
         return isFinalExecutionOutcome(result)
             ? (result as FinalExecutionOutcome)
@@ -93,6 +96,7 @@ export class KeypomTrialSelector implements InstantLinkWalletBehaviour {
     }
 
     async signAndSendTransactions(params: { transactions: Transaction[] }) {
+        console.log("Sign and send transactions", params);
         const transactionResults: FinalExecutionOutcome[] = [];
 
         for (const tx of params.transactions) {
@@ -108,6 +112,7 @@ export class KeypomTrialSelector implements InstantLinkWalletBehaviour {
                 attachedDepositNear: tx.actions[0].params.deposit || "0",
                 gas: tx.actions[0].params.gas || "30000000000000",
             };
+            console.log("Action to perform", actionToPerform);
 
             const { signatures, txnDatas } =
                 await this.trialManager.performActions({
@@ -121,6 +126,7 @@ export class KeypomTrialSelector implements InstantLinkWalletBehaviour {
                 signatureResult: signatures[0],
                 txnData: txnDatas[0],
             });
+            console.log("Result", result);
 
             if (isFinalExecutionOutcome(result)) {
                 transactionResults.push(result as FinalExecutionOutcome);
