@@ -1,5 +1,5 @@
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Near } from "@near-js/wallet-account";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import { Near } from "near-api-js";
 import { Config } from "../configs/type";
 
 /**

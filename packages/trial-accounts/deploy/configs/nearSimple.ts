@@ -1,6 +1,6 @@
 // src/configs/simple.ts
 
-import { UnencryptedFileSystemKeyStore } from "@near-js/keystores-node";
+import { UnencryptedFileSystemKeyStore } from "near-api-js/lib/key_stores";
 import path from "path";
 import os from "os";
 import { Config } from "./type";

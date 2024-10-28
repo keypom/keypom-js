@@ -1,9 +1,5 @@
-import {
-    InstantLinkWallet,
-    Network,
-    NetworkId,
-} from "@near-wallet-selector/core";
-import { KeypomWallet } from "./wallet";
+import { InstantLinkWallet, NetworkId } from "@near-wallet-selector/core";
+import { KeypomTrialSelector } from "./wallet";
 
 export const FAILED_EXECUTION_OUTCOME: any = {
     final_execution_status: "NONE",
@@ -57,7 +53,7 @@ export interface SignInOptions {
 }
 
 export interface KeypomInitializeOptions {
-    keypomWallet: KeypomWallet;
+    keypomWallet: KeypomTrialSelector;
 }
 
 export interface OneClickParams {
@@ -88,26 +84,3 @@ export type AddKeyPermission =
           allowance?: string;
           methodNames?: Array<string>;
       };
-
-export const getNetworkPreset = (networkId: NetworkId): Network => {
-    switch (networkId) {
-        case "mainnet":
-            return {
-                networkId,
-                nodeUrl: "https://rpc.mainnet.near.org",
-                helperUrl: "https://helper.mainnet.near.org",
-                explorerUrl: "https://nearblocks.io",
-                indexerUrl: "https://api.kitwallet.app",
-            };
-        case "testnet":
-            return {
-                networkId,
-                nodeUrl: "https://rpc.testnet.near.org",
-                helperUrl: "https://helper.testnet.near.org",
-                explorerUrl: "https://testnet.nearblocks.io",
-                indexerUrl: "https://testnet-api.kitwallet.app",
-            };
-        default:
-            throw Error(`Failed to find config for: '${networkId}'`);
-    }
-};

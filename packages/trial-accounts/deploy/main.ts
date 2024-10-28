@@ -6,12 +6,11 @@ import path from "path";
 import fs from "fs";
 import { logError, logInfo, logSuccess } from "./utils/logUtils";
 import { initNear, isFinalExecutionOutcome } from "./utils/nearUtils";
-import { FinalExecutionOutcome } from "@near-js/types";
 import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
 import { getSponsorEVMWallet } from "./utils/evmUtils";
 import { Config } from "./configs/type";
-import { NetworkId } from "@near-wallet-selector/core";
+import { FinalExecutionOutcome, NetworkId } from "@near-wallet-selector/core";
 
 // Load environment variables from .env file
 loadEnv();

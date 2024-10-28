@@ -6,7 +6,6 @@ import path from "path";
 import fs from "fs";
 import { logError, logInfo, logSuccess } from "./utils/logUtils";
 import { isFinalExecutionOutcome } from "./utils/nearUtils";
-import { FinalExecutionOutcome } from "@near-js/types";
 import { TransactionResponse } from "ethers";
 import { config as loadEnv } from "dotenv";
 import { TransactionData } from "../src/lib/performAction";
