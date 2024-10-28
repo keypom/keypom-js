@@ -2,8 +2,6 @@
 // lib/TrialAccountManager.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrialAccountManager = void 0;
-const crypto_1 = require("@near-js/crypto");
-const wallet_account_1 = require("@near-js/wallet-account");
 const types_1 = require("./types");
 const createTrial_1 = require("./createTrial");
 const activateTrial_1 = require("./activateTrial");
@@ -11,8 +9,10 @@ const addTrialKeys_1 = require("./addTrialKeys");
 const performAction_1 = require("./performAction");
 const broadcastTransaction_1 = require("./broadcastTransaction");
 const kdf_1 = require("./mpcUtils/kdf");
-const keystores_1 = require("@near-js/keystores");
 const near_1 = require("./networks/near");
+const near_api_js_1 = require("near-api-js");
+const key_stores_1 = require("near-api-js/lib/key_stores");
+const utils_1 = require("near-api-js/lib/utils");
 /**
  * Class to manage trial accounts and trials.
  * Provides methods to create trials, add trial accounts,
@@ -29,10 +29,10 @@ class TrialAccountManager {
         this.maxRetries = params.maxRetries ?? 3; // Default to 3 retries
         this.initialDelayMs = params.initialDelayMs ?? 1000; // Default to 1 second
         this.backoffFactor = params.backoffFactor ?? 2; // Default backoff factor of 2
-        const near = new wallet_account_1.Near({
+        const near = new near_api_js_1.Near({
             networkId: params.networkId,
             nodeUrl: "https://rpc.testnet.near.org",
-            keyStore: new keystores_1.InMemoryKeyStore(),
+            keyStore: new key_stores_1.InMemoryKeyStore(),
         });
         this.near = near;
     }
@@ -162,7 +162,7 @@ class TrialAccountManager {
         });
         // Set the trial key in the keyStore
         const keyStore = this.near.connection.signer.keyStore;
-        await keyStore.setKey(this.near.connection.networkId, this.trialContractId, crypto_1.KeyPair.fromString(trialAccountSecretKey));
+        await keyStore.setKey(this.near.connection.networkId, this.trialContractId, utils_1.KeyPair.fromString(trialAccountSecretKey));
         // set the signer to the trial contract to actually perform the call_*_contract methods using the proxy key
         const signerAccount = await this.near.account(this.trialContractId);
         const signatures = await retryAsync(async () => {
@@ -239,7 +239,7 @@ class TrialAccountManager {
      */
     async getTrialData(trialSecretKey) {
         return retryAsync(async () => {
-            const trialPubKey = crypto_1.KeyPair.fromString(trialSecretKey)
+            const trialPubKey = utils_1.KeyPair.fromString(trialSecretKey)
                 .getPublicKey()
                 .toString();
             // Retrieve trial account info from the contract
@@ -262,7 +262,7 @@ class TrialAccountManager {
      */
     async getTrialAccountIdForChain(trialAccountSecretKey, chainId) {
         return retryAsync(async () => {
-            const trialPubKey = crypto_1.KeyPair.fromString(trialAccountSecretKey)
+            const trialPubKey = utils_1.KeyPair.fromString(trialAccountSecretKey)
                 .getPublicKey()
                 .toString();
             // Retrieve trial account info from the contract
@@ -284,7 +284,7 @@ class TrialAccountManager {
      * @returns The ETH address.
      */
     async deriveEthAddress(trialSecretKey) {
-        const path = crypto_1.KeyPair.fromString(trialSecretKey)
+        const path = utils_1.KeyPair.fromString(trialSecretKey)
             .getPublicKey()
             .toString();
         const rootKey = await this.viewFunction({

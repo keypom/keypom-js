@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractSignatureFromResult = exports.generateActionArgs = void 0;
 const evmUtils_1 = require("./evmUtils");
-const utils_1 = require("@near-js/utils");
 const ethers_1 = require("ethers");
 const validityChecker_1 = require("./validityChecker");
+const format_1 = require("near-api-js/lib/utils/format");
 /**
  * Performs one or more actions by requesting signatures from the MPC.
  *
@@ -46,7 +46,7 @@ async function generateActionArgs(params) {
                 method_name: actionToPerform.methodName,
                 args: serializedArgs,
                 gas: actionToPerform.gas,
-                deposit: (0, utils_1.parseNearAmount)(actionToPerform.attachedDepositNear),
+                deposit: (0, format_1.parseNearAmount)(actionToPerform.attachedDepositNear),
                 nonce: nonce.toString(),
                 block_hash: blockHash,
             });

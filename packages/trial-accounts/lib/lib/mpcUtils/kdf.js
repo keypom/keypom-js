@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uncompressedHexPointToEvmAddress = exports.deriveChildPublicKey = exports.najPublicKeyStrToUncompressedHexPoint = void 0;
 const js_sha3_1 = require("js-sha3");
 const elliptic_1 = require("elliptic");
-const utils_1 = require("@near-js/utils");
 const ethers_1 = require("ethers");
+const serialize_1 = require("near-api-js/lib/utils/serialize");
 function najPublicKeyStrToUncompressedHexPoint(najPublicKeyStr) {
-    const decodedKey = (0, utils_1.baseDecode)(najPublicKeyStr.split(":")[1]);
+    const decodedKey = (0, serialize_1.base_decode)(najPublicKeyStr.split(":")[1]);
     return "04" + Buffer.from(decodedKey).toString("hex");
 }
 exports.najPublicKeyStrToUncompressedHexPoint = najPublicKeyStrToUncompressedHexPoint;

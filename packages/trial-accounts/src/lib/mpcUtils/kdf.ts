@@ -1,12 +1,12 @@
 import { sha3_256 } from "js-sha3";
 import { ec as EC } from "elliptic";
-import { baseDecode } from "@near-js/utils";
 import { keccak256 } from "ethers";
+import { base_decode } from "near-api-js/lib/utils/serialize";
 
 export function najPublicKeyStrToUncompressedHexPoint(
     najPublicKeyStr: string
 ): string {
-    const decodedKey = baseDecode(najPublicKeyStr.split(":")[1]!);
+    const decodedKey = base_decode(najPublicKeyStr.split(":")[1]!);
     return "04" + Buffer.from(decodedKey).toString("hex");
 }
 

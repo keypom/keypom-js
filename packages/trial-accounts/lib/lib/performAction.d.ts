@@ -1,5 +1,5 @@
 import { ActionToPerform, MPCSignature, TrialAccountInfo } from "./types";
-import { Near } from "@near-js/wallet-account";
+import { Near } from "near-api-js";
 export interface TransactionData {
     nonce: string;
     maxFeePerGas?: string;

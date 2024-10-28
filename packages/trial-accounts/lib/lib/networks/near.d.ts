@@ -1,5 +1,5 @@
-import { FinalExecutionOutcome } from "@near-js/types";
 import { SigningAccount } from "../TrialAccountManager";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 export declare function sendTransaction({ signerAccount, receiverId, methodName, args, deposit, gas, }: {
     signerAccount: SigningAccount;
     receiverId: string;

@@ -1,4 +1,4 @@
-import { KeyPairString } from "@near-js/crypto";
+import { KeyPairString } from "near-api-js/lib/utils";
 /**
  * Key data structure containing information about a trial key.
  */

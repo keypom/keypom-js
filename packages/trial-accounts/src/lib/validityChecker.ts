@@ -1,9 +1,9 @@
 // lib/validityChecker.ts
 
 import { ActionToPerform, TrialData, UsageStats } from "./types";
-import { parseNearAmount } from "@near-js/utils";
 import { ExtEVMConstraints, NEARConstraints } from "./types/ChainConstraints";
 import { TransactionData } from "./performAction";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 /**
  * Checks the validity of actions against trial data constraints.

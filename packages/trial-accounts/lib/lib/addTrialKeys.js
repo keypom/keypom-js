@@ -2,7 +2,7 @@
 // addTrialKeys.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateTrialKeys = void 0;
-const crypto_1 = require("@near-js/crypto");
+const near_api_js_1 = require("near-api-js");
 /**
  * Generates the trial key data needed to add trial accounts.
  *
@@ -14,7 +14,7 @@ async function generateTrialKeys(params) {
     const trialKeys = [];
     for (let i = 0; i < numberOfKeys; i++) {
         // Generate a new key pair
-        const keyPair = crypto_1.KeyPair.fromRandom("ed25519");
+        const keyPair = near_api_js_1.KeyPair.fromRandom("ed25519");
         // Derive the MPC public key
         const derivationPath = keyPair.getPublicKey().toString();
         const mpcPublicKey = await viewFunction({

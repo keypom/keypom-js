@@ -1,13 +1,5 @@
 // lib/broadcastTransaction.ts
 
-import {
-    Action,
-    actionCreators,
-    createTransaction,
-    SignedTransaction,
-} from "@near-js/transactions";
-import { parseNearAmount } from "@near-js/utils";
-import { PublicKey } from "@near-js/crypto";
 import bs58 from "bs58";
 import { createSignature } from "./cryptoUtils";
 import { ActionToPerform, MPCSignature } from "./types";
@@ -22,9 +14,17 @@ import {
     TransactionLike,
     TransactionResponse,
 } from "ethers";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Near } from "@near-js/wallet-account";
+import { Near } from "near-api-js";
 import { TransactionData } from "./performAction";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
+import {
+    Action,
+    createTransaction,
+    functionCall,
+    SignedTransaction,
+} from "near-api-js/lib/transaction";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
+import { PublicKey } from "near-api-js/lib/utils";
 
 interface BroadcastTransactionParams {
     nearConnection: Near;
@@ -81,7 +81,7 @@ export async function broadcastTransaction(
         const blockHashBytes = bs58.decode(txnData.blockHash!);
 
         const actions: Action[] = [
-            actionCreators.functionCall(
+            functionCall(
                 methodName,
                 serializedArgs,
                 BigInt(gas!),

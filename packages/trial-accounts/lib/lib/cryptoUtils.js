@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parsePublicKey = exports.hashTransaction = exports.createSignature = void 0;
-const crypto_1 = require("@near-js/crypto");
 const bs58_1 = __importDefault(require("bs58"));
 const js_sha256_1 = require("js-sha256");
-const transactions_1 = require("@near-js/transactions");
+const transaction_1 = require("near-api-js/lib/transaction");
+const key_pair_1 = require("near-api-js/lib/utils/key_pair");
 /**
  * Creates a NEAR Signature object from r, s, and recovery ID.
  * @param r - The r component of the signature.
@@ -16,8 +16,8 @@ const transactions_1 = require("@near-js/transactions");
  * @returns A NEAR Signature object.
  */
 function createSignature(r, s) {
-    return new transactions_1.Signature({
-        keyType: crypto_1.KeyType.SECP256K1,
+    return new transaction_1.Signature({
+        keyType: key_pair_1.KeyType.SECP256K1,
         data: Buffer.concat([
             Buffer.from(r.substring(2), "hex"),
             Buffer.from(s, "hex"),

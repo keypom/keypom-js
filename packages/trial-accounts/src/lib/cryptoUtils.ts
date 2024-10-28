@@ -1,9 +1,9 @@
 // cryptoUtils.ts
 
-import { KeyType } from "@near-js/crypto";
 import bs58 from "bs58";
 import { sha256 } from "js-sha256";
-import { Signature } from "@near-js/transactions";
+import { Signature } from "near-api-js/lib/transaction";
+import { KeyType } from "near-api-js/lib/utils/key_pair";
 
 /**
  * Creates a NEAR Signature object from r, s, and recovery ID.

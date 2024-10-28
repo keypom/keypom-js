@@ -1,15 +1,17 @@
 // networks/utils.ts
 
-import { FinalExecutionOutcome } from "@near-js/types";
-import {
-    Action as AccountAction,
-    actionCreators,
-    FunctionCallPermission,
-} from "@near-js/transactions";
-import { parseNearAmount } from "@near-js/utils";
 import { SigningAccount } from "../TrialAccountManager";
-import { Account } from "@near-js/accounts";
-import { Action as WalletAction } from "@near-wallet-selector/core";
+import {
+    Action as WalletAction,
+    FinalExecutionOutcome,
+} from "@near-wallet-selector/core";
+import {
+    Action,
+    functionCall,
+    FunctionCallPermission,
+} from "near-api-js/lib/transaction";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
+import { Account } from "near-api-js";
 
 export async function sendTransaction({
     signerAccount,
@@ -29,10 +31,10 @@ export async function sendTransaction({
     const serializedArgsBuffer = Buffer.from(JSON.stringify(args));
     const serializedArgs = new Uint8Array(serializedArgsBuffer);
 
-    let actions: AccountAction[] = [];
+    let actions: Action[] = [];
 
     actions.push(
-        actionCreators.functionCall(
+        functionCall(
             methodName,
             serializedArgs,
             BigInt(gas),
@@ -69,7 +71,7 @@ function isAccount(account: any): account is Account {
 
 // Function to transform AccountActions to WalletActions
 function transformAccountActionsToWalletActions(
-    accountActions: AccountAction[]
+    accountActions: Action[]
 ): WalletAction[] {
     return accountActions.map((action) => {
         switch (action.enum) {

@@ -2,10 +2,10 @@
 
 import { ActionToPerform, MPCSignature, TrialAccountInfo } from "./types";
 import { encodeMethodParams, esimateGasParams } from "./evmUtils";
-import { parseNearAmount } from "@near-js/utils";
-import { Near } from "@near-js/wallet-account";
 import { JsonRpcProvider, VoidSigner } from "ethers";
 import { checkActionValidity } from "./validityChecker";
+import { Near } from "near-api-js";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 export interface TransactionData {
     nonce: string;

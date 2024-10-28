@@ -2,7 +2,7 @@
 // lib/validityChecker.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkActionValidity = void 0;
-const utils_1 = require("@near-js/utils");
+const format_1 = require("near-api-js/lib/utils/format");
 /**
  * Checks the validity of actions against trial data constraints.
  * @param actionsToPerform - The actions to validate.
@@ -61,7 +61,7 @@ function checkActionValidity(actionsToPerform, txnDatas, trialData, usageStats, 
             }
             // Check deposit limit
             if (nearConstraints.maxDeposit && action.attachedDepositNear) {
-                const actionDepositYocto = BigInt((0, utils_1.parseNearAmount)(action.attachedDepositNear));
+                const actionDepositYocto = BigInt((0, format_1.parseNearAmount)(action.attachedDepositNear));
                 if (actionDepositYocto > BigInt(nearConstraints.maxDeposit)) {
                     throw new Error(`Deposit ${action.attachedDepositNear} exceeds maximum allowed ${nearConstraints.maxDeposit}`);
                 }
@@ -71,7 +71,7 @@ function checkActionValidity(actionsToPerform, txnDatas, trialData, usageStats, 
                 cumulativeUsageStats.gasUsed = (BigInt(cumulativeUsageStats.gasUsed) + BigInt(action.gas)).toString();
             }
             if (action.attachedDepositNear) {
-                const actionDepositYocto = BigInt((0, utils_1.parseNearAmount)(action.attachedDepositNear));
+                const actionDepositYocto = BigInt((0, format_1.parseNearAmount)(action.attachedDepositNear));
                 cumulativeUsageStats.depositUsed = (BigInt(cumulativeUsageStats.depositUsed) +
                     actionDepositYocto).toString();
             }

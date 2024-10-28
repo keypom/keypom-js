@@ -2,14 +2,14 @@
 // networks/utils.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendTransaction = void 0;
-const transactions_1 = require("@near-js/transactions");
-const utils_1 = require("@near-js/utils");
-const accounts_1 = require("@near-js/accounts");
+const transaction_1 = require("near-api-js/lib/transaction");
+const format_1 = require("near-api-js/lib/utils/format");
+const near_api_js_1 = require("near-api-js");
 async function sendTransaction({ signerAccount, receiverId, methodName, args, deposit, gas, }) {
     const serializedArgsBuffer = Buffer.from(JSON.stringify(args));
     const serializedArgs = new Uint8Array(serializedArgsBuffer);
     let actions = [];
-    actions.push(transactions_1.actionCreators.functionCall(methodName, serializedArgs, BigInt(gas), BigInt((0, utils_1.parseNearAmount)(deposit))));
+    actions.push((0, transaction_1.functionCall)(methodName, serializedArgs, BigInt(gas), BigInt((0, format_1.parseNearAmount)(deposit))));
     let result;
     console.log("Signer account", signerAccount);
     if (isAccount(signerAccount)) {
@@ -33,7 +33,7 @@ async function sendTransaction({ signerAccount, receiverId, methodName, args, de
 }
 exports.sendTransaction = sendTransaction;
 function isAccount(account) {
-    return account instanceof accounts_1.Account;
+    return account instanceof near_api_js_1.Account;
 }
 // Function to transform AccountActions to WalletActions
 function transformAccountActionsToWalletActions(accountActions) {
@@ -82,7 +82,7 @@ function transformAccountActionsToWalletActions(accountActions) {
                         publicKey: action.addKey.publicKey.toString(),
                         accessKey: {
                             permission: action.addKey.accessKey.permission instanceof
-                                transactions_1.FunctionCallPermission
+                                transaction_1.FunctionCallPermission
                                 ? {
                                     receiverId: action.addKey.accessKey
                                         .permission.receiverId,

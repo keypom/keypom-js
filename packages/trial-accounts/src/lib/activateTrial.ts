@@ -1,7 +1,7 @@
 // activateTrial.ts
 
-import { KeyPair, KeyPairString } from "@near-js/crypto";
-import { Near } from "@near-js/wallet-account";
+import { Near } from "near-api-js";
+import { KeyPair, KeyPairString } from "near-api-js/lib/utils";
 import { sendTransaction } from "./networks/near";
 
 interface ActivateTrialAccountsParams {

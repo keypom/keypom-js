@@ -1,8 +1,5 @@
 // lib/TrialAccountManager.ts
 
-import { Account } from "@near-js/accounts";
-import { KeyPairString, KeyPair } from "@near-js/crypto";
-import { Near } from "@near-js/wallet-account";
 import {
     ActionToPerform,
     TrialData,
@@ -23,6 +20,7 @@ import { broadcastTransaction } from "./broadcastTransaction";
 import {
     Wallet as SelectorWallet,
     NetworkId,
+    FinalExecutionOutcome,
 } from "@near-wallet-selector/core";
 import {
     deriveChildPublicKey,
@@ -30,9 +28,10 @@ import {
     uncompressedHexPointToEvmAddress,
 } from "./mpcUtils/kdf";
 import { TransactionResponse } from "ethers";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { InMemoryKeyStore } from "@near-js/keystores";
 import { sendTransaction } from "./networks/near";
+import { Account, Near } from "near-api-js";
+import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
+import { KeyPair, KeyPairString } from "near-api-js/lib/utils";
 
 export type SigningAccount = Account | SelectorWallet;
 

@@ -1,8 +1,8 @@
 import { ActionToPerform, MPCSignature } from "./types";
 import { TransactionResponse } from "ethers";
-import { FinalExecutionOutcome } from "@near-js/types";
-import { Near } from "@near-js/wallet-account";
+import { Near } from "near-api-js";
 import { TransactionData } from "./performAction";
+import { FinalExecutionOutcome } from "@near-wallet-selector/core";
 interface BroadcastTransactionParams {
     nearConnection: Near;
     chainId: string;

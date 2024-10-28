@@ -1,6 +1,6 @@
 // addTrialKeys.ts
 
-import { KeyPair } from "@near-js/crypto";
+import { KeyPair } from "near-api-js";
 import { TrialKey } from "./types";
 
 interface AddTrialAccountsParams {

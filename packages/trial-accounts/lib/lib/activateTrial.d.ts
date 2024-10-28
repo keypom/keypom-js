@@ -1,5 +1,5 @@
-import { KeyPairString } from "@near-js/crypto";
-import { Near } from "@near-js/wallet-account";
+import { Near } from "near-api-js";
+import { KeyPairString } from "near-api-js/lib/utils";
 interface ActivateTrialAccountsParams {
     near: Near;
     trialContractId: string;

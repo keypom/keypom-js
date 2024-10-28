@@ -1,6 +1,6 @@
 /// <reference types="node" />
 /// <reference types="node" />
-import { Signature } from "@near-js/transactions";
+import { Signature } from "near-api-js/lib/transaction";
 /**
  * Creates a NEAR Signature object from r, s, and recovery ID.
  * @param r - The r component of the signature.

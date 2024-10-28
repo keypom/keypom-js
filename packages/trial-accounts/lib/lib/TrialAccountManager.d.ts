@@ -1,10 +1,9 @@
-import { Account } from "@near-js/accounts";
-import { KeyPairString } from "@near-js/crypto";
 import { ActionToPerform, TrialData, TrialKey, MPCSignature, TrialAccountInfo } from "./types";
 import { TransactionData } from "./performAction";
-import { Wallet as SelectorWallet, NetworkId } from "@near-wallet-selector/core";
+import { Wallet as SelectorWallet, NetworkId, FinalExecutionOutcome } from "@near-wallet-selector/core";
 import { TransactionResponse } from "ethers";
-import { FinalExecutionOutcome } from "@near-js/types";
+import { Account } from "near-api-js";
+import { KeyPairString } from "near-api-js/lib/utils";
 export type SigningAccount = Account | SelectorWallet;
 /**
  * Class to manage trial accounts and trials.
