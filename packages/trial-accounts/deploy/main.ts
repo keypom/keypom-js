@@ -106,7 +106,7 @@ async function main() {
                     );
                 }
 
-                const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
+                const providerUrl = `https://arb-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
                 const sponsorWallet = getSponsorEVMWallet(
                     process.env.EVM_PRIVATE_KEY!,
                     providerUrl,
@@ -135,41 +135,6 @@ async function main() {
             logInfo(
                 `Requesting signature for method ${action.methodName} on contract ${action.targetContractId}`
             );
-
-            const providerUrl = `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`;
-            const { signatures, txnDatas, contractLogs } =
-                await trialManager.performActions({
-                    trialAccountSecretKey: trialKey.trialAccountSecretKey,
-                    actionsToPerform: [action],
-                    evmProviderUrl: providerUrl,
-                });
-
-            const dataToWrite = {
-                signatures,
-                txnDatas,
-            };
-            console.log("Data to write:", dataToWrite);
-            writeToFile(dataToWrite, config.dataDir, "signatures.json");
-            if (contractLogs) {
-                writeToFile(
-                    contractLogs[0],
-                    config.dataDir,
-                    "contractLogs.json"
-                );
-            }
-
-            const { result, clientLog } =
-                await trialManager.broadcastTransaction({
-                    trialAccountSecretKey: trialKey.trialAccountSecretKey,
-                    actionToPerform: action,
-                    providerUrl,
-                    signatureResult: signatures[0],
-                    txnData: txnDatas[0],
-                });
-
-            writeToFile(clientLog, config.dataDir, "clientLog.json");
-            results.push(result);
-            logSuccess(`Actions performed successfully for ${accountId!}.`);
         }
 
         logSuccess(

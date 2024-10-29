@@ -116,6 +116,8 @@ export class TrialAccountManager {
         trialData: TrialData;
         signingAccount: SigningAccount;
     }): Promise<number> {
+        console.log("Creating trial...");
+        console.log(trialData);
         const fnArgs = getCreateTrialParams(trialData);
 
         const result = await retryAsync(
