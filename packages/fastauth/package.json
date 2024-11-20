@@ -1,7 +1,7 @@
 {
-    "name": "@keypom/trial-accounts",
-    "version": "0.1.7",
-    "description": "Core library for interacting with and creating Multichain Trial Accounts",
+    "name": "@keypom/fastauth",
+    "version": "0.0.1",
+    "description": "Core library for FastAuth Login",
     "main": "lib/index.js",
     "scripts": {
         "build": "pnpm compile",
