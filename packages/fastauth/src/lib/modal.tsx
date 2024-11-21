@@ -16,6 +16,7 @@ export function setupModal(
     selector: WalletSelector,
     options: any
 ): MyCustomModal {
+    console.log("setupModal", selector, options);
     let isVisible = false;
 
     const show = () => {

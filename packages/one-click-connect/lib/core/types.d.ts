@@ -1,4 +1,4 @@
-import { InstantLinkWallet, NetworkId } from "@near-wallet-selector/core";
+import { InstantLinkWallet, Network, NetworkId } from "@near-wallet-selector/core";
 import { KeypomWallet } from "./wallet";
 export declare const FAILED_EXECUTION_OUTCOME: any;
 export interface SignInOptions {
@@ -30,3 +30,4 @@ export type AddKeyPermission = "FullAccess" | {
     allowance?: string;
     methodNames?: Array<string>;
 };
+export declare const getNetworkPreset: (networkId: NetworkId) => Network;

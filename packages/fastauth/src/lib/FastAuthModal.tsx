@@ -73,7 +73,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     };
 
     return (
-        <GoogleOAuthProvider clientId="628474345367-1kdtb1v57jvbbl3k2e47sd2cdg091fjm.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={options.clientId}>
             <div className="fastauth-modal-overlay">
                 <div className="fastauth-modal-content">
                     <button onClick={onClose}>Close</button>

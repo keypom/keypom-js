@@ -52,6 +52,6 @@ const FastAuthModal = ({ selector, options, isVisible, onClose, }) => {
             console.error("Error adding session key:", error);
         }
     };
-    return ((0, jsx_runtime_1.jsx)(google_1.GoogleOAuthProvider, { clientId: "628474345367-1kdtb1v57jvbbl3k2e47sd2cdg091fjm.apps.googleusercontent.com", children: (0, jsx_runtime_1.jsx)("div", { className: "fastauth-modal-overlay", children: (0, jsx_runtime_1.jsxs)("div", { className: "fastauth-modal-content", children: [(0, jsx_runtime_1.jsx)("button", { onClick: onClose, children: "Close" }), (0, jsx_runtime_1.jsx)(google_1.GoogleLogin, { onSuccess: handleGoogleSuccess, onError: handleGoogleError }), (0, jsx_runtime_1.jsx)("button", { onClick: handleWalletSignIn, children: "Sign in with a Wallet" })] }) }) }));
+    return ((0, jsx_runtime_1.jsx)(google_1.GoogleOAuthProvider, { clientId: options.clientId, children: (0, jsx_runtime_1.jsx)("div", { className: "fastauth-modal-overlay", children: (0, jsx_runtime_1.jsxs)("div", { className: "fastauth-modal-content", children: [(0, jsx_runtime_1.jsx)("button", { onClick: onClose, children: "Close" }), (0, jsx_runtime_1.jsx)(google_1.GoogleLogin, { onSuccess: handleGoogleSuccess, onError: handleGoogleError }), (0, jsx_runtime_1.jsx)("button", { onClick: handleWalletSignIn, children: "Sign in with a Wallet" })] }) }) }));
 };
 exports.default = FastAuthModal;

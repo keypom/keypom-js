@@ -11,6 +11,7 @@ const client_1 = require("react-dom/client");
 const FastAuthModal_1 = __importDefault(require("./FastAuthModal"));
 let root = null;
 function setupModal(selector, options) {
+    console.log("setupModal", selector, options);
     let isVisible = false;
     const show = () => {
         isVisible = true;
