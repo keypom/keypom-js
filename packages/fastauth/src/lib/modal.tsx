@@ -5,6 +5,7 @@ import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import FastAuthModal from "./FastAuthModal";
 import FastAuthProvider from "./FastAuthProvider"; // Import the provider
+import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui"; // Import setupModal
 
 interface MyCustomModal {
     show: () => void;
@@ -18,6 +19,7 @@ export function setupModal(
     options: any
 ): MyCustomModal {
     let isVisible = false;
+    let walletSelectorModal = null;
 
     const show = () => {
         isVisible = true;
@@ -40,6 +42,16 @@ export function setupModal(
             root = createRoot(container);
         }
 
+        if (!walletSelectorModal) {
+            walletSelectorModal = setupWalletSelectorModal(selector, {
+                contractId: options.contractId,
+                methodNames: options.methodNames,
+                theme: options.theme,
+                description: options.description,
+                // Include other options as needed
+            });
+        }
+
         root.render(
             <FastAuthProvider clientId={options.clientId}>
                 <FastAuthModal
@@ -47,6 +59,7 @@ export function setupModal(
                     options={options}
                     isVisible={isVisible}
                     onClose={hide}
+                    walletSelectorModal={walletSelectorModal}
                 />
             </FastAuthProvider>
         );

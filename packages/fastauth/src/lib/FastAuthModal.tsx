@@ -1,6 +1,5 @@
 import React from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
-import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 
 interface FastAuthModalProps {
@@ -8,6 +7,7 @@ interface FastAuthModalProps {
     options: any;
     isVisible: boolean;
     onClose: () => void;
+    walletSelectorModal: any; // Accept the walletSelectorModal prop
 }
 
 const FastAuthModal: React.FC<FastAuthModalProps> = ({
@@ -15,6 +15,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     options,
     isVisible,
     onClose,
+    walletSelectorModal,
 }) => {
     if (!isVisible) return null;
 
@@ -41,18 +42,9 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     };
 
     const handleWalletSignIn = () => {
-        onClose();
-
-        const availableWallets = selector.store
-            .getState()
-            .modules.filter((module) => module.id !== "fastauth-wallet")
-            .map((module) => ({ id: module.id }));
-
-        const walletSelectorModal = setupWalletSelectorModal(selector, {
-            ...options,
-            wallets: availableWallets,
-        });
-        walletSelectorModal.show();
+        if (walletSelectorModal) {
+            walletSelectorModal.show();
+        }
     };
 
     return (

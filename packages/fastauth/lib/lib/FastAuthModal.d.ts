@@ -5,6 +5,7 @@ interface FastAuthModalProps {
     options: any;
     isVisible: boolean;
     onClose: () => void;
+    walletSelectorModal: any;
 }
 declare const FastAuthModal: React.FC<FastAuthModalProps>;
 export default FastAuthModal;
