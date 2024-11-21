@@ -27,9 +27,13 @@ import {
     Account,
     SignInParams,
     Wallet,
-    WalletEvents,
+    VerifyOwnerParams,
+    VerifiedOwner,
 } from "@near-wallet-selector/core";
 import { KeyPair } from "near-api-js";
+import { transactions, utils } from "near-api-js";
+import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
+import { SCHEMA } from "near-api-js/lib/transaction";
 import { KeyPairString } from "near-api-js/lib/utils";
 
 interface FastAuthState {
@@ -45,41 +49,30 @@ interface FastAuthSignInParams extends SignInParams {
 
 const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
     const { options } = walletOptions;
+    console.log("options", options);
 
     const wallet: WalletBehaviourFactory<Wallet> = async ({
-        options,
-        store,
+        options: _options,
+        store: _store,
         provider,
         emitter,
-        logger,
+        logger: _logger,
         storage,
     }) => {
         let state: FastAuthState | null = null;
 
         const loadState = async () => {
-            const storedState = await storage.getItem<{
-                accountId: string;
-                keyPair: { publicKey: string; secretKey: string };
-            }>(STORAGE_KEY);
+            const storedState = await storage.getItem<FastAuthState>(
+                STORAGE_KEY
+            );
             if (storedState) {
-                state = {
-                    accountId: storedState.accountId,
-                    keyPair: KeyPair.fromString(
-                        storedState.keyPair.toString() as KeyPairString
-                    ),
-                };
+                state = storedState;
             }
         };
 
         const saveState = async () => {
             if (state) {
-                await storage.setItem(STORAGE_KEY, {
-                    accountId: state.accountId,
-                    keyPair: {
-                        publicKey: state.keyPair.getPublicKey().toString(),
-                        secretKey: state.keyPair.toString(),
-                    },
-                });
+                await storage.setItem(STORAGE_KEY, state);
             }
         };
 
@@ -89,6 +82,21 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
         };
 
         await loadState();
+
+        const mapAction = (action): transactions.Action => {
+            switch (action.type) {
+                case "FunctionCall":
+                    return transactions.functionCall(
+                        action.params.methodName,
+                        action.params.args,
+                        BigInt(action.params.gas),
+                        BigInt(action.params.deposit)
+                    );
+                // Handle other action types as needed
+                default:
+                    throw new Error(`Unsupported action type: ${action.type}`);
+            }
+        };
 
         return {
             /** Sign In */
@@ -117,7 +125,7 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                     );
                 }
 
-                const accountId = result.accountId; // Get the accountId from the server
+                const accountId = result.accountId || "benjiman.testnet"; // Replace with actual accountId
 
                 state = {
                     accountId,
@@ -125,14 +133,6 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                 };
 
                 await saveState();
-
-                // Add the keyPair to the keyStore
-                const { network } = options;
-                options.storage.setKey(
-                    network.networkId,
-                    accountId,
-                    state.keyPair
-                );
 
                 // Emit the signedIn event
                 const accounts: Array<Account> = [{ accountId }];
@@ -147,13 +147,6 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
 
             /** Sign Out */
             async signOut() {
-                if (state) {
-                    const { accountId } = state;
-                    const { network } = options;
-
-                    // Remove the keyPair from the keyStore
-                    options.storage.removeKey(network.networkId, accountId);
-                }
                 await clearState();
 
                 // Emit the signedOut event
@@ -168,7 +161,82 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                 return [];
             },
 
-            // Implement other methods as needed, e.g., signAndSendTransaction
+            /** signAndSendTransaction */
+            async signAndSendTransaction(
+                params: any
+            ): Promise<FinalExecutionOutcome> {
+                if (!state) {
+                    throw new Error("Wallet not signed in");
+                }
+
+                const { accountId } = state;
+                const signerId = params.signerId || accountId;
+                const receiverId =
+                    params.receiverId || params.signerId || accountId;
+
+                const actions = params.actions.map((action) =>
+                    mapAction(action)
+                );
+
+                const publicKey = state.keyPair.getPublicKey();
+                const accessKey = await provider.viewAccessKey({
+                    accountId: signerId,
+                    publicKey: publicKey.toString(),
+                });
+
+                const block = await provider.block({ finality: "final" });
+
+                const nonce = accessKey.nonce + BigInt(1);
+
+                const transaction = transactions.createTransaction(
+                    signerId,
+                    publicKey,
+                    receiverId,
+                    nonce,
+                    actions,
+                    utils.serialize.base_decode(block.header.hash)
+                );
+
+                const serializedTx = utils.serialize.serialize(
+                    SCHEMA.SignedTransaction,
+                    transaction
+                );
+
+                const signature = state.keyPair.sign(serializedTx);
+
+                const signedTransaction = new transactions.SignedTransaction({
+                    transaction,
+                    signature: new transactions.Signature({
+                        keyType: transaction.publicKey.keyType,
+                        data: signature.signature,
+                    }),
+                });
+
+                // Send the transaction
+                return await provider.sendTransaction(signedTransaction);
+            },
+
+            /** signAndSendTransactions */
+            async signAndSendTransactions(
+                params: any
+            ): Promise<Array<FinalExecutionOutcome>> {
+                const results: Array<FinalExecutionOutcome> = [];
+                for (const tx of params.transactions) {
+                    const result = await this.signAndSendTransaction({
+                        ...tx,
+                        signerId: tx.signerId || state?.accountId,
+                    });
+                    results.push(result);
+                }
+                return results;
+            },
+
+            /** verifyOwner */
+            async verifyOwner(
+                params: VerifyOwnerParams
+            ): Promise<VerifiedOwner | void> {
+                throw new Error("Method not implemented.");
+            },
         };
     };
 
@@ -253,19 +321,15 @@ export default new FastAuthStorage();
 
 import { setupWalletSelector as baseSetupWalletSelector } from "@near-wallet-selector/core";
 import FastAuthWallet from "./FastAuthWallet";
-// Import other wallet modules as needed
-// import { setupNearWallet } from "@near-wallet-selector/near-wallet";
-// import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 
 export const setupWalletSelector = async (params) => {
+    const { modules = [] } = params;
+
+    const fastAuthWallet = FastAuthWallet({ options: params });
+
     const selector = await baseSetupWalletSelector({
         ...params,
-        modules: [
-            await FastAuthWallet(), // Include FastAuth wallet
-            // Include other wallet modules
-            // await setupNearWallet(),
-            // await setupMyNearWallet(),
-        ],
+        modules: [fastAuthWallet, ...modules],
     });
 
     return selector;
