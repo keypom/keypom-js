@@ -1,5 +1,5 @@
 import React from "react";
-import { AccountState, WalletSelector } from "@near-wallet-selector/core";
+import { WalletSelector } from "@near-wallet-selector/core";
 import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 
@@ -22,8 +22,18 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         credentialResponse: CredentialResponse
     ) => {
         const idToken = credentialResponse.credential;
-        await addSessionKey(idToken);
-        onClose();
+
+        try {
+            const wallet = await selector.wallet("fastauth-wallet");
+            await wallet.signIn({
+                idToken,
+                contractId: options.contractId,
+                methodNames: options.methodNames,
+            });
+            onClose();
+        } catch (error) {
+            console.error("Error during FastAuth sign-in:", error);
+        }
     };
 
     const handleGoogleError = () => {
@@ -32,40 +42,17 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
 
     const handleWalletSignIn = () => {
         onClose();
-        const walletSelectorModal = setupWalletSelectorModal(selector, options);
+
+        const availableWallets = selector.store
+            .getState()
+            .modules.filter((module) => module.id !== "fastauth-wallet")
+            .map((module) => ({ id: module.id }));
+
+        const walletSelectorModal = setupWalletSelectorModal(selector, {
+            ...options,
+            wallets: availableWallets,
+        });
         walletSelectorModal.show();
-    };
-
-    const addSessionKey = async (idToken: string) => {
-        try {
-            const response = await fetch(
-                "https://fastauth-worker-dev.keypom.workers.dev/add-session-key",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ idToken }),
-                }
-            );
-            const result = await response.json();
-            if (result.success) {
-                const newAccount: AccountState = {
-                    accountId: result.accountId,
-                    active: true,
-                };
-
-                selector.store.updateState((prevState) => ({
-                    ...prevState,
-                    accounts: [newAccount, ...prevState.accounts],
-                    selectedWalletId: "google-wallet",
-                }));
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (error) {
-            console.error("Error adding session key:", error);
-        }
     };
 
     return (

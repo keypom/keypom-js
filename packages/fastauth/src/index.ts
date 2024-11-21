@@ -11,6 +11,7 @@
  */
 
 // index.ts
-export { setupWalletSelector } from "@near-wallet-selector/core";
+
+export { setupWalletSelector } from "./lib/setupWalletSelector";
 export { setupModal } from "./lib/modal";
 export { default as FastAuthProvider } from "./lib/FastAuthProvider";

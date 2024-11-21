@@ -1,0 +1,443 @@
+### index.ts ###
+// index.ts
+
+/**
+ * Main entry point for the Trial Accounts package.
+ *
+ * This package provides functions to deploy trial contracts,
+ * create trials, add trial accounts, activate trial accounts,
+ * perform actions, and broadcast transactions.
+ *
+ * @packageDocumentation
+ */
+
+// index.ts
+
+export { setupWalletSelector } from "./lib/setupWalletSelector";
+export { setupModal } from "./lib/modal";
+export { default as FastAuthProvider } from "./lib/FastAuthProvider";
+
+
+### lib/FastAuthWallet.ts ###
+// FastAuthWallet.ts
+
+import {
+    WalletModuleFactory,
+    WalletBehaviourFactory,
+    Account,
+    SignInParams,
+    Wallet,
+    WalletEvents,
+} from "@near-wallet-selector/core";
+import { KeyPair } from "near-api-js";
+import { KeyPairString } from "near-api-js/lib/utils";
+
+interface FastAuthState {
+    keyPair: KeyPair;
+    accountId: string;
+}
+
+const STORAGE_KEY = "FAST_AUTH_WALLET_STATE";
+
+interface FastAuthSignInParams extends SignInParams {
+    idToken: string;
+}
+
+const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
+    const { options } = walletOptions;
+
+    const wallet: WalletBehaviourFactory<Wallet> = async ({
+        options,
+        store,
+        provider,
+        emitter,
+        logger,
+        storage,
+    }) => {
+        let state: FastAuthState | null = null;
+
+        const loadState = async () => {
+            const storedState = await storage.getItem<{
+                accountId: string;
+                keyPair: { publicKey: string; secretKey: string };
+            }>(STORAGE_KEY);
+            if (storedState) {
+                state = {
+                    accountId: storedState.accountId,
+                    keyPair: KeyPair.fromString(
+                        storedState.keyPair.toString() as KeyPairString
+                    ),
+                };
+            }
+        };
+
+        const saveState = async () => {
+            if (state) {
+                await storage.setItem(STORAGE_KEY, {
+                    accountId: state.accountId,
+                    keyPair: {
+                        publicKey: state.keyPair.getPublicKey().toString(),
+                        secretKey: state.keyPair.toString(),
+                    },
+                });
+            }
+        };
+
+        const clearState = async () => {
+            await storage.removeItem(STORAGE_KEY);
+            state = null;
+        };
+
+        await loadState();
+
+        return {
+            /** Sign In */
+            async signIn(params: FastAuthSignInParams) {
+                const { idToken, contractId, methodNames } = params;
+
+                // Generate a new keypair
+                const keyPair = KeyPair.fromRandom("ed25519");
+                const publicKey = keyPair.getPublicKey().toString();
+
+                // Use the idToken and publicKey to authenticate with your backend
+                const response = await fetch(
+                    "https://fastauth-worker-dev.keypom.workers.dev/add-session-key",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ idToken, publicKey }),
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.error || "Failed to sign in with FastAuth"
+                    );
+                }
+
+                const accountId = result.accountId; // Get the accountId from the server
+
+                state = {
+                    accountId,
+                    keyPair,
+                };
+
+                await saveState();
+
+                // Add the keyPair to the keyStore
+                const { network } = options;
+                options.storage.setKey(
+                    network.networkId,
+                    accountId,
+                    state.keyPair
+                );
+
+                // Emit the signedIn event
+                const accounts: Array<Account> = [{ accountId }];
+                emitter.emit("signedIn", {
+                    contractId: contractId,
+                    methodNames: methodNames || [],
+                    accounts,
+                });
+
+                return accounts;
+            },
+
+            /** Sign Out */
+            async signOut() {
+                if (state) {
+                    const { accountId } = state;
+                    const { network } = options;
+
+                    // Remove the keyPair from the keyStore
+                    options.storage.removeKey(network.networkId, accountId);
+                }
+                await clearState();
+
+                // Emit the signedOut event
+                emitter.emit("signedOut", null);
+            },
+
+            /** Get Accounts */
+            async getAccounts() {
+                if (state) {
+                    return [{ accountId: state.accountId }];
+                }
+                return [];
+            },
+
+            // Implement other methods as needed, e.g., signAndSendTransaction
+        };
+    };
+
+    return {
+        id: "fastauth-wallet",
+        type: "injected",
+        metadata: {
+            name: "FastAuth Wallet",
+            description: null,
+            iconUrl: "https://your-icon-url/fastauth-icon.png",
+            downloadUrl: null,
+            deprecated: false,
+            available: true,
+        },
+        init: wallet,
+    };
+};
+
+export default FastAuthWallet;
+
+
+### lib/styles.css ###
+/* styles.css */
+
+.fastauth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.fastauth-modal-content {
+    position: fixed;
+    background: white;
+    width: 400px;
+    height: 200px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+### lib/Storage.ts ###
+// lib/Storage.ts
+
+class FastAuthStorage {
+    private prefix: string;
+
+    constructor(prefix = "FAST_AUTH_WALLET:") {
+        this.prefix = prefix;
+    }
+
+    setItem(key: string, value: string) {
+        localStorage.setItem(this.prefix + key, value);
+    }
+
+    getItem(key: string): string | null {
+        return localStorage.getItem(this.prefix + key);
+    }
+
+    removeItem(key: string) {
+        localStorage.removeItem(this.prefix + key);
+    }
+
+    clear() {
+        // Remove all items with the prefix
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith(this.prefix)) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
+}
+
+export default new FastAuthStorage();
+
+
+### lib/setupWalletSelector.ts ###
+// setupWalletSelector.ts
+
+import { setupWalletSelector as baseSetupWalletSelector } from "@near-wallet-selector/core";
+import FastAuthWallet from "./FastAuthWallet";
+// Import other wallet modules as needed
+// import { setupNearWallet } from "@near-wallet-selector/near-wallet";
+// import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+
+export const setupWalletSelector = async (params) => {
+    const selector = await baseSetupWalletSelector({
+        ...params,
+        modules: [
+            await FastAuthWallet(), // Include FastAuth wallet
+            // Include other wallet modules
+            // await setupNearWallet(),
+            // await setupMyNearWallet(),
+        ],
+    });
+
+    return selector;
+};
+
+
+### lib/FastAuthModal.tsx ###
+import React from "react";
+import { WalletSelector } from "@near-wallet-selector/core";
+import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+
+interface FastAuthModalProps {
+    selector: WalletSelector;
+    options: any;
+    isVisible: boolean;
+    onClose: () => void;
+}
+
+const FastAuthModal: React.FC<FastAuthModalProps> = ({
+    selector,
+    options,
+    isVisible,
+    onClose,
+}) => {
+    if (!isVisible) return null;
+
+    const handleGoogleSuccess = async (
+        credentialResponse: CredentialResponse
+    ) => {
+        const idToken = credentialResponse.credential;
+
+        try {
+            const wallet = await selector.wallet("fastauth-wallet");
+            await wallet.signIn({
+                idToken,
+                contractId: options.contractId,
+                methodNames: options.methodNames,
+            });
+            onClose();
+        } catch (error) {
+            console.error("Error during FastAuth sign-in:", error);
+        }
+    };
+
+    const handleGoogleError = () => {
+        console.error("Google Sign-In failed");
+    };
+
+    const handleWalletSignIn = () => {
+        onClose();
+
+        const availableWallets = selector.store
+            .getState()
+            .modules.filter((module) => module.id !== "fastauth-wallet")
+            .map((module) => ({ id: module.id }));
+
+        const walletSelectorModal = setupWalletSelectorModal(selector, {
+            ...options,
+            wallets: availableWallets,
+        });
+        walletSelectorModal.show();
+    };
+
+    return (
+        <div className="fastauth-modal-overlay">
+            <div className="fastauth-modal-content">
+                <button onClick={onClose}>Close</button>
+                <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    logo_alignment="left"
+                    width="300"
+                />
+                <button onClick={handleWalletSignIn}>
+                    Sign in with a Wallet
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default FastAuthModal;
+
+
+### lib/modal.tsx ###
+// modal.tsx
+import React from "react";
+import { WalletSelector } from "@near-wallet-selector/core";
+import type { Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import FastAuthModal from "./FastAuthModal";
+import FastAuthProvider from "./FastAuthProvider"; // Import the provider
+
+interface MyCustomModal {
+    show: () => void;
+    hide: () => void;
+}
+
+let root: Root | null = null;
+
+export function setupModal(
+    selector: WalletSelector,
+    options: any
+): MyCustomModal {
+    let isVisible = false;
+
+    const show = () => {
+        isVisible = true;
+        renderModal();
+    };
+
+    const hide = () => {
+        isVisible = false;
+        renderModal();
+    };
+
+    const renderModal = () => {
+        const container =
+            document.getElementById("fastauth-wallet-selector-modal") ||
+            document.createElement("div");
+        container.id = "fastauth-wallet-selector-modal";
+        document.body.appendChild(container);
+
+        if (!root) {
+            root = createRoot(container);
+        }
+
+        root.render(
+            <FastAuthProvider clientId={options.clientId}>
+                <FastAuthModal
+                    selector={selector}
+                    options={options}
+                    isVisible={isVisible}
+                    onClose={hide}
+                />
+            </FastAuthProvider>
+        );
+    };
+
+    return {
+        show,
+        hide,
+    };
+}
+
+
+### lib/FastAuthProvider.tsx ###
+// src/FastAuthProvider.tsx
+import React from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+interface FastAuthProviderProps {
+    children: React.ReactNode;
+    clientId: string;
+}
+
+const FastAuthProvider: React.FC<FastAuthProviderProps> = ({
+    children,
+    clientId,
+}) => {
+    return (
+        <GoogleOAuthProvider clientId={clientId}>
+            {children}
+        </GoogleOAuthProvider>
+    );
+};
+
+export default FastAuthProvider;
+
+
