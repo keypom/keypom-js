@@ -1,11 +1,7 @@
 import React from "react";
 import { AccountState, WalletSelector } from "@near-wallet-selector/core";
 import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui";
-import {
-    GoogleOAuthProvider,
-    GoogleLogin,
-    CredentialResponse,
-} from "@react-oauth/google";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 
 interface FastAuthModalProps {
     selector: WalletSelector;
@@ -73,20 +69,24 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     };
 
     return (
-        <GoogleOAuthProvider clientId={options.clientId}>
-            <div className="fastauth-modal-overlay">
-                <div className="fastauth-modal-content">
-                    <button onClick={onClose}>Close</button>
-                    <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleError}
-                    />
-                    <button onClick={handleWalletSignIn}>
-                        Sign in with a Wallet
-                    </button>
-                </div>
+        <div className="fastauth-modal-overlay">
+            <div className="fastauth-modal-content">
+                <button onClick={onClose}>Close</button>
+                <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    logo_alignment="left"
+                    width="300"
+                />
+                <button onClick={handleWalletSignIn}>
+                    Sign in with a Wallet
+                </button>
             </div>
-        </GoogleOAuthProvider>
+        </div>
     );
 };
 

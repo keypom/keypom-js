@@ -10,5 +10,7 @@
  * @packageDocumentation
  */
 
+// index.ts
 export { setupWalletSelector } from "@near-wallet-selector/core";
 export { setupModal } from "./lib/modal";
+export { default as FastAuthProvider } from "./lib/FastAuthProvider";
