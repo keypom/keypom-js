@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { CloseIcon } from "./icons/CloseIcon"; // You'll need to add this icon or replace it with your own
@@ -18,6 +18,8 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     onClose,
     walletSelectorModal,
 }) => {
+    const [loading, setLoading] = useState(false);
+
     if (!isVisible) return null;
 
     const handleGoogleSuccess = async (
@@ -26,6 +28,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         const idToken = credentialResponse.credential;
 
         try {
+            setLoading(true);
             const wallet = await selector.wallet("fastauth-wallet");
             await wallet.signIn({
                 idToken,
@@ -35,6 +38,8 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
             onClose();
         } catch (error) {
             console.error("Error during FastAuth sign-in:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -63,26 +68,36 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
                     </button>
                 </div>
                 <div className="fastauth-modal-body">
-                    <div className="fastauth-content">
-                        <div className="google-login-button">
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={handleGoogleError}
-                                theme="outline"
-                                size="large"
-                                text="signin_with"
-                                shape="rectangular"
-                                logo_alignment="left"
-                                width="300"
-                            />
+                    {loading ? (
+                        <div className="fastauth-loading-indicator">
+                            {/* Replace with your loading animation */}
+                            <p>Loading...</p>
                         </div>
-                        <button
-                            className="wallet-signin-button"
-                            onClick={handleWalletSignIn}
-                        >
-                            Sign in with a Wallet
-                        </button>
-                    </div>
+                    ) : (
+                        <div className="fastauth-content">
+                            <div className="google-login-button">
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    useOneTap={false}
+                                    auto_select={false}
+                                    context="signin"
+                                    theme="outline"
+                                    size="large"
+                                    text="signin_with"
+                                    shape="rectangular"
+                                    logo_alignment="left"
+                                    width="300"
+                                />
+                            </div>
+                            <button
+                                className="wallet-signin-button"
+                                onClick={handleWalletSignIn}
+                            >
+                                Sign in with a Wallet
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
