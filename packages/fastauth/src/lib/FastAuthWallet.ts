@@ -9,6 +9,7 @@ import {
     VerifyOwnerParams,
     VerifiedOwner,
 } from "@near-wallet-selector/core";
+import { googleLogout } from "@react-oauth/google";
 import { KeyPair } from "near-api-js";
 import { transactions, utils } from "near-api-js";
 import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
@@ -127,6 +128,9 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
             async signOut() {
                 await clearState();
 
+                // Revoke the OAuth token
+                googleLogout();
+
                 // Emit the signedOut event
                 emitter.emit("signedOut", null);
             },
@@ -220,7 +224,7 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
 
     return {
         id: "fastauth-wallet",
-        type: "injected",
+        type: "instant-link",
         metadata: {
             name: "FastAuth Wallet",
             description: null,

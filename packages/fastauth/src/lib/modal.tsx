@@ -1,4 +1,3 @@
-// modal.tsx
 import React from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import type { Root } from "react-dom/client";

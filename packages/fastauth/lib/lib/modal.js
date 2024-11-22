@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupModal = void 0;
 const jsx_runtime_1 = require("react/jsx-runtime");
-// modal.tsx
 const react_1 = __importDefault(require("react"));
 const client_1 = require("react-dom/client");
 const FastAuthModal_1 = __importDefault(require("./FastAuthModal"));

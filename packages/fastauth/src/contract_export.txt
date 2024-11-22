@@ -30,11 +30,11 @@ import {
     VerifyOwnerParams,
     VerifiedOwner,
 } from "@near-wallet-selector/core";
+import { googleLogout } from "@react-oauth/google";
 import { KeyPair } from "near-api-js";
 import { transactions, utils } from "near-api-js";
 import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { SCHEMA } from "near-api-js/lib/transaction";
-import { KeyPairString } from "near-api-js/lib/utils";
 
 interface FastAuthState {
     keyPair: KeyPair;
@@ -149,6 +149,9 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
             async signOut() {
                 await clearState();
 
+                // Revoke the OAuth token
+                googleLogout();
+
                 // Emit the signedOut event
                 emitter.emit("signedOut", null);
             },
@@ -242,7 +245,7 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
 
     return {
         id: "fastauth-wallet",
-        type: "injected",
+        type: "instant-link",
         metadata: {
             name: "FastAuth Wallet",
             description: null,
@@ -259,25 +262,114 @@ export default FastAuthWallet;
 
 
 ### lib/styles.css ###
-/* styles.css */
+/* lib/styles.css */
 
-.fastauth-modal-overlay {
+/* Theme Variables */
+:root {
+    --fastauth-backdrop-bg: rgba(0, 0, 0, 0.5);
+    --fastauth-content-bg: #ffffff;
+    --fastauth-heading-color: #222222;
+    --fastauth-text-color: #676767;
+    --fastauth-close-button-bg: #ededed;
+    --fastauth-close-button-icon-color: #9f9f9f;
+    --fastauth-button-bg: #5f8afa;
+    --fastauth-button-bg-hover: #5aa6ff;
+    --fastauth-button-text-color: #ffffff;
+}
+
+/* Dark Theme Overrides */
+.dark-theme {
+    --fastauth-backdrop-bg: rgba(0, 0, 0, 0.8);
+    --fastauth-content-bg: #232323;
+    --fastauth-heading-color: #ffffff;
+    --fastauth-text-color: #c1c1c1;
+    --fastauth-close-button-bg: #313030;
+    --fastauth-close-button-icon-color: #c1c1c1;
+}
+
+/* Modal Wrapper */
+.fastauth-modal-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--fastauth-backdrop-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.fastauth-modal-content {
-    position: fixed;
-    background: white;
-    width: 400px;
-    height: 200px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* Modal Content */
+.fastauth-modal {
+    background-color: var(--fastauth-content-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    margin: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.fastauth-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+}
+
+.fastauth-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--fastauth-heading-color);
+}
+
+.fastauth-close-button {
+    background-color: var(--fastauth-close-button-bg);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fastauth-close-button svg {
+    fill: var(--fastauth-close-button-icon-color);
+}
+
+.fastauth-modal-body {
+    padding: 16px;
+}
+
+.fastauth-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fastauth-content .google-login-button {
+    width: 100%;
+    max-width: 300px;
+}
+
+.fastauth-content .wallet-signin-button {
+    margin-top: 20px;
+    padding: 10px 24px;
+    background-color: var(--fastauth-button-bg);
+    border: none;
+    border-radius: 4px;
+    color: var(--fastauth-button-text-color);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.fastauth-content .wallet-signin-button:hover {
+    background-color: var(--fastauth-button-bg-hover);
 }
 
 
@@ -320,16 +412,15 @@ export default new FastAuthStorage();
 // setupWalletSelector.ts
 
 import { setupWalletSelector as baseSetupWalletSelector } from "@near-wallet-selector/core";
+
 import FastAuthWallet from "./FastAuthWallet";
 
 export const setupWalletSelector = async (params) => {
     const { modules = [] } = params;
 
-    const fastAuthWallet = FastAuthWallet({ options: params });
-
     const selector = await baseSetupWalletSelector({
         ...params,
-        modules: [fastAuthWallet, ...modules],
+        modules: [FastAuthWallet, ...modules],
     });
 
     return selector;
@@ -339,14 +430,15 @@ export const setupWalletSelector = async (params) => {
 ### lib/FastAuthModal.tsx ###
 import React from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
-import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+import { CloseIcon } from "./icons/CloseIcon"; // You'll need to add this icon or replace it with your own
 
 interface FastAuthModalProps {
     selector: WalletSelector;
     options: any;
     isVisible: boolean;
     onClose: () => void;
+    walletSelectorModal: any; // Accept the walletSelectorModal prop
 }
 
 const FastAuthModal: React.FC<FastAuthModalProps> = ({
@@ -354,6 +446,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     options,
     isVisible,
     onClose,
+    walletSelectorModal,
 }) => {
     if (!isVisible) return null;
 
@@ -380,37 +473,47 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     };
 
     const handleWalletSignIn = () => {
-        onClose();
-
-        const availableWallets = selector.store
-            .getState()
-            .modules.filter((module) => module.id !== "fastauth-wallet")
-            .map((module) => ({ id: module.id }));
-
-        const walletSelectorModal = setupWalletSelectorModal(selector, {
-            ...options,
-            wallets: availableWallets,
-        });
-        walletSelectorModal.show();
+        if (walletSelectorModal) {
+            onClose(); // Close the FastAuth modal before opening the wallet selector modal
+            walletSelectorModal.show();
+        }
     };
 
     return (
-        <div className="fastauth-modal-overlay">
-            <div className="fastauth-modal-content">
-                <button onClick={onClose}>Close</button>
-                <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleError}
-                    theme="outline"
-                    size="large"
-                    text="signin_with"
-                    shape="rectangular"
-                    logo_alignment="left"
-                    width="300"
-                />
-                <button onClick={handleWalletSignIn}>
-                    Sign in with a Wallet
-                </button>
+        <div
+            className={`fastauth-modal-wrapper ${
+                options.theme === "dark" ? "dark-theme" : ""
+            }`}
+        >
+            <div className="fastauth-modal">
+                <div className="fastauth-modal-header">
+                    <h3>Sign in with Google</h3>
+                    <button className="fastauth-close-button" onClick={onClose}>
+                        <CloseIcon />
+                    </button>
+                </div>
+                <div className="fastauth-modal-body">
+                    <div className="fastauth-content">
+                        <div className="google-login-button">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={handleGoogleError}
+                                theme="outline"
+                                size="large"
+                                text="signin_with"
+                                shape="rectangular"
+                                logo_alignment="left"
+                                width="300"
+                            />
+                        </div>
+                        <button
+                            className="wallet-signin-button"
+                            onClick={handleWalletSignIn}
+                        >
+                            Sign in with a Wallet
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -420,13 +523,13 @@ export default FastAuthModal;
 
 
 ### lib/modal.tsx ###
-// modal.tsx
 import React from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import FastAuthModal from "./FastAuthModal";
 import FastAuthProvider from "./FastAuthProvider"; // Import the provider
+import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui"; // Import setupModal
 
 interface MyCustomModal {
     show: () => void;
@@ -440,6 +543,7 @@ export function setupModal(
     options: any
 ): MyCustomModal {
     let isVisible = false;
+    let walletSelectorModal = null;
 
     const show = () => {
         isVisible = true;
@@ -462,6 +566,16 @@ export function setupModal(
             root = createRoot(container);
         }
 
+        if (!walletSelectorModal) {
+            walletSelectorModal = setupWalletSelectorModal(selector, {
+                contractId: options.contractId,
+                methodNames: options.methodNames,
+                theme: options.theme,
+                description: options.description,
+                // Include other options as needed
+            });
+        }
+
         root.render(
             <FastAuthProvider clientId={options.clientId}>
                 <FastAuthModal
@@ -469,6 +583,7 @@ export function setupModal(
                     options={options}
                     isVisible={isVisible}
                     onClose={hide}
+                    walletSelectorModal={walletSelectorModal}
                 />
             </FastAuthProvider>
         );
@@ -503,5 +618,35 @@ const FastAuthProvider: React.FC<FastAuthProviderProps> = ({
 };
 
 export default FastAuthProvider;
+
+
+### lib/icons/CloseIcon.tsx ###
+// lib/icons/CloseIcon.tsx
+import React from "react";
+
+export const CloseIcon: React.FC = () => (
+    <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M13 1L1 13"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+        />
+        <path
+            d="M1 1L13 13"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+        />
+    </svg>
+);
+
+export default CloseIcon;
 
 

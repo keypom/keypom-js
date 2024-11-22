@@ -1,6 +1,7 @@
 "use strict";
 // FastAuthWallet.ts
 Object.defineProperty(exports, "__esModule", { value: true });
+const google_1 = require("@react-oauth/google");
 const near_api_js_1 = require("near-api-js");
 const near_api_js_2 = require("near-api-js");
 const transaction_1 = require("near-api-js/lib/transaction");
@@ -72,6 +73,8 @@ const FastAuthWallet = async (walletOptions) => {
             /** Sign Out */
             async signOut() {
                 await clearState();
+                // Revoke the OAuth token
+                (0, google_1.googleLogout)();
                 // Emit the signedOut event
                 emitter.emit("signedOut", null);
             },
@@ -131,7 +134,7 @@ const FastAuthWallet = async (walletOptions) => {
     };
     return {
         id: "fastauth-wallet",
-        type: "injected",
+        type: "instant-link",
         metadata: {
             name: "FastAuth Wallet",
             description: null,
