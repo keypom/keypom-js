@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { CloseIcon } from "./icons/CloseIcon"; // You'll need to add this icon or replace it with your own
+import { ClipLoader } from "react-spinners";
+import { MPC_CONTRACT_ID, FASTAUTH_CONTRACT_ID } from "./constants";
 
 interface FastAuthModalProps {
     selector: WalletSelector;
@@ -32,6 +34,8 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
             const wallet = await selector.wallet("fastauth-wallet");
             await wallet.signIn({
                 idToken,
+                mpcContractId: MPC_CONTRACT_ID,
+                fastAuthContractId: FASTAUTH_CONTRACT_ID,
                 contractId: options.contractId,
                 methodNames: options.methodNames,
             });
@@ -70,8 +74,11 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
                 <div className="fastauth-modal-body">
                     {loading ? (
                         <div className="fastauth-loading-indicator">
-                            {/* Replace with your loading animation */}
-                            <p>Loading...</p>
+                            <ClipLoader
+                                color="#5f8afa"
+                                loading={loading}
+                                size={50}
+                            />
                         </div>
                     ) : (
                         <div className="fastauth-content">

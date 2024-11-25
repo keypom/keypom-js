@@ -1,0 +1,26 @@
+{
+    "extends": "../../tsconfig.node.json",
+    "compilerOptions": {
+        "preserveSymlinks": false,
+        "outDir": "./lib",
+        "baseUrl": ".",
+        "lib": [
+            "ES2020",
+            "DOM"
+        ], // Add "DOM" here for browser types
+        "paths": {
+            "@near-js/types/*": [
+                "node_modules/@near-js/types/lib/*"
+            ],
+            "@near-js/types/src/provider/protocol": [
+                "node_modules/@near-js/types/lib/provider/protocol"
+            ]
+        }
+    },
+    "files": [
+        "src/index.ts"
+    ],
+    "types": [
+        "node"
+    ]
+}
