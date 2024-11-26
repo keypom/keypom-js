@@ -11,13 +11,12 @@ import {
 } from "@near-wallet-selector/core";
 import { Options } from "@near-wallet-selector/core/src/lib/options.types";
 import { googleLogout } from "@react-oauth/google";
-import { sha256 } from "js-sha256";
 import { KeyPair, Near } from "near-api-js";
 import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
 import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { KeyPairString } from "near-api-js/lib/utils";
+import { STORAGE_KEY } from "./constants";
 import { NearPayload } from "./models/payload";
-import { decodeJwt } from "./utils/authTokens";
 import { deriveEthAddressFromMpcKey } from "./utils/crypto";
 
 interface FastAuthState {
@@ -25,10 +24,9 @@ interface FastAuthState {
     accountId: string;
 }
 
-const STORAGE_KEY = "FAST_AUTH_WALLET_STATE";
-
 interface FastAuthSignInParams extends SignInParams {
-    idToken: string;
+    userIdHash: string;
+    sessionKeyPair: KeyPair;
     mpcContractId: string;
     fastAuthContractId: string;
 }
@@ -58,7 +56,7 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
 
             near = new Near({
                 networkId: options.network.networkId,
-                nodeUrl: "https://rpc.testnet.near.org",
+                nodeUrl: options.network.nodeUrl,
                 keyStore: new InMemoryKeyStore(),
             });
         };
@@ -80,50 +78,23 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
             /** Sign In */
             async signIn(params: FastAuthSignInParams) {
                 const {
-                    idToken,
+                    userIdHash,
+                    sessionKeyPair,
                     contractId,
                     methodNames,
                     mpcContractId,
                     fastAuthContractId,
                 } = params;
 
-                // Generate a new keypair
-                const sessionKeyPair = KeyPair.fromRandom("ed25519");
-                const sessionPublicKey = sessionKeyPair
-                    .getPublicKey()
-                    .toString();
+                console.log("Params: ", params);
 
-                // Use the idToken and publicKey to authenticate with your backend
-                const response = await fetch(
-                    "https://fastauth-worker-dev.keypom.workers.dev/add-session-key",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ idToken, sessionPublicKey }),
-                    }
-                );
-                const result = await response.json();
-                if (!response.ok || !result.success) {
-                    throw new Error(
-                        result.error || "Failed to sign in with FastAuth"
-                    );
-                }
-
-                // Decode the idToken to get the Google ID
-                const decodedToken = decodeJwt(idToken);
-                const googleId = decodedToken.sub;
-                console.log("googleId", googleId);
-                // Hash the Google ID to create the derivation path
-                const googleIdHash = sha256(googleId);
-
+                // Fetch the mpcKey from the mpcContract
                 const viewAccount = await near.account("foo");
                 const mpcKey = await viewAccount.viewFunction({
                     contractId: mpcContractId,
                     methodName: "derived_public_key",
                     args: {
-                        path: googleIdHash,
+                        path: userIdHash,
                         predecessor: fastAuthContractId,
                     },
                 });

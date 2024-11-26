@@ -1,16 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
-import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { CloseIcon } from "./icons/CloseIcon"; // You'll need to add this icon or replace it with your own
+import { CloseIcon } from "./icons/CloseIcon";
 import { ClipLoader } from "react-spinners";
-import { MPC_CONTRACT_ID, FASTAUTH_CONTRACT_ID } from "./constants";
+import { KeyPair } from "near-api-js";
+import {
+    AUTH_ORIGIN,
+    FASTAUTH_CONTRACT_ID,
+    MPC_CONTRACT_ID,
+} from "./constants";
+import GoogleButton from "react-google-button";
 
 interface FastAuthModalProps {
     selector: WalletSelector;
     options: any;
     isVisible: boolean;
     onClose: () => void;
-    walletSelectorModal: any; // Accept the walletSelectorModal prop
+    walletSelectorModal: any;
 }
 
 const FastAuthModal: React.FC<FastAuthModalProps> = ({
@@ -21,42 +26,73 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     walletSelectorModal,
 }) => {
     const [loading, setLoading] = useState(false);
+    const [iframeVisible, setIframeVisible] = useState(false);
+    const [sessionKeyPair, setSessionKeyPair] = useState<KeyPair | null>(null);
+    const [publicKeyString, setPublicKeyString] = useState<string | null>(null);
 
-    if (!isVisible) return null;
+    useEffect(() => {
+        const handleMessage = async (event: MessageEvent) => {
+            if (event.origin !== AUTH_ORIGIN) return;
+            const data = event.data;
+            if (data.type === "auth-success") {
+                const { userIdHash } = data; // Extract googleId
+                try {
+                    setLoading(true);
+                    const wallet = await selector.wallet("fastauth-wallet");
+                    await wallet.signIn({
+                        userIdHash,
+                        sessionKeyPair,
+                        contractId: options.contractId,
+                        methodNames: options.methodNames,
+                        mpcContractId: MPC_CONTRACT_ID,
+                        fastAuthContractId: FASTAUTH_CONTRACT_ID,
+                    });
+                    onClose();
+                } catch (error) {
+                    console.error("Error during FastAuth sign-in:", error);
+                } finally {
+                    setLoading(false);
+                }
+            } else if (data.type === "auth-error") {
+                console.error("Authentication failed:", data.error);
+            }
+            setIframeVisible(false);
+        };
 
-    const handleGoogleSuccess = async (
-        credentialResponse: CredentialResponse
-    ) => {
-        const idToken = credentialResponse.credential;
+        window.addEventListener("message", handleMessage);
+        return () => {
+            window.removeEventListener("message", handleMessage);
+        };
+    }, [selector, options, onClose, sessionKeyPair]);
 
-        try {
-            setLoading(true);
-            const wallet = await selector.wallet("fastauth-wallet");
-            await wallet.signIn({
-                idToken,
-                mpcContractId: MPC_CONTRACT_ID,
-                fastAuthContractId: FASTAUTH_CONTRACT_ID,
-                contractId: options.contractId,
-                methodNames: options.methodNames,
-            });
-            onClose();
-        } catch (error) {
-            console.error("Error during FastAuth sign-in:", error);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (!iframeVisible) {
+            setSessionKeyPair(null);
+            setPublicKeyString(null);
         }
-    };
+    }, [iframeVisible]);
 
-    const handleGoogleError = () => {
-        console.error("Google Sign-In failed");
+    const handleSignInClick = () => {
+        // Generate session keypair
+        const keyPair = KeyPair.fromRandom("ed25519");
+        setSessionKeyPair(keyPair);
+
+        const publicKeyString = keyPair.getPublicKey().toString();
+        setPublicKeyString(publicKeyString);
+
+        // Open the iframe with the session public key as a URL parameter
+        setIframeVisible(true);
     };
 
     const handleWalletSignIn = () => {
         if (walletSelectorModal) {
-            onClose(); // Close the FastAuth modal before opening the wallet selector modal
+            onClose();
             walletSelectorModal.show();
         }
     };
+
+    // Prevent rendering modal if not visible
+    if (!isVisible) return null;
 
     return (
         <div
@@ -82,27 +118,26 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
                         </div>
                     ) : (
                         <div className="fastauth-content">
-                            <div className="google-login-button">
-                                <GoogleLogin
-                                    onSuccess={handleGoogleSuccess}
-                                    onError={handleGoogleError}
-                                    useOneTap={false}
-                                    auto_select={false}
-                                    context="signin"
-                                    theme="outline"
-                                    size="large"
-                                    text="signin_with"
-                                    shape="rectangular"
-                                    logo_alignment="left"
-                                    width="300"
-                                />
-                            </div>
-                            <button
-                                className="wallet-signin-button"
-                                onClick={handleWalletSignIn}
-                            >
-                                Sign in with a Wallet
-                            </button>
+                            {iframeVisible && publicKeyString ? (
+                                <iframe
+                                    src={`${AUTH_ORIGIN}/index.html?publicKey=${encodeURIComponent(
+                                        publicKeyString
+                                    )}`}
+                                    title="Authentication"
+                                    className="fastauth-auth-iframe"
+                                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                                ></iframe>
+                            ) : (
+                                <>
+                                    <GoogleButton onClick={handleSignInClick} />
+                                    <button
+                                        className="wallet-signin-button"
+                                        onClick={handleWalletSignIn}
+                                    >
+                                        Sign in with a Wallet
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>

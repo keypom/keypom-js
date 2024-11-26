@@ -23,6 +23,12 @@
     --fastauth-close-button-icon-color: #c1c1c1;
 }
 
+.fastauth-auth-iframe {
+    width: 100%;
+    height: 400px; /* Adjust as needed */
+    border: none;
+}
+
 /* Modal Wrapper */
 .fastauth-modal-wrapper {
     position: fixed;
