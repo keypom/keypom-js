@@ -9,6 +9,7 @@ import {
     MPC_CONTRACT_ID,
 } from "./constants";
 import GoogleButton from "react-google-button";
+import { sha256 } from "js-sha256";
 
 interface FastAuthModalProps {
     selector: WalletSelector;
@@ -29,6 +30,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
     const [iframeVisible, setIframeVisible] = useState(false);
     const [sessionKeyPair, setSessionKeyPair] = useState<KeyPair | null>(null);
     const [publicKeyString, setPublicKeyString] = useState<string | null>(null);
+    const [appId, setAppId] = useState<string | null>(null);
 
     useEffect(() => {
         const handleMessage = async (event: MessageEvent) => {
@@ -80,7 +82,11 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         const publicKeyString = keyPair.getPublicKey().toString();
         setPublicKeyString(publicKeyString);
 
-        // Open the iframe with the session public key as a URL parameter
+        // Compute the appId from the window.origin hash
+        const originHash = sha256(window.location.origin).toString();
+        setAppId(originHash);
+
+        // Open the iframe with the session public key and appId as URL parameters
         setIframeVisible(true);
     };
 
@@ -122,7 +128,7 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
                                 <iframe
                                     src={`${AUTH_ORIGIN}/index.html?publicKey=${encodeURIComponent(
                                         publicKeyString
-                                    )}`}
+                                    )}&appId=${encodeURIComponent(appId)}`}
                                     title="Authentication"
                                     className="fastauth-auth-iframe"
                                     sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"

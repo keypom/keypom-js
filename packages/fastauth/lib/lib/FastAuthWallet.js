@@ -1,94 +1,44 @@
+"use strict";
 // FastAuthWallet.ts
-
-import {
-    WalletModuleFactory,
-    WalletBehaviourFactory,
-    Account,
-    SignInParams,
-    Wallet,
-    VerifyOwnerParams,
-    VerifiedOwner,
-} from "@near-wallet-selector/core";
-import { Options } from "@near-wallet-selector/core/src/lib/options.types";
-import { googleLogout } from "@react-oauth/google";
-import { sha256 } from "js-sha256";
-import { KeyPair, Near } from "near-api-js";
-import { InMemoryKeyStore } from "near-api-js/lib/key_stores";
-import type { FinalExecutionOutcome } from "near-api-js/lib/providers";
-import { KeyPairString } from "near-api-js/lib/utils";
-import { STORAGE_KEY } from "./constants";
-import { NearPayload } from "./models/payload";
-import { deriveEthAddressFromMpcKey } from "./utils/crypto";
-
-interface FastAuthState {
-    sessionKey: KeyPairString;
-    accountId: string;
-}
-
-interface FastAuthSignInParams extends SignInParams {
-    userIdHash: string;
-    sessionKeyPair: KeyPair;
-    mpcContractId: string;
-    fastAuthContractId: string;
-}
-
-const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
+Object.defineProperty(exports, "__esModule", { value: true });
+const google_1 = require("@react-oauth/google");
+const js_sha256_1 = require("js-sha256");
+const near_api_js_1 = require("near-api-js");
+const key_stores_1 = require("near-api-js/lib/key_stores");
+const constants_1 = require("./constants");
+const crypto_1 = require("./utils/crypto");
+const FastAuthWallet = async (walletOptions) => {
     const { options } = walletOptions;
     console.log("options", options);
-
-    const wallet: WalletBehaviourFactory<Wallet> = async ({
-        options,
-        store: _store,
-        provider,
-        emitter,
-        logger: _logger,
-        storage,
-    }) => {
-        let state: FastAuthState | null = null;
-        let near: Near | null = null;
-
-        const loadState = async (options: Options) => {
-            const storedState = await storage.getItem<FastAuthState>(
-                STORAGE_KEY
-            );
+    const wallet = async ({ options, store: _store, provider, emitter, logger: _logger, storage, }) => {
+        let state = null;
+        let near = null;
+        const loadState = async (options) => {
+            const storedState = await storage.getItem(constants_1.STORAGE_KEY);
             if (storedState) {
                 state = storedState;
             }
-
-            near = new Near({
+            near = new near_api_js_1.Near({
                 networkId: options.network.networkId,
                 nodeUrl: options.network.nodeUrl,
-                keyStore: new InMemoryKeyStore(),
+                keyStore: new key_stores_1.InMemoryKeyStore(),
             });
         };
-
         const saveState = async () => {
             if (state) {
-                await storage.setItem(STORAGE_KEY, state);
+                await storage.setItem(constants_1.STORAGE_KEY, state);
             }
         };
-
         const clearState = async () => {
-            await storage.removeItem(STORAGE_KEY);
+            await storage.removeItem(constants_1.STORAGE_KEY);
             state = null;
         };
-
         await loadState(options);
-
         return {
             /** Sign In */
-            async signIn(params: FastAuthSignInParams) {
-                const {
-                    userIdHash,
-                    sessionKeyPair,
-                    contractId,
-                    methodNames,
-                    mpcContractId,
-                    fastAuthContractId,
-                } = params;
-
+            async signIn(params) {
+                const { userIdHash, sessionKeyPair, contractId, methodNames, mpcContractId, fastAuthContractId, } = params;
                 console.log("Params: ", params);
-
                 // Fetch the mpcKey from the mpcContract
                 const viewAccount = await near.account("foo");
                 const mpcKey = await viewAccount.viewFunction({
@@ -99,38 +49,29 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                         predecessor: fastAuthContractId,
                     },
                 });
-
-                const accountId = deriveEthAddressFromMpcKey(mpcKey);
-
+                const accountId = (0, crypto_1.deriveEthAddressFromMpcKey)(mpcKey);
                 state = {
                     accountId,
                     sessionKey: sessionKeyPair.toString(),
                 };
-
                 await saveState();
-
                 // Emit the signedIn event
-                const accounts: Array<Account> = [{ accountId }];
+                const accounts = [{ accountId }];
                 emitter.emit("signedIn", {
                     contractId: contractId,
                     methodNames: methodNames || [],
                     accounts,
                 });
-
                 return accounts;
             },
-
             /** Sign Out */
             async signOut() {
                 await clearState();
-
                 // Revoke the OAuth token
-                googleLogout();
-
+                (0, google_1.googleLogout)();
                 // Emit the signedOut event
                 emitter.emit("signedOut", null);
             },
-
             /** Get Accounts */
             async getAccounts() {
                 if (state) {
@@ -138,35 +79,26 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                 }
                 return [];
             },
-
             /** signAndSendTransaction */
-            async signAndSendTransaction(
-                params: any
-            ): Promise<FinalExecutionOutcome> {
+            async signAndSendTransaction(params) {
                 if (!state) {
                     throw new Error("Wallet not signed in");
                 }
-
                 const { accountId, sessionKey } = state;
-                const sessionKeyPair = KeyPair.fromString(sessionKey);
+                const sessionKeyPair = near_api_js_1.KeyPair.fromString(sessionKey);
                 const receiverId = params.receiverId || params.signerId;
-
                 if (!params.actions || params.actions.length === 0) {
                     throw new Error("No actions provided");
                 }
-
                 const action = params.actions[0];
-
-                let nearPayload: NearPayload;
+                let nearPayload;
                 if (action.type === "FunctionCall") {
                     // Extract action parameters
                     const { methodName, args, gas, deposit } = action.params;
-
                     // Serialize args to bytes
                     const argsSerialized = JSON.stringify(args);
                     const argsBytes = Buffer.from(argsSerialized);
                     const argsArray = Array.from(argsBytes);
-
                     const viewAccount = await near.account("foo");
                     const nonce = await viewAccount.viewFunction({
                         contractId: accountId,
@@ -174,7 +106,6 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                         args: {},
                     });
                     console.log("Nonce: ", nonce);
-
                     nearPayload = {
                         action: {
                             FunctionCall: {
@@ -187,9 +118,9 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                         },
                         nonce: nonce.toString(),
                     };
-                } else if (action.type === "Transfer") {
+                }
+                else if (action.type === "Transfer") {
                     const { deposit } = action.params;
-
                     const viewAccount = await near.account("foo");
                     const nonce = await viewAccount.viewFunction({
                         contractId: accountId,
@@ -197,7 +128,6 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                         args: {},
                     });
                     console.log("Nonce: ", nonce);
-
                     nearPayload = {
                         action: {
                             Transfer: {
@@ -207,56 +137,41 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                         },
                         nonce: nonce.toString(),
                     };
-                } else {
+                }
+                else {
                     throw new Error("Unsupported action type");
                 }
-
                 // Serialize the payload
                 const payloadJson = JSON.stringify(nearPayload);
                 const payloadBytes = Buffer.from(payloadJson);
-
                 // Sign the payload using the session key
                 const signature = sessionKeyPair.sign(payloadBytes);
-                const signatureBase64 = Buffer.from(
-                    signature.signature
-                ).toString("base64");
-
+                const signatureBase64 = Buffer.from(signature.signature).toString("base64");
                 // Relay the signed payload to the Cloudflare worker
-                const response = await fetch(
-                    "https://fastauth-worker-dev.keypom.workers.dev/sign-txn",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            signature: signatureBase64,
-                            payload: nearPayload,
-                            sessionKey: sessionKeyPair.toString(),
-                            appId: sha256(window.location.origin),
-                        }),
-                    }
-                );
-
+                const response = await fetch("https://fastauth-worker-dev.keypom.workers.dev/sign-txn", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        signature: signatureBase64,
+                        payload: nearPayload,
+                        sessionKey: sessionKeyPair.toString(),
+                        appId: (0, js_sha256_1.sha256)(window.location.origin),
+                    }),
+                });
                 const result = await response.json();
                 if (!response.ok || !result.success) {
-                    throw new Error(
-                        result.error ||
-                            "Failed to sign transaction with FastAuth"
-                    );
+                    throw new Error(result.error ||
+                        "Failed to sign transaction with FastAuth");
                 }
-
                 console.log("result", result);
-
                 // Return the execution outcome (if applicable)
                 return result;
             },
-
             /** signAndSendTransactions */
-            async signAndSendTransactions(
-                params: any
-            ): Promise<Array<FinalExecutionOutcome>> {
-                const results: Array<FinalExecutionOutcome> = [];
+            async signAndSendTransactions(params) {
+                const results = [];
                 for (const tx of params.transactions) {
                     const result = await this.signAndSendTransaction({
                         ...tx,
@@ -265,16 +180,12 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
                 }
                 return results;
             },
-
             /** verifyOwner */
-            async verifyOwner(
-                params: VerifyOwnerParams
-            ): Promise<VerifiedOwner | void> {
+            async verifyOwner(params) {
                 throw new Error("Method not implemented.");
             },
         };
     };
-
     return {
         id: "fastauth-wallet",
         type: "instant-link",
@@ -289,5 +200,4 @@ const FastAuthWallet: WalletModuleFactory = async (walletOptions) => {
         init: wallet,
     };
 };
-
-export default FastAuthWallet;
+exports.default = FastAuthWallet;
