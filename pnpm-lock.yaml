@@ -217,52 +217,6 @@ importers:
         specifier: ^4.8.4
         version: 4.9.5
 
-  packages/proxy-mpc:
-    dependencies:
-      '@near-wallet-selector/core':
-        specifier: ^8.9.13
-        version: 8.9.14(near-api-js@5.0.1)
-      bs58:
-        specifier: ^6.0.0
-        version: 6.0.0
-      elliptic:
-        specifier: ^6.5.7
-        version: 6.5.7
-      ethers:
-        specifier: ^6.13.4
-        version: 6.13.4
-      hash.js:
-        specifier: ^1.1.7
-        version: 1.1.7
-      js-sha256:
-        specifier: ^0.11.0
-        version: 0.11.0
-      js-sha3:
-        specifier: ^0.9.3
-        version: 0.9.3
-      near-api-js:
-        specifier: ^5.0.1
-        version: 5.0.1
-      tweetnacl-util:
-        specifier: ^0.15.1
-        version: 0.15.1
-    devDependencies:
-      ava:
-        specifier: ^4.3.3
-        version: 4.3.3
-      dotenv:
-        specifier: ^16.0.3
-        version: 16.4.5
-      eslint:
-        specifier: ^8.39.0
-        version: 8.57.1
-      typedoc:
-        specifier: ^0.23.24
-        version: 0.23.28(typescript@4.9.5)
-      typescript:
-        specifier: ^4.8.4
-        version: 4.9.5
-
   packages/trial-accounts:
     dependencies:
       '@near-wallet-selector/core':
@@ -3089,7 +3043,7 @@ snapshots:
       '@types/node': 20.5.1
       chalk: 4.1.2
       cosmiconfig: 8.3.6(typescript@4.9.5)
-      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@22.7.5)(typescript@4.9.5))(typescript@4.9.5)
+      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@20.5.1)(typescript@4.9.5))(typescript@4.9.5)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -4136,7 +4090,7 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@22.7.5)(typescript@4.9.5))(typescript@4.9.5):
+  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@4.9.5))(ts-node@10.9.2(@types/node@20.5.1)(typescript@4.9.5))(typescript@4.9.5):
     dependencies:
       '@types/node': 20.5.1
       cosmiconfig: 8.3.6(typescript@4.9.5)

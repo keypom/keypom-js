@@ -1,6 +1,6 @@
 {
     "name": "@keypom/fastauth",
-    "version": "0.0.12",
+    "version": "0.0.14",
     "description": "Core library for FastAuth Login",
     "main": "lib/index.js",
     "scripts": {
