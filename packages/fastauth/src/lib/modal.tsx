@@ -6,7 +6,7 @@ import FastAuthModal from "./FastAuthModal";
 import FastAuthProvider from "./FastAuthProvider"; // Import the provider
 import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui"; // Import setupModal
 
-interface MyCustomModal {
+interface FastAuthModalProps {
     show: () => void;
     hide: () => void;
 }
@@ -16,7 +16,7 @@ let root: Root | null = null;
 export function setupModal(
     selector: WalletSelector,
     options: any
-): MyCustomModal {
+): FastAuthModalProps {
     let isVisible = false;
     let walletSelectorModal = null;
 

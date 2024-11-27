@@ -3,7 +3,7 @@
     <picture>
       <img src="https://cloudflare-ipfs.com/ipfs/bafybeightypuoqly32gsrivh4efckhdv6wsefiynpnonlem6ts3ypgdm7e" height="128">
     </picture>
-    <h1 align="center">Keypom Multichain Trial Accounts</h1>
+    <h1 align="center">Keypom Multichain FastAuth</h1>
   </a>
 </p>
 
@@ -19,312 +19,94 @@
   </a>
 </p>
 
-The Keypom Multichain Trial Accounts SDK provides a seamless way to create and manage trial accounts across multiple blockchain networks, including NEAR and EVM-compatible chains. This SDK abstracts the complexities involved in setting up trial accounts, managing their constraints, and performing actions on their behalf. With this package, you can:
-
--   Deploy and manage trial contracts.
--   Create trials with customizable constraints per chain.
--   Add and activate trial accounts with limited access keys.
--   Perform actions on behalf of trial accounts, including contract calls on NEAR and EVM chains.
--   Broadcast transactions signed via Multi-Party Computation (MPC).
--   Handle usage statistics, exit conditions, and expiration for trial accounts.
+This document explains key concepts related to the FastAuth SDK, including session keys, attestations, ETH implicit accounts, app IDs, iframes, wrappers around Wallet Selector, and styling. It also details the steps for integrating the package into your application.
 
 # Table of Contents
 
--   [Installation](#installation)
--   [Getting Started](#getting-started)
-    -   [Prerequisites](#prerequisites)
-    -   [Initialization](#initialization)
--   [Usage Examples](#usage-examples)
-    -   [Creating a Trial](#creating-a-trial)
-    -   [Adding and Activating Trial Accounts](#adding-and-activating-trial-accounts)
-    -   [Performing Actions](#performing-actions)
--   [Configuration](#configuration)
--   [Scripts and Commands](#scripts-and-commands)
--   [Concepts](#concepts)
-    -   [Trial Accounts](#trial-accounts)
-    -   [MPC Integration](#mpc-integration)
-    -   [Usage Constraints](#usage-constraints)
--   [Utilities](#utilities)
+-   [Key Concepts](#key-concepts)
+    -   [Session Keys](#session-keys)
+    -   [Attestations](#attestations)
+    -   [Eth Implicit Accounts](#eth-implicit-accounts)
+    -   [Iframes](#iframes)
+    -   [Wallet Selector](#wallet-selector)
+    -   [Styling](#styling)
+-   [Integration Steps](#integration-steps)
 -   [Contributing](#contributing)
 -   [License](#license)
 
 ---
 
-# Installation
+# Key Concepts
 
-To install the Keypom Multichain Trial Accounts SDK, run one of the following commands:
+## Session Keys
 
-```bash
-npm install @keypom/trial-accounts
-# or
-yarn add @keypom/trial-accounts
-# or
-pnpm add @keypom/trial-accounts
-```
+Session keys are short-lived cryptographic key pairs generated to facilitate secure and lightweight authentication for users. These keys are stored locally and used to sign paylods without requiring the user's oauth token. This improves security by limiting the exposure of long-term keys and provides flexibility for session-based interactions.
 
-# Getting Started
+-   **Lifecycle**: Session keys are created when a user logs in and are cleared upon logout.
+-   **Usage**: They are used to authenticate user actions and sign payloads which are sent to the server, authenticated, and relayed on-chain.
+-   **Storage**: Session keys are stored in local storage.
 
-## Prerequisites
+## Attestations
 
--   **Node.js**: Ensure you have Node.js installed (version 14 or higher recommended).
--   **NEAR CLI**: Install the NEAR CLI for interacting with NEAR blockchain.
--   **EVM Provider**: For EVM interactions, you'll need access to an EVM-compatible network (e.g., Base Sepolia) and an API key from a provider like Alchemy.
+Attestations verify the integrity and authenticity of actions made by users of FastAuth ecosystem. These include:
 
-## Initialization
+-   **User Identity Attestations**: Proofs that a specific user owns a session key.
+-   **Transaction Attestations**: Evidence that a signed transaction was authorized by a valid session key.
 
-Before using the SDK, you need to initialize the `TrialAccountManager` class. This class provides methods to manage trial accounts and interact with the trial contract.
+Attestations rely on cryptographic signatures and are validated by the backend and sent to the FastAuth smart contract.
 
-```js
-import { TrialAccountManager } from "@keypom/trial-accounts";
-import { Near, Account } from "@near-js/wallet-account";
-import { UnencryptedFileSystemKeyStore } from "@near-js/keystores-node";
-import path from "path";
-import os from "os";
+## Eth Implicit Accounts
 
-// Set up NEAR connection
-const homedir = os.homedir();
-const credentialsPath = path.join(homedir, ".near-credentials");
-const keyStore = new UnencryptedFileSystemKeyStore(credentialsPath);
-const near = new Near({
-    networkId: "testnet",
-    keyStore,
-    nodeUrl: "https://rpc.testnet.near.org",
-});
+ETH implicit accounts are Ethereum-compatible addresses derived from the hash of the user's google ID using the MPC service. These accounts are created when a new user logs into FastAuth and do not require meta-transactions since they have a proxy contract automatically deployed to them upon activation.
 
-const signerAccount = await near.account("your-account.testnet");
+## Iframes
 
-const trialManager = new TrialAccountManager({
-    trialContractId: "trial-contract.your-account.testnet",
-    mpcContractId: "v1.signer-prod.testnet",
-    signerAccount,
-    near,
-});
-```
+The FastAuth iframe is used to handle social logins and user authentication securely within a sandboxed environment. The iframe serves as the front-end interface for interacting with OAuth providers, like Google, while isolating authentication workflows from the parent application so that the user's oauth token is never exposed.
 
--   `trialContractId`: The account ID where the trial contract is deployed.
--   `mpcContractId`: The account ID of the MPC contract.
--   `signerAccount`: An instance of `Account` used for signing transactions.
--   `near`: The NEAR connection instance.
+-   **Communication**: Uses postMessage API to securely exchange data between the iframe and the parent application.
+-   **Parameters**: Includes public keys and app IDs as URL parameters which are sent to the attestation server for verification.
+-   **Security**: Sandbox configuration prevents the iframe from accessing the parent application’s DOM or cookies.
 
-## Usage Examples
+## Wallet Selector
 
-### Creating a Trial
+FastAuth integrates with the NEAR Wallet Selector by wrapping its functionality, adding:
 
-Create a new trial with specific constraints per chain. For example, you can set different allowed methods and contracts for NEAR and EVM chains.
+1. **FastAuth Wallet Module**: A custom wallet module for managing session keys and authenticating users via the FastAuth modal.
+2. **Extended Modal Support**: Includes options for both traditional wallet logins and social logins (e.g., Google).
+3. **Custom Authentication Flow**: Combines Wallet Selector’s existing functionality with FastAuth’s session-based authentication.
+
+## Styling
+
+The FastAuth SDK includes a CSS file (`styles.css`) that defines default styles for modals, buttons, and components. The CSS uses CSS variables for easy customization and supports light and dark themes.
+
+-   **Customization**: You can override theme variables to match your application’s design.
+-   **Components**: Includes predefined styles for modals, social login buttons, and wallet login buttons.
+-   **Themes**:
+    -   **Light theme**: Default appearance.
+    -   **Dark theme**: Activated using the dark-theme class on the root modal element.
+
+# Integration Steps
+
+To integrate the FastAuth SDK into your application:
+
+1. Install the FastAuth SDK: `npm install @keypom/fastauth`
+2. Replace Wallet Selector Imports: Replace the existing imports for `setupWalletSelector` and `setupModal` to use FastAuth’s versions:
 
 ```js
-import { TrialData } from "@keypom/trial-accounts";
-import { parseEther } from "ethers";
-import { parseNearAmount } from "@near-js/utils";
-
-const trialData: TrialData = {
-  constraintsByChainId: {
-    EVM: {
-      chainId: 84532,
-      allowedMethods: ["setMessage"],
-      allowedContracts: ["0xdf5c3bd628a11C97BB25d441D8b6d9Ce974dc552"],
-      maxGas: 1000000,
-      maxValue: "0",
-      initialDeposit: parseEther("0.004"), // approximately $15 worth of ETH
-    },
-    NEAR: {
-      allowedMethods: ["add_message"],
-      allowedContracts: ["guestbook.near-examples.testnet"],
-      maxGas: null,
-      maxDeposit: null,
-      initialDeposit: parseNearAmount("10")!, // 10 NEAR tokens
-    },
-  },
-  usageConstraints: null,
-  interactionLimits: null,
-  exitConditions: null,
-  expirationTime: null,
-};
-
-// Create the trial
-const trialId = await trialManager.createTrial(trialData);
-console.log(`Trial created with ID: ${trialId}`);
+import { setupWalletSelector, setupModal } from "@keypom/fastauth";
 ```
 
-### Adding and Activating Trial Accounts
-
-Add trial accounts to the trial by generating limited access keys and then activate them.
+3. Import the CSS file:
 
 ```js
-// Add trial accounts
-const numberOfKeys = 1;
-const trialKeys = await trialManager.addTrialAccounts(numberOfKeys);
-console.log(`Added ${trialKeys.length} trial account(s).`);
-
-// Activate the trial account for a specific chain (e.g., NEAR or EVM)
-const trialKey = trialKeys[0];
-const chainId = "NEAR"; // or "84532" for EVM chain
-const accountId = `trial-account-${Date.now()}.testnet`;
-
-trialManager.setTrialAccountCredentials(
-    accountId,
-    trialKey.trialAccountSecretKey
-);
-await trialManager.activateTrialAccounts(accountId, chainId);
-console.log(`Trial account ${accountId} activated.`);
+import "@keypom/fastauth/lib/styles.css";
 ```
 
-### Performing Actions
-
-Perform actions on behalf of the trial account, such as calling methods on contracts. The SDK ensures that the actions are within the specified constraints.
-
-```ts
-import { ActionToPerform } from "@keypom/trial-accounts";
-import { BASE_GUESTBOOK_ABI } from "./abis/baseGuestbook";
-
-// Define the action to perform on the EVM chain
-const action: ActionToPerform = {
-    chain: "EVM",
-    chainId: 84532, // Base Sepolia chain ID
-    targetContractId: "0xdf5c3bd628a11C97BB25d441D8b6d9Ce974dc552",
-    methodName: "setMessage",
-    args: ["Hello from the trial account!"],
-    abi: BASE_GUESTBOOK_ABI,
-    value: "0",
-    accessList: [],
-};
-
-// Request signature and perform the action
-const providerUrl = `https://base-sepolia.g.alchemy.com/v2/YOUR_ALCHEMY_API_KEY`;
-const { signatures, txnDatas } = await trialManager.performActions(
-    [action],
-    providerUrl
-);
-
-// Broadcast the transaction
-const { result } = await trialManager.broadcastTransaction({
-    actionToPerform: action,
-    signatureResult: signatures[0],
-    signerAccountId: accountId,
-    providerUrl,
-    txnData: txnDatas[0],
-});
-
-console.log("Action performed successfully.");
-```
-
-## Configuration
-
-You can customize various settings, such as retry logic and configurations for different chains.
-
-```ts
-// Set custom retry logic
-trialManager.setRetryConfig({
-    maxRetries: 5,
-    initialDelayMs: 2000,
-    backoffFactor: 2,
-});
-
-// Set trial account credentials if needed
-trialManager.setTrialAccountCredentials("trial-account.testnet", "ed25519:...");
-
-// Set trial ID
-trialManager.setTrialId(123);
-```
-
--   `maxRetries`: Maximum number of retries for operations.
--   `initialDelayMs`: Initial delay before retrying (in milliseconds).
--   `backoffFactor`: Exponential backoff factor.
-
-## Scripts And Commands
-
-The package includes several scripts to automate common tasks. You can run these scripts using commands defined in the package.json.
-
-```bash
-pnpm run deploy:evm
-pnpm run deploy:near
-pnpm run deploy:omni
-```
-
-These scripts correspond to configurations defined in the configs directory:
-
--   nearSimple: For NEAR-only trials.
--   evmSimple: For EVM-only trials.
--   omniChainSimple: For trials that span both NEAR and EVM chains.
-
-### Running the Scripts
-
-1. Ensure Environment Variables are Set: Create a .env file in the root directory with the necessary environment variables, especially for EVM interactions.
-
-    ```bash
-    EVM_PRIVATE_KEY=your_evm_private_key
-    ALCHEMY_API_KEY=your_alchemy_api_key
-    ```
-
-2. Install Dependencies:
-
-    ```bash
-    pnpm install
-    ```
-
-3. Run the scripts:
-    ```bash
-    pnpm run deploy:evm
-    pnpm run deploy:near
-    pnpm run deploy:omni
-    ```
-
-The script will:
-
--   Initialize the NEAR connection.
--   Create a trial with specified constraints.
--   Add and activate trial accounts.
--   Perform the defined actions.
--   Output the results and write data to the data directory.
-
-# Concepts
-
-## Trial Accounts
-
-Trial accounts are temporary accounts with limited access, ideal for onboarding new users or running promotions. They use limited access keys to ensure they operate within specified constraints.
-
--   Limited Access Keys: These keys allow calling specific methods on the trial contract.
-
-## MPC Integration
-
-The SDK integrates with a Multi-Party Computation (MPC) service to securely sign transactions without exposing private keys.
-
--   MPC Contract: The mpcContractId points to the deployed MPC contract that handles signing.
--   Signature Requests: When performing actions, the SDK requests signatures from the MPC contract, ensuring secure transaction signing.
-
-## Usage Constraints
-
-When creating a trial, you can specify various constraints to control how trial accounts interact with the blockchain.
-
--   Constraints by Chain ID: Define constraints specific to each chain (NEAR, EVM, etc.).
--   Allowed Methods and Contracts: Restrict which methods and contracts trial accounts can interact with.
--   Gas and Value Limits: Set maximum gas usage and transaction values.
--   Initial Deposits: Fund trial accounts automatically upon activation.
-
-Example:
-
-```js
-const trialData: TrialData = {
-    constraintsByChainId: {
-        EVM: {
-            chainId: 84532,
-            allowedMethods: ["setMessage"],
-            allowedContracts: ["0xdf5c3bd628a11C97BB25d441D8b6d9Ce974dc552"],
-            maxGas: 1000000,
-            maxValue: "0",
-            initialDeposit: parseEther("0.004"),
-        },
-    },
-    usageConstraints: null,
-    interactionLimits: null,
-    exitConditions: null,
-    expirationTime: null,
-};
-```
+By following these steps, you’ll integrate the FastAuth SDK into your application, enabling secure, flexible, and interoperable authentication.
 
 # Contributing
 
-We welcome contributions to the Keypom Trial Accounts SDK! Please follow these guidelines:
+We welcome contributions to the Keypom FastAuth SDK! Please follow these guidelines:
 
 -   **Bug Reports**: Submit detailed bug reports with steps to reproduce.
 -   **Feature Requests**: Open issues for feature enhancements with use cases.
@@ -336,4 +118,4 @@ This project is licensed under the **GPL License**.
 
 ---
 
-Thank you for using the Keypom Trial Accounts SDK! If you have any questions or need assistance, feel free to join our [community](https://t.me/+OqI-cKxQU05lZDIx) or open an issue on GitHub.
+Thank you for using the Keypom FastAuth SDK! If you have any questions or need assistance, feel free to join our [community](https://t.me/+OqI-cKxQU05lZDIx) or open an issue on GitHub.

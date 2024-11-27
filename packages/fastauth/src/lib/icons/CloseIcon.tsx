@@ -10,14 +10,14 @@ export const CloseIcon: React.FC = () => (
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
-            d="M13 1L1 13"
-            stroke="currentColor"
+            d="M11 3L3 11"
+            stroke="var(--fastauth-close-button-icon-color)"
             strokeWidth="2"
             strokeLinecap="round"
         />
         <path
-            d="M1 1L13 13"
-            stroke="currentColor"
+            d="M3 3L11 11"
+            stroke="var(--fastauth-close-button-icon-color)"
             strokeWidth="2"
             strokeLinecap="round"
         />

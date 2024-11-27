@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { CloseIcon } from "./icons/CloseIcon";
+import GoogleIcon from "./icons/GoogleIcon";
+import WalletIcon from "./icons/WalletIcon";
 import { ClipLoader } from "react-spinners";
 import { KeyPair } from "near-api-js";
 import {
@@ -8,7 +10,6 @@ import {
     FASTAUTH_CONTRACT_ID,
     MPC_CONTRACT_ID,
 } from "./constants";
-import GoogleButton from "react-google-button";
 import { sha256 } from "js-sha256";
 
 interface FastAuthModalProps {
@@ -67,13 +68,6 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         };
     }, [selector, options, onClose, sessionKeyPair]);
 
-    useEffect(() => {
-        if (!iframeVisible) {
-            setSessionKeyPair(null);
-            setPublicKeyString(null);
-        }
-    }, [iframeVisible]);
-
     const handleSignInClick = () => {
         // Generate session keypair
         const keyPair = KeyPair.fromRandom("ed25519");
@@ -97,6 +91,14 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         }
     };
 
+    const handleClose = () => {
+        console.log("Modal Closed!");
+        setIframeVisible(false);
+        setSessionKeyPair(null);
+        setPublicKeyString(null);
+        onClose();
+    };
+
     // Prevent rendering modal if not visible
     if (!isVisible) return null;
 
@@ -108,8 +110,11 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
         >
             <div className="fastauth-modal">
                 <div className="fastauth-modal-header">
-                    <h3>Sign in with Google</h3>
-                    <button className="fastauth-close-button" onClick={onClose}>
+                    <h3>Login or sign up</h3>
+                    <button
+                        className="fastauth-close-button"
+                        onClick={handleClose}
+                    >
                         <CloseIcon />
                     </button>
                 </div>
@@ -135,12 +140,22 @@ const FastAuthModal: React.FC<FastAuthModalProps> = ({
                                 ></iframe>
                             ) : (
                                 <>
-                                    <GoogleButton onClick={handleSignInClick} />
+                                    {/* Custom Social Login Button */}
+                                    <button
+                                        className="social-login-button"
+                                        onClick={handleSignInClick}
+                                    >
+                                        <GoogleIcon className="social-login-icon" />
+                                        <span>Social Login</span>
+                                    </button>
+
+                                    {/* Custom Existing Wallet Button */}
                                     <button
                                         className="wallet-signin-button"
                                         onClick={handleWalletSignIn}
                                     >
-                                        Sign in with a Wallet
+                                        <WalletIcon className="wallet-icon" />
+                                        <span>Existing Wallet</span>
                                     </button>
                                 </>
                             )}
