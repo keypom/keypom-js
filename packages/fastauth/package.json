@@ -1,0 +1,65 @@
+{
+    "name": "@keypom/fastauth",
+    "version": "0.0.14",
+    "description": "Core library for FastAuth Login",
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "pnpm compile",
+        "postbuild": "copyfiles -u 2 src/lib/styles.css lib/",
+        "compile": "tsc -p tsconfig.json",
+        "deploy:near": "ts-node deploy/main.ts nearSimple",
+        "deploy:evm": "ts-node deploy/main.ts evmSimple",
+        "deploy:omni": "ts-node deploy/main.ts omniChainSimple",
+        "debug:logs": "ts-node deploy/compareLogs.ts",
+        "broadcast:evm": "ts-node deploy/broadcastSig.ts evmSimple",
+        "broadcast:near": "ts-node deploy/broadcastSig.ts nearSimple",
+        "broadcast:omni": "ts-node deploy/broadcastSig.ts omniChainSimple",
+        "lint:js": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc",
+        "lint:js:fix": "eslint -c ../../.eslintrc.js.yml src/**/*.js --no-eslintrc --fix",
+        "lint:ts": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc",
+        "lint:ts:fix": "eslint -c ../../.eslintrc.ts.yml src/**/*.ts --no-eslintrc --fix",
+        "build-docs": "npx typedoc --options typedoc.json"
+    },
+    "author": "benkurrek",
+    "license": "MIT",
+    "dependencies": {
+        "@near-wallet-selector/core": "^8.9.14",
+        "@near-wallet-selector/modal-ui": "^8.9.14",
+        "@react-oauth/google": "^0.12.1",
+        "bs58": "^6.0.0",
+        "elliptic": "^6.5.7",
+        "ethers": "^6.13.4",
+        "hash.js": "^1.1.7",
+        "js-sha256": "^0.11.0",
+        "js-sha3": "^0.9.3",
+        "near-api-js": "^5.0.1",
+        "react-google-button": "^0.8.0",
+        "react-spinners": "^0.14.1",
+        "tweetnacl-util": "^0.15.1"
+    },
+    "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0"
+    },
+    "ava": {
+        "require": [
+            "dotenv/config"
+        ]
+    },
+    "devDependencies": {
+        "ava": "^4.3.3",
+        "copyfiles": "^2.4.1",
+        "dotenv": "^16.0.3",
+        "eslint": "^8.39.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "typedoc": "^0.23.24",
+        "typescript": "^4.8.4"
+    },
+    "files": [
+        "lib/**/*",
+        "index.js",
+        "index.ts",
+        "lib/styles.css"
+    ]
+}

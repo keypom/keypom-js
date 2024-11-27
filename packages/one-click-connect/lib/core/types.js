@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isOneClickParams = exports.FAILED_EXECUTION_OUTCOME = void 0;
+exports.getNetworkPreset = exports.isOneClickParams = exports.FAILED_EXECUTION_OUTCOME = void 0;
 exports.FAILED_EXECUTION_OUTCOME = {
     final_execution_status: "NONE",
     status: {
@@ -50,3 +50,26 @@ var isOneClickParams = function (params) {
         (params.networkId === "testnet" || params.networkId === "mainnet");
 };
 exports.isOneClickParams = isOneClickParams;
+var getNetworkPreset = function (networkId) {
+    switch (networkId) {
+        case "mainnet":
+            return {
+                networkId: networkId,
+                nodeUrl: "https://rpc.mainnet.near.org",
+                helperUrl: "https://helper.mainnet.near.org",
+                explorerUrl: "https://nearblocks.io",
+                indexerUrl: "https://api.kitwallet.app",
+            };
+        case "testnet":
+            return {
+                networkId: networkId,
+                nodeUrl: "https://rpc.testnet.near.org",
+                helperUrl: "https://helper.testnet.near.org",
+                explorerUrl: "https://testnet.nearblocks.io",
+                indexerUrl: "https://testnet-api.kitwallet.app",
+            };
+        default:
+            throw Error("Failed to find config for: '".concat(networkId, "'"));
+    }
+};
+exports.getNetworkPreset = getNetworkPreset;
