@@ -4,10 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jsx_runtime_1 = require("react/jsx-runtime");
-// src/FastAuthProvider.tsx
 const react_1 = __importDefault(require("react"));
-const google_1 = require("@react-oauth/google");
-const FastAuthProvider = ({ children, clientId, }) => {
-    return ((0, jsx_runtime_1.jsx)(google_1.GoogleOAuthProvider, { clientId: clientId, children: children }));
-};
-exports.default = FastAuthProvider;
+const DiscordIcon = () => ((0, jsx_runtime_1.jsx)("img", { src: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg", alt: "Discord Icon", style: { width: "24px", height: "24px", objectFit: "contain" } }));
+exports.default = DiscordIcon;

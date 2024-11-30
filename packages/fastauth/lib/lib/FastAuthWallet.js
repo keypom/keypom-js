@@ -8,13 +8,18 @@ const key_stores_1 = require("near-api-js/lib/key_stores");
 const constants_1 = require("./constants");
 const crypto_1 = require("./utils/crypto");
 const FastAuthWallet = async (walletOptions) => {
-    const { options } = walletOptions;
+    const { options, localTesting } = walletOptions;
+    const envNetwork = localTesting ? "local" : options.network.networkId;
+    const env = constants_1.ENV_VARIABLES[envNetwork];
     console.log("options", options);
+    console.log("localTesting", localTesting);
+    console.log("WALLET ENV:", env);
+    const { STORAGE_KEY, WORKER_BASE_URL } = env;
     const wallet = async ({ options, store: _store, provider, emitter, logger: _logger, storage, }) => {
         let state = null;
         let near = null;
         const loadState = async (options) => {
-            const storedState = await storage.getItem(constants_1.STORAGE_KEY);
+            const storedState = await storage.getItem(STORAGE_KEY);
             if (storedState) {
                 state = storedState;
             }
@@ -26,11 +31,11 @@ const FastAuthWallet = async (walletOptions) => {
         };
         const saveState = async () => {
             if (state) {
-                await storage.setItem(constants_1.STORAGE_KEY, state);
+                await storage.setItem(STORAGE_KEY, state);
             }
         };
         const clearState = async () => {
-            await storage.removeItem(constants_1.STORAGE_KEY);
+            await storage.removeItem(STORAGE_KEY);
             state = null;
         };
         await loadState(options);
@@ -148,7 +153,7 @@ const FastAuthWallet = async (walletOptions) => {
                 const signature = sessionKeyPair.sign(payloadBytes);
                 const signatureBase64 = Buffer.from(signature.signature).toString("base64");
                 // Relay the signed payload to the Cloudflare worker
-                const response = await fetch("https://fastauth-worker-dev.keypom.workers.dev/sign-txn", {
+                const response = await fetch(`${WORKER_BASE_URL}/sign-txn`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -162,7 +167,8 @@ const FastAuthWallet = async (walletOptions) => {
                 });
                 const result = await response.json();
                 if (!response.ok || !result.success) {
-                    throw new Error(result.error || "Failed to sign transaction with FastAuth");
+                    throw new Error(result.error ||
+                        "Failed to sign transaction with FastAuth");
                 }
                 console.log("result", result);
                 // Return the execution outcome (if applicable)

@@ -8,7 +8,6 @@ const jsx_runtime_1 = require("react/jsx-runtime");
 const react_1 = __importDefault(require("react"));
 const client_1 = require("react-dom/client");
 const FastAuthModal_1 = __importDefault(require("./FastAuthModal"));
-const FastAuthProvider_1 = __importDefault(require("./FastAuthProvider")); // Import the provider
 const modal_ui_1 = require("@near-wallet-selector/modal-ui"); // Import setupModal
 let root = null;
 function setupModal(selector, options) {
@@ -39,7 +38,7 @@ function setupModal(selector, options) {
                 // Include other options as needed
             });
         }
-        root.render((0, jsx_runtime_1.jsx)(FastAuthProvider_1.default, { clientId: options.clientId, children: (0, jsx_runtime_1.jsx)(FastAuthModal_1.default, { selector: selector, options: options, isVisible: isVisible, onClose: hide, walletSelectorModal: walletSelectorModal }) }));
+        root.render((0, jsx_runtime_1.jsx)(FastAuthModal_1.default, { selector: selector, options: options, isVisible: isVisible, onClose: hide, walletSelectorModal: walletSelectorModal }));
     };
     return {
         show,
