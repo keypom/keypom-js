@@ -1,8 +1,9 @@
 import React from "react";
 import { WalletSelector } from "@near-wallet-selector/core";
+import { FastAuthModalOptions } from "./modal";
 interface FastAuthModalProps {
     selector: WalletSelector;
-    options: any;
+    options: FastAuthModalOptions;
     isVisible: boolean;
     onClose: () => void;
     walletSelectorModal: any;

@@ -3,8 +3,10 @@ import { WalletSelector } from "@near-wallet-selector/core";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import FastAuthModal from "./FastAuthModal";
-import FastAuthProvider from "./FastAuthProvider"; // Import the provider
-import { setupModal as setupWalletSelectorModal } from "@near-wallet-selector/modal-ui"; // Import setupModal
+import {
+    ModalOptions,
+    setupModal as setupWalletSelectorModal,
+} from "@near-wallet-selector/modal-ui"; // Import setupModal
 
 interface FastAuthModalProps {
     show: () => void;
@@ -13,9 +15,13 @@ interface FastAuthModalProps {
 
 let root: Root | null = null;
 
+export interface FastAuthModalOptions extends ModalOptions {
+    localTesting?: boolean;
+}
+
 export function setupModal(
     selector: WalletSelector,
-    options: any
+    options: FastAuthModalOptions
 ): FastAuthModalProps {
     let isVisible = false;
     let walletSelectorModal = null;
@@ -52,15 +58,13 @@ export function setupModal(
         }
 
         root.render(
-            <FastAuthProvider clientId={options.clientId}>
-                <FastAuthModal
-                    selector={selector}
-                    options={options}
-                    isVisible={isVisible}
-                    onClose={hide}
-                    walletSelectorModal={walletSelectorModal}
-                />
-            </FastAuthProvider>
+            <FastAuthModal
+                selector={selector}
+                options={options}
+                isVisible={isVisible}
+                onClose={hide}
+                walletSelectorModal={walletSelectorModal}
+            />
         );
     };
 

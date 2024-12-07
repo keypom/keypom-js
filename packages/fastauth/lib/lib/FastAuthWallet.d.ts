@@ -1,3 +1,2 @@
-import { WalletModuleFactory } from "@near-wallet-selector/core";
-declare const FastAuthWallet: WalletModuleFactory;
+declare const FastAuthWallet: any;
 export default FastAuthWallet;

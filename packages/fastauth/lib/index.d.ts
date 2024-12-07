@@ -9,4 +9,3 @@
  */
 export { setupWalletSelector } from "./lib/setupWalletSelector";
 export { setupModal } from "./lib/modal";
-export { default as FastAuthProvider } from "./lib/FastAuthProvider";
